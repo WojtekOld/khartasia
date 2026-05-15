@@ -1,0 +1,29 @@
+uuid: d4b56a73-f595-4ca6-8e9c-8948203b2fd5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.paper_mill.body
+    - node.type.paper_mill
+  module:
+    - text
+    - user
+id: node.paper_mill.default
+targetEntityType: node
+bundle: paper_mill
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  langcode: true

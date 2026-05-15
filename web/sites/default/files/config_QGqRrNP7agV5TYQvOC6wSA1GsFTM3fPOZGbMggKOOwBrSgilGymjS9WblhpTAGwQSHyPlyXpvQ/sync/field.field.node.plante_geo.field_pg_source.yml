@@ -1,0 +1,19 @@
+uuid: 3c374683-746e-441c-91de-54f47a32e8b5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_source
+    - node.type.plante_geo
+id: node.plante_geo.field_pg_source
+field_name: field_pg_source
+entity_type: node
+bundle: plante_geo
+label: 'Source bibliographique'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

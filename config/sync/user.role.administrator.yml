@@ -1,0 +1,132 @@
+uuid: d3f62ceb-e81c-4d47-8a27-fd92c7ddf9f4
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.ds_code
+    - filter.format.filtered_html
+    - filter.format.full_html
+    - filter.format.php_code
+    - node.type.article
+    - node.type.book
+    - node.type.common_names
+    - node.type.nouvelles
+    - node.type.page
+    - node.type.panel
+    - node.type.paper_mill
+    - node.type.papers
+  module:
+    - block
+    - comment
+    - contact
+    - contextual
+    - filter
+    - image
+    - language
+    - locale
+    - node
+    - path
+    - search
+    - shortcut
+    - system
+    - taxonomy
+    - toolbar
+    - views_ui
+_core:
+  default_config_hash: OeKGIkmZA_c-t6QLH81WNQx8gDCc1MRmxaTuQgxBByU
+id: administrator
+label: administrator
+weight: 2
+is_admin: true
+permissions:
+  - 'access administration pages'
+  - 'access comments'
+  - 'access content'
+  - 'access content overview'
+  - 'access contextual links'
+  - 'access site in maintenance mode'
+  - 'access site reports'
+  - 'access site-wide contact form'
+  - 'access toolbar'
+  - 'access user contact forms'
+  - 'access user profiles'
+  - 'administer actions'
+  - 'administer blocks'
+  - 'administer comments'
+  - 'administer contact forms'
+  - 'administer content types'
+  - 'administer filters'
+  - 'administer image styles'
+  - 'administer languages'
+  - 'administer menu'
+  - 'administer modules'
+  - 'administer nodes'
+  - 'administer permissions'
+  - 'administer search'
+  - 'administer shortcuts'
+  - 'administer site configuration'
+  - 'administer software updates'
+  - 'administer taxonomy'
+  - 'administer themes'
+  - 'administer url aliases'
+  - 'administer users'
+  - 'administer views'
+  - 'bypass node access'
+  - 'cancel account'
+  - 'change own username'
+  - 'create article content'
+  - 'create book content'
+  - 'create common_names content'
+  - 'create nouvelles content'
+  - 'create page content'
+  - 'create panel content'
+  - 'create paper_mill content'
+  - 'create papers content'
+  - 'create url aliases'
+  - 'customize shortcut links'
+  - 'delete any article content'
+  - 'delete any book content'
+  - 'delete any common_names content'
+  - 'delete any nouvelles content'
+  - 'delete any page content'
+  - 'delete any panel content'
+  - 'delete any paper_mill content'
+  - 'delete any papers content'
+  - 'delete own article content'
+  - 'delete own book content'
+  - 'delete own common_names content'
+  - 'delete own nouvelles content'
+  - 'delete own page content'
+  - 'delete own panel content'
+  - 'delete own paper_mill content'
+  - 'delete own papers content'
+  - 'edit any article content'
+  - 'edit any book content'
+  - 'edit any common_names content'
+  - 'edit any nouvelles content'
+  - 'edit any page content'
+  - 'edit any panel content'
+  - 'edit any paper_mill content'
+  - 'edit any papers content'
+  - 'edit own article content'
+  - 'edit own book content'
+  - 'edit own comments'
+  - 'edit own common_names content'
+  - 'edit own nouvelles content'
+  - 'edit own page content'
+  - 'edit own panel content'
+  - 'edit own paper_mill content'
+  - 'edit own papers content'
+  - 'post comments'
+  - 'search content'
+  - 'select account cancellation method'
+  - 'skip comment approval'
+  - 'switch shortcut sets'
+  - 'translate interface'
+  - 'use advanced search'
+  - 'use text format ds_code'
+  - 'use text format filtered_html'
+  - 'use text format full_html'
+  - 'use text format php_code'
+  - 'view own unpublished content'
+  - 'view the administration theme'

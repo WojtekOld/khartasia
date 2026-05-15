@@ -1,0 +1,22 @@
+uuid: 50ed8da9-0a89-4a61-9a7a-62051c65aa34
+langcode: en
+status: true
+dependencies:
+  module:
+    - help
+  theme:
+    - khartasia_ui
+_core:
+  default_config_hash: VfPFqqxfkomud5CO8DUijw85QIl9GIxh_nIxLOYESxg
+id: khartasia_ui_help
+theme: khartasia_ui
+region: header
+weight: 0
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  label_display: '0'
+  provider: help
+visibility: {  }

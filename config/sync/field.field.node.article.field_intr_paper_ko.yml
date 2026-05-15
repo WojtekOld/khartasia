@@ -1,0 +1,25 @@
+uuid: 9438cda3-b14f-40ab-a77c-759a8b3dfc83
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_intr_paper_ko
+    - node.type.article
+  module:
+    - text
+id: node.article.field_intr_paper_ko
+field_name: field_intr_paper_ko
+entity_type: node
+bundle: article
+label: Corée
+description: ' Introduction korean paper'
+required: false
+translatable: true
+default_value:
+  -
+    value: '<p>Suffix ji = paper.<br>In Korea papers made with paper mulberry bark are the most numerous.<br>Suffixe ji = papier.<br>En Corée les papiers d’écorces de mûriers à papier sont les plus nombreux.</p>'
+    format: full_html
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

@@ -1,0 +1,22 @@
+uuid: 845540d6-a611-4a06-a030-ba394b8f10e0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mode_prep_ch
+    - node.type.article
+  module:
+    - text
+id: node.article.field_mode_prep_ch
+field_name: field_mode_prep_ch
+entity_type: node
+bundle: article
+label: Chine
+description: 'Mode de préparation en Chine'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

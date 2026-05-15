@@ -1,0 +1,10 @@
+uuid: ecf96e69-c696-4613-b1f4-e4002f3abdae
+langcode: und
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: M_Bh81osDyUQ4wV0GgU_NdBNqkzM87sLxjaCdFj9mnw
+id: account
+label: 'User menu'
+description: 'Le menu <em>Utilisateur</em> contient les liens du compte utilisateur, comme le lien "Déconnexion"'
+locked: true

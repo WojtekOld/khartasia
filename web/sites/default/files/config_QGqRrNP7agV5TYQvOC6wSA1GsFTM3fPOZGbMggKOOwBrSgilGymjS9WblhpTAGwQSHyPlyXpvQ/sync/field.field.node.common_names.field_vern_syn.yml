@@ -1,0 +1,19 @@
+uuid: 7c647c34-1f51-4948-9cd9-204c6987a2e9
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_vern_syn
+    - node.type.common_names
+id: node.common_names.field_vern_syn
+field_name: field_vern_syn
+entity_type: node
+bundle: common_names
+label: Synonyme
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

@@ -1,0 +1,19 @@
+uuid: 153f1a2d-68e2-4d57-8aa1-430f38f5490f
+langcode: und
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_mode_prep_ko
+field_name: field_mode_prep_ko
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

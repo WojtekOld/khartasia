@@ -1,0 +1,25 @@
+uuid: db812bc3-a1b4-47e6-9076-ff1cca253b42
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_ident_fibre
+    - node.type.article
+  module:
+    - text
+id: node.article.field_ident_fibre
+field_name: field_ident_fibre
+entity_type: node
+bundle: article
+label: "Eléments pour l'identification des fibres"
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: '<table style="width: 325px;height:  px" border="0" cellpadding="1" cellspacing="1"><tbody><tr><td><div><strong>Type de fibres</strong></div><div><strong>Fibre type</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Longueur moyenne des fibres</strong></div><div><strong>Average fibre lenght</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Largeur moyenne des fibres</strong></div><div><strong>Average fibre width</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Extrémités des fibres</strong></div><div><strong>Fibre ends</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Striations, noeuds, plis de flexion</strong></div><div><strong>Striations, cross-markings, flexion creases</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Cellules associées</strong></div><div><strong>Associated cells</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Caractéritiques particulières</strong></div><div><strong>Special features</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Coloration Herzberg</strong></div><div><strong>Herzberg staining</strong></div></td><td><div>&nbsp;</div></td></tr><tr><td><div><strong>Coloration Graff ''C''</strong></div><div><strong>Graff ''C'' staining</strong></div></td><td><div>&nbsp;</div></td></tr></tbody></table><p>&nbsp;</p>'
+    format: full_html
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

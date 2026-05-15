@@ -1,0 +1,23 @@
+uuid: d4d0362b-cafb-4a62-80c0-b3480157386a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_language_taxo_vern
+    - node.type.common_names
+id: node.common_names.field_language_taxo_vern
+field_name: field_language_taxo_vern
+entity_type: node
+bundle: common_names
+label: Langue
+description: 'Common name Language'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    sort:
+      field: _none
+field_type: entity_reference

@@ -1,0 +1,29 @@
+uuid: 9f551801-ab7d-4713-a8a4-d4b947f03476
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.biblio.body
+    - node.type.biblio
+  module:
+    - text
+    - user
+id: node.biblio.default
+targetEntityType: node
+bundle: biblio
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  langcode: true

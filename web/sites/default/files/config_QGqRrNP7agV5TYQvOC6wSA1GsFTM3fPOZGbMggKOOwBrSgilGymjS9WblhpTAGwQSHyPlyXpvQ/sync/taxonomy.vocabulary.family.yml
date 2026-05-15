@@ -1,0 +1,9 @@
+uuid: f0cc79f4-035c-4f40-8996-ce4137d232a2
+langcode: en
+status: true
+dependencies: {  }
+name: Famille
+vid: family
+description: 'Famille dans la classification botanique'
+weight: 0
+new_revision: false

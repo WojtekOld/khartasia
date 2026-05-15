@@ -1,0 +1,22 @@
+uuid: 16a810f6-1b91-4a87-bdcf-8036df64ccee
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_notes
+    - node.type.plante_fibre
+  module:
+    - text
+id: node.plante_fibre.field_pf_notes
+field_name: field_pf_notes
+entity_type: node
+bundle: plante_fibre
+label: 'Notes microscopiques'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

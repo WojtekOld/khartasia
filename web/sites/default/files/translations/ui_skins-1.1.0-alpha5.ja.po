@@ -1,0 +1,28 @@
+# Japanese translation of UI Skins (1.1.0-alpha5)
+# Copyright (c) 2025 by the Japanese translation team
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: UI Skins (1.1.0-alpha5)\n"
+"POT-Creation-Date: 2025-09-09 14:51+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Japanese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+msgid "User interface"
+msgstr "ユーザーインターフェース"
+msgid "Value"
+msgstr "値"
+msgid "Theme"
+msgstr "テーマ"
+msgid "Other"
+msgstr "その他"
+msgid "Color"
+msgstr "色"
+msgid "Scope"
+msgstr "スコープ"
+msgid "Theme name"
+msgstr "テーマ名"

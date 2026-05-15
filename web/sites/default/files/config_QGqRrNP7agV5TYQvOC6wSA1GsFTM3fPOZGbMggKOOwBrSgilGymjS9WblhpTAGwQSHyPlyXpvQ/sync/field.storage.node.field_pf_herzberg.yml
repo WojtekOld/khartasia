@@ -1,0 +1,39 @@
+uuid: 79dddb1d-5521-4abd-a6df-4ebba7cf61cf
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_pf_herzberg
+field_name: field_pf_herzberg
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: jaune
+      label: Jaune
+    -
+      value: vert
+      label: Vert
+    -
+      value: bleu
+      label: Bleu
+    -
+      value: rouge
+      label: Rouge
+    -
+      value: violet
+      label: Violet
+    -
+      value: orange
+      label: Orange
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

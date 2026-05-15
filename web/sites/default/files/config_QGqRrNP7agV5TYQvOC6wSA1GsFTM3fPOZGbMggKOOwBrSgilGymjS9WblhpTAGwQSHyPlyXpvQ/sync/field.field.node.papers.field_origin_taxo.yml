@@ -1,0 +1,23 @@
+uuid: e9e638d4-7c9d-48aa-b86a-1bc7b7545ba4
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_origin_taxo
+    - node.type.papers
+id: node.papers.field_origin_taxo
+field_name: field_origin_taxo
+entity_type: node
+bundle: papers
+label: Origine
+description: 'Pays / Country'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    sort:
+      field: _none
+field_type: entity_reference

@@ -1,0 +1,19 @@
+
+In ExceptionHandler.php line 56:
+                                                                                              
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'drupal7.boxes' doesn't exist: S  
+  ELECT COUNT(*) AS "expression"                                                              
+  FROM                                                                                        
+  (SELECT 1 AS "expression"                                                                   
+  FROM                                                                                        
+  "boxes" "b") "subquery"; Array                                                              
+  (                                                                                           
+  )                                                                                           
+                                                                                              
+
+In StatementWrapperIterator.php line 113:
+                                                                                           
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'drupal7.boxes' doesn't exist  
+                                                                                           
+
+Failed to run drush migrate:import --all --continue-on-failure: exit status 1

@@ -1,0 +1,22 @@
+uuid: 28b705c4-4d2d-42ac-9623-8a2ff7aa8792
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_cellules
+    - node.type.plante_fibre
+  module:
+    - text
+id: node.plante_fibre.field_pf_cellules
+field_name: field_pf_cellules
+entity_type: node
+bundle: plante_fibre
+label: 'Cellules associées'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

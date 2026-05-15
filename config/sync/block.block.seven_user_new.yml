@@ -1,0 +1,24 @@
+uuid: f025f894-3464-48e2-915d-e2cef8e56ad6
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.who_s_new
+  module:
+    - views
+  theme:
+    - claro
+id: seven_user_new
+theme: claro
+region: content
+weight: 0
+provider: null
+plugin: 'views_block:who_s_new-block_1'
+settings:
+  id: 'views_block:who_s_new-block_1'
+  label: ''
+  label_display: '0'
+  provider: views
+  views_label: ''
+  items_per_page: '5'
+visibility: {  }

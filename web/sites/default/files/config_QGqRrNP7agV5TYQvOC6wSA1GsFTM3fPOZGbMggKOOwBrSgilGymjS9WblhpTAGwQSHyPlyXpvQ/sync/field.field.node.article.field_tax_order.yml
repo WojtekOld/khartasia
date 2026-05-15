@@ -1,0 +1,23 @@
+uuid: 264bd2e4-0766-435c-bf5d-10b468ac814e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tax_order
+    - node.type.article
+id: node.article.field_tax_order
+field_name: field_tax_order
+entity_type: node
+bundle: article
+label: Ordre
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    sort:
+      field: _none
+field_type: entity_reference

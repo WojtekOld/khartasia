@@ -1,0 +1,23 @@
+uuid: 9c59558d-df05-4c52-a06f-51d60d54ad07
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_use_paper_making
+    - node.type.article
+id: node.article.field_use_paper_making
+field_name: field_use_paper_making
+entity_type: node
+bundle: article
+label: 'Utilisation dans la fabrication du papier'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    sort:
+      field: _none
+field_type: entity_reference

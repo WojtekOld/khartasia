@@ -1,0 +1,8 @@
+uuid: a02f56da-f448-4808-8432-6a178c0f3203
+langcode: und
+status: true
+dependencies: {  }
+id: menu-papiers
+label: Taxonomie
+description: ''
+locked: false

@@ -1,0 +1,23 @@
+uuid: 94fbd16b-ce87-491a-b027-df51300cbe53
+langcode: en
+status: true
+dependencies:
+  module:
+    - search
+  theme:
+    - khartasia_ui
+_core:
+  default_config_hash: yEBET0cqDbk8dkWzaJw-8CKft0961VBflsISoSR6Lj8
+id: khartasia_ui_moja_search_form
+theme: khartasia_ui
+region: content
+weight: -1
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: ''
+  label_display: '0'
+  provider: search
+  page_id: null
+visibility: {  }

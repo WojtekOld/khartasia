@@ -1,0 +1,22 @@
+uuid: 7429ae3c-8894-4bf7-9eae-15120265e585
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_culture
+    - node.type.plante_geo
+  module:
+    - text
+id: node.plante_geo.field_pg_culture
+field_name: field_pg_culture
+entity_type: node
+bundle: plante_geo
+label: 'Généralités culture et usage'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

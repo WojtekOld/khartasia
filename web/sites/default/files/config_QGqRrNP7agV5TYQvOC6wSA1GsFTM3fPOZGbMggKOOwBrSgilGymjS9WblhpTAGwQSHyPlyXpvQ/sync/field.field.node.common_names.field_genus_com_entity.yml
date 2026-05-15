@@ -1,0 +1,30 @@
+uuid: f3b3957d-1a1b-4aad-9c1c-6b5b6fbdb3f1
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_genus_com_entity
+    - node.type.article
+    - node.type.common_names
+id: node.common_names.field_genus_com_entity
+field_name: field_genus_com_entity
+entity_type: node
+bundle: common_names
+label: 'Nom botanique'
+description: 'Non synchronisé! A retaper par dessus'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      article: article
+    sort:
+      field: _none
+      direction: ASC
+    behaviors:
+      views-select-list:
+        status: 1
+field_type: entity_reference

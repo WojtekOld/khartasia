@@ -1,0 +1,20 @@
+uuid: 31c6cbbf-d019-4506-b089-4f997d261458
+langcode: und
+status: true
+dependencies:
+  module:
+    - node
+    - taxonomy
+id: node.field_language_taxo_vern
+field_name: field_language_taxo_vern
+entity_type: node
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

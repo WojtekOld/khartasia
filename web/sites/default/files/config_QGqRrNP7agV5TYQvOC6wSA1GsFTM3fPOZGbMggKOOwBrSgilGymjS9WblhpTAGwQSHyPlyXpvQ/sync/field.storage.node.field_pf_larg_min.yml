@@ -1,0 +1,18 @@
+uuid: 6a4901f9-8b39-48f1-970d-bbec8213ca45
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_pf_larg_min
+field_name: field_pf_larg_min
+entity_type: node
+type: float
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

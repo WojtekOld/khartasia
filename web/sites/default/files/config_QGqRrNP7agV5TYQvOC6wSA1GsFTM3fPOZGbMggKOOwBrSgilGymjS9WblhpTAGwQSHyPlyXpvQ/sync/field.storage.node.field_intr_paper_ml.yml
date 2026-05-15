@@ -1,0 +1,19 @@
+uuid: b47e053c-edd2-4849-89a0-c50e2c93c460
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_intr_paper_ml
+field_name: field_intr_paper_ml
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

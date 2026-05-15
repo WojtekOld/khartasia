@@ -1,0 +1,118 @@
+uuid: f0bea830-c5f9-43ca-a8f0-685cf1bc4f9b
+langcode: en
+status: true
+dependencies: {  }
+id: upgrade_d7_node_complete_common_names
+class: Drupal\node\Plugin\migrate\D7NodeTranslation
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Drupal 7'
+  - Content
+migration_group: migrate_drupal_7
+label: 'Node complete (Noms communs)'
+source:
+  plugin: d7_node_complete
+  node_type: common_names
+process:
+  nid:
+    -
+      plugin: get
+      source: tnid
+  vid:
+    -
+      plugin: get
+      source: vid
+  langcode:
+    -
+      plugin: default_value
+      source: language
+      default_value: und
+  title:
+    -
+      plugin: get
+      source: title
+  uid:
+    -
+      plugin: get
+      source: node_uid
+  status:
+    -
+      plugin: get
+      source: status
+  created:
+    -
+      plugin: get
+      source: created
+  changed:
+    -
+      plugin: get
+      source: timestamp
+  promote:
+    -
+      plugin: get
+      source: promote
+  sticky:
+    -
+      plugin: get
+      source: sticky
+  revision_uid:
+    -
+      plugin: get
+      source: revision_uid
+  revision_log:
+    -
+      plugin: get
+      source: log
+  revision_timestamp:
+    -
+      plugin: get
+      source: timestamp
+  content_translation_source:
+    -
+      plugin: get
+      source: source_langcode
+  comment_node_common_names/0/status:
+    -
+      plugin: get
+      source: comment
+  body:
+    -
+      plugin: get
+      source: body
+  field_genus_taxo:
+    -
+      plugin: sub_process
+      source: field_genus_taxo
+      process:
+        target_id: tid
+  field_language_taxo_vern:
+    -
+      plugin: sub_process
+      source: field_language_taxo_vern
+      process:
+        target_id: tid
+  field_ver_local_scripture:
+    -
+      plugin: get
+      source: field_ver_local_scripture
+  field_genus_com_entity:
+    -
+      plugin: get
+      source: field_genus_com_entity
+  field_vern_syn:
+    -
+      plugin: get
+      source: field_vern_syn
+destination:
+  plugin: 'entity_complete:node'
+  translations: true
+  default_bundle: common_names
+idMap: {  }
+migration_dependencies:
+  required:
+    - upgrade_d7_user
+    - upgrade_d7_node_type
+  optional:
+    - upgrade_d7_field_instance
+include: null

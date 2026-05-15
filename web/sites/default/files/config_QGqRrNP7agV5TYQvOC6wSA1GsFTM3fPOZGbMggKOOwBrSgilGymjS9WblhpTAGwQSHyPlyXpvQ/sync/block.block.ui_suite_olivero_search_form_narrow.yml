@@ -1,0 +1,23 @@
+uuid: 1fc265ec-40e1-41df-b1e3-1cc16a55d55e
+langcode: en
+status: true
+dependencies:
+  module:
+    - search
+  theme:
+    - ui_suite_olivero
+_core:
+  default_config_hash: iJCASnet_u8mZE_XqcEu2_DAwABibbYD0LgLRmPgPxU
+id: ui_suite_olivero_search_form_narrow
+theme: ui_suite_olivero
+region: primary_menu
+weight: -4
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: 'Search form (narrow)'
+  label_display: '0'
+  provider: search
+  page_id: null
+visibility: {  }

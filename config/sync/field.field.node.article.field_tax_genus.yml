@@ -1,0 +1,23 @@
+uuid: 4a8dee6d-6a17-4345-bd19-9f07976b9caf
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tax_genus
+    - node.type.article
+id: node.article.field_tax_genus
+field_name: field_tax_genus
+entity_type: node
+bundle: article
+label: Genus
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    sort:
+      field: _none
+field_type: entity_reference

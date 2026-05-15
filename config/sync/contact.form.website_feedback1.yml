@@ -1,0 +1,12 @@
+uuid: 1bd7cdab-35cd-43c2-867a-c041f7f49c7a
+langcode: en
+status: true
+dependencies: {  }
+id: website_feedback1
+label: 'Website feedback'
+recipients:
+  - akuch@free.fr
+reply: ''
+weight: 0
+message: null
+redirect: null

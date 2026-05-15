@@ -1,0 +1,25 @@
+uuid: 4a4eb4f8-e2fd-4eaf-9ce1-f3d767b2f1f3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_class_botan_texte
+    - node.type.article
+  module:
+    - text
+id: node.article.field_class_botan_texte
+field_name: field_class_botan_texte
+entity_type: node
+bundle: article
+label: 'Classification botanique'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: '<table style="height: 240px; width: 315px;" border="1" cellpadding="1" cellspacing="1"><tbody><tr><td><strong>Ordre</strong></td><td>&nbsp;XXXXXXX</td></tr><tr><td><strong>Famille</strong></td><td>XXXXXXXXX</td></tr><tr><td><strong>Genre</strong></td><td>XXXXXXXX</td></tr><tr><td><p><strong>Synonymes</strong></p></td><td><p>XXXXXXXX</p></td></tr></tbody></table><p>&nbsp;</p>'
+    format: full_html
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

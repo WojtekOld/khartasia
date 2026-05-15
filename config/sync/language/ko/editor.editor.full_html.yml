@@ -1,0 +1,12 @@
+settings:
+  plugins:
+    ckeditor5_codeBlock:
+      languages:
+        0:
+          label: '일반 텍스트'
+        4:
+          label: 스타일(CSS)
+        5:
+          label: '차이점 비교'
+        9:
+          label: PHP

@@ -1,0 +1,13 @@
+features:
+  name: 0
+  slogan: 1
+  node_user_picture: 0
+  comment_user_picture: 1
+  favicon: 1
+logo:
+  use_default: 0
+  path: 'public://logo270_1.png'
+favicon:
+  use_default: 0
+  path: 'public://favicon_4.ico'
+  mimetype: image/vnd.microsoft.icon

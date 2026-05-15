@@ -1,0 +1,29 @@
+uuid: 96a8e167-e791-413f-84e3-43412bffe6d4
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.nouvelles.body
+    - node.type.nouvelles
+  module:
+    - text
+    - user
+id: node.nouvelles.default
+targetEntityType: node
+bundle: nouvelles
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  langcode: true

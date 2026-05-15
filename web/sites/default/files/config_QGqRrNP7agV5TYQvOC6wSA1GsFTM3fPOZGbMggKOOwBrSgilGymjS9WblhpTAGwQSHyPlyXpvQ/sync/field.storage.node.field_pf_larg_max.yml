@@ -1,0 +1,18 @@
+uuid: 81d329a9-5811-4cbb-987b-a701f86b0dc1
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_pf_larg_max
+field_name: field_pf_larg_max
+entity_type: node
+type: float
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

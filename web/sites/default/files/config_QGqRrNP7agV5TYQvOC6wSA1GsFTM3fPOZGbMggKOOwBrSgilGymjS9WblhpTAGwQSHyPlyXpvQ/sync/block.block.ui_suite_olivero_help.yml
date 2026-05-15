@@ -1,0 +1,22 @@
+uuid: 0ec10f8b-7a87-4199-8486-22d21ee16c07
+langcode: en
+status: true
+dependencies:
+  module:
+    - help
+  theme:
+    - ui_suite_olivero
+_core:
+  default_config_hash: qrn0sQ1J8eYj9z4PA4lNFP6jYjRwfPSGGU7GbN_t5oc
+id: ui_suite_olivero_help
+theme: ui_suite_olivero
+region: content_above
+weight: 0
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  label_display: '0'
+  provider: help
+visibility: {  }

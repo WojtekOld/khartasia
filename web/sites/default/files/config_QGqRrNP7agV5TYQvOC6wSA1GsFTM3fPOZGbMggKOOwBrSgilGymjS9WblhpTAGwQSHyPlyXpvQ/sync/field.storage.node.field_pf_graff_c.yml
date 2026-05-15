@@ -1,0 +1,30 @@
+uuid: a9bf2aa8-5ce6-40b0-8d9b-8e1c7a7acc33
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_pf_graff_c
+field_name: field_pf_graff_c
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: positif
+      label: Positif
+    -
+      value: negatif
+      label: Négatif
+    -
+      value: variable
+      label: Variable
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

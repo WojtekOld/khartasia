@@ -1,0 +1,11 @@
+uuid: 705476d6-0a56-471c-bf9c-b055cdf065de
+langcode: en
+status: true
+dependencies: {  }
+name: 'Identification des fibres'
+type: plante_fibre
+description: 'Données microscopiques didentification des fibres dune plante'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

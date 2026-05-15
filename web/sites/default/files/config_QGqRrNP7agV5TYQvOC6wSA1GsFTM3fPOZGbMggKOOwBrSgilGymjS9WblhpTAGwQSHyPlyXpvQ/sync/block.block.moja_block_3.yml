@@ -1,0 +1,28 @@
+uuid: 78ee8476-6879-404c-8579-51d0f945fff7
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:56f05940-90b1-47f3-b8ee-a886006ab94f'
+  module:
+    - block_content
+    - system
+  theme:
+    - olivero
+id: moja_block_3
+theme: olivero
+region: content
+weight: 0
+provider: null
+plugin: 'block_content:56f05940-90b1-47f3-b8ee-a886006ab94f'
+settings:
+  id: 'block_content:56f05940-90b1-47f3-b8ee-a886006ab94f'
+  label: Copyright
+  label_display: visible
+  provider: block_content
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: '<front>'

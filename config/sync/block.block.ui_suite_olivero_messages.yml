@@ -1,0 +1,22 @@
+uuid: ef750190-5e0c-4f17-93a0-818b4be4c8dc
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - ui_suite_olivero
+_core:
+  default_config_hash: eZmWo3Wtg879hQXxJrVi1AulhvxSASwN1FrA5m33Ik4
+id: ui_suite_olivero_messages
+theme: ui_suite_olivero
+region: highlighted
+weight: -5
+provider: null
+plugin: system_messages_block
+settings:
+  id: system_messages_block
+  label: 'Status messages'
+  label_display: '0'
+  provider: system
+visibility: {  }

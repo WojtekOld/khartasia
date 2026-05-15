@@ -1,0 +1,22 @@
+uuid: b3fb547c-a155-4ae2-9c26-c964b45bac45
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_view_pap_plant_ml
+    - node.type.plante_texte
+  module:
+    - text
+id: node.plante_texte.field_view_pap_plant_ml
+field_name: field_view_pap_plant_ml
+entity_type: node
+bundle: plante_texte
+label: 'Vue papier / plante'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

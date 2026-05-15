@@ -1,0 +1,28 @@
+uuid: e688556a-f110-47e4-9e7b-62fed1c7c266
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:7b80a76b-7f27-440b-8ca0-30a76ec8c622'
+  module:
+    - block_content
+    - system
+  theme:
+    - khartasia_ui
+id: khartasia_ui_moja_block_2
+theme: khartasia_ui
+region: content
+weight: 0
+provider: null
+plugin: 'block_content:7b80a76b-7f27-440b-8ca0-30a76ec8c622'
+settings:
+  id: 'block_content:7b80a76b-7f27-440b-8ca0-30a76ec8c622'
+  label: ''
+  label_display: '0'
+  provider: block_content
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: '<front>'

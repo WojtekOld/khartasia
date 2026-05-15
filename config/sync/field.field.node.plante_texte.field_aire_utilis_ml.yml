@@ -1,0 +1,22 @@
+uuid: ebe98b67-4e18-4de9-998a-f061988b3c13
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_aire_utilis_ml
+    - node.type.plante_texte
+  module:
+    - text
+id: node.plante_texte.field_aire_utilis_ml
+field_name: field_aire_utilis_ml
+entity_type: node
+bundle: plante_texte
+label: 'Aire d utilisation dans la fabrication'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

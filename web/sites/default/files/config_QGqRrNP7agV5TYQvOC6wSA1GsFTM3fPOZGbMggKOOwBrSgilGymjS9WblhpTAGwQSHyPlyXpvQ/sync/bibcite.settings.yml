@@ -1,0 +1,5 @@
+_core:
+  default_config_hash: JXjEYHnVPUCVJis63SS-qHAhs0sc1MLnAPGyhamxGtM
+processor: citeproc-php
+default_style: apa
+convert_urls: false

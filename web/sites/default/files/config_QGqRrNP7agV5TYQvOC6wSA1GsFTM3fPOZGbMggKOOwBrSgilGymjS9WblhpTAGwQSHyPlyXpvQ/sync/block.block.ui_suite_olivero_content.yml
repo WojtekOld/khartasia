@@ -1,0 +1,22 @@
+uuid: 550335b6-408a-438c-9f20-24621427db4f
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - ui_suite_olivero
+_core:
+  default_config_hash: ESXwv9f7mUH5tublpsWyjxhs0tuzZdqFYAoyBxH4c_Y
+id: ui_suite_olivero_content
+theme: ui_suite_olivero
+region: content
+weight: 0
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: 'Main page content'
+  label_display: '0'
+  provider: system
+visibility: {  }

@@ -1,0 +1,24 @@
+uuid: 72f12c56-a3db-47e5-b8b1-eee47e7100c4
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_paper_name
+    - node.type.article
+  module:
+    - text
+id: node.article.field_paper_name
+field_name: field_paper_name
+entity_type: node
+bundle: article
+label: Papiers
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: "In Asia and particularly in China, Korea and Japan, the papers are intended for a wide range of use: Papers for calligraphy and art,  Papers for ceremonies,  Paper as a medium of exchange, money paper,  Papers for making clothes, wall hangings and bedding,  Papers for architecture, interior design,  Papers for crafts of various kinds, for domestic purposes and leisure.\r\nThe names assigned to the paper refers to different notions: The material used, The place of production, The method of production, Appearance, Dimensions, Use, The name of an artist or a studio etc.\r\nEn Asie et plus particulièrement en Chine, Corée et Japon, les papiers sont destinés à une grande variété d’usage: Papiers pour la calligraphie et les arts, Papiers pour les cérémonies, Papiers comme moyen d’échange, Papier monnaie\r\nPapiers pour la confection des vêtements, de tentures murales et la literie, Papiers pour l’architecture, la décoration intérieure, Papiers pour les objets d’artisanat de diverses natures, destinés à des usages domestiques ou de loisirs. \r\nLes noms attribués aux papiers se réfèrent à diverses notions: Le matériau utilisé, Le lieu de production, La méthode de production, L’apparence, Les dimensions, L’utilisation, Le nom d’un artiste ou d’un atelier etc.\r\n"
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

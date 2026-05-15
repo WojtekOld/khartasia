@@ -1,0 +1,11 @@
+uuid: f45a1e51-6a08-42ba-9947-78784a76db63
+langcode: en
+status: true
+dependencies: {  }
+name: 'Sujet de discussion'
+type: forum
+description: 'Un <em>Sujet</em> commence un nouveau fil de discussion dans un forum.'
+help: null
+new_revision: false
+preview_mode: 1
+display_submitted: true

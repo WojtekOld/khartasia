@@ -1,0 +1,18 @@
+uuid: ec23c3c6-b307-409a-90f3-f0a2bd6f8008
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: 'Paper Mill'
+type: paper_mill
+description: 'Paper Mill'
+help: null
+new_revision: false
+preview_mode: 1
+display_submitted: false

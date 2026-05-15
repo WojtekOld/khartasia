@@ -1,0 +1,15 @@
+uuid: 45370712-e863-4656-8458-730301b4ab9d
+langcode: en
+status: true
+dependencies: {  }
+name: image_gallery_1
+label: image_gallery_1
+effects:
+  f309a7f2-7f25-468e-ab66-5388e618b714:
+    uuid: f309a7f2-7f25-468e-ab66-5388e618b714
+    id: image_scale
+    weight: 1
+    data:
+      width: 270
+      height: null
+      upscale: true

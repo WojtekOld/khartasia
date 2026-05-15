@@ -1,0 +1,378 @@
+uuid: a8255a3b-7a46-426c-9b9e-d1d1dcc38776
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.article.body
+    - field.field.node.article.comment
+    - field.field.node.article.field_aire_croissance
+    - field.field.node.article.field_aire_utilis
+    - field.field.node.article.field_aire_utilis_ch
+    - field.field.node.article.field_aire_utilis_ja
+    - field.field.node.article.field_aire_utilis_ko
+    - field.field.node.article.field_aire_utilis_thai
+    - field.field.node.article.field_class_botan_texte
+    - field.field.node.article.field_fibres
+    - field.field.node.article.field_fiel_gen_cult_thai
+    - field.field.node.article.field_gen_cult_ch
+    - field.field.node.article.field_gen_cult_jap
+    - field.field.node.article.field_gen_cult_ko
+    - field.field.node.article.field_gen_culture
+    - field.field.node.article.field_ident_fibre
+    - field.field.node.article.field_image
+    - field.field.node.article.field_image_gallery_1
+    - field.field.node.article.field_image_gallery_2
+    - field.field.node.article.field_intr_paper_ch
+    - field.field.node.article.field_intr_paper_jap
+    - field.field.node.article.field_intr_paper_ko
+    - field.field.node.article.field_intr_paper_thai
+    - field.field.node.article.field_mode_prep
+    - field.field.node.article.field_mode_prep_ch
+    - field.field.node.article.field_mode_prep_ja
+    - field.field.node.article.field_mode_prep_ko
+    - field.field.node.article.field_mode_prep_thai
+    - field.field.node.article.field_paper_name
+    - field.field.node.article.field_synonymes_bot
+    - field.field.node.article.field_tags
+    - field.field.node.article.field_tax_family
+    - field.field.node.article.field_tax_genus
+    - field.field.node.article.field_tax_order
+    - field.field.node.article.field_use_paper_making
+    - field.field.node.article.field_used_part_plant
+    - field.field.node.article.field_vern_name
+    - field.field.node.article.field_zones_geo
+    - image.style.thumbnail
+    - node.type.article
+  module:
+    - comment
+    - image
+    - path
+    - text
+_core:
+  default_config_hash: ewbd6G2uX456-bgwseM2Q-KQG3RkASoyHmTh-XR3oLU
+id: node.article.default
+targetEntityType: node
+bundle: article
+mode: default
+content:
+  body:
+    type: text_textarea_with_summary
+    weight: 3
+    region: content
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+  comment:
+    type: comment_default
+    weight: 20
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  created:
+    type: datetime_timestamp
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_aire_croissance:
+    type: text_textarea
+    weight: 8
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_aire_utilis:
+    type: text_textarea
+    weight: 22
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_aire_utilis_ch:
+    type: text_textarea
+    weight: 23
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_aire_utilis_ja:
+    type: text_textarea
+    weight: 25
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_aire_utilis_ko:
+    type: text_textarea
+    weight: 26
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_aire_utilis_thai:
+    type: string_textarea
+    weight: 27
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_class_botan_texte:
+    type: text_textarea
+    weight: 9
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_fiel_gen_cult_thai:
+    type: text_textarea
+    weight: 32
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_gen_cult_ch:
+    type: text_textarea
+    weight: 29
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_gen_cult_jap:
+    type: text_textarea
+    weight: 30
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_gen_cult_ko:
+    type: text_textarea
+    weight: 31
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_gen_culture:
+    type: text_textarea
+    weight: 28
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_ident_fibre:
+    type: text_textarea
+    weight: 13
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_image:
+    type: image_image
+    weight: 11
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_image_gallery_1:
+    type: image_image
+    weight: 13
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_image_gallery_2:
+    type: image_image
+    weight: 14
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_intr_paper_ch:
+    type: text_textarea
+    weight: 23
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_intr_paper_jap:
+    type: text_textarea
+    weight: 27
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_intr_paper_ko:
+    type: text_textarea
+    weight: 25
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_intr_paper_thai:
+    type: text_textarea
+    weight: 29
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_mode_prep:
+    type: text_textarea
+    weight: 28
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_mode_prep_ch:
+    type: text_textarea
+    weight: 29
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_mode_prep_ja:
+    type: text_textarea
+    weight: 30
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_mode_prep_ko:
+    type: text_textarea
+    weight: 31
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_mode_prep_thai:
+    type: text_textarea
+    weight: 32
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_paper_name:
+    type: text_textarea
+    weight: 22
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_synonymes_bot:
+    type: text_textarea
+    weight: 7
+    region: content
+    settings:
+      rows: 1
+      placeholder: ''
+    third_party_settings: {  }
+  field_tags:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_vern_name:
+    type: string_textarea
+    weight: 11
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    weight: 15
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 120
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    weight: 16
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  url_redirects:
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_fibres: true
+  field_tax_family: true
+  field_tax_genus: true
+  field_tax_order: true
+  field_use_paper_making: true
+  field_used_part_plant: true
+  field_zones_geo: true

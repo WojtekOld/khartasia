@@ -1,0 +1,18 @@
+name: Khartasia UI
+type: theme
+base theme: olivero
+description: "Sous-thème pour Khartasia - Base de données plantes à papier d'Asie."
+package: Custom
+core_version_requirement: ^11
+libraries:
+  - khartasia_ui/global-styling
+regions:
+  header: Header
+  primary_menu: "Menu principal"
+  secondary_menu: "Menu secondaire"
+  breadcrumb: "Fil d'Ariane"
+  highlighted: Highlighted
+  content: Contenu
+  sidebar_first: "Sidebar gauche"
+  footer_top: "Pied de page haut"
+  footer_bottom: "Pied de page bas"

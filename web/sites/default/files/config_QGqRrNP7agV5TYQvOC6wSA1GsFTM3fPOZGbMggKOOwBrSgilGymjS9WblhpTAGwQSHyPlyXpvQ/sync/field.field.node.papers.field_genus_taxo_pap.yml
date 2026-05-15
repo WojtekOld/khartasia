@@ -1,0 +1,29 @@
+uuid: 1ca66f76-0cbc-4ba0-a9ea-c681c54090e2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_genus_taxo_pap
+    - node.type.papers
+    - taxonomy.vocabulary.classification_botanique
+id: node.papers.field_genus_taxo_pap
+field_name: field_genus_taxo_pap
+entity_type: node
+bundle: papers
+label: 'Genus classification'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      classification_botanique: classification_botanique
+    sort:
+      field: _none
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

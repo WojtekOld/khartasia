@@ -1,0 +1,108 @@
+uuid: 56ed2dd0-3b7a-4297-8c83-b9f8171ca051
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.filtered_html
+    - filter.format.full_html
+    - node.type.article
+    - node.type.book
+    - node.type.common_names
+    - node.type.nouvelles
+    - node.type.page
+    - node.type.panel
+    - node.type.paper_mill
+    - node.type.papers
+  module:
+    - comment
+    - contact
+    - contextual
+    - filter
+    - image
+    - language
+    - locale
+    - node
+    - search
+    - shortcut
+    - system
+    - taxonomy
+    - toolbar
+id: contributeur
+label: contributeur
+weight: 3
+is_admin: null
+permissions:
+  - 'access administration pages'
+  - 'access comments'
+  - 'access content'
+  - 'access content overview'
+  - 'access contextual links'
+  - 'access site reports'
+  - 'access site-wide contact form'
+  - 'access toolbar'
+  - 'administer comments'
+  - 'administer content types'
+  - 'administer filters'
+  - 'administer image styles'
+  - 'administer languages'
+  - 'administer menu'
+  - 'administer modules'
+  - 'administer nodes'
+  - 'administer search'
+  - 'administer shortcuts'
+  - 'administer site configuration'
+  - 'administer taxonomy'
+  - 'change own username'
+  - 'create article content'
+  - 'create book content'
+  - 'create common_names content'
+  - 'create nouvelles content'
+  - 'create page content'
+  - 'create panel content'
+  - 'create paper_mill content'
+  - 'create papers content'
+  - 'customize shortcut links'
+  - 'delete any article content'
+  - 'delete any book content'
+  - 'delete any common_names content'
+  - 'delete any nouvelles content'
+  - 'delete any page content'
+  - 'delete any panel content'
+  - 'delete any paper_mill content'
+  - 'delete any papers content'
+  - 'delete own article content'
+  - 'delete own book content'
+  - 'delete own common_names content'
+  - 'delete own nouvelles content'
+  - 'delete own page content'
+  - 'delete own panel content'
+  - 'delete own paper_mill content'
+  - 'delete own papers content'
+  - 'edit any article content'
+  - 'edit any book content'
+  - 'edit any common_names content'
+  - 'edit any nouvelles content'
+  - 'edit any page content'
+  - 'edit any panel content'
+  - 'edit any paper_mill content'
+  - 'edit any papers content'
+  - 'edit own article content'
+  - 'edit own book content'
+  - 'edit own comments'
+  - 'edit own common_names content'
+  - 'edit own nouvelles content'
+  - 'edit own page content'
+  - 'edit own panel content'
+  - 'edit own paper_mill content'
+  - 'edit own papers content'
+  - 'post comments'
+  - 'rebuild node access permissions'
+  - 'search content'
+  - 'skip comment approval'
+  - 'switch shortcut sets'
+  - 'translate interface'
+  - 'use advanced search'
+  - 'use text format filtered_html'
+  - 'use text format full_html'
+  - 'view own unpublished content'
+  - 'view the administration theme'

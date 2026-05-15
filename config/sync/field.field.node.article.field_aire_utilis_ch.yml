@@ -1,0 +1,22 @@
+uuid: 978fe65d-7aac-4328-8750-2c30524fca41
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_aire_utilis_ch
+    - node.type.article
+  module:
+    - text
+id: node.article.field_aire_utilis_ch
+field_name: field_aire_utilis_ch
+entity_type: node
+bundle: article
+label: Chine
+description: 'Aire d’utilisation dans la fabrication des papiers en Chine'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

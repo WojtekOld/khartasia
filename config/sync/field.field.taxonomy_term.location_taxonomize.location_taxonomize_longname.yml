@@ -1,0 +1,19 @@
+uuid: 9fa8f095-5a63-4afe-bc4f-b550db701857
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.location_taxonomize_longname
+    - taxonomy.vocabulary.location_taxonomize
+id: taxonomy_term.location_taxonomize.location_taxonomize_longname
+field_name: location_taxonomize_longname
+entity_type: taxonomy_term
+bundle: location_taxonomize
+label: 'Long Name'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,19 @@
+uuid: bb9902c7-ce93-4da1-b145-53a2ddc910e5
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_pf_cellules
+field_name: field_pf_cellules
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

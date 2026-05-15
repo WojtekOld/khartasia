@@ -1,0 +1,24 @@
+uuid: bdd5d7b1-a8d3-4d60-b836-8def41b6e584
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_zones_geo
+    - node.type.article
+    - node.type.plante_geo
+id: node.article.field_zones_geo
+field_name: field_zones_geo
+entity_type: node
+bundle: article
+label: 'Zones géographiques'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      plante_geo: plante_geo
+field_type: entity_reference

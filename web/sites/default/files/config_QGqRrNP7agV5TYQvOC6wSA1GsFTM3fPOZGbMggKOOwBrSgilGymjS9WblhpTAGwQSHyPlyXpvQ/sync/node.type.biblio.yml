@@ -1,0 +1,11 @@
+uuid: 7d50fd4c-db09-428d-a5f5-d6d88e0e9aa4
+langcode: en
+status: true
+dependencies: {  }
+name: Biblio
+type: biblio
+description: 'Use Biblio for scholarly content, such as journal papers and books.'
+help: null
+new_revision: false
+preview_mode: 1
+display_submitted: true

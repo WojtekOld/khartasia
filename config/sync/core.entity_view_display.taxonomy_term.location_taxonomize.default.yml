@@ -1,0 +1,31 @@
+uuid: 9304d2ab-2c49-4a58-96fc-c7ca31d4027b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.location_taxonomize.location_taxonomize_longname
+    - taxonomy.vocabulary.location_taxonomize
+  module:
+    - text
+id: taxonomy_term.location_taxonomize.default
+targetEntityType: taxonomy_term
+bundle: location_taxonomize
+mode: default
+content:
+  description:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  location_taxonomize_longname:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  langcode: true

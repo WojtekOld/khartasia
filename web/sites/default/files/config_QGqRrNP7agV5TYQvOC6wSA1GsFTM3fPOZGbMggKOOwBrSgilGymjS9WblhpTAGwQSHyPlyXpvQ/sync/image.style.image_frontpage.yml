@@ -1,0 +1,15 @@
+uuid: 6d75c4d6-3921-4258-9f1c-2bd78196234b
+langcode: en
+status: true
+dependencies: {  }
+name: image_frontpage
+label: image_frontpage
+effects:
+  191e7fda-a49c-4993-966d-42ad853e952f:
+    uuid: 191e7fda-a49c-4993-966d-42ad853e952f
+    id: image_scale
+    weight: 1
+    data:
+      width: 270
+      height: 270
+      upscale: true

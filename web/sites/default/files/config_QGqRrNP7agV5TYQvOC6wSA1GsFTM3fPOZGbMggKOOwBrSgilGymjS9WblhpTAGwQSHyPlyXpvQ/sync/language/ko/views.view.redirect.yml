@@ -1,0 +1,35 @@
+display:
+  default:
+    display_options:
+      exposed_form:
+        options:
+          submit_button: 필터
+          reset_button_label: 재설정
+          exposed_sorts_label: 정렬기준
+          sort_asc_label: Asc
+          sort_desc_label: 설명
+      pager:
+        options:
+          expose:
+            items_per_page_label: '페이지 당 항목 수'
+            items_per_page_options_all_label: '- 모두 -'
+            offset_label: 건너뛰기
+      fields:
+        redirect_source__path:
+          label: '보내는 이'
+        enabled:
+          label: 사용
+        created:
+          label: '생성 시각'
+      filters:
+        redirect_source__path:
+          expose:
+            label: '보내는 이'
+        redirect_redirect__uri:
+          expose:
+            label: '받는 이'
+        language:
+          expose:
+            label: '원래 언어'
+  page_1:
+    display_title: 쪽

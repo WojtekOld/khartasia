@@ -1,0 +1,15 @@
+uuid: dca08437-0d2d-4017-add0-deb827101cb6
+langcode: en
+status: true
+dependencies: {  }
+name: image_gallery_2
+label: image_gallery_2
+effects:
+  48f5d0aa-6d5c-4532-9ef5-145364c47558:
+    uuid: 48f5d0aa-6d5c-4532-9ef5-145364c47558
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 80
+      height: 80
+      anchor: center-center

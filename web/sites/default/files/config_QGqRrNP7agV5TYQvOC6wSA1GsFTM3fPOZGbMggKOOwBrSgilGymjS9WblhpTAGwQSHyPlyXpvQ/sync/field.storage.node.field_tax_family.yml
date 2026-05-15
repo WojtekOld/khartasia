@@ -1,0 +1,20 @@
+uuid: 51620ec8-cb0a-4f70-ac3f-a5f5f1ab4b0d
+langcode: und
+status: true
+dependencies:
+  module:
+    - node
+    - taxonomy
+id: node.field_tax_family
+field_name: field_tax_family
+entity_type: node
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

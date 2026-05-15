@@ -1,0 +1,21 @@
+uuid: 3db8cbde-3637-455b-a790-d657f621e659
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_pg_source
+field_name: field_pg_source
+entity_type: node
+type: string
+settings:
+  max_length: 255
+  case_sensitive: false
+  is_ascii: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

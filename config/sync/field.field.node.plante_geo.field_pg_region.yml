@@ -1,0 +1,19 @@
+uuid: cb3aa752-9d39-434b-b63a-d33758d47c4a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_region
+    - node.type.plante_geo
+id: node.plante_geo.field_pg_region
+field_name: field_pg_region
+entity_type: node
+bundle: plante_geo
+label: 'Région / Province'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

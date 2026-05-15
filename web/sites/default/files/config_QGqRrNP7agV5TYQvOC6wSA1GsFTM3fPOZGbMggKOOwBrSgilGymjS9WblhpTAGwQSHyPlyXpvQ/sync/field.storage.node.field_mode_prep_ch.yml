@@ -1,0 +1,19 @@
+uuid: 2e1b486e-6f0c-4d54-a5af-67c1e0a79b9d
+langcode: und
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_mode_prep_ch
+field_name: field_mode_prep_ch
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

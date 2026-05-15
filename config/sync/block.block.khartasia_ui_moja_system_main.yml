@@ -1,0 +1,26 @@
+uuid: bbf7c006-c03e-4a85-a305-5a5c79c2a2af
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - khartasia_ui
+_core:
+  default_config_hash: erQSEZF2XUjNmgTl0uNRBzmg18ZGXwUcw2FhApoeuHk
+id: khartasia_ui_moja_system_main
+theme: khartasia_ui
+region: content
+weight: -30
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: ''
+  label_display: '0'
+  provider: system
+visibility:
+  request_path:
+    id: request_path
+    negate: true
+    pages: '<front>'

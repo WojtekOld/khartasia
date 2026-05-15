@@ -1,0 +1,19 @@
+uuid: 737b9684-6df4-41da-aba2-7e96484a8a9f
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_pg_utilisation
+field_name: field_pg_utilisation
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

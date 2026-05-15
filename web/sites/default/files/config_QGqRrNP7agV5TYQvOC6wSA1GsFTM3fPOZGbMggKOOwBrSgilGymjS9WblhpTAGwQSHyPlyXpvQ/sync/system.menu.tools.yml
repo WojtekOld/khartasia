@@ -1,0 +1,10 @@
+uuid: 0e3b0daf-d036-465e-80f6-ab37ed783857
+langcode: und
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: BCM-vV1zzRaLHN18dqAR_CuGOj8AFJvTx7BKl_8Gcxc
+id: tools
+label: Navigation
+description: 'Le <em>menu Navigation</em> contient les liens destinés aux visiteurs du site. Des liens sont automatiquement ajoutés à ce menu par certains modules.'
+locked: true

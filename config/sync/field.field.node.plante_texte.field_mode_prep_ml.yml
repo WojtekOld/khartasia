@@ -1,0 +1,22 @@
+uuid: 00f22d14-de5c-495d-8057-c254234dd952
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mode_prep_ml
+    - node.type.plante_texte
+  module:
+    - text
+id: node.plante_texte.field_mode_prep_ml
+field_name: field_mode_prep_ml
+entity_type: node
+bundle: plante_texte
+label: 'Mode de preparation'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

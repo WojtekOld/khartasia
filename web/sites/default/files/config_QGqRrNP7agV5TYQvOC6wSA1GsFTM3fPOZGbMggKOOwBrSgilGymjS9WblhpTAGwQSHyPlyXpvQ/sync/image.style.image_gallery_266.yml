@@ -1,0 +1,15 @@
+uuid: a19d9864-daa8-47f7-a1c7-c6422d423b32
+langcode: en
+status: true
+dependencies: {  }
+name: image_gallery_266
+label: image_gallery_266
+effects:
+  1331bcf0-032f-4a9d-b418-67bcacec911c:
+    uuid: 1331bcf0-032f-4a9d-b418-67bcacec911c
+    id: image_scale
+    weight: 1
+    data:
+      width: 320
+      height: null
+      upscale: false

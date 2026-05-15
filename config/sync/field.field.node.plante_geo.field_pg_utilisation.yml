@@ -1,0 +1,22 @@
+uuid: 755cfaeb-e362-4c09-bedf-e672608281cb
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_utilisation
+    - node.type.plante_geo
+  module:
+    - text
+id: node.plante_geo.field_pg_utilisation
+field_name: field_pg_utilisation
+entity_type: node
+bundle: plante_geo
+label: 'Utilisation dans la fabrication'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

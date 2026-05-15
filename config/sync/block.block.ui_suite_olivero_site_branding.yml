@@ -1,0 +1,25 @@
+uuid: 7644842c-9a05-40b0-a237-d41ae77870d2
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - ui_suite_olivero
+_core:
+  default_config_hash: Q9VBVOxSQWCrgZvEc3oGgjqwXTzJMWp-kYkwUcnEMtc
+id: ui_suite_olivero_site_branding
+theme: ui_suite_olivero
+region: header
+weight: 0
+provider: null
+plugin: system_branding_block
+settings:
+  id: system_branding_block
+  label: 'Site branding'
+  label_display: '0'
+  provider: system
+  use_site_logo: true
+  use_site_name: true
+  use_site_slogan: false
+visibility: {  }

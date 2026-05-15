@@ -1,0 +1,19 @@
+uuid: 5c956c41-ec3a-4767-8df9-1b6a5dc5adeb
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_mode_prep_ml
+field_name: field_mode_prep_ml
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

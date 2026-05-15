@@ -1,0 +1,20 @@
+uuid: 1007fe69-288e-424c-b9d1-bf9166e55e41
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - fusion_core
+id: fusion_core_system_powered_by
+theme: fusion_core
+region: ''
+weight: 10
+provider: null
+plugin: system_powered_by_block
+settings:
+  id: system_powered_by_block
+  label: ''
+  label_display: '0'
+  provider: system
+visibility: {  }

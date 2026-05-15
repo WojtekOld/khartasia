@@ -1,0 +1,25 @@
+---
+-
+  - 1
+  - bibtex
+  - |
+      @article{bibcite_1,
+        author = {Jos{\'e} Monta{\~n}o},
+        title = {Lorem ipsum dolor sit amet, consectetur adipiscing elit.},
+        year = {1992},
+        volume = {5},
+        pages = {1-13},
+        publisher = {Journal},
+      }
+-
+  - 2
+  - bibtex
+  - |
+      @article{bibcite_2,
+        author = {Jos{\'e} Monta{\~n}o and Mark Twain},
+        title = {Proin ut laoreet purus. Maecenas sed scelerisque leo.},
+        year = {2001},
+        volume = {2},
+        pages = {5-8},
+        publisher = {Journal},
+      }

@@ -1,0 +1,22 @@
+uuid: 20bfdb50-8a79-4b34-bc26-48a175ae728f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_aire_croissance
+    - node.type.article
+  module:
+    - text
+id: node.article.field_aire_croissance
+field_name: field_aire_croissance
+entity_type: node
+bundle: article
+label: 'Aire de croissance de la plante '
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

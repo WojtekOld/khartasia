@@ -1,0 +1,22 @@
+uuid: d947adbf-d61a-49b2-9d18-c18eb884a2ae
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_synonymes_bot
+    - node.type.article
+  module:
+    - text
+id: node.article.field_synonymes_bot
+field_name: field_synonymes_bot
+entity_type: node
+bundle: article
+label: Synonymes
+description: 'Synonymes du nom botanique'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

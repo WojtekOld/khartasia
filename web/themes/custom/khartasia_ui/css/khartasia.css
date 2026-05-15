@@ -1,0 +1,56 @@
+/* Khartasia UI - Palette botanique */
+:root {
+  --kh-vert-fonce:   #2C4A2E;
+  --kh-vert-moyen:   #4A7C59;
+  --kh-ivoire:       #F5F0E8;
+  --kh-beige:        #D4C4A0;
+  --kh-encre:        #1A1A2E;
+  --kh-or:           #C9A84C;
+}
+
+body {
+  background-color: var(--kh-ivoire);
+  color: var(--kh-encre);
+  font-family: "Georgia", serif;
+}
+
+.node--type-papers,
+.node--type-common-names,
+.node--type-paper-mill {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* En-tête scientifique */
+.kh-header-scientific {
+  border-bottom: 2px solid var(--kh-vert-moyen);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Nom botanique en italique */
+.kh-nom-botanique {
+  font-style: italic;
+  color: var(--kh-vert-fonce);
+  font-size: 1.4rem;
+}
+
+/* Bloc multilingue CN/JA/KO/TH */
+.kh-multilang-block {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  background: var(--kh-beige);
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+}
+
+.kh-lang-label {
+  font-size: 0.75rem;
+  color: var(--kh-vert-fonce);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

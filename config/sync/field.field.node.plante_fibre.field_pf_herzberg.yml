@@ -1,0 +1,21 @@
+uuid: 32032f2f-9023-4ebb-b569-4bf730cdc307
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_herzberg
+    - node.type.plante_fibre
+  module:
+    - options
+id: node.plante_fibre.field_pf_herzberg
+field_name: field_pf_herzberg
+entity_type: node
+bundle: plante_fibre
+label: 'Coloration Herzberg'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,9 @@
+uuid: b78244ec-4ed8-4e94-b230-8d2d7bb42629
+langcode: en
+status: true
+dependencies: {  }
+name: Pays
+vid: pays
+description: 'Origines par pays'
+weight: 1
+new_revision: false

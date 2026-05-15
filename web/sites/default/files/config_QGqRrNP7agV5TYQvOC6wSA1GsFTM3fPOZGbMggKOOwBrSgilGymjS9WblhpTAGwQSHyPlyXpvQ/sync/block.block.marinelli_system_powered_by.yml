@@ -1,0 +1,20 @@
+uuid: f40b0193-1a8d-489c-bd4e-42d2a9d0c631
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - marinelli
+id: marinelli_system_powered_by
+theme: marinelli
+region: ''
+weight: 10
+provider: null
+plugin: system_powered_by_block
+settings:
+  id: system_powered_by_block
+  label: ''
+  label_display: '0'
+  provider: system
+visibility: {  }

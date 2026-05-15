@@ -1,0 +1,18 @@
+uuid: b2bbb409-a6d1-4070-b8ca-623d4c3b5ab1
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: Actualites
+type: nouvelles
+description: 'Actualités du site et de la profession'
+help: null
+new_revision: false
+preview_mode: 1
+display_submitted: false

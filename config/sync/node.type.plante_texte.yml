@@ -1,0 +1,11 @@
+uuid: 6d5ace2c-667b-4ee2-aa18-eff228040f33
+langcode: en
+status: true
+dependencies: {  }
+name: 'Texte plante multilingue'
+type: plante_texte
+description: 'Textes descriptifs d une plante dans une langue donnee.'
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: true

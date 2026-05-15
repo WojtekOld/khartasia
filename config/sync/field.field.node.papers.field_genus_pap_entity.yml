@@ -1,0 +1,30 @@
+uuid: fb94173d-60eb-4ab6-9228-02959b37a2c0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_genus_pap_entity
+    - node.type.article
+    - node.type.papers
+id: node.papers.field_genus_pap_entity
+field_name: field_genus_pap_entity
+entity_type: node
+bundle: papers
+label: 'Nom botanique'
+description: 'Botanical classification of paper'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      article: article
+    sort:
+      field: _none
+      direction: ASC
+    behaviors:
+      views-select-list:
+        status: 1
+field_type: entity_reference

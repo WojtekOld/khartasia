@@ -1,0 +1,20 @@
+uuid: eadfee58-1efb-4569-90b2-3ed89d5ec982
+langcode: en
+status: true
+dependencies:
+  theme:
+    - khartasia_ui
+_core:
+  default_config_hash: Q9_2whdOj1YIomfvsIfopROW4FT_X5pY0DjdOiOaQ5U
+id: khartasia_ui_primary_admin_actions
+theme: khartasia_ui
+region: highlighted
+weight: -5
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility: {  }

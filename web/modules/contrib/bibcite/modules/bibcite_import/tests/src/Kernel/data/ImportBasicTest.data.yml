@@ -1,0 +1,142 @@
+---
+-
+  - bibtex
+  - |
+      @article{1,
+        title = "Decoding of special characters seems to fail during Bibtex import (#3161578)",
+        keywords = "decoding, specíal characters",
+        author = {Lu{\'{\i}}s Moniz Pereira and
+        Ant{\'{o}}nio Barata Lopes},
+        abstract = "Latin1: ¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶ ¸¹º»¼½¾¿ Substitutions: {\"a} {\^e} {\`i} {\.I} {\o} {\'u} {\aa} {\c c} {\u g} {\l} {\~n} {\H o} {\v r} {\ss} {\r u}",
+        year = "2011",
+        journal = "Pagsubay Journal",
+      }
+
+  - journal_article
+  -
+    bibcite_year: 2011
+    bibcite_abst_e: "Latin1: ¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶ ¸¹º»¼½¾¿ Substitutions: ä ê ì İ ø ú å ç ğ ł ñ ő ř ß ů"
+    author: "Luís Pereira"
+    keywords: "specíal characters"
+-
+  - bibtex
+  - |
+      @article{1,
+        keywords = "Philippines, Facebook",
+        author = "Mark Fullmer",
+        editor = "Hawley, Teresa S.
+        and Voltaire Oyzon",
+        title = "Literacy in the Facebook Era: A Pedagogical Approach to Internet English and Filipino Education",
+        abstract = "{G}iven the exponential growth of Facebook in the Philippines, especially among students learning English, this study aims to answer the following questions
+        (1) What are the linguistic characteristics of the English students read and write on Facebook?
+        (2) How does this affect, positively or negatively, students' ability to comprehend and produce standard English?
+        (3) How should teachers adapt in response to this?",
+        year = "2011",
+        journal = "{P}agsubay Journal",
+      }
+
+  - journal_article
+  -
+    bibcite_year: 2011
+    bibcite_abst_e: "Given the exponential growth of Facebook in the Philippines, especially among students learning English, this study aims to answer the following questions (1) What are the linguistic characteristics of the English students read and write on Facebook? (2) How does this affect, positively or negatively, students' ability to comprehend and produce standard English? (3) How should teachers adapt in response to this?"
+    bibcite_secondary_title: "Pagsubay Journal"
+    author: "Mark Fullmer"
+    editor: "Voltaire Oyzon"
+    keywords: "Philippines"
+-
+  - bibtex
+  - |
+      @article{2,
+        title = {Proin ut laoreet purus. Maecenas sed scelerisque leo.},
+        author = {Doe John and Twain Mark},
+        year = {2001},
+        volume = {2},
+        pages = {5-8},
+        publisher = {Journal},
+      }
+  - journal_article
+  -
+    bibcite_year: 2001
+    bibcite_volume: 2
+    bibcite_pages: 5-8
+    bibcite_publisher: Journal
+-
+  - bibtex
+  - |
+      @Book{abramowitz+stegun,
+        author = "Milton {Abramowitz} and Irene A. {Stegun}",
+        title = "Handbook of Mathematical Functions with Formulas, Graphs, and Mathematical Tables",
+        publisher = "Dover",
+        year = 1964,
+        address = "New York City",
+        edition = "ninth Dover printing, tenth GPO printing"
+      }
+  - book
+  -
+    bibcite_year: 1964
+    title: "Handbook of Mathematical Functions with Formulas, Graphs, and Mathematical Tables"
+    bibcite_publisher: Dover
+    bibcite_edition: "ninth Dover printing, tenth GPO printing"
+-
+  - bibtex
+  - |
+      @ARTICLE{Gao2025-hy,
+        title = "Canoe Tours
+        in {S}weden",
+        journal  = "Nature Communications",
+        volume   =  16,
+        number   =  1,
+        pages    = "10064",
+        month    =  "nov",
+        year     =  2025
+      }
+  - journal_article
+  -
+    bibcite_citekey: "Gao2025-hy"
+    bibcite_year: 2025
+    title: "Canoe Tours in Sweden"
+    bibcite_secondary_title: Nature Communications
+    bibcite_volume: 16
+    bibcite_number: 1
+    bibcite_pages: 10064
+    bibcite_date: "11/2025"
+-
+  - ris
+  - |
+      TY - JOUR
+      AU - Shannon, Claude E.
+      ED - Jude Fawley
+      TI - Proin ut laoreet purus. Maecenas sed scelerisque leo.
+      PY - 2001
+      PB - Journal
+      VL - 2
+      ER -
+  - journal_article
+  -
+    bibcite_year: 2001
+    bibcite_volume: 2
+    bibcite_publisher: Journal
+-
+  - ris
+  - |
+      BT - Synonymous keys should be treated the same (#3584018)
+      TY - JOUR
+      AU - Shannon, Claude E.
+      A1 - Turing, Alan Mathison
+      ED - Jude Fawley
+      A2 - Tess Durbeyfield
+      Y1 - 2001
+      PB - Journal
+      CP - Issue
+      VL - 2
+      N2 - This is the alternate key for abstracts
+  - journal_article
+  -
+    title: "Synonymous keys should be treated the same (#3584018)"
+    bibcite_year: 2001
+    bibcite_volume: 2
+    bibcite_abst_e: "This is the alternate key for abstracts"
+    bibcite_publisher: "Journal"
+    author: "Alan Turing"
+    editor: "Tess Durbeyfield"
+    bibcite_issue: "Issue"

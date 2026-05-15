@@ -1,0 +1,65 @@
+uuid: 3f83840e-dd8e-4316-afa0-f810959588d0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.papers.body
+    - field.field.node.papers.field_genus_pap_entity
+    - field.field.node.papers.field_genus_taxo_pap
+    - field.field.node.papers.field_origin_taxo
+    - field.field.node.papers.field_pap_local_scripture
+    - field.field.node.papers.field_pap_synonyme
+    - node.type.papers
+  module:
+    - text
+    - user
+id: node.papers.default
+targetEntityType: node
+bundle: papers
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_genus_pap_entity:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_origin_taxo:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_pap_local_scripture:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_pap_synonyme:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  field_genus_taxo_pap: true
+  langcode: true

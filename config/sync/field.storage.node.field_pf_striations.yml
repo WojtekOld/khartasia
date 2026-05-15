@@ -1,0 +1,19 @@
+uuid: 44b7c7c6-fcb7-45bf-94cc-27427ede4d72
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_pf_striations
+field_name: field_pf_striations
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,18 @@
+uuid: 987dec9c-86c7-4c8d-b792-5beddcaf5834
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_pg_lat
+field_name: field_pg_lat
+entity_type: node
+type: float
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

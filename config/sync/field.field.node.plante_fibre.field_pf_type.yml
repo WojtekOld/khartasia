@@ -1,0 +1,19 @@
+uuid: c0b6a7b9-faee-41c4-8364-51f146458cff
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_type
+    - node.type.plante_fibre
+id: node.plante_fibre.field_pf_type
+field_name: field_pf_type
+entity_type: node
+bundle: plante_fibre
+label: 'Type de fibres'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

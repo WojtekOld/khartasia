@@ -1,0 +1,22 @@
+uuid: d3659de2-7f1f-410f-850f-292eea93a36c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_particularites
+    - node.type.plante_fibre
+  module:
+    - text
+id: node.plante_fibre.field_pf_particularites
+field_name: field_pf_particularites
+entity_type: node
+bundle: plante_fibre
+label: 'Caractéristiques particulières'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

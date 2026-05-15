@@ -1,0 +1,22 @@
+uuid: ed139d18-f349-48e9-9e9b-685568807759
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_gen_cult_jap
+    - node.type.article
+  module:
+    - text
+id: node.article.field_gen_cult_jap
+field_name: field_gen_cult_jap
+entity_type: node
+bundle: article
+label: Japon
+description: "Généralités sur la culture et l'usage au Japon"
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

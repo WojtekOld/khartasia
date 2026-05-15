@@ -1,0 +1,20 @@
+uuid: 1708d5a4-e7c5-4a6e-9c3c-54d6ffbadf29
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - bartik
+id: bartik_system_powered_by
+theme: bartik
+region: ''
+weight: 10
+provider: null
+plugin: system_powered_by_block
+settings:
+  id: system_powered_by_block
+  label: ''
+  label_display: '0'
+  provider: system
+visibility: {  }

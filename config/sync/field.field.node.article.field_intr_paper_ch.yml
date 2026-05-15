@@ -1,0 +1,25 @@
+uuid: dfa1a2f1-94e0-4679-b516-45dd7d8c546d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_intr_paper_ch
+    - node.type.article
+  module:
+    - text
+id: node.article.field_intr_paper_ch
+field_name: field_intr_paper_ch
+entity_type: node
+bundle: article
+label: Chine
+description: ' Introduction chinese paper'
+required: false
+translatable: true
+default_value:
+  -
+    value: '<p>Suffixes zhi or chih = paper.<br>In China, unlike Korea and Japan, papers made with paper mulberry fibers are not prominent, the production of paper from bamboo fiber being the most important.<br>Suffixes zhi or chih = papier.<br>En Chine, à la différence de la Corée et du Japon, les papiers de fibres de mûrier à papier ne sont pas prédominants, la production de papier de fibre de bambou étant la plus importante.</p>'
+    format: full_html
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

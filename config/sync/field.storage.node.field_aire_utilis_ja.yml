@@ -1,0 +1,19 @@
+uuid: 7cd46125-0172-41f4-8e06-6d62414fce0c
+langcode: und
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_aire_utilis_ja
+field_name: field_aire_utilis_ja
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

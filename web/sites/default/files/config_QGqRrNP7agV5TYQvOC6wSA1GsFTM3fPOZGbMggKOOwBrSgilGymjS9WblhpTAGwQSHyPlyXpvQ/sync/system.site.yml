@@ -1,0 +1,15 @@
+_core:
+  default_config_hash: ijfbzDTN4CbE7Sr-6ubWzy_t1vH4OtU1doNCLssVz-4
+langcode: en
+uuid: 04a770e2-fb06-47aa-a855-dc8aff1f0b66
+name: khartasia
+mail: akuch@free.fr
+slogan: ''
+page:
+  403: /node/3030
+  404: ''
+  front: /accueil
+admin_compact_mode: false
+weight_select_max: 100
+default_langcode: en
+mail_notification: null

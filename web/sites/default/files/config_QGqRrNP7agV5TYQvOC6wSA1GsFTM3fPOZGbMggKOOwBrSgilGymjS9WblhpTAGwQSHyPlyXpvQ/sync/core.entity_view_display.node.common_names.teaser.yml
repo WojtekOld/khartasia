@@ -1,0 +1,41 @@
+uuid: 898baa9d-1640-4f23-8fdb-a5036fa380b2
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.common_names.body
+    - field.field.node.common_names.field_genus_com_entity
+    - field.field.node.common_names.field_genus_taxo
+    - field.field.node.common_names.field_language_taxo_vern
+    - field.field.node.common_names.field_ver_local_scripture
+    - field.field.node.common_names.field_vern_syn
+    - node.type.common_names
+  module:
+    - text
+    - user
+id: node.common_names.teaser
+targetEntityType: node
+bundle: common_names
+mode: teaser
+content:
+  body:
+    type: text_summary_or_trimmed
+    label: hidden
+    settings:
+      trim_length: 600
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  field_genus_com_entity: true
+  field_genus_taxo: true
+  field_language_taxo_vern: true
+  field_ver_local_scripture: true
+  field_vern_syn: true
+  langcode: true

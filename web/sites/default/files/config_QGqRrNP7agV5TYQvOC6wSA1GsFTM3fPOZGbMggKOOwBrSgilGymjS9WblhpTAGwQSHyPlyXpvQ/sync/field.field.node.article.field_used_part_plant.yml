@@ -1,0 +1,23 @@
+uuid: 73d05059-408f-4ef1-adf1-2a14a0768498
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_used_part_plant
+    - node.type.article
+id: node.article.field_used_part_plant
+field_name: field_used_part_plant
+entity_type: node
+bundle: article
+label: 'Partie utilisée de la plante'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    sort:
+      field: _none
+field_type: entity_reference

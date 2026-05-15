@@ -1,0 +1,23 @@
+uuid: 627cfbf3-01f2-4615-ab54-afaece245b4d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tax_family
+    - node.type.article
+id: node.article.field_tax_family
+field_name: field_tax_family
+entity_type: node
+bundle: article
+label: Famille
+description: Family
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    sort:
+      field: _none
+field_type: entity_reference

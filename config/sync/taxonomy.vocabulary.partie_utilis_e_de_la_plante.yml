@@ -1,0 +1,9 @@
+uuid: 5cb75756-07b2-45cd-94ea-2217f2a6da82
+langcode: en
+status: true
+dependencies: {  }
+name: 'Partie utilisée de la plante'
+vid: partie_utilis_e_de_la_plante
+description: 'Partie utilisée de la plante'
+weight: 0
+new_revision: false

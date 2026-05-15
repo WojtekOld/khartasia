@@ -1,0 +1,27 @@
+uuid: cc40d5e1-411f-474d-b30c-8a5e7e0f1781
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.account
+  module:
+    - system
+  theme:
+    - ui_suite_olivero
+_core:
+  default_config_hash: sws4TySQy9DPrmLrHFeQGmafTdxTYUbFDNRIqRmB1es
+id: ui_suite_olivero_account_menu
+theme: ui_suite_olivero
+region: secondary_menu
+weight: -4
+provider: null
+plugin: 'system_menu_block:account'
+settings:
+  id: 'system_menu_block:account'
+  label: 'User account menu'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 1
+  expand_all_items: false
+visibility: {  }

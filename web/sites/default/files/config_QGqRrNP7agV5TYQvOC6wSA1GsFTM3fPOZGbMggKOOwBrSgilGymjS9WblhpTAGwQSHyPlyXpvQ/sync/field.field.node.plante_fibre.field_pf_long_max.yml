@@ -1,0 +1,23 @@
+uuid: c140e7ed-9f95-481c-bbb6-edfb751a5a9e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_long_max
+    - node.type.plante_fibre
+id: node.plante_fibre.field_pf_long_max
+field_name: field_pf_long_max
+entity_type: node
+bundle: plante_fibre
+label: 'Longueur max (mm)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

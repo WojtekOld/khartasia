@@ -1,0 +1,22 @@
+uuid: 668ebb54-8e15-4877-886d-985356dd8885
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_intr_paper_ml
+    - node.type.plante_texte
+  module:
+    - text
+id: node.plante_texte.field_intr_paper_ml
+field_name: field_intr_paper_ml
+entity_type: node
+bundle: plante_texte
+label: 'Introduction fabrication du papier'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

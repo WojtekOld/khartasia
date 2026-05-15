@@ -1,0 +1,19 @@
+uuid: 20d90fdb-2489-4789-9a1d-c76a1e7a81d5
+langcode: en
+status: true
+dependencies:
+  theme:
+    - claro
+id: seven_forum_new
+theme: claro
+region: content
+weight: 0
+provider: null
+plugin: forum_new_block
+settings:
+  id: broken
+  label: ''
+  label_display: '0'
+  provider: core
+  block_count: 5
+visibility: {  }

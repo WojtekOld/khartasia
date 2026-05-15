@@ -1,0 +1,22 @@
+uuid: fe9d8a26-1ba0-4d4f-bc0d-042cf9918b5b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_preparation
+    - node.type.plante_geo
+  module:
+    - text
+id: node.plante_geo.field_pg_preparation
+field_name: field_pg_preparation
+entity_type: node
+bundle: plante_geo
+label: 'Mode de préparation'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

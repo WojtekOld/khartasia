@@ -1,0 +1,282 @@
+uuid: 9920157d-b15d-4d17-a85b-6a66d7f8cd44
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_display.comment.comment.default
+    - field.field.node.article.body
+    - field.field.node.article.comment
+    - field.field.node.article.field_aire_croissance
+    - field.field.node.article.field_aire_utilis
+    - field.field.node.article.field_aire_utilis_ch
+    - field.field.node.article.field_aire_utilis_ja
+    - field.field.node.article.field_aire_utilis_ko
+    - field.field.node.article.field_aire_utilis_thai
+    - field.field.node.article.field_class_botan_texte
+    - field.field.node.article.field_fibres
+    - field.field.node.article.field_fiel_gen_cult_thai
+    - field.field.node.article.field_gen_cult_ch
+    - field.field.node.article.field_gen_cult_jap
+    - field.field.node.article.field_gen_cult_ko
+    - field.field.node.article.field_gen_culture
+    - field.field.node.article.field_ident_fibre
+    - field.field.node.article.field_image
+    - field.field.node.article.field_image_gallery_1
+    - field.field.node.article.field_image_gallery_2
+    - field.field.node.article.field_intr_paper_ch
+    - field.field.node.article.field_intr_paper_jap
+    - field.field.node.article.field_intr_paper_ko
+    - field.field.node.article.field_intr_paper_thai
+    - field.field.node.article.field_mode_prep
+    - field.field.node.article.field_mode_prep_ch
+    - field.field.node.article.field_mode_prep_ja
+    - field.field.node.article.field_mode_prep_ko
+    - field.field.node.article.field_mode_prep_thai
+    - field.field.node.article.field_paper_name
+    - field.field.node.article.field_synonymes_bot
+    - field.field.node.article.field_tags
+    - field.field.node.article.field_tax_family
+    - field.field.node.article.field_tax_genus
+    - field.field.node.article.field_tax_order
+    - field.field.node.article.field_use_paper_making
+    - field.field.node.article.field_used_part_plant
+    - field.field.node.article.field_vern_name
+    - field.field.node.article.field_zones_geo
+    - node.type.article
+  module:
+    - comment
+    - text
+    - user
+_core:
+  default_config_hash: br6izr-iGEu--JvNbCJNtOBpRnxpFLXfoV5y61U9Nqc
+id: node.article.default
+targetEntityType: node
+bundle: article
+mode: default
+content:
+  comment:
+    type: comment_default
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 110
+    region: content
+  field_aire_croissance:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_aire_utilis:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 14
+    region: content
+  field_aire_utilis_ch:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 16
+    region: content
+  field_aire_utilis_ja:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 17
+    region: content
+  field_aire_utilis_ko:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 18
+    region: content
+  field_aire_utilis_thai:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 19
+    region: content
+  field_fiel_gen_cult_thai:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 17
+    region: content
+  field_gen_cult_ch:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 14
+    region: content
+  field_gen_cult_jap:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 15
+    region: content
+  field_gen_cult_ko:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 16
+    region: content
+  field_gen_culture:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_ident_fibre:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_intr_paper_ch:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 28
+    region: content
+  field_intr_paper_jap:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 29
+    region: content
+  field_intr_paper_ko:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 30
+    region: content
+  field_intr_paper_thai:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 31
+    region: content
+  field_mode_prep:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_mode_prep_ch:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
+    region: content
+  field_mode_prep_ja:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_mode_prep_ko:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  field_mode_prep_thai:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  field_paper_name:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 27
+    region: content
+  field_synonymes_bot:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_tax_family:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_tax_order:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_use_paper_making:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  field_used_part_plant:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_vern_name:
+    type: basic_string
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 18
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  body: true
+  field_class_botan_texte: true
+  field_fibres: true
+  field_image: true
+  field_image_gallery_1: true
+  field_image_gallery_2: true
+  field_tags: true
+  field_tax_genus: true
+  field_zones_geo: true
+  langcode: true
+  search_api_excerpt: true

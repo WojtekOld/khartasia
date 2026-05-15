@@ -1,0 +1,22 @@
+uuid: 8d551993-b410-4c64-bada-14b01e67a854
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.papers
+id: node.papers.promote
+field_name: promote
+entity_type: node
+bundle: papers
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

@@ -1,0 +1,8 @@
+uuid: 5e06d14e-d42a-40e7-8807-0a954c2b8b4e
+langcode: und
+status: true
+dependencies: {  }
+id: menu-participation
+label: Participants
+description: 'Participation: financement, partenaires contributeurs'
+locked: false

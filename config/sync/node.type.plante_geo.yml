@@ -1,0 +1,11 @@
+uuid: 25f665eb-bd66-43d7-b484-a5df17a96a95
+langcode: en
+status: true
+dependencies: {  }
+name: 'Zone géographique (plante)'
+type: plante_geo
+description: 'Zone de production/utilisation dune plante à papier'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

@@ -1,0 +1,20 @@
+uuid: af1afeb0-b8ab-4f25-9c60-412cbf0f9dcc
+langcode: en
+status: true
+dependencies:
+  theme:
+    - ui_suite_olivero
+_core:
+  default_config_hash: jUCOQqK5TnL7V7eErxmXgOpRjR8ye3_i5S8nVeDORQM
+id: ui_suite_olivero_page_title
+theme: ui_suite_olivero
+region: content_above
+weight: -5
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  label_display: '0'
+  provider: core
+visibility: {  }

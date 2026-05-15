@@ -1,0 +1,31 @@
+uuid: ea9ae025-a9e7-4b97-8d50-d94e4dafbbd2
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.biblio.body
+    - node.type.biblio
+  module:
+    - text
+    - user
+id: node.biblio.teaser
+targetEntityType: node
+bundle: biblio
+mode: teaser
+content:
+  body:
+    type: text_summary_or_trimmed
+    label: hidden
+    settings:
+      trim_length: 600
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  langcode: true

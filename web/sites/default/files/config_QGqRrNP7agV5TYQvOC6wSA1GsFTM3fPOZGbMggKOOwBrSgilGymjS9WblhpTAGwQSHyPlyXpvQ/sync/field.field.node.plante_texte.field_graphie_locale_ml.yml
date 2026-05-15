@@ -1,0 +1,22 @@
+uuid: d3d8c9bd-7cf6-4737-b117-5c91b7668a02
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_graphie_locale_ml
+    - node.type.plante_texte
+  module:
+    - text
+id: node.plante_texte.field_graphie_locale_ml
+field_name: field_graphie_locale_ml
+entity_type: node
+bundle: plante_texte
+label: 'Graphie locale'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

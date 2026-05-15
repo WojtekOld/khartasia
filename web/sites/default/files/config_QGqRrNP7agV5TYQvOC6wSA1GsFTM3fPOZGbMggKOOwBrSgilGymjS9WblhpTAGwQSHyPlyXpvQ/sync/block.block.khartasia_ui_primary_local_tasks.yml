@@ -1,0 +1,22 @@
+uuid: 92ae539e-d285-49ba-9e9d-6927d954c835
+langcode: en
+status: true
+dependencies:
+  theme:
+    - khartasia_ui
+_core:
+  default_config_hash: nGE3EoPQQaQCuqTUtZgw0-KIzmrqdKDzdNQf2JyPUt4
+id: khartasia_ui_primary_local_tasks
+theme: khartasia_ui
+region: highlighted
+weight: -4
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: 'Primary tabs'
+  label_display: '0'
+  provider: core
+  primary: true
+  secondary: false
+visibility: {  }

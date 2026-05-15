@@ -1,0 +1,20 @@
+uuid: 4f14bd17-e981-44f4-b2f3-b5b581f0cb33
+langcode: und
+status: true
+dependencies:
+  module:
+    - node
+    - taxonomy
+id: node.field_tax_genus
+field_name: field_tax_genus
+entity_type: node
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

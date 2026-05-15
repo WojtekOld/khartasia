@@ -1,0 +1,23 @@
+uuid: 82c14c8b-2bee-4709-aa38-cf31b1ea470a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_lat
+    - node.type.plante_geo
+id: node.plante_geo.field_pg_lat
+field_name: field_pg_lat
+entity_type: node
+bundle: plante_geo
+label: Latitude
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

@@ -1,0 +1,24 @@
+uuid: 18b36ca9-6c05-42cd-be6a-97bcd8f63c0f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_pays
+    - node.type.plante_geo
+    - taxonomy.vocabulary.pays
+id: node.plante_geo.field_pg_pays
+field_name: field_pg_pays
+entity_type: node
+bundle: plante_geo
+label: Pays
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      pays: pays
+field_type: entity_reference

@@ -1,0 +1,7 @@
+name: Khartasia Migrate
+type: module
+description: Migration overrides for Khartasia
+core_version_requirement: ^10 || ^11
+package: Custom
+dependencies:
+  - migrate_drupal:migrate_drupal

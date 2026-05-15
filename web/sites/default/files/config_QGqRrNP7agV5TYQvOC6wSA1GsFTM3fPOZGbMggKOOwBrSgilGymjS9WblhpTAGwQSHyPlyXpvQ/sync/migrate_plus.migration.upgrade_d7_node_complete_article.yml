@@ -1,0 +1,260 @@
+uuid: 9e887101-fde7-444e-9001-d23a2b7609cd
+langcode: en
+status: true
+dependencies: {  }
+id: upgrade_d7_node_complete_article
+class: Drupal\node\Plugin\migrate\D7NodeTranslation
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Drupal 7'
+  - Content
+migration_group: migrate_drupal_7
+label: 'Node complete (Plantes)'
+source:
+  plugin: d7_node_complete
+  node_type: article
+process:
+  nid:
+    -
+      plugin: get
+      source: tnid
+  vid:
+    -
+      plugin: get
+      source: vid
+  langcode:
+    -
+      plugin: default_value
+      source: language
+      default_value: und
+  title:
+    -
+      plugin: get
+      source: title
+  uid:
+    -
+      plugin: get
+      source: node_uid
+  status:
+    -
+      plugin: get
+      source: status
+  created:
+    -
+      plugin: get
+      source: created
+  changed:
+    -
+      plugin: get
+      source: timestamp
+  promote:
+    -
+      plugin: get
+      source: promote
+  sticky:
+    -
+      plugin: get
+      source: sticky
+  revision_uid:
+    -
+      plugin: get
+      source: revision_uid
+  revision_log:
+    -
+      plugin: get
+      source: log
+  revision_timestamp:
+    -
+      plugin: get
+      source: timestamp
+  content_translation_source:
+    -
+      plugin: get
+      source: source_langcode
+  comment_node_article/0/status:
+    -
+      plugin: get
+      source: comment
+  body:
+    -
+      plugin: get
+      source: body
+  field_tags:
+    -
+      plugin: sub_process
+      source: field_tags
+      process:
+        target_id: tid
+  field_image:
+    -
+      plugin: sub_process
+      source: field_image
+      process:
+        target_id: fid
+        alt: alt
+        title: title
+        width: width
+        height: height
+  field_class_botan_texte:
+    -
+      plugin: get
+      source: field_class_botan_texte
+  field_aire_croissance:
+    -
+      plugin: get
+      source: field_aire_croissance
+  field_aire_utilis:
+    -
+      plugin: get
+      source: field_aire_utilis
+  field_gen_culture:
+    -
+      plugin: get
+      source: field_gen_culture
+  field_mode_prep:
+    -
+      plugin: get
+      source: field_mode_prep
+  field_ident_fibre:
+    -
+      plugin: get
+      source: field_ident_fibre
+  field_image_gallery_1:
+    -
+      plugin: sub_process
+      source: field_image_gallery_1
+      process:
+        target_id: fid
+        alt: alt
+        title: title
+        width: width
+        height: height
+  field_image_gallery_2:
+    -
+      plugin: sub_process
+      source: field_image_gallery_2
+      process:
+        target_id: fid
+        alt: alt
+        title: title
+        width: width
+        height: height
+  field_use_paper_making:
+    -
+      plugin: sub_process
+      source: field_use_paper_making
+      process:
+        target_id: tid
+  field_used_part_plant:
+    -
+      plugin: sub_process
+      source: field_used_part_plant
+      process:
+        target_id: tid
+  field_gen_cult_ch:
+    -
+      plugin: get
+      source: field_gen_cult_ch
+  field_gen_cult_jap:
+    -
+      plugin: get
+      source: field_gen_cult_jap
+  field_gen_cult_ko:
+    -
+      plugin: get
+      source: field_gen_cult_ko
+  field_fiel_gen_cult_thai:
+    -
+      plugin: get
+      source: field_fiel_gen_cult_thai
+  field_mode_prep_ch:
+    -
+      plugin: get
+      source: field_mode_prep_ch
+  field_mode_prep_ja:
+    -
+      plugin: get
+      source: field_mode_prep_ja
+  field_mode_prep_ko:
+    -
+      plugin: get
+      source: field_mode_prep_ko
+  field_aire_utilis_ch:
+    -
+      plugin: get
+      source: field_aire_utilis_ch
+  field_aire_utilis_ja:
+    -
+      plugin: get
+      source: field_aire_utilis_ja
+  field_aire_utilis_ko:
+    -
+      plugin: get
+      source: field_aire_utilis_ko
+  field_aire_utilis_thai:
+    -
+      plugin: get
+      source: field_aire_utilis_thai
+  field_vern_name:
+    -
+      plugin: get
+      source: field_vern_name
+  field_paper_name:
+    -
+      plugin: get
+      source: field_paper_name
+  field_intr_paper_ch:
+    -
+      plugin: get
+      source: field_intr_paper_ch
+  field_intr_paper_jap:
+    -
+      plugin: get
+      source: field_intr_paper_jap
+  field_intr_paper_ko:
+    -
+      plugin: get
+      source: field_intr_paper_ko
+  field_tax_order:
+    -
+      plugin: sub_process
+      source: field_tax_order
+      process:
+        target_id: tid
+  field_tax_family:
+    -
+      plugin: sub_process
+      source: field_tax_family
+      process:
+        target_id: tid
+  field_tax_genus:
+    -
+      plugin: sub_process
+      source: field_tax_genus
+      process:
+        target_id: tid
+  field_synonymes_bot:
+    -
+      plugin: get
+      source: field_synonymes_bot
+  field_intr_paper_thai:
+    -
+      plugin: get
+      source: field_intr_paper_thai
+  field_mode_prep_thai:
+    -
+      plugin: get
+      source: field_mode_prep_thai
+destination:
+  plugin: 'entity_complete:node'
+  translations: true
+  default_bundle: article
+idMap: {  }
+migration_dependencies:
+  required:
+    - upgrade_d7_user
+    - upgrade_d7_node_type
+  optional:
+    - upgrade_d7_field_instance
+include: null

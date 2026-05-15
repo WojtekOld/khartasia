@@ -1,0 +1,22 @@
+uuid: 5ca5fc30-c4ae-4a0f-9b95-e641ec01c070
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pg_intro
+    - node.type.plante_geo
+  module:
+    - text
+id: node.plante_geo.field_pg_intro
+field_name: field_pg_intro
+entity_type: node
+bundle: plante_geo
+label: 'Introduction papier'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

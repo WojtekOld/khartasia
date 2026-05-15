@@ -1,0 +1,1 @@
+Drupal.locale = { 'pluralFormula': function ($n) { return Number(($n!=1)); }, 'strings': {"":{"Disabled":"\uc0ac\uc6a9 \uc548\ud568","None":"\uc5c6\uc74c","Show shortcuts":"\ubc14\ub85c\uac00\uae30 \ubcf4\uc774\uae30","The block cannot be placed in this region.":"\uc774 \uad6c\uc5ed\uc5d0 \ube14\ub85d\uc744 \ub193\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4."}} };

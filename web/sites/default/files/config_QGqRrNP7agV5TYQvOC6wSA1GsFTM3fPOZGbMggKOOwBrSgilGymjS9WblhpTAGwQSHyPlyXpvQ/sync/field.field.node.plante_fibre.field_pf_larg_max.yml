@@ -1,0 +1,23 @@
+uuid: 8253b9ea-9cbb-4b47-93fd-7a1a329a8f2e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_larg_max
+    - node.type.plante_fibre
+id: node.plante_fibre.field_pf_larg_max
+field_name: field_pf_larg_max
+entity_type: node
+bundle: plante_fibre
+label: 'Largeur max (mm)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

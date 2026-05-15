@@ -1,0 +1,3 @@
+processor: citeproc-php
+default_style: apa
+convert_urls: false

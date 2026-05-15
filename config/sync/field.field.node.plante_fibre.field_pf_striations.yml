@@ -1,0 +1,22 @@
+uuid: b9ec22d9-497b-4b94-9f45-a9dba2d0b4d8
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_pf_striations
+    - node.type.plante_fibre
+  module:
+    - text
+id: node.plante_fibre.field_pf_striations
+field_name: field_pf_striations
+entity_type: node
+bundle: plante_fibre
+label: 'Striations, nœuds, plis de flexion'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

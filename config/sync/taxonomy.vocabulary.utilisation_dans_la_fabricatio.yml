@@ -1,0 +1,9 @@
+uuid: 7372bbf3-d5cf-4ae5-b75e-8051c6109147
+langcode: en
+status: true
+dependencies: {  }
+name: 'Utilisation dans la fabrication du papier'
+vid: utilisation_dans_la_fabricatio
+description: null
+weight: 2
+new_revision: false

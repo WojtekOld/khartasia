@@ -1,0 +1,21 @@
+uuid: 284a9999-0b58-47ff-917f-d761cffd75ca
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_plante_ref
+    - node.type.plante_texte
+id: node.plante_texte.field_plante_ref
+field_name: field_plante_ref
+entity_type: node
+bundle: plante_texte
+label: Plante
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings: {  }
+field_type: entity_reference

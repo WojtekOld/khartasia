@@ -1,0 +1,24 @@
+uuid: 71a840b9-9340-475f-b39b-bd2e988c6fd6
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - mojfabist
+id: mojfabist_system_main
+theme: mojfabist
+region: ''
+weight: -30
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: ''
+  label_display: '0'
+  provider: system
+visibility:
+  request_path:
+    id: request_path
+    negate: true
+    pages: '<front>'
