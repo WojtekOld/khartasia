@@ -1,4 +1,4 @@
-# khartasia_deploy_master.ps1 — Synchronisation sécurisée Khartasia
+﻿# khartasia_deploy_master.ps1 — Synchronisation sécurisée Khartasia
 # Local DDEV (11.3.11) ↔ Hetzner (11.3.9)
 #
 # RÈGLES ABSOLUES (leçons Wallpaper Canton) :
