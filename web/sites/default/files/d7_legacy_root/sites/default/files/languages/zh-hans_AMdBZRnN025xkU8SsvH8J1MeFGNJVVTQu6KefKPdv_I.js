@@ -1,1 +1,0 @@
-Drupal.locale = { 'pluralFormula': function ($n) { return Number(($n!=1)); }, 'strings': {"":{"None":"Aucun(e)","Show shortcuts":"Afficher les raccourcis"}} };

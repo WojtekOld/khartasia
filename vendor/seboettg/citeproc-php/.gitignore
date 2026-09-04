@@ -1,7 +1,0 @@
-.DS_Store
-/vendor/
-/.idea/
-composer.lock
-build/
-review/
-.phpunit.result.cache
