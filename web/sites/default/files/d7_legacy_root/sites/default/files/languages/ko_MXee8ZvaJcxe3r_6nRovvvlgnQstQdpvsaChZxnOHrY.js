@@ -1,0 +1,1 @@
+Drupal.locale = { 'pluralFormula': function ($n) { return Number(($n!=1)); }, 'strings': {"":{"None":"\uc5c6\uc74c","Show shortcuts":"\ubc14\ub85c\uac00\uae30 \ubcf4\uc774\uae30"}} };

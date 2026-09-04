@@ -3,8 +3,10 @@
 namespace Drupal\bibcite_export\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -18,6 +20,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   confirm_form_route_name = "entity.bibcite_reference.export_multiple_form",
  * )
  */
+#[Action(
+  id: 'bibcite_export_multiple',
+  label: new TranslatableMarkup('Export reference'),
+  type: 'bibcite_reference',
+  confirm_form_route_name: 'entity.bibcite_reference.export_multiple_form'
+)]
 class ExportReference extends ActionBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -71,7 +79,7 @@ class ExportReference extends ActionBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function execute($entity = NULL) {
+  public function execute(?object $entity = NULL) {
     $this->executeMultiple([$entity]);
   }
 

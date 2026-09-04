@@ -1,0 +1,9 @@
+fields:
+  bibcite_custom4:
+    label: ジャンル
+  bibcite_custom5:
+    label: フォーマット
+  bibcite_type_of_work:
+    label: 中程度
+  bibcite_place_published:
+    label: 国

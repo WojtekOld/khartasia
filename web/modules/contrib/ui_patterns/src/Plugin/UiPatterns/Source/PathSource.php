@@ -9,6 +9,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -18,7 +19,7 @@ use Drupal\ui_patterns\SourcePluginBase;
   label: new TranslatableMarkup('Path'),
   description: new TranslatableMarkup('Internal path.'),
   prop_types: ['url'],
-  tags: ['widget', 'widget:dismissible']
+  tags: [SourceTags::Widget->value, SourceTags::WidgetDismissible->value]
 )]
 class PathSource extends SourcePluginBase {
 
@@ -27,11 +28,11 @@ class PathSource extends SourcePluginBase {
    */
   public function getPropValue(): mixed {
     $value = $this->getSetting('value');
-    if (is_scalar($value)) {
+    if (\is_scalar($value)) {
       $value = $this->replaceTokens($value, FALSE);
     }
-    elseif (isset($value["route_name"])) {
-      $value["route_name"] = $this->replaceTokens($value["route_name"], FALSE);
+    elseif (isset($value['route_name'])) {
+      $value['route_name'] = $this->replaceTokens($value['route_name'], FALSE);
     }
     return $this->getUrlFromRoute($value);
   }
@@ -40,13 +41,13 @@ class PathSource extends SourcePluginBase {
    * Get URL from route.
    */
   private function getUrlFromRoute(mixed $value): string {
-    if (is_scalar($value)) {
+    if (\is_scalar($value)) {
       return (string) $value;
     }
-    if (!isset($value["route_name"])) {
-      return "";
+    if (!isset($value['route_name'])) {
+      return '';
     }
-    $url = Url::fromRoute($value["route_name"], $value["route_parameters"] ?? []);
+    $url = Url::fromRoute($value['route_name'], $value['route_parameters'] ?? []);
     return $url->toString();
   }
 
@@ -60,7 +61,7 @@ class PathSource extends SourcePluginBase {
     $form['value'] = [
       '#type' => 'path',
       '#default_value' => $value,
-      '#description' => $this->t("Enter an internal path"),
+      '#description' => $this->t('Enter an internal path'),
     ];
     $this->addRequired($form['value']);
     return $form;

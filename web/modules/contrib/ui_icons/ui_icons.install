@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the ui_icons module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Remove the obsolete ui_icons_backport and ui_icons_iconify_api modules.
+ */
+function ui_icons_update_11201(): string {
+  // Both were empty placeholders kept for the 1.0.x upgrade path and are gone
+  // in 2.0.0. They never shipped code, config or schema, so clearing their
+  // entries is enough. The module installer cannot be used here because it
+  // resolves the extension on disk, which no longer exists.
+  $obsolete = ['ui_icons_backport', 'ui_icons_iconify_api'];
+
+  $extension_config = \Drupal::configFactory()->getEditable('core.extension');
+  $key_value = \Drupal::keyValue('system.schema');
+
+  $removed = [];
+  foreach ($obsolete as $module) {
+    if ($extension_config->get('module.' . $module) === NULL) {
+      continue;
+    }
+    $extension_config->clear('module.' . $module);
+    $key_value->delete($module);
+    $removed[] = $module;
+  }
+
+  if (!$removed) {
+    return 'No obsolete UI Icons module to remove.';
+  }
+
+  $extension_config->save();
+  \Drupal::service('extension.list.module')->reset();
+
+  return 'Removed obsolete module(s): ' . implode(', ', $removed) . '.';
+}

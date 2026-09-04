@@ -1,0 +1,25 @@
+ui_patterns_ckeditor5.dialog:
+  path: '/editor/dialog/ui_patterns_ckeditor5/{filter_format}'
+  defaults:
+    _form: '\Drupal\ui_patterns_ckeditor5\Form\DialogForm'
+    _title_callback: '\Drupal\ui_patterns_ckeditor5\Form\DialogForm::title'
+  options:
+    parameters:
+      filter_format:
+        type: 'entity:filter_format'
+  requirements:
+    _entity_access: 'filter_format.use'
+    _custom_access: '\Drupal\ui_patterns_ckeditor5\Controller\PreviewController::formatUsesComponentEmbedFilter'
+
+ui_patterns_ckeditor5.preview:
+  path: '/editor/preview/ui_patterns_ckeditor5/{filter_format}'
+  defaults:
+    _controller: '\Drupal\ui_patterns_ckeditor5\Controller\PreviewController::preview'
+  methods: [POST]
+  options:
+    parameters:
+      filter_format:
+        type: 'entity:filter_format'
+  requirements:
+    _entity_access: 'filter_format.use'
+    _custom_access: '\Drupal\ui_patterns_ckeditor5\Controller\PreviewController::formatUsesComponentEmbedFilter'

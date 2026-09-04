@@ -1,0 +1,36 @@
+uuid: b0861d0e-6bdd-46af-9b2e-db5294ac3423
+langcode: fr
+status: true
+dependencies:
+  module:
+    - options
+    - taxonomy
+id: taxonomy_term.field_syn_type
+field_name: field_syn_type
+entity_type: taxonomy_term
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: homotopique
+      label: Homotopique
+    -
+      value: heterotypique
+      label: Hétérotypique
+    -
+      value: pro_parte
+      label: 'Pro parte'
+    -
+      value: basionymique
+      label: Basionymique
+    -
+      value: orthographique
+      label: Orthographique
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

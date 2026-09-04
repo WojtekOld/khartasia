@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\bibcite_entity\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\bibcite_entity\ContextProvider\ReferenceRouteContext;
 use Drupal\Core\Routing\RouteMatch;
 use Drupal\KernelTests\KernelTestBase;
@@ -9,9 +11,9 @@ use Drupal\Tests\bibcite_entity\Traits\EntityCreationTrait;
 
 /**
  * @coversDefaultClass \Drupal\bibcite_entity\ContextProvider\ReferenceRouteContext
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class ReferenceContextTest extends KernelTestBase {
 
   use EntityCreationTrait;
@@ -48,7 +50,8 @@ class ReferenceContextTest extends KernelTestBase {
   public function testGetAvailableContexts() {
     $context_repository = $this->container->get('context.repository');
 
-    // Test bibcite_entity.bibcite_reference_route_context:bibcite_reference exists.
+    // Test bibcite_entity.bibcite_reference_route_context:bibcite_reference
+    // exists.
     $contexts = $context_repository->getAvailableContexts();
     $this->assertArrayHasKey('@bibcite_entity.bibcite_reference_route_context:bibcite_reference', $contexts);
     $this->assertSame('entity:bibcite_reference', $contexts['@bibcite_entity.bibcite_reference_route_context:bibcite_reference']->getContextDefinition()

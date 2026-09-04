@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns\Plugin\UiPatterns\PropType;
 
+use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Markup;
+use Drupal\Core\Render\RenderableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\PropType;
 use Drupal\ui_patterns\PropTypePluginBase;
@@ -19,7 +22,7 @@ use Drupal\ui_patterns\PropTypePluginBase;
   default_source: 'textfield',
   convert_from: ['number', 'url', 'identifier'],
   schema: ['type' => 'string'],
-  priority: 1,
+  priority: 2,
   typed_data: ['string']
 )]
 class StringPropType extends PropTypePluginBase {
@@ -44,10 +47,10 @@ class StringPropType extends PropTypePluginBase {
   public function getSummary(array $definition): array {
     $summary = parent::getSummary($definition);
     if (isset($definition['maxLength'])) {
-      $summary[] = $this->t("Max length: @length", ["@length" => $definition['maxLength']]);
+      $summary[] = $this->t('Max length: @length', ['@length' => $definition['maxLength']]);
     }
     if (isset($definition['minLength'])) {
-      $summary[] = $this->t("Min length: @length", ["@length" => $definition['minLength']]);
+      $summary[] = $this->t('Min length: @length', ['@length' => $definition['minLength']]);
     }
     return $summary;
   }
@@ -56,21 +59,24 @@ class StringPropType extends PropTypePluginBase {
    * {@inheritdoc}
    */
   public static function normalize(mixed $value, ?array $definition = NULL): mixed {
-    $value = static::normalizer()->convertToString($value);
     $contentMediaType = $definition['contentMediaType'] ?? NULL;
-    return ($contentMediaType === 'text/plain') ? strip_tags($value) : $value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function preprocess(mixed $value, ?array $definition = NULL): mixed {
-    $value = parent::preprocess($value, $definition);
-    $contentMediaType = $definition['contentMediaType'] ?? NULL;
-    if ($contentMediaType !== 'text/plain') {
-      return Markup::create($value);
+    // A text/plain prop is plain text: strip every tag, even from Markup.
+    if ($contentMediaType === 'text/plain') {
+      return \strip_tags(static::normalizer()->convertToString($value));
     }
-    return $value;
+    // Trust is decided by type. A MarkupInterface value (TranslatableMarkup,
+    // Markup::create()) is already safe: keep it so Twig does not escape it.
+    if ($value instanceof MarkupInterface) {
+      return $value;
+    }
+    // A renderable or render array is rendered through Drupal's safe-HTML
+    // pipeline; mark the result trusted for downstream code.
+    if ($value instanceof RenderableInterface || (\is_array($value) && Element::isRenderArray($value))) {
+      return Markup::create(static::normalizer()->convertToString($value));
+    }
+    // A plain string is untrusted: leave it as-is so Twig autoescapes it
+    // at render. To pass raw HTML, wrap the value in Markup::create().
+    return static::normalizer()->convertToString($value);
   }
 
 }

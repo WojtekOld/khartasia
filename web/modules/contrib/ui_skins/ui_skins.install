@@ -7,31 +7,52 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\ui_skins\UiSkinsInterface;
 
 /**
  * Implements hook_uninstall().
  */
 function ui_skins_uninstall(): void {
-  $themeHandler = \Drupal::service('theme_handler');
+  $themeHandler = \Drupal::service(ThemeHandlerInterface::class);
   $configFactory = \Drupal::configFactory();
   foreach ($themeHandler->listInfo() as $theme) {
     $config = $configFactory->getEditable($theme->getName() . '.settings');
-    $cssVariablesSettings = $config->get(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY);
-    $themeSettings = $config->get(UiSkinsInterface::THEME_THEME_SETTING_KEY);
-    if ($cssVariablesSettings == NULL && $themeSettings == NULL) {
-      continue;
+    $config->clear(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY);
+    $config->clear(UiSkinsInterface::THEME_THEME_SETTING_KEY);
+
+    if (empty($config->get('third_party_settings.ui_skins'))) {
+      $config->clear('third_party_settings.ui_skins');
     }
-    /** @var array $settings */
-    $settings = $config->get();
-    if (isset($settings[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY])) {
-      unset($settings[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY]);
+    if (empty($config->get('third_party_settings'))) {
+      $config->clear('third_party_settings');
     }
 
-    if (isset($settings[UiSkinsInterface::THEME_THEME_SETTING_KEY])) {
-      unset($settings[UiSkinsInterface::THEME_THEME_SETTING_KEY]);
+    $config->save();
+  }
+}
+
+/**
+ * Put UI Skins config into theme's third party settings.
+ */
+function ui_skins_update_10101(): void {
+  $themeHandler = \Drupal::service(ThemeHandlerInterface::class);
+  $configFactory = \Drupal::configFactory();
+  foreach ($themeHandler->listInfo() as $theme) {
+    $config = $configFactory->getEditable($theme->getName() . '.settings');
+
+    $ui_skins_theme = $config->get('ui_skins_theme');
+    if ($ui_skins_theme) {
+      $config->set('third_party_settings.ui_skins.theme', $ui_skins_theme);
+      $config->clear('ui_skins_theme');
     }
 
-    $config->setData($settings)->save();
+    $ui_skins_variables = $config->get('ui_skins_css_variables');
+    if ($ui_skins_variables) {
+      $config->set('third_party_settings.ui_skins.css_variables', $ui_skins_variables);
+      $config->clear('ui_skins_css_variables');
+    }
+
+    $config->save();
   }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
-use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Plugin\PluginBase;
 
 /**
  * Base class for prop_type_adapter plugins.
@@ -17,7 +17,7 @@ abstract class PropTypeAdapterPluginBase extends PluginBase implements PropTypeA
    */
   public function label(): string {
     // Cast the label to a string since it is a TranslatableMarkup object.
-    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? $this->pluginDefinition->id() : (string) ($this->pluginDefinition["label"] ?? '');
+    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? $this->pluginDefinition->id() : (string) ($this->pluginDefinition['label'] ?? '');
   }
 
   /**

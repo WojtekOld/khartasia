@@ -1,0 +1,211 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the tmgmt_deepl module.
+ */
+
+use Drupal\Core\Url;
+use Drupal\tmgmt_deepl\Plugin\tmgmt\Translator\DeeplTranslator;
+
+/**
+ * Implements hook_requirements().
+ */
+function tmgmt_deepl_requirements(string $phase): array {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    $deepl_translators = DeeplTranslator::getTranslators();
+
+    if (count($deepl_translators) > 0) {
+      $requirements += \Drupal::service('tmgmt_deepl.api')->getUsageData($deepl_translators);
+    }
+    else {
+      $requirements['tmgmt_deepl'] = [
+        'title' => t('TMGMT DeepL'),
+        'value' => t('No translation providers configured'),
+        'description' => t('Please add at least one DeepL translation provider <a href=":here">here</a>.', [
+          ':here' => Url::fromRoute('entity.tmgmt_translator.collection')
+            ->toString(),
+        ]),
+        'severity' => REQUIREMENT_WARNING,
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Update schema definitions of tmgmt_deepl module.
+ */
+function tmgmt_deepl_update_8001(): void {
+  $config_factory = \Drupal::configFactory();
+  // Find all available tmgmt translators.
+  /** @var string $tmgmt_translator_config_name */
+  foreach ($config_factory->listAll('tmgmt.translator.') as $tmgmt_translator_config_name) {
+    $tmgmt_translator_config = $config_factory->getEditable($tmgmt_translator_config_name);
+    // Check for plugin deepl_pro and resave configuration.
+    if ($tmgmt_translator_config->get('plugin') === 'deepl_pro') {
+      $tmgmt_translator_config->save();
+    }
+  }
+}
+
+/**
+ * Re-run fixed tmgmt_deepl_update_8001.
+ */
+function tmgmt_deepl_update_8002(): void {
+  tmgmt_deepl_update_8001();
+}
+
+/**
+ * Update existing deepl_pro translator settings and set url/ url_usage.
+ */
+function tmgmt_deepl_update_8003(): void {
+  $config_factory = \Drupal::configFactory();
+  // Find all available tmgmt translators.
+  /** @var string $tmgmt_translator_config_name */
+  foreach ($config_factory->listAll('tmgmt.translator.') as $tmgmt_translator_config_name) {
+    $tmgmt_translator_config = $config_factory->getEditable($tmgmt_translator_config_name);
+    // Check for plugin deepl_pro and resave configuration with
+    // new translator/ usage url.
+    if ($tmgmt_translator_config->get('plugin') === 'deepl_pro') {
+      /** @var array $settings */
+      $settings = $tmgmt_translator_config->get('settings');
+      // Add translate url.
+      $settings['url'] = 'https://api.deepl.com/v2/translate';
+      // Add usage url.
+      $settings['url_usage'] = 'https://api.deepl.com/v2/usage';
+      // Set new settings.
+      $tmgmt_translator_config->set('settings', $settings);
+      // Resave settings.
+      $tmgmt_translator_config->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Rewrite deepl_pro, deepl_free translator config to use deepl_api translator.
+ */
+function tmgmt_deepl_update_8004(): void {
+  // Enable the key module to prevent further errors while updating.
+  if (!\Drupal::moduleHandler()->moduleExists('key')) {
+    $module_installer = \Drupal::service('module_installer');
+    $module_installer->install(['key'], FALSE);
+    \Drupal::service('kernel')->rebuildContainer();
+  }
+
+  $config_factory = \Drupal::configFactory();
+  $pending_key_migration = [];
+  // Find all available tmgmt translators.
+  /** @var string $tmgmt_translator_config_name */
+  foreach ($config_factory->listAll('tmgmt.translator.') as $tmgmt_translator_config_name) {
+    $tmgmt_translator_config = $config_factory->getEditable($tmgmt_translator_config_name);
+    if (in_array($tmgmt_translator_config->get('plugin'), ['deepl_pro', 'deepl_free'], TRUE)) {
+      /** @var array $settings */
+      $settings = $tmgmt_translator_config->get('settings');
+      // Record translators that rely on a direct API key so the API key
+      // migration post_update can advise creating a Key entity. The key is
+      // removed here (before saving) so no intermediate save violates the
+      // 2.3.x schema.
+      if (isset($settings['auth_key']) && $settings['auth_key'] !== ''
+        && (!isset($settings['auth_key_entity']) || $settings['auth_key_entity'] === '')) {
+        /** @var string $label */
+        $label = $tmgmt_translator_config->get('label');
+        $id = str_replace('tmgmt.translator.', '', $tmgmt_translator_config_name);
+        $pending_key_migration[$id] = $label;
+      }
+      // Unset obsolete legacy settings dropped from the 2.3.x schema.
+      foreach (['auth_key', 'url', 'url_usage', 'test_url', 'test_url_usage', 'tmgmt_deepl_glossary'] as $obsolete_key) {
+        unset($settings[$obsolete_key]);
+      }
+      // Set new settings.
+      $tmgmt_translator_config->set('settings', $settings);
+      $tmgmt_translator_config->set('plugin', 'deepl_api');
+      $tmgmt_translator_config->save(TRUE);
+    }
+  }
+  // Hand the affected translators to the API key migration post_update.
+  if ($pending_key_migration !== []) {
+    \Drupal::state()->set('tmgmt_deepl.pending_key_migration', $pending_key_migration);
+  }
+}
+
+/**
+ * Update deepl_pro, deepl_free, deepl_api translator settings.
+ */
+function tmgmt_deepl_update_8005(): void {
+  $config_factory = \Drupal::configFactory();
+  // Find all available tmgmt translators.
+  /** @var string $tmgmt_translator_config_name */
+  foreach ($config_factory->listAll('tmgmt.translator.') as $tmgmt_translator_config_name) {
+    $tmgmt_translator_config = $config_factory->getEditable($tmgmt_translator_config_name);
+    // Check for plugin deepl_pro, deepl_free, deepl_api and resave its
+    // configuration with enable_context setting.
+    if ($tmgmt_translator_config->get('plugin') === 'deepl_pro' ||
+        $tmgmt_translator_config->get('plugin') === 'deepl_free' ||
+        $tmgmt_translator_config->get('plugin') === 'deepl_api') {
+      /** @var array $settings */
+      $settings = $tmgmt_translator_config->get('settings');
+      // Set e to FALSE.
+      $settings['enable_context'] = FALSE;
+      // Set new settings.
+      $tmgmt_translator_config->set('settings', $settings);
+      // Resave settings.
+      $tmgmt_translator_config->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Set omit_partner_id setting to FALSE for existing DeepL translators.
+ */
+function tmgmt_deepl_update_8006(): void {
+  $config_factory = \Drupal::configFactory();
+  // Find all available tmgmt translators.
+  /** @var string $tmgmt_translator_config_name */
+  foreach ($config_factory->listAll('tmgmt.translator.') as $tmgmt_translator_config_name) {
+    $tmgmt_translator_config = $config_factory->getEditable($tmgmt_translator_config_name);
+    // Check for plugin deepl_pro, deepl_free, deepl_api and resave its
+    // configuration with omit_partner_id setting.
+    if ($tmgmt_translator_config->get('plugin') === 'deepl_pro' ||
+        $tmgmt_translator_config->get('plugin') === 'deepl_free' ||
+        $tmgmt_translator_config->get('plugin') === 'deepl_api') {
+      /** @var array $settings */
+      $settings = $tmgmt_translator_config->get('settings');
+      // Set omit_partner_id to FALSE by default for existing translators.
+      $settings['omit_partner_id'] = FALSE;
+      // Set new settings.
+      $tmgmt_translator_config->set('settings', $settings);
+      // Resave settings.
+      $tmgmt_translator_config->save(TRUE);
+    }
+  }
+}
+
+/**
+ * Set tag_handling_version setting to 'v1' for existing DeepL translators.
+ */
+function tmgmt_deepl_update_8007(): void {
+  $config_factory = \Drupal::configFactory();
+  // Find all available tmgmt translators.
+  /** @var string $tmgmt_translator_config_name */
+  foreach ($config_factory->listAll('tmgmt.translator.') as $tmgmt_translator_config_name) {
+    $tmgmt_translator_config = $config_factory->getEditable($tmgmt_translator_config_name);
+    // Check for plugin deepl_pro, deepl_free, deepl_api and resave its
+    // configuration with tag_handling_version setting.
+    if ($tmgmt_translator_config->get('plugin') === 'deepl_pro' ||
+      $tmgmt_translator_config->get('plugin') === 'deepl_free' ||
+      $tmgmt_translator_config->get('plugin') === 'deepl_api') {
+      /** @var array $settings */
+      $settings = $tmgmt_translator_config->get('settings');
+      // Set tag_handling_version to 'v1' by default for existing translators.
+      $settings['tag_handling_version'] = 'v1';
+      // Set new settings.
+      $tmgmt_translator_config->set('settings', $settings);
+      // Resave settings.
+      $tmgmt_translator_config->save(TRUE);
+    }
+  }
+}

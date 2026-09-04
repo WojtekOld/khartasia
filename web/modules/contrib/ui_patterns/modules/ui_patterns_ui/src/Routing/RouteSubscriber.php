@@ -19,15 +19,10 @@ class RouteSubscriber extends RouteSubscriberBase {
 
   use StringTranslationTrait;
 
-  /**
-   * Constructs a RouteSubscriber object.
-   */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected ComponentPluginManager $componentPluginManager,
-  ) {
-
-  }
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -72,11 +67,9 @@ class RouteSubscriber extends RouteSubscriberBase {
         [
           '_permission' => 'administer component',
         ]
-
       );
       $collection->add("entity.component_form_display.{$component->getPluginId()}.add_form", $route);
     }
-
   }
 
   /**

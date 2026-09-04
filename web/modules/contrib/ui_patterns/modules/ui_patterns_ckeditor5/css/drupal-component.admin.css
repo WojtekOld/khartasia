@@ -1,0 +1,8 @@
+/**
+ * @file
+ * Toolbar item icon in the text format configuration form.
+ */
+
+.ckeditor5-toolbar-button-drupalComponent {
+  background-image: url(../icons/component.svg);
+}

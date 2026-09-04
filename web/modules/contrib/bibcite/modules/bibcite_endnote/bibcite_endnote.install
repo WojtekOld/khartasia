@@ -43,7 +43,7 @@ function bibcite_endnote_update_8001() {
 
   // Save config updates.
   $config->set('fields', $fields);
-  $config->save(TRUE);
+  $config->save();
 }
 
 /**
@@ -55,7 +55,7 @@ function bibcite_endnote_update_8002() {
   $fields['issue'] = 'bibcite_issue';
   $fields['edition'] = 'bibcite_edition';
   $config->set('fields', $fields);
-  $config->save(TRUE);
+  $config->save();
 }
 
 /**

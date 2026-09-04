@@ -1,0 +1,6 @@
+label: クラシック音楽
+fields:
+  bibcite_type_of_work:
+    label: タイプ
+  bibcite_place_published:
+    label: 市区町村

@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Install functions for the Color Field Widget Grid module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_requirements().
+ *
+ * If the jQuery Simple Color library doesn't exist, show a warning on the
+ * status page.
+ */
+function color_field_widget_grid_requirements($phase): array {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    $requirements['color_field_simple'] = !file_exists(DRUPAL_ROOT . '/libraries/jquery-simple-color/jquery.simple-color.js') ? [
+      'title' => t('Color Field library: jQuery Simple Color'),
+      'value' => t('Missing'),
+      'description' => t('If you want to use the Simple Color widget, you must download the <a href=":url">jQuery Simple Color</a> library and copy it to :library', [
+        ':url' => 'https://github.com/recurser/jquery-simple-color',
+        ':library' => DRUPAL_ROOT . '/libraries/jquery-simple-color/',
+      ]),
+      'severity' => REQUIREMENT_WARNING,
+    ] : [
+      'title' => t('Color Field library: jQuery Simple Color'),
+      'value' => t('Installed'),
+      'severity' => REQUIREMENT_OK,
+    ];
+  }
+
+  return $requirements;
+}

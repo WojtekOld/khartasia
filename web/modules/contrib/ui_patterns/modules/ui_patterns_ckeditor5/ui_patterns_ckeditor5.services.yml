@@ -1,0 +1,10 @@
+services:
+  ui_patterns_ckeditor5.host_entity:
+    class: Drupal\ui_patterns_ckeditor5\HostEntity
+    arguments: ['@entity_type.manager', '@ui_patterns.sample_entity_generator']
+  ui_patterns_ckeditor5.rendering_filter:
+    class: Drupal\ui_patterns_ckeditor5\RenderingFilter
+  Drupal\ui_patterns_ckeditor5\RenderingFilter: '@ui_patterns_ckeditor5.rendering_filter'
+  Drupal\ui_patterns_ckeditor5\Hook\UiPatternsCkeditor5Hooks:
+    class: Drupal\ui_patterns_ckeditor5\Hook\UiPatternsCkeditor5Hooks
+    autowire: true

@@ -1,0 +1,13 @@
+uuid: fb3f8578-bb5b-4b74-9a26-2e0c0b2b4498
+langcode: en
+status: true
+dependencies:
+  module:
+    - bibcite_entity
+_core:
+  default_config_hash: Krrgk1XQIMMS2QZ3DZCaM7SzMdaZIHGb0x-9R7rtlxw
+id: bibcite_entity_contributor_delete
+label: 'Delete contributor'
+type: bibcite_contributor
+plugin: bibcite_entity_contributor_delete
+configuration: {  }

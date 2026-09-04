@@ -28,7 +28,7 @@ interface ContextMatcherPluginManagerInterface {
    * @return array<string, array<string, mixed> >
    *   Plugin definitions
    */
-  public function getDefinitionsMatchingContextsAndTags(array $contexts = [], ?array $tag_filter = NULL) : array;
+  public function getDefinitionsMatchingContextsAndTags(array $contexts = [], ?array $tag_filter = NULL): array;
 
   /**
    * Filters definitions by tags.

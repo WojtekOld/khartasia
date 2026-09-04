@@ -2,17 +2,23 @@
 
 namespace Drupal\Tests\bibcite_entity\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\bibcite_entity\Entity\Reference;
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Test rendering of entity to citation.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class EntityCitationRenderTest extends KernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'system',
     'user',
@@ -50,9 +56,8 @@ class EntityCitationRenderTest extends KernelTestBase {
 
   /**
    * Test rendering Reference entity to citation.
-   *
-   * @dataProvider providerReferenceEntity
    */
+  #[DataProvider('providerReferenceEntity')]
   public function testEntityRender($entity_values, $expected) {
     $entity = Reference::create($entity_values);
 

@@ -1,0 +1,10 @@
+label: ソフトウェア
+fields:
+  bibcite_edition:
+    label: バージョン
+  bibcite_pages:
+    label: 説明
+  bibcite_type_of_work:
+    label: タイプ
+  bibcite_place_published:
+    label: 市区町村

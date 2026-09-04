@@ -5,16 +5,14 @@
  * Module hooks.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\bibcite_endnote\Hook\BibciteEndnoteHooks;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
  */
+#[LegacyHook]
 function bibcite_endnote_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    case 'help.page.bibcite_endnote':
-      $module = 'bibcite_endnote';
-      return \Drupal::service('bibcite.help_service')
-        ->getHelpMarkup([], $route_name, $module);
-  }
+  return \Drupal::service(BibciteEndnoteHooks::class)->help($route_name, $route_match);
 }

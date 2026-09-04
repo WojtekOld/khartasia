@@ -1,0 +1,2 @@
+parameters:
+  ui_patterns_fields.skip_procedural_hook_scan: true

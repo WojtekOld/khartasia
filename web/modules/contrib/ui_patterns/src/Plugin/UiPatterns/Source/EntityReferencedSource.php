@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -19,9 +20,7 @@ use Drupal\ui_patterns\Attribute\Source;
   context_definitions: [
     'entity' => new ContextDefinition('entity', label: new TranslatableMarkup('Entity'), required: TRUE),
   ],
-  tags: [
-    'context_switcher',
-  ]
+  tags: [SourceTags::ContextSwitcher->value]
 )]
 class EntityReferencedSource extends DerivableContextSourceBase {
 
@@ -30,7 +29,7 @@ class EntityReferencedSource extends DerivableContextSourceBase {
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
-    $form["derivable_context"]["#title"] = $this->t("Referenced entities");
+    $form['derivable_context']['#title'] = $this->t('Referenced entities');
     return $form;
   }
 
@@ -41,15 +40,15 @@ class EntityReferencedSource extends DerivableContextSourceBase {
    *   The context.
    */
   protected function getContextForDerivation(): array {
-    return array_filter($this->context, function ($key) {
+    return \array_filter($this->context, static function ($key) {
       return $key !== 'ui_patterns:field:index';
-    }, ARRAY_FILTER_USE_KEY);
+    }, \ARRAY_FILTER_USE_KEY);
   }
 
   /**
    * {@inheritDoc}
    */
-  protected function getDerivableContextsOptions() : array {
+  protected function getDerivableContextsOptions(): array {
     $options = parent::getDerivableContextsOptions();
     $groups = self::getDerivableContextOptionGroups($options);
     $option_to_group = [];
@@ -71,7 +70,7 @@ class EntityReferencedSource extends DerivableContextSourceBase {
         if ($grouped_option_key !== $group_key) {
           $label = (string) $options[$grouped_option_key];
           // @phpstan-ignore-next-line
-          $returned[$group][$grouped_option_key] = explode(" referenced by ", $label)[0];
+          $returned[$group][$grouped_option_key] = \explode(' referenced by ', $label)[0];
         }
       }
     }
@@ -87,12 +86,12 @@ class EntityReferencedSource extends DerivableContextSourceBase {
    * @return array<string, array<string> >
    *   The option groups.
    */
-  private static function getDerivableContextOptionGroups(array $options) : array {
+  private static function getDerivableContextOptionGroups(array $options): array {
     $groups = [];
-    foreach (array_keys($options) as $option_key) {
-      $exploded_option = explode(":", $option_key);
-      $exploded_option[count($exploded_option) - 1] = "";
-      $group_option = implode(":", $exploded_option);
+    foreach (\array_keys($options) as $option_key) {
+      $exploded_option = \explode(':', $option_key);
+      $exploded_option[\count($exploded_option) - 1] = '';
+      $group_option = \implode(':', $exploded_option);
       if (!isset($options[$group_option])) {
         continue;
       }
@@ -102,8 +101,8 @@ class EntityReferencedSource extends DerivableContextSourceBase {
       $groups[$group_option][] = $option_key;
     }
     // Remove single groups.
-    return array_filter($groups, function ($grouped_option_keys) {
-      return count($grouped_option_keys) > 1;
+    return \array_filter($groups, static function ($grouped_option_keys) {
+      return \count($grouped_option_keys) > 1;
     });
   }
 
@@ -112,8 +111,8 @@ class EntityReferencedSource extends DerivableContextSourceBase {
    */
   protected function getSourcesTagFilter(): array {
     return [
-      "widget:dismissible" => FALSE,
-      "widget" => FALSE,
+      SourceTags::WidgetDismissible->value => FALSE,
+      SourceTags::Widget->value => FALSE,
     ];
   }
 
@@ -122,8 +121,7 @@ class EntityReferencedSource extends DerivableContextSourceBase {
    */
   protected function getDerivationTagFilter(): ?array {
     return [
-      // "entity" => TRUE,
-      "entity_referenced" => TRUE,
+      SourceTags::EntityReferenced->value => TRUE,
     ];
   }
 
@@ -147,9 +145,9 @@ class EntityReferencedSource extends DerivableContextSourceBase {
       $bundle_value = $arguments['@bundle'];
 
       // Keep only the part before parentheses, if present.
-      if (is_string($bundle_value) &&
-        preg_match('/^(.*?)\s*\(/', $bundle_value, $matches)) {
-        $arguments['@bundle'] = trim($matches[1]);
+      if (\is_string($bundle_value)
+        && \preg_match('/^(.*?)\s*\(/', $bundle_value, $matches)) {
+        $arguments['@bundle'] = \trim($matches[1]);
       }
     }
 

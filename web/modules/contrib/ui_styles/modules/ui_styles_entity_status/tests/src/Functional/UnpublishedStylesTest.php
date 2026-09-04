@@ -6,6 +6,8 @@ namespace Drupal\Tests\ui_styles_entity_status\Functional;
 
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\ui_styles_entity_status\UiStylesEntityStatusInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Unpublished status styles functional tests.
@@ -13,6 +15,9 @@ use Drupal\ui_styles_entity_status\UiStylesEntityStatusInterface;
  * @group ui_styles
  * @group ui_styles_entity_status
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_entity_status')]
+#[RunTestsInSeparateProcesses]
 class UnpublishedStylesTest extends UiStylesEntityStatusFunctionalTestBase {
 
   /**

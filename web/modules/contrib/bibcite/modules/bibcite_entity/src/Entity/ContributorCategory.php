@@ -2,7 +2,9 @@
 
 namespace Drupal\bibcite_entity\Entity;
 
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the Contributor category entity.
@@ -39,6 +41,37 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'bibcite_contributor_category',
+  label: new TranslatableMarkup('Contributor category'),
+  handlers: [
+    'list_builder' => 'Drupal\bibcite_entity\ContributorCategoryListBuilder',
+    'form' => [
+      'add' => 'Drupal\bibcite_entity\Form\ContributorCategoryForm',
+      'edit' => 'Drupal\bibcite_entity\Form\ContributorCategoryForm',
+      'delete' => 'Drupal\bibcite_entity\Form\ContributorCategoryDeleteForm',
+    ],
+  ],
+  config_prefix: 'bibcite_contributor_category',
+  admin_permission: 'administer bibcite_reference',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+    'weight' => 'weight',
+  ],
+  links: [
+    'add-form' => '/admin/structure/bibcite/contributor/settings/category/add',
+    'edit-form' => '/admin/structure/bibcite/contributor/settings/category/{bibcite_contributor_category}',
+    'delete-form' => '/admin/structure/bibcite/contributor/settings/category/{bibcite_contributor_category}/delete',
+    'collection' => '/admin/structure/bibcite/contributor/settings/category',
+  ],
+  config_export: [
+    'id',
+    'label',
+    'weight',
+  ]
+)]
 class ContributorCategory extends ConfigEntityBase implements ContributorCategoryInterface {
 
   /**

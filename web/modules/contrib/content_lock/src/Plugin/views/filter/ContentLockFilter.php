@@ -1,0 +1,31 @@
+<?php
+
+namespace Drupal\content_lock\Plugin\views\filter;
+
+use Drupal\views\Attribute\ViewsFilter;
+use Drupal\views\Plugin\views\filter\BooleanOperator;
+
+/**
+ * Filter handler for content lock.
+ *
+ * @group views_filter_handlers
+ *
+ * @ViewsFilter("content_lock_filter")
+ */
+#[ViewsFilter('content_lock_filter')]
+class ContentLockFilter extends BooleanOperator {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function query(): void {
+    $this->ensureMyTable();
+    if (empty($this->value)) {
+      $this->query->addWhere($this->options['group'], $this->tableAlias . ".timestamp", 0, static::EQUAL);
+    }
+    else {
+      $this->query->addWhere($this->options['group'], $this->tableAlias . ".timestamp", 0, static::NOT_EQUAL);
+    }
+  }
+
+}

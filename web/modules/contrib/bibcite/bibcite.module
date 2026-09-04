@@ -5,65 +5,30 @@
  * Main module hooks.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\bibcite\Hook\BibciteHooks;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
 
 /**
  * Implements hook_theme().
  */
+#[LegacyHook]
 function bibcite_theme($existing, $type, $theme, $path) {
-  return [
-    'bibcite_citation' => [
-      'variables' => [
-        'data' => [],
-        'style' => NULL,
-      ],
-    ],
-  ];
+  return \Drupal::service(BibciteHooks::class)->theme($existing, $type, $theme, $path);
 }
 
 /**
  * Implements hook_preprocess_HOOK().
  */
+#[LegacyHook]
 function bibcite_preprocess_bibcite_citation(&$variables) {
-  /** @var \Drupal\bibcite\CitationStylerInterface $styler */
-  $styler = \Drupal::service('bibcite.citation_styler');
-  $data = $variables['data'];
-
-  if ($variables['style']) {
-    $styler->setStyleById($variables['style']);
-  }
-  else {
-    $styler->setStyle(NULL);
-  }
-  $processed = $styler->render($data);
-  $config = \Drupal::config('bibcite.settings');
-  $convert_urls = $config->get('convert_urls') ?? FALSE;
-  if ($convert_urls === TRUE) {
-    $filter = new stdClass();
-    $filter->settings = [
-      'filter_url_length' => 72,
-    ];
-    $processed = _filter_url($processed, $filter);
-  }
-  $variables['content'] = [
-    '#markup' => $processed,
-  ];
+  \Drupal::service(BibciteHooks::class)->preprocessBibciteCitation($variables);
 }
 
 /**
  * Implements hook_help().
  */
+#[LegacyHook]
 function bibcite_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    case 'help.page.bibcite':
-      $links = [
-        ':proc' => Url::fromRoute('bibcite.settings')->toString(),
-        ':csl' => Url::fromRoute('entity.bibcite_csl_style.collection')
-          ->toString(),
-      ];
-      $module = 'bibcite';
-      return \Drupal::service('bibcite.help_service')
-        ->getHelpMarkup($links, $route_name, $module);
-  }
+  return \Drupal::service(BibciteHooks::class)->help($route_name, $route_match);
 }

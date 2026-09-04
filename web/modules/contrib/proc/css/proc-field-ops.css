@@ -1,0 +1,7 @@
+a.proc-decrypt-link,
+a.encrypt-button {
+  margin-left: 0.5em;
+}
+input.form-autocomplete-proc-read-only {
+  background-image: none !important;
+}

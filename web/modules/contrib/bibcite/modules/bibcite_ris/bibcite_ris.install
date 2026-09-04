@@ -8,27 +8,6 @@
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Implements hook_requirements().
- */
-function bibcite_ris_requirements($phase) {
-  $requirements = [];
-
-  switch ($phase) {
-    case 'runtime':
-    case 'install':
-      if (!class_exists('\LibRIS\RISReader')) {
-        $requirements['bibcite_ris_dependencies'] = [
-          'title' => t('RIS dependencies'),
-          'description' => t("Bibliography &amp; Citation - RIS requires the researchgate/libris library. See the module's README.md file for more information."),
-          'severity' => REQUIREMENT_ERROR,
-        ];
-      }
-  }
-
-  return $requirements;
-}
-
-/**
  * Implements hook_uninstall().
  */
 function bibcite_ris_uninstall() {
@@ -50,7 +29,7 @@ function bibcite_ris_update_8001() {
     $fields = $yaml['fields'];
 
     $config->set('fields', $fields);
-    $config->save(TRUE);
+    $config->save();
   }
 }
 
@@ -122,5 +101,5 @@ function bibcite_ris_update_8002() {
       $config->set($config_key, $value);
     }
   }
-  $config->save(TRUE);
+  $config->save();
 }

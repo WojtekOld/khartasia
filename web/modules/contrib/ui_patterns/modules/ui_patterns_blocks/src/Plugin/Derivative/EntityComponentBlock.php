@@ -18,13 +18,13 @@ class EntityComponentBlock extends ComponentBlock {
     parent::getDerivativeDefinitions($base_plugin_definition);
     foreach ($this->derivatives as &$definition) {
       $definition['_block_ui_hidden'] = TRUE;
-      if (!array_key_exists("context_definitions", $definition) ||
-        !is_array($definition['context_definitions'])) {
+      if (!\array_key_exists('context_definitions', $definition)
+        || !\is_array($definition['context_definitions'])) {
         $definition['context_definitions'] = [];
       }
-      $entity_context_def = new ContextDefinition("entity");
+      $entity_context_def = new ContextDefinition('entity');
       $entity_context_def->setRequired(TRUE);
-      $definition['context_definitions']["entity"] = $entity_context_def;
+      $definition['context_definitions']['entity'] = $entity_context_def;
     }
     unset($definition);
     return $this->derivatives;

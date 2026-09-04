@@ -35,9 +35,11 @@ class ComponentPerItemFormatter extends ComponentFormatterBase {
     $context = $this->getComponentSourceContexts($items);
     $context['ui_patterns:lang_code'] = new Context(new ContextDefinition('any'), $langcode);
     $context['ui_patterns:field:items'] = new Context(new ContextDefinition('any'), $items);
-    for ($field_item_index = 0; $field_item_index < $items->count(); $field_item_index++) {
-      $build[] = $this->buildComponentRenderable($this->getComponentConfiguration()['component_id'],
-        array_merge($context, ['ui_patterns:field:index' => new Context(new ContextDefinition('integer'), $field_item_index)]));
+    for ($field_item_index = 0; $field_item_index < $items->count(); ++$field_item_index) {
+      $build[] = $this->buildComponentRenderable(
+        $this->getComponentConfiguration()['component_id'],
+        \array_merge($context, ['ui_patterns:field:index' => new Context(new ContextDefinition('integer'), $field_item_index)])
+      );
     }
 
     return $build;
@@ -48,7 +50,7 @@ class ComponentPerItemFormatter extends ComponentFormatterBase {
    */
   protected function getComponentSourceContexts(?FieldItemListInterface $items = NULL): array {
     // Set the context of field and entity (override the method trait).
-    return RequirementsContext::addToContext(["field_granularity:item"], parent::getComponentSourceContexts($items));
+    return RequirementsContext::addToContext(['field_granularity:item'], parent::getComponentSourceContexts($items));
   }
 
 }

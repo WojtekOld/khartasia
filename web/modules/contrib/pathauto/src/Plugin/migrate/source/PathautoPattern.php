@@ -19,9 +19,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   source_module = "pathauto",
  * )
  */
-#[MigrateSource(
-  id: 'pathauto_pattern'
-)]
 // phpcs:ignore Drupal.Commenting.ClassComment.WrongStyle @phpstan-ignore class.extendsDeprecatedClass
 class PathautoPattern extends DrupalSqlBase {
 

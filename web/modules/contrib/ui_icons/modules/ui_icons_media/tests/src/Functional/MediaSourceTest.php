@@ -10,12 +10,14 @@ use Drupal\field\FieldStorageConfigInterface;
 use Drupal\field\FieldStorageConfigStorage;
 use Drupal\Tests\media\Functional\MediaFunctionalTestBase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the custom media source plugin.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[Group('ui_icons')]
 class MediaSourceTest extends MediaFunctionalTestBase {
 

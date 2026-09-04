@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\ui_patterns_test\Plugin\Block;
 
 use Drupal\Core\Block\Attribute\Block;
@@ -11,9 +13,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * Provides a basic block for testing schema validation.
  */
 #[Block(
-    id: "uip_schema_test_block",
-    admin_label: new TranslatableMarkup("UI Patterns Schema Validation")
-  )]
+  id: 'uip_schema_test_block',
+  admin_label: new TranslatableMarkup('UI Patterns Schema Validation')
+)]
 class SchemaTestBlock extends BlockBase {
 
   /**
@@ -40,7 +42,7 @@ class SchemaTestBlock extends BlockBase {
   /**
    * {@inheritdoc}
    */
-  public function blockSubmit($form, FormStateInterface $form_state) : void {
+  public function blockSubmit($form, FormStateInterface $form_state): void {
     $this->configuration['ui_patterns'] = $form_state->getValue('ui_patterns');
   }
 

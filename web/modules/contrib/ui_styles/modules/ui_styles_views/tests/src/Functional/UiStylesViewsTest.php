@@ -6,6 +6,8 @@ namespace Drupal\Tests\ui_styles_views\Functional;
 
 use Drupal\Core\Url;
 use Drupal\Tests\views\Functional\ViewTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the UI Styles Views module.
@@ -13,6 +15,9 @@ use Drupal\Tests\views\Functional\ViewTestBase;
  * @group ui_styles
  * @group ui_styles_views
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_views')]
+#[RunTestsInSeparateProcesses]
 class UiStylesViewsTest extends ViewTestBase {
 
   /**

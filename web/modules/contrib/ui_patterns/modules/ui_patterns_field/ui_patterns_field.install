@@ -33,7 +33,7 @@ function ui_patterns_field_update_10201(): void {
   ];
 
   // Find all field storage configs of type ui_patterns_source.
-  $field_storages = \Drupal::entityTypeManager()
+  $field_storages = Drupal::entityTypeManager()
     ->getStorage('field_storage_config')
     ->loadByProperties(['type' => 'ui_patterns_source']);
 

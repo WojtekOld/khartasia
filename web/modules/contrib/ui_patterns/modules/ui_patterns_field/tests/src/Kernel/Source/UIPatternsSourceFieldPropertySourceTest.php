@@ -5,29 +5,41 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_patterns_field\Kernel\Source;
 
 use Drupal\Tests\ui_patterns\Kernel\SourcePluginsTestBase;
+use Drupal\ui_patterns_field\Plugin\UiPatterns\Source\UIPatternsSourceFieldPropertySource;
+
 use function PHPUnit\Framework\assertIsArray;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test UIPatternsSourceFieldPropertySource.
  *
- * @coversDefaultClass \Drupal\ui_patterns_field\Plugin\UiPatterns\Source\UIPatternsSourceFieldPropertySource
- * @group ui_patterns_field
+ * @internal
  */
-class UIPatternsSourceFieldPropertySourceTest extends SourcePluginsTestBase {
+#[CoversClass(UIPatternsSourceFieldPropertySource::class)]
+#[Group('ui_patterns')]
+#[Group('ui_patterns_field')]
+#[RunTestsInSeparateProcesses]
+final class UIPatternsSourceFieldPropertySourceTest extends SourcePluginsTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['ui_patterns_field'];
+  protected static $modules = [
+    'ui_patterns_field',
+  ];
 
   /**
    * Test Field Property Plugin.
    */
   public function testPlugin(): void {
-    $testData = self::loadTestDataFixture(__DIR__ . "/../../../fixtures/tests.ui_patterns_source.yml");
+    $testData = self::loadTestDataFixture(__DIR__ . '/../../../fixtures/tests.ui_patterns_source.yml');
     $testSets = $testData->getTestSets();
+
     foreach ($testSets as $test_set_name => $test_set) {
-      if (!str_starts_with($test_set_name, 'ui_patterns_source_')) {
+      if (!\str_starts_with($test_set_name, 'ui_patterns_source_')) {
         continue;
       }
       $this->runSourcePluginTest($test_set);
@@ -84,41 +96,44 @@ class UIPatternsSourceFieldPropertySourceTest extends SourcePluginsTestBase {
     $node1 = \Drupal::entityTypeManager()
       ->getStorage('node')
       ->load($node1->id());
-    $this->assertNotNull($node1, 'Node should be saved successfully');
+    self::assertNotNull($node1, 'Node should be saved successfully');
     $field_value1 = $node1->get('field_test_source')->getValue()[0];
     assertIsArray($field_value1);
 
-    $this->assertEquals('component', $field_value1['source_id'], 'source_id should be stored correctly');
-    $this->assertArrayHasKey('source', $field_value1, 'source should be stored correctly');
+    self::assertEquals('component', $field_value1['source_id'], 'source_id should be stored correctly');
+    self::assertArrayHasKey('source', $field_value1, 'source should be stored correctly');
 
     // Verify that optional columns are handled correctly when not set.
     // This ensures backward compatibility.
     // Note: Due to Drupal Core's handling of optional MapItem columns,
     // the values may be returned in various formats (NULL, empty string).
     // The node was saved successfully and the main fields work.
-    $has_third_party_settings = array_key_exists('third_party_settings', $field_value1);
+    $has_third_party_settings = \array_key_exists('third_party_settings', $field_value1);
+
     if ($has_third_party_settings) {
       $third_party_value = $field_value1['third_party_settings'];
       // Accept NULL, empty array, or empty string as valid "not set" values.
       $is_empty = $third_party_value === NULL || $third_party_value === [] || $third_party_value === '';
-      $this->assertTrue(
+      self::assertTrue(
         $is_empty,
-        'third_party_settings should be empty when not provided. Got: ' . gettype($third_party_value) . ' - ' . var_export($third_party_value, TRUE)
+        'third_party_settings should be empty when not provided. Got: ' . \gettype($third_party_value) . ' - ' . \var_export($third_party_value, TRUE)
       );
     }
 
-    $has_node_id = array_key_exists('node_id', $field_value1);
+    $has_node_id = \array_key_exists('node_id', $field_value1);
+
     if ($has_node_id) {
       $node_id_value = $field_value1['node_id'];
-      // Accept NULL, empty string, FALSE, empty array, or the string 'Array'
-      // (which occurs due to Drupal Core's array-to-string conversion warning).
-      // The important thing is that it's not a meaningful value.
-      $is_empty = $node_id_value === NULL ||
-                  $node_id_value === '';
-
-      $this->assertTrue(
-        $is_empty,
-        'node_id should be empty when not provided. Got: ' . gettype($node_id_value) . ' - ' . var_export($node_id_value, TRUE)
+      // When node_id is not provided at write time, SourceValueItem::setValue()
+      // automatically assigns a unique id via SourceTree::ensureNodeIds().
+      // The value must be a non-empty string after the round-trip.
+      self::assertIsString(
+        $node_id_value,
+        'node_id should be a string after write-time assignment. Got: ' . \gettype($node_id_value)
+      );
+      self::assertNotEmpty(
+        $node_id_value,
+        'node_id should be auto-assigned (non-empty) when not provided. Got: ' . \var_export($node_id_value, TRUE)
       );
     }
 
@@ -154,13 +169,13 @@ class UIPatternsSourceFieldPropertySourceTest extends SourcePluginsTestBase {
 
     // Verify third_party_settings is stored correctly (may be deserialized).
     $stored_third_party_settings = $field_value2['third_party_settings'] ?? NULL;
-    $this->assertNotNull($stored_third_party_settings, 'third_party_settings should be stored');
-    $this->assertEquals($third_party_settings, $stored_third_party_settings, 'third_party_settings should match stored value');
+    self::assertNotNull($stored_third_party_settings, 'third_party_settings should be stored');
+    self::assertEquals($third_party_settings, $stored_third_party_settings, 'third_party_settings should match stored value');
 
     // Verify node_id is stored correctly.
     $stored_node_id = $field_value2['node_id'] ?? NULL;
-    $this->assertNotNull($stored_node_id, 'node_id should be stored');
-    $this->assertEquals($node_id, $stored_node_id, 'node_id should match stored value');
+    self::assertNotNull($stored_node_id, 'node_id should be stored');
+    self::assertEquals($node_id, $stored_node_id, 'node_id should match stored value');
   }
 
 }

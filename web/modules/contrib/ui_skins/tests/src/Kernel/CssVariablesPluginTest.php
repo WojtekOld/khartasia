@@ -6,12 +6,15 @@ namespace Drupal\Tests\ui_skins\Kernel;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the UI Skins CSS Variable plugin manager.
- *
- * @group ui_skins
  */
+#[Group('ui_skins')]
+#[RunTestsInSeparateProcesses]
 class CssVariablesPluginTest extends KernelTestBase {
 
   use StringTranslationTrait;
@@ -29,7 +32,7 @@ class CssVariablesPluginTest extends KernelTestBase {
    */
   public function testDetectedPlugins(): void {
     /** @var \Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface $cssVariablePluginManager */
-    $cssVariablePluginManager = $this->container->get('plugin.manager.ui_skins.css_variable');
+    $cssVariablePluginManager = $this->container->get(CssVariablePluginManagerInterface::class);
     $definitions = $cssVariablePluginManager->getDefinitions();
 
     $this->assertEquals(1, \count($definitions), 'There is one variable detected.');
@@ -63,14 +66,14 @@ class CssVariablesPluginTest extends KernelTestBase {
     // Test when the module overriding the definition is executed before.
     \module_set_weight('ui_skins_test_disabled', -1);
     /** @var \Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface $cssVariablePluginManager */
-    $cssVariablePluginManager = $this->container->get('plugin.manager.ui_skins.css_variable');
+    $cssVariablePluginManager = $this->container->get(CssVariablePluginManagerInterface::class);
     $this->assertArrayHasKey('test', $cssVariablePluginManager->getDefinitions());
 
     // Test when the module overriding the definition is executed after.
     \module_set_weight('ui_skins_test_disabled', 1);
     \drupal_flush_all_caches();
     /** @var \Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface $cssVariablePluginManager */
-    $cssVariablePluginManager = $this->container->get('plugin.manager.ui_skins.css_variable');
+    $cssVariablePluginManager = $this->container->get(CssVariablePluginManagerInterface::class);
     $this->assertArrayNotHasKey('test', $cssVariablePluginManager->getDefinitions());
   }
 

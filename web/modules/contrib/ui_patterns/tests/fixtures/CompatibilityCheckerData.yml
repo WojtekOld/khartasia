@@ -197,8 +197,9 @@
       type: object
       properties:
         title: { type: string }
-        attributes: { $ref: "ui-patterns://attributes" }
-        below: { $ref: "ui-patterns://links" }
+        url:
+          type: string
+          format: "iri-reference"
   tests:
     - label: "Links"
       schema:
@@ -207,8 +208,9 @@
           type: object
           properties:
             title: { type: string }
-            attributes: { $ref: "ui-patterns://attributes" }
-            below: { $ref: "ui-patterns://links" }
+            url:
+              type: string
+              format: "iri-reference"
       result: true
     - label: "Links with extra property on"
       schema:
@@ -217,11 +219,169 @@
           type: object
           properties:
             title: { type: string }
-            attributes: { $ref: "ui-patterns://attributes" }
-            below: { $ref: "ui-patterns://links" }
+            url:
+              type: string
+              format: "iri-reference"
             extra: { type: string }
+      result: true
+    - label: "Links with absolute, non-internationalized, URL"
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            title: { type: string }
+            url:
+              type: string
+              format: uri
+      result: true
+    - label: "Links with strings as URL"
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            title: { type: string }
+            url:
+              type: string
+      result: false
+    - label: "Links with all resolved properties (url, attributes, link_attributes, below)"
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            title: { type: string }
+            url:
+              type: string
+              format: "iri-reference"
+            attributes:
+              type: object
+              patternProperties:
+                ".+":
+                  anyOf:
+                    - type: [string, number]
+                    - type: array
+                      items:
+                        anyOf:
+                          - type: number
+                          - type: string
+            below:
+              type: array
+              items:
+                type: object
+      result: true
+    - label: "Links with only title and attributes (subset)"
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            title: { type: string }
+            attributes:
+              type: object
+              patternProperties:
+                ".+":
+                  anyOf:
+                    - type: [string, number]
+                    - type: array
+                      items:
+                        anyOf:
+                          - type: number
+                          - type: string
       result: true
     - label: "Simple array"
       schema:
         type: array
       result: false
+    - label: "Links with url as an object instead of a string (see: radix:dropdown-menu)"
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            title: { type: string }
+            url:
+              type: object
+              properties:
+                options:
+                  type: object
+      result: false
+
+# Attributes prop type
+- label: "Attributes prop type"
+  schema:
+    type: object
+    patternProperties:
+      ".+":
+        anyOf:
+          - type: [string, number]
+          - type: array
+            items:
+              anyOf:
+                - type: number
+                - type: string
+  tests:
+    - label: "Attributes"
+      schema:
+        type: object
+        patternProperties:
+          ".+":
+            anyOf:
+              - type: [string, number]
+              - type: array
+                items:
+                  anyOf:
+                    - type: number
+                    - type: string
+      result: true
+    - label: "Attributes with only strings"
+      schema:
+        type: object
+        patternProperties:
+          ".+":
+            anyOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+      result: true
+    - label: "Attributes with only URLs"
+      schema:
+        type: object
+        patternProperties:
+          ".+":
+            type: string
+            format: "iri-reference"
+      result: true
+
+# additionalProperties: false
+- label: "Object with additionalProperties false"
+  schema:
+    type: object
+    properties:
+      title: { type: string }
+      url: { type: string }
+    additionalProperties: false
+  tests:
+    - label: "Same properties"
+      schema:
+        type: object
+        properties:
+          title: { type: string }
+          url: { type: string }
+      result: true
+    - label: "Extra property not allowed"
+      schema:
+        type: object
+        properties:
+          title: { type: string }
+          url: { type: string }
+          extra: { type: string }
+      result: false
+    - label: "Subset of properties"
+      schema:
+        type: object
+        properties:
+          title: { type: string }
+      result: true

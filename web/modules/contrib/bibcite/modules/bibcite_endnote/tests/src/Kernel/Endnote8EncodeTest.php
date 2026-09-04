@@ -2,13 +2,16 @@
 
 namespace Drupal\Tests\bibcite_endnote\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\bibcite_endnote\Encoder\EndnoteEncoder;
 use Drupal\Tests\bibcite_export\Kernel\FormatEncoderTestBase;
 
 /**
  * @coversDefaultClass \Drupal\bibcite_endnote\Encoder\EndnoteEncoder
- * @group bibcite
  */
+#[Group('bibcite')]
+#[RunTestsInSeparateProcesses]
 class Endnote8EncodeTest extends FormatEncoderTestBase {
 
   /**

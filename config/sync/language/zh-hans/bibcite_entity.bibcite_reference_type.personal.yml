@@ -1,0 +1,9 @@
+fields:
+  bibcite_edition:
+    label: 描述
+  bibcite_type_of_work:
+    label: 类型
+  bibcite_place_published:
+    label: 城市
+  bibcite_alternate_title:
+    label: 缩写

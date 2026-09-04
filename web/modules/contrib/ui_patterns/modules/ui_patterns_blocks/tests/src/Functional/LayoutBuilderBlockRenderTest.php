@@ -1,16 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ui_patterns_blocks\Functional;
 
 use Drupal\Tests\ui_patterns\Functional\UiPatternsFunctionalTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test component rendering with Layout Builder.
  *
- * @group ui_patterns_blocks
+ * @internal
+ *
+ * @coversNothing
  */
-class LayoutBuilderBlockRenderTest extends UiPatternsFunctionalTestBase {
+#[Group('ui_patterns')]
+#[Group('ui_patterns_blocks')]
+#[RunTestsInSeparateProcesses]
+final class LayoutBuilderBlockRenderTest extends UiPatternsFunctionalTestBase {
 
   use TestDataTrait;
 
@@ -32,6 +41,7 @@ class LayoutBuilderBlockRenderTest extends UiPatternsFunctionalTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+
     if ($this->user) {
       $this->drupalCreateRole(['configure any layout'], 'custom_role');
       $this->user->addRole('custom_role');
@@ -56,18 +66,19 @@ class LayoutBuilderBlockRenderTest extends UiPatternsFunctionalTestBase {
     );
     $this->drupalGet('layout_builder/update/block/defaults/node.page.full/0/wrapper/e35dd171-c69c-451f-a035-88dcb7a80af5');
     $status_code = $this->getSession()->getStatusCode();
-    $this->assertTrue($status_code === 200, sprintf('Status code is $status_code for test %s. %s', $test_set['name'], $this->getSession()->getPage()->getContent()));
+    self::assertTrue($status_code === 200, \sprintf('Status code is $status_code for test %s. %s', $test_set['name'], $this->getSession()->getPage()->getContent()));
     $assert_session->elementTextEquals('css', '.context-exists', $test_set['output']['props']['string']['value']);
 
     // ---
     $node = $this->createTestContentNode('page', $test_set['entity'] ?? []);
     $this->drupalGet('node/' . $node->id());
     $status_code = $this->getSession()->getStatusCode();
-    $this->assertTrue($status_code === 200, sprintf('Status code is $status_code for test %s. %s', $test_set['name'], $this->getSession()->getPage()->getContent()));
+    self::assertTrue($status_code === 200, \sprintf('Status code is $status_code for test %s. %s', $test_set['name'], $this->getSession()->getPage()->getContent()));
     $assert_session->statusCodeEquals(200);
     $this->validateRenderedComponent($test_set);
-    if (isset($test_set["assertSession"])) {
-      $this->assertSessionObject($test_set["assertSession"]);
+
+    if (isset($test_set['assertSession'])) {
+      $this->assertSessionObject($test_set['assertSession']);
     }
   }
 

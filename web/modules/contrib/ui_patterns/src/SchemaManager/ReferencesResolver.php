@@ -8,6 +8,7 @@ use JsonSchema\Constraints\BaseConstraint;
 use JsonSchema\Exception\RuntimeException;
 use JsonSchema\SchemaStorage;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * JSON Schema References resolver.
@@ -18,15 +19,12 @@ use Psr\Log\LoggerInterface;
  */
 class ReferencesResolver {
 
-  const MAXIMUM_RECURSIVITY_LEVEL = 10;
+  public const int MAXIMUM_RECURSIVITY_LEVEL = 10;
 
-  /**
-   * Constructs a ComponentElementBuilder.
-   */
   public function __construct(
+    #[Autowire(service: 'logger.channel.ui_patterns')]
     protected LoggerInterface $logger,
-  ) {
-  }
+  ) {}
 
   /**
    * Resolve schema references recursively.
@@ -36,40 +34,46 @@ class ReferencesResolver {
       return $schema;
     }
 
-    $depth++;
-    $storage = new SchemaStorage();
+    ++$depth;
 
-    try {
-      $schema = BaseConstraint::arrayToObjectRecursive($schema);
-      $refSchema = (array) $storage->resolveRefSchema($schema);
-      $schema = (array) $schema;
+    // The resolver converts arrays to objects and adds an "id" property.
+    if (isset($schema['$ref'])) {
+      $storage = new SchemaStorage();
 
-      unset($schema['$ref']);
+      try {
+        $schemaObject = BaseConstraint::arrayToObjectRecursive($schema);
+        $refSchema = (array) $storage->resolveRefSchema($schemaObject);
+        $schema = (array) $schemaObject;
 
-      // Merge referenced schema into the current schema.
-      $schema += $refSchema;
+        unset($schema['$ref']);
 
-      if (isset($schema['id'])) {
-        // Prop types like enum_list has an underscore.
-        // This leads to an "Invalid URL format" exception.
-        $schema['id'] = str_replace('_', '-', $schema['id']);
+        // Merge referenced schema into the current schema.
+        $schema += $refSchema;
+
+        // The "id" added by the resolver is a string. A schema declaring a
+        // property named "id" holds a schema definition instead.
+        if (isset($schema['id']) && \is_string($schema['id'])) {
+          // Prop types like enum_list has an underscore.
+          // This leads to an "Invalid URL format" exception.
+          $schema['id'] = \str_replace('_', '-', $schema['id']);
+        }
+      }
+      catch (RuntimeException $e) {
+        // $schema is untouched: only resolveRefSchema() throws.
+        $this->logger->error("Could not resolve schema referenced by \$ref property '@ref': @error", [
+          '@ref' => $schema['$ref'],
+          '@error' => $e->getMessage(),
+        ]);
       }
     }
-    catch (RuntimeException $e) {
-      $schema = (array) $schema;
-      $this->logger->error(t(
-        "Could not resolve schema referenced by \$ref property '@ref': @error",
-        [
-          '@ref' => $schema['$ref'] ?? '',
-          '@error' => $e->getMessage(),
-        ]
-      ));
-    }
 
-    // Recursively resolve nested objects.
+    // Recursively resolve nested schemas.
     foreach ($schema as $key => $value) {
-      if (is_object($value)) {
+      if (\is_object($value)) {
         $schema[$key] = $this->resolve((array) $value, $depth);
+      }
+      elseif (\is_array($value)) {
+        $schema[$key] = $this->resolve($value, $depth);
       }
     }
 

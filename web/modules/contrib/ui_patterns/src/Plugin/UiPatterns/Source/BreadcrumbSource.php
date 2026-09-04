@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
+use Drupal\Core\Breadcrumb\ChainBreadcrumbBuilderInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -24,7 +26,7 @@ class BreadcrumbSource extends SourcePluginBase {
   /**
    * The breadcrumb manager.
    *
-   * @var \Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface
+   * @var \Drupal\Core\Breadcrumb\ChainBreadcrumbBuilderInterface
    */
   protected $breadcrumbManager;
 
@@ -33,10 +35,9 @@ class BreadcrumbSource extends SourcePluginBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $plugin = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    /** @var \Drupal\Core\StringTranslation\TranslationInterface $translation */
-    $translation = $container->get('string_translation');
+    $translation = $container->get(TranslationInterface::class);
     $plugin->setStringTranslation($translation);
-    $plugin->breadcrumbManager = $container->get('breadcrumb');
+    $plugin->breadcrumbManager = $container->get(ChainBreadcrumbBuilderInterface::class);
     return $plugin;
   }
 
@@ -48,12 +49,11 @@ class BreadcrumbSource extends SourcePluginBase {
     $links = [];
     foreach ($breadcrumb->getLinks() as $link) {
       $links[] = [
-        "title" => $link->getText(),
-        "url" => $link->getUrl()->toString(),
+        'title' => $link->getText(),
+        'url' => $link->getUrl()->toString(),
       ];
     }
     return $links;
-
   }
 
   /**

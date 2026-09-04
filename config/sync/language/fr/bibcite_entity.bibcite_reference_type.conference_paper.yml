@@ -1,0 +1,6 @@
+label: 'Document de conférence'
+fields:
+  bibcite_secondary_title:
+    label: 'Nom de la conférence'
+  bibcite_place_published:
+    label: 'Lieu de la conférence'

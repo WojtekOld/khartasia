@@ -9,7 +9,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Render\BubbleableMetadata;
-use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
@@ -27,7 +26,6 @@ use function Symfony\Component\String\u;
   label: new TranslatableMarkup('Token'),
   description: new TranslatableMarkup('Text with placeholder variables, replaced before display.'),
   prop_types: ['slot', 'string', 'url'],
-  tags: [],
   context_definitions: [
     'entity' => new ContextDefinition('entity', label: new TranslatableMarkup('Entity'), required: FALSE),
   ]
@@ -39,7 +37,7 @@ class TokenSource extends SourcePluginBase {
    */
   public function defaultSettings(): array {
     return [
-      'value' => "",
+      'value' => '',
     ];
   }
 
@@ -48,12 +46,12 @@ class TokenSource extends SourcePluginBase {
    */
   public function settingsSummary(): array {
     $value = $this->getSetting('value') ?? NULL;
-    if (!$value || !is_string($value)) {
+    if (!$value || !\is_string($value)) {
       return [];
     }
 
     return [
-      u(strip_tags($value))->truncate(20, '...', FALSE),
+      u(\strip_tags($value))->truncate(20, '...', FALSE),
     ];
   }
 
@@ -77,10 +75,18 @@ class TokenSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getPropValue(): mixed {
-    $value = $this->getSetting('value') ?? "";
-    $isSlot = ($this->propDefinition["ui_patterns"]["type_definition"]->getPluginId() === "slot");
+    $value = $this->getSetting('value') ?? '';
+    $isSlot = ($this->propDefinition['ui_patterns']['type_definition']->getPluginId() === 'slot');
     $has_sample_entity = $this->hasSampleEntity();
     $bubbleable_metadata = new BubbleableMetadata();
+    // For a slot, escape the template (the `value` setting) so markup typed
+    // into this config setting renders as text; the result is emitted as
+    // #markup below, so Drupal core still runs Xss::filterAdmin over the
+    // token output. For a string/URL prop, the raw result is returned and
+    // Twig autoescapes it at render.
+    if ($isSlot && \is_string($value)) {
+      $value = Html::escape($value);
+    }
     try {
       $value = $this->replaceTokens($value, $isSlot, $bubbleable_metadata);
     }
@@ -93,18 +99,23 @@ class TokenSource extends SourcePluginBase {
       $value = NULL;
     }
     if (empty($value)) {
-      return $isSlot ? [] : "";
+      return $isSlot ? [] : '';
     }
     if ($isSlot) {
+      // A plain string in #markup (not Markup::create()) lets Drupal core
+      // run Xss::filterAdmin over the token output: <script>, <iframe> and
+      // event handlers are stripped; <a href> and <img src> survive.
       $build = [
-        "#markup" => Markup::create($value),
+        '#markup' => $value,
       ];
       if (!$has_sample_entity) {
         $bubbleable_metadata->applyTo($build);
       }
       return $build;
     }
-    return Html::escape($value);
+    // A string/URL prop stays a plain untrusted string: Twig autoescapes
+    // it at render.
+    return $value;
   }
 
   /**
@@ -119,17 +130,17 @@ class TokenSource extends SourcePluginBase {
       // '#pattern' => '^\[.+\]$',.
     ];
     $this->addRequired($form['value']);
-    $this->addTokenTreeLink($form, "help");
+    $this->addTokenTreeLink($form, 'help');
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies() : array {
+  public function calculateDependencies(): array {
     $dependencies = parent::calculateDependencies();
     if ($this->moduleHandler->moduleExists('token')) {
-      static::mergeConfigDependencies($dependencies, ["module" => ["token"]]);
+      static::mergeConfigDependencies($dependencies, ['module' => ['token']]);
     }
     return $dependencies;
   }

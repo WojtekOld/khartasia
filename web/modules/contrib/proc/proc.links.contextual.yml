@@ -1,0 +1,10 @@
+entity.proc.edit_form:
+  route_name: entity.proc.edit_form
+  group: proc
+  title: Edit
+
+entity.proc.delete_form:
+  route_name: entity.proc.delete_form
+  group: proc
+  title: Delete
+  weight: 10

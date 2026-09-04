@@ -25,7 +25,7 @@ final class NamespacedAttributes extends PropTypeAdapterPluginBase {
    * {@inheritdoc}
    */
   public function transform(mixed $data): mixed {
-    if (!is_array($data)) {
+    if (!\is_array($data)) {
       return $data;
     }
     // Component using this type are expecting a PHP object.

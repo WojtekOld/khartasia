@@ -307,9 +307,6 @@ class LeafletDefaultFormatter extends FormatterBase implements ContainerFactoryP
     $entity_id = $entity->id();
     $field = $items->getFieldDefinition();
 
-    // Sets/consider possibly existing previous Zoom settings.
-    $this->setExistingZoomSettings();
-
     // Determine the formatter default and input settings.
     $default_settings = self::defaultSettings();
     $settings = $this->getSettings();
@@ -518,19 +515,6 @@ class LeafletDefaultFormatter extends FormatterBase implements ContainerFactoryP
     }
 
     return $results;
-  }
-
-  /**
-   * Sets possibly existing previous settings for the Zoom Form Element.
-   */
-  protected function setExistingZoomSettings(): void {
-    $settings = $this->getSettings();
-    if (isset($settings['zoom'])) {
-      $settings['map_position']['zoom'] = (int) $settings['zoom'] ?? 10;
-      $settings['map_position']['minZoom'] = (int) $settings['minZoom'] ?? 3;
-      $settings['map_position']['maxZoom'] = (int) $settings['maxZoom'] ?? 16;
-      $this->setSettings($settings);
-    }
   }
 
   /**

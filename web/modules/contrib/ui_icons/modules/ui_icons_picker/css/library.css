@@ -3,10 +3,7 @@
 
   > div {
     display: grid;
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(var(--ui-icons-picker-size, 3rem), 1fr)
-    );
+    grid-template-columns: repeat(auto-fill, minmax(var(--ui-icons-picker-size, 3rem), 1fr));
     grid-gap: 8px;
     padding-bottom: 1rem;
   }

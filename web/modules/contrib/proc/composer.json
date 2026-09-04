@@ -1,0 +1,36 @@
+{
+    "name": "drupal/proc",
+    "description": "The Protected Content module allows you to create RSA keys, encrypt and decrypt content.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Drupal\\proc\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rodrigo Panchiniak Fernandes",
+            "homepage": "https://www.drupal.org/u/rodrigo-panchiniak-fernandes",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Duarte Briz",
+            "homepage": "https://www.drupal.org/u/duartebriz",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Reva Gomes",
+            "homepage": "https://www.drupal.org/u/revagomes",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "https://drupal.org/project/proc",
+    "support": {
+        "issues": "https://drupal.org/project/issues/proc",
+        "source": "https://git.drupalcode.org/project/proc"
+    },
+    "require": {
+        "drupal/core": "^9 || ^10 || ^11"
+    }
+}

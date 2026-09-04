@@ -1,0 +1,4 @@
+services:
+  Drupal\ui_patterns_blocks\Hook\UiPatternsBlocksHooks:
+    class: Drupal\ui_patterns_blocks\Hook\UiPatternsBlocksHooks
+    autowire: true

@@ -12,6 +12,7 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Plugin\Discovery\ContainerDerivativeDiscoveryDecorator;
 use Drupal\Core\Plugin\Discovery\YamlDiscovery;
 use Drupal\ui_skins\Definition\ThemeDefinition;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Provides the default theme plugin manager.
@@ -21,28 +22,15 @@ use Drupal\ui_skins\Definition\ThemeDefinition;
  */
 class ThemePluginManager extends DefaultPluginManager implements ThemePluginManagerInterface {
 
-  /**
-   * The theme handler.
-   *
-   * @var \Drupal\Core\Extension\ThemeHandlerInterface
-   */
-  protected ThemeHandlerInterface $themeHandler;
-
-  /**
-   * Constructor.
-   *
-   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
-   *   Cache backend instance to use.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
-   * @param \Drupal\Core\Extension\ThemeHandlerInterface $theme_handler
-   *   The theme handler.
-   */
-  public function __construct(CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler, ThemeHandlerInterface $theme_handler) {
+  public function __construct(
+    #[Autowire(service: 'cache.discovery')]
+    CacheBackendInterface $cache_backend,
+    ModuleHandlerInterface $module_handler,
+    protected ThemeHandlerInterface $themeHandler,
+  ) {
     $this->setCacheBackend($cache_backend, 'ui_skins_themes', ['ui_skins_themes']);
     $this->alterInfo('ui_skins_themes');
     $this->moduleHandler = $module_handler;
-    $this->themeHandler = $theme_handler;
 
     // Set defaults in the constructor to be able to use string translation.
     $this->defaults = [

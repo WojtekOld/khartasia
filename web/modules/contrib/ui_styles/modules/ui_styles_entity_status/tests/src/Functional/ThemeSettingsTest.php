@@ -6,6 +6,8 @@ namespace Drupal\Tests\ui_styles_entity_status\Functional;
 
 use Drupal\Core\Url;
 use Drupal\ui_styles_entity_status\UiStylesEntityStatusInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Theme settings functional tests.
@@ -13,6 +15,9 @@ use Drupal\ui_styles_entity_status\UiStylesEntityStatusInterface;
  * @group ui_styles
  * @group ui_styles_entity_status
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_entity_status')]
+#[RunTestsInSeparateProcesses]
 class ThemeSettingsTest extends UiStylesEntityStatusFunctionalTestBase {
 
   /**
@@ -26,58 +31,58 @@ class ThemeSettingsTest extends UiStylesEntityStatusFunctionalTestBase {
     $expected_results = [
       'ui_styles_test_theme3' => [
         'present' => [
-          'ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
         ],
         'absent' => [
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
         ],
       ],
       'ui_styles_test_theme2' => [
         'present' => [
-          'ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
         ],
         'absent' => [
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
         ],
       ],
       'ui_styles_test_theme1' => [
         'present' => [
-          'ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
         ],
         'absent' => [
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
         ],
       ],
       'ui_styles_test_subtheme' => [
         'present' => [
-          'ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_test]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme1]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_subtheme]',
         ],
         'absent' => [
-          'ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][ui_styles_ui_styles_test_theme2]',
         ],
       ],
       'ui_styles_test_subsubtheme' => [
         'present' => [
-          'ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
-          'ui_styles_entity_status_unpublished[wrapper][other][ui_styles_test]',
-          'ui_styles_entity_status_unpublished[wrapper][other][ui_styles_ui_styles_test_theme1]',
-          'ui_styles_entity_status_unpublished[wrapper][other][ui_styles_ui_styles_test_subtheme]',
-          'ui_styles_entity_status_unpublished[wrapper][subsubtheme_group][ui_styles_ui_styles_test_subsubtheme]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][other][ui_styles_test]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][other][ui_styles_ui_styles_test_theme1]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][other][ui_styles_ui_styles_test_subtheme]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][subsubtheme_group][ui_styles_ui_styles_test_subsubtheme]',
         ],
         'absent' => [
-          'ui_styles_entity_status_unpublished[wrapper][other][ui_styles_ui_styles_test_theme2]',
+          'third_party_settings_ui_styles_entity_status_unpublished[wrapper][other][ui_styles_ui_styles_test_theme2]',
         ],
       ],
     ];
@@ -115,8 +120,8 @@ class ThemeSettingsTest extends UiStylesEntityStatusFunctionalTestBase {
       'theme' => $this->defaultTheme,
     ]));
     $this->submitForm([
-      'ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]' => 'free-value',
-      'ui_styles_entity_status_unpublished[wrapper][other][ui_styles_test]' => 'test',
+      'third_party_settings_ui_styles_entity_status_unpublished[wrapper][_ui_styles_extra]' => 'free-value',
+      'third_party_settings_ui_styles_entity_status_unpublished[wrapper][other][ui_styles_test]' => 'test',
     ], 'Save configuration');
 
     $theme_settings = $this->config($this->defaultTheme . '.settings');

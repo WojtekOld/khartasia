@@ -1,0 +1,44 @@
+################
+# DrupalCI GitLabCI template
+#
+# Gitlab-ci.yml to replicate DrupalCI testing for Contrib
+#
+# With thanks to:
+#   * The GitLab Acceleration Initiative participants
+#   * DrupalSpoons
+################
+
+include:
+  # View these include files at https://git.drupalcode.org/project/gitlab_templates/
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+variables:
+  SKIP_CSPELL: '1'
+  _PHPUNIT_CONCURRENT: '1'
+  BROWSERTEST_OUTPUT_VERBOSE: 'false'
+  OPT_IN_TEST_PREVIOUS_MAJOR: '0'
+  OPT_IN_TEST_PREVIOUS_MINOR: '0'
+  OPT_IN_TEST_NEXT_MINOR: '1'
+  OPT_IN_TEST_NEXT_MAJOR: '0'
+  OPT_IN_TEST_MAX_PHP: '1'
+
+phpunit:
+  extends: .phpunit-base
+  variables:
+    SYMFONY_DEPRECATIONS_HELPER: "ignoreFile=$CI_PROJECT_DIR/$_WEB_ROOT/modules/custom/imagemagick/.deprecation-ignore.txt"
+  before_script:
+    # Merge core's deprecation ignore file into module's.
+    - cat $CI_PROJECT_DIR/$_WEB_ROOT/core/.deprecation-ignore.txt >> $CI_PROJECT_DIR/$_WEB_ROOT/modules/custom/imagemagick/.deprecation-ignore.txt
+    - echo -e "\e[0Ksection_start:`date +%s`:package_install[collapsed=true]\r\e[0K\e[0;30;103m *** ImageMagick and GraphicsMagick packages install *** \e[0m"
+    - sudo apt-get update
+    - sudo apt-get install -y --no-install-recommends imagemagick graphicsmagick ghostscript-x
+    - echo -e "\e[0Ksection_end:`date +%s`:package_install\r\e[0K"
+    - |
+      convert -version | head -n1
+      gm -version | head -n1
+      gs -version | head -n1

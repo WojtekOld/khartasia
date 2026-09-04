@@ -20,9 +20,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * A widget to display the UI Patterns configuration form.
- *
- * @internal
- *   Plugin classes are internal.
  */
 #[FieldWidget(
   id: 'ui_patterns_source',
@@ -34,8 +31,6 @@ class SourceWidget extends WidgetBase {
 
   /**
    * The source plugin manager.
-   *
-   * @var \Drupal\ui_patterns\SourcePluginManager
    */
   protected SourcePluginManager $sourcePluginManager;
 
@@ -44,7 +39,7 @@ class SourceWidget extends WidgetBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->sourcePluginManager = $container->get('plugin.manager.ui_patterns_source');
+    $instance->sourcePluginManager = $container->get(SourcePluginManager::class);
     return $instance;
   }
 
@@ -54,12 +49,13 @@ class SourceWidget extends WidgetBase {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $field_name = $this->fieldDefinition->getName();
     $element['#slot_id'] = $delta;
-    $element['#parents'] = array_merge($element['#field_parents'] ?? [], [$field_name, $delta]);
+    $element['#parents'] = \array_merge($element['#field_parents'] ?? [], [$field_name, $delta]);
     $default_value = $this->getDefaultValue($items, $delta, $element, $form, $form_state);
+
     $element['#source_contexts'] = $this->getComponentSourceContexts($items);
     $element['#tag_filter'] = $this->getSetting('tag_filter') ?? [];
-    $source_form = ComponentSlotForm::buildSourceForm($element, $form_state, [], $default_value);
-    $source_form['source_id']['#empty_option'] = t("- Select a source to add -");
+    $source_form = ComponentSlotForm::buildSourceForm($element, $form_state, [], $default_value, FALSE);
+    $source_form['source_id']['#empty_option'] = $this->t('- Select a source to add -');
 
     return $element + $source_form;
   }
@@ -83,14 +79,15 @@ class SourceWidget extends WidgetBase {
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  protected function getDefaultValue(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) : mixed {
+  protected function getDefaultValue(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): mixed {
     $full_form_state_values = $form_state->getValues() ?? [];
     $full_input = $form_state->getUserInput();
-    $form_state_values = &NestedArray::getValue($full_form_state_values, $element["#parents"] ?? []);
+    $form_state_values = &NestedArray::getValue($full_form_state_values, $element['#parents'] ?? []);
     if (!empty($full_input) || $form_state->isProcessingInput() || $form_state->isRebuilding()) {
-      $form_state_values = &NestedArray::getValue($full_input, $element["#parents"] ?? []);
+      $form_state_values = &NestedArray::getValue($full_input, $element['#parents'] ?? []);
     }
-    $default_value = array_merge($items[$delta]?->getValue() ?? [], $form_state_values ?? []);
+    // Read via the list: merged view on synchronized translations.
+    $default_value = \array_merge($items->getValue()[$delta] ?? [], $form_state_values ?? []);
     return $default_value;
   }
 
@@ -107,10 +104,9 @@ class SourceWidget extends WidgetBase {
     $contexts = [];
     if ($entity = $items?->getEntity()) {
       $contexts['entity'] = EntityContext::fromEntity($entity);
-      $contexts['bundle'] = new Context(ContextDefinition::create('string'), $contexts["entity"]->getContextValue()->bundle() ?? "");
+      $contexts['bundle'] = new Context(ContextDefinition::create('string'), $contexts['entity']->getContextValue()->bundle() ?? '');
     }
-    $contexts = RequirementsContext::addToContext(["field_granularity:item"], $contexts);
-    return $contexts;
+    return RequirementsContext::addToContext(['field_granularity:item'], $contexts);
   }
 
 }

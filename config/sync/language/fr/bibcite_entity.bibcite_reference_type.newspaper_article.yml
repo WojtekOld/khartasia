@@ -1,0 +1,14 @@
+label: 'Article de presse'
+fields:
+  bibcite_secondary_title:
+    label: Journal
+  bibcite_number_of_volumes:
+    label: Fréquence
+  bibcite_number:
+    label: 'Page de début'
+  bibcite_date:
+    label: 'Date de parution'
+  bibcite_type_of_work:
+    label: "Type d'article"
+  bibcite_place_published:
+    label: Ville

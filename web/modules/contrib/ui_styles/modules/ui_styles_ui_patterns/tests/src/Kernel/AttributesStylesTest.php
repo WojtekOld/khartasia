@@ -11,6 +11,8 @@ use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_patterns\SourceInterface;
 use Drupal\ui_patterns\SourcePluginBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test attributes styles source.
@@ -20,6 +22,9 @@ use Drupal\ui_patterns\SourcePluginBase;
  * @group ui_styles
  * @group ui_styles_ui_patterns
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_ui_patterns')]
+#[RunTestsInSeparateProcesses]
 class AttributesStylesTest extends KernelTestBase {
 
   /**

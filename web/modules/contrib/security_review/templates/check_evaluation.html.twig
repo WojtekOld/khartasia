@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Default evaluation page template for checks.
+ *
+ * Available variables:
+ * - paragraphs: Array of paragraphs (strings) to show before the list.
+ * - items: Array of items (strings) to show in an unordered list after the paragraphs.
+ */
+#}
+
+{% if additional_paragraph is not empty or finding_items is not empty %}
+  <h3>{{ 'Findings'|trans }}</h3>
+  {% for additional_paragraph in additional_paragraphs %}
+      <p>
+          {{ additional_paragraph }}
+      </p>
+  {% endfor %}
+  {% if finding_items is not empty %}
+      <ul>
+          {% for finding_item in finding_items %}
+              <li>{{ finding_item }}</li>
+          {% endfor %}
+      </ul>
+  {% endif %}
+{% endif %}
+
+{% if hushed_items is not empty %}
+  <h3>{{ 'Hushed Findings'|trans }}</h3>
+  <ul>
+    {% for hushed_item in hushed_items %}
+      <li>{{ hushed_item }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}

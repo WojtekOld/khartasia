@@ -14,3 +14,7 @@ services:
       defaultType: 'misc'
       contributorKey: 'authors'
       keywordKey: 'keywords'
+
+  Drupal\bibcite_marc\Hook\BibciteMarcHooks:
+    class: Drupal\bibcite_marc\Hook\BibciteMarcHooks
+    autowire: true

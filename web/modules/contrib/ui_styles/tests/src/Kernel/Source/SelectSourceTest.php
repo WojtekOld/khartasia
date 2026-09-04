@@ -10,12 +10,16 @@ use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ui_styles\Definition\StyleDefinition;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\ui_styles\Plugin\UiStyles\Source\Select
  *
  * @group ui_styles
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class SelectSourceTest extends SourceTestBase {
 
   use StringTranslationTrait;

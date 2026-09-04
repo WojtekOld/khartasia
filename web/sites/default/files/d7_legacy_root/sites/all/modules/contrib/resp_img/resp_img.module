@@ -1,0 +1,745 @@
+<?php
+
+define('RESP_IMG_CLASS', 'resp-img-picture');
+define('RESP_IMG_SEPARATOR', '__');
+define('RESP_IMG_STYLE_PREFIX', 'resp_img__');
+
+/**
+ * Implements hook_permission().
+ */
+function resp_img_permission() {
+  return array(
+    'administer responsive images and styles' => array(
+      'title' => t('Administer Responsive Images and Styles'),
+      'description' => t('Administer responsive images and styles'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function resp_img_menu() {
+  $items = array();
+
+  // @todo: link to all breakpoints and a list of all groups
+  // cf theme settings page
+  $items['admin/config/media/resp_img'] = array(
+    'title' => 'Responsive images and styles',
+    'description' => 'Manage Responsive Images and Styles',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('resp_img_admin_breakpoints'),
+    'access arguments' => array('administer responsive images and styles'),
+    'file' => 'resp_img.admin.inc',
+  );
+
+  $items['admin/config/media/resp_img/groups'] = array(
+    'title' => 'Groups',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 10,
+  );
+
+  $items['admin/config/media/resp_img/groups/global'] = array(
+    'title' => 'Map breakpoints and image styles',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['admin/config/media/resp_img/groups/import'] = array(
+    'title' => 'Import mappings',
+    'page arguments' => array('resp_img_admin_import_form'),
+    'type' => MENU_LOCAL_TASK,
+    'access arguments' => array('administer responsive images and styles'),
+    'file' => 'resp_img.admin.inc',
+    'weight' => 999,
+  );
+
+  $breakpoint_groups = breakpoints_breakpoint_group_load_all();
+  foreach ($breakpoint_groups as $breakpoint_group_name => $breakpoint_group) {
+    if (!empty($breakpoint_group->machine_name)) {
+      $items['admin/config/media/resp_img/groups/' . $breakpoint_group->machine_name] = array(
+        'title' => $breakpoint_group->name,
+        'page arguments' => array('resp_img_admin_breakpoints', $breakpoint_group->machine_name),
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer responsive images and styles'),
+        'file' => 'resp_img.admin.inc',
+        'weight' => 15,
+      );
+      $items['admin/config/media/resp_img/groups/' . $breakpoint_group->machine_name . '/export'] = array(
+        'title' => 'Export ' . check_plain($breakpoint_group->name) . ' mappings',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('resp_img_admin_export_form', 'mappings.' . $breakpoint_group->machine_name),
+        'type' => MENU_LOCAL_ACTION,
+        'access arguments' => array('administer responsive images and styles', 'mappings.' . $breakpoint_group->machine_name),
+        'access callback' => 'resp_img_mappings_export_access',
+        'file' => 'resp_img.admin.inc',
+        'weight' => 15,
+      );
+    }
+  }
+
+  return $items;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function resp_img_form_breakpoints_add_style_form_alter(&$form, &$form_state) {
+  $form['style']['#options'] = array_filter($form['style']['#options'], '_resp_img_filter_styles');
+}
+
+/**
+ * Access callback.
+ */
+function resp_img_mappings_export_access($perm, $mapping_name) {
+  return resp_img_mapping_load($mapping_name) && user_access($perm);
+}
+
+/**
+ * Load mappings.
+ */
+function resp_img_mapping_load($name = NULL) {
+  ctools_include('export');
+  if ($name) {
+    $mappings = ctools_export_load_object('resp_img_mapping', 'names', array($name));
+    $mapping = isset($mappings[$name]) ? $mappings[$name] : FALSE;
+    return $mapping;
+  }
+  return ctools_export_load_object('resp_img_mapping');
+}
+
+
+/**
+ * Save mappings.
+ */
+function resp_img_mapping_save(&$mapping) {
+  ctools_include('export');
+  $update = isset($mapping->id) ? array('id') : array();
+  $style = image_style_load(RESP_IMG_STYLE_PREFIX . $mapping->breakpoint_group);
+  if ($style) {
+    image_style_flush($style);
+  }
+  return drupal_write_record('resp_img_mapping', $mapping, $update);
+}
+
+/**
+ * Validate mappings.
+ */
+function resp_img_mapping_validate($mapping) {
+  if (!is_object($mapping)) {
+    return FALSE;
+  }
+  foreach (array('machine_name', 'breakpoint_group', 'mapping') as $property) {
+    if (!property_exists($mapping, $property)) {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * Add javascript for older browser support
+ */
+function resp_img_add_js() {
+  static $added = FALSE;
+  if (!$added) {
+    $added = TRUE;
+    drupal_add_js(drupal_get_path('module', 'resp_img') . '/picturefill/picturefill.js', array('type' => 'file', 'weight' => -10, 'group' => JS_DEFAULT));
+    drupal_add_js(drupal_get_path('module', 'resp_img') . '/resp_img.js', array('type' => 'file', 'weight' => -10, 'group' => JS_DEFAULT));
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function resp_img_theme() {
+  return array(
+    'picture' => array(
+      'variables' => array(
+        'style_name' => NULL,
+        'path' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'alt' => '',
+        'title' => NULL,
+        'attributes' => array(),
+        'breakpoints' => array(),
+      ),
+    ),
+    'picture_formatter' => array(
+      'variables' => array(
+        'item' => NULL,
+        'path' => NULL,
+        'image_style' => NULL,
+        'breakpoints' => array(),
+      ),
+    ),
+    'colorbox_picture_formatter' => array(
+      'variables' => array(
+        'item' => NULL,
+        'node' => NULL,
+        'field' => array(),
+        'display_settings' => array(),
+        'breakpoints' => array(),
+      ),
+    ),
+    'colorbox_picturefield' => array(
+      'variables' => array(
+        'image' => array(),
+        'path' => NULL,
+        'title' => NULL,
+        'gid' => NULL,
+        'breakpoints' => array(),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function resp_img_entity_info_alter(&$info) {
+  if (isset($info['file'])) {
+    foreach (breakpoints_breakpoint_group_load_all() as $group) {
+      $info['file']['view modes']['media_responsive_' . $group->machine_name] = array(
+        'label' => t('@group (Responsive)', array('@group' => $group->name)),
+        'custom settings' => TRUE,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ *
+ * Lets CTools know which plugin APIs are implemented by resp_img module.
+ */
+function resp_img_ctools_plugin_api($owner, $api) {
+  static $api_versions = array(
+    'file_entity' => array(
+      'file_default_displays' => 1,
+    ),
+  );
+  if (isset($api_versions[$owner][$api])) {
+    return array('version' => $api_versions[$owner][$api]);
+  }
+}
+
+/**
+ * Implements hook_file_default_displays().
+ */
+function resp_img_file_default_displays() {
+  $default_image_styles = array();
+  foreach (breakpoints_breakpoint_group_load_all() as $group) {
+    $default_image_styles['media_responsive_' . $group->machine_name] = RESP_IMG_STYLE_PREFIX . $group->machine_name;
+  }
+  $default_displays = array();
+
+  foreach ($default_image_styles as $view_mode => $image_style) {
+    $display_name = 'image__' . $view_mode . '__file_image';
+    $default_displays[$display_name] = (object) array(
+      'api_version' => 1,
+      'name' => $display_name,
+      'status' => 1,
+      'weight' => 5,
+      'settings' => array('image_style' => $image_style),
+    );
+  }
+
+  return $default_displays;
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function resp_img_field_attach_view_alter(&$output, $context) {
+  $view = module_exists('views') ? views_get_current_view() : FALSE;
+  foreach (element_children($output) as $field_name) {
+    $element = &$output[$field_name];
+    $vars = array();
+    if (isset($element['#formatter'])) {
+      if ($element['#formatter'] == 'image') {
+        $vars['image_style'] = 'image_style';
+        $vars['#formatter'] = 'picture';
+        $vars['#theme'] = 'picture_formatter';
+      }
+      elseif ($element['#formatter'] == 'colorbox') {
+        $vars['image_style'] = 'colorbox_node_style';
+        $vars['#formatter'] = 'picture';
+        $vars['#theme'] = 'colorbox_picture_formatter';
+      }
+      elseif ($element['#formatter'] == 'slideshow') {
+        $vars['image_style'] = 'slideshow_image_style';
+        $vars['#formatter'] = 'slideshow';
+        $vars['#theme'] = 'field_slideshow';
+      }
+
+      if (!empty($vars)) {
+        $instance = field_info_instance($element['#entity_type'], $element['#field_name'], $element['#bundle']);
+        if ($view && isset($view->query->pager->display->handler->handlers['field'][$element['#field_name']])) {
+          $settings = $view->query->pager->display->handler->handlers['field'][$element['#field_name']]->options['settings'];
+        }
+        elseif (isset($instance['display'][$context['view_mode']]['settings'][$vars['image_style']]) && !empty($instance['display'][$context['view_mode']]['settings'][$vars['image_style']])) {
+          $settings = $instance['display'][$context['view_mode']]['settings'];
+        }
+        else {
+          $settings = $instance['display']['default']['settings'];
+        }
+        if (isset($settings[$vars['image_style']]) && strpos($settings[$vars['image_style']], RESP_IMG_STYLE_PREFIX) !== FALSE) {
+          $group_name = drupal_substr($settings[$vars['image_style']], drupal_strlen(RESP_IMG_STYLE_PREFIX));
+          $breakpoint_styles = _resp_img_get_breakpoint_styles($group_name);
+          if (!empty($breakpoint_styles)) {
+            // Change the formatter so it uses ours.
+            $element['#formatter'] = $vars['#formatter'];
+
+             // Change the formatter on all items as well.
+            $num_fields = ($element['#formatter'] != 'slideshow') ? count($element['#items']) : 1;
+            for ($delta = 0; $delta < $num_fields; $delta++) {
+              $element[$delta]['#theme'] = $vars['#theme'];
+              // Change the image style to the first in use.
+              $reset = reset($breakpoint_styles['mapping']);
+              $element[$delta]['#image_style'] = reset($reset);
+              $element[$delta]['#breakpoints'] = $breakpoint_styles;
+            }
+          }
+          else {
+            watchdog('Responsive images', 'You have to map at least 1 style for ' . check_plain($group_name) . '.');
+          }
+        }
+      }
+    }
+  }
+}
+
+function theme_picture_formatter($variables) {
+  if (!isset($variables['breakpoints']) || empty($variables['breakpoints'])) {
+    return theme('image_formatter', $variables);
+  }
+
+  $item = $variables['item'];
+
+  // Do not output an empty 'title' attribute.
+  if (isset($item['title']) && drupal_strlen($item['title']) == 0) {
+    unset($item['title']);
+  }
+
+  $item['style_name'] = $variables['image_style'];
+  $item['breakpoints'] = $variables['breakpoints'];
+
+  if (!isset($item['path']) && isset($variables['uri'])) {
+    $item['path'] = $variables['uri'];
+  }
+  $output = theme('picture', $item);
+
+  if (isset($variables['path']['path'])) {
+    $path = $variables['path']['path'];
+    $options = isset($variables['path']['options']) ? $variables['path']['options'] : array();
+    $options['html'] = TRUE;
+    $output = l($output, $path, $options);
+  }
+  return $output;
+}
+
+/**
+ * Theme a picture element.
+ */
+function theme_picture($variables) {
+  resp_img_add_js();
+  // Add classes to ease styling
+  if (!isset($variables['attributes'])) {
+    $variables['attributes'] = array();
+  }
+  if (!isset($variables['attributes']['class'])) {
+    $variables['attributes']['class'] = array();
+  }
+  $variables['attributes']['class'][] = RESP_IMG_CLASS;
+
+  // Make sure that width and height are proper values
+  // If they exists we'll output them
+  // @see http://www.w3.org/community/respimg/2012/06/18/florians-compromise/
+  if (isset($variables['width']) && empty($variables['width'])) {
+    unset($variables['width']);
+    unset($variables['height']);
+  }
+  elseif (isset($variables['height']) && empty($variables['height'])) {
+    unset($variables['width']);
+    unset($variables['height']);
+  }
+
+  // Use path or uri untill D7 uses one in all places.
+  if (!isset($variables['path']) || empty($variables['path'])) {
+    $variables['path'] = ($variables['uri']);
+  }
+  if (!isset($variables['uri']) || empty($variables['uri'])) {
+    $variables['uri'] = ($variables['path']);
+  }
+
+  $images = array();
+  $output = array();
+  $fallback_image = FALSE;
+
+  // All breakpoints and multipliers.
+  if (isset($variables['breakpoints']['mapping'])) {
+    foreach ($variables['breakpoints']['mapping'] as $breakpoint_name => $multipliers) {
+      $breakpoint = breakpoints_breakpoint_load_by_fullkey($breakpoint_name);
+      if ($breakpoint) {
+        $new_images = array();
+        foreach ($multipliers as $multiplier => $image_style) {
+          $new_image = $variables;
+          // Add classes to ease styling
+          $new_image['attributes']['class'][] = RESP_IMG_CLASS . '-' . drupal_clean_css_identifier($breakpoint->name);
+          $new_image['style_name'] = $image_style;
+          $new_image['#multiplier'] = $multiplier;
+          $new_images[] = $new_image;
+        }
+        // Fallback image = smallest breakpoint.
+        $fallback_image = theme('image_style', $new_images[0]);
+        $srcset = array();
+        foreach ($new_images as $new_image) {
+          $srcset[] = image_style_url($new_image['style_name'], $new_image['uri']) . ' ' . $new_image['#multiplier'];
+        }
+        $images[] = array(
+          'srcset' => implode(', ', $srcset),
+          'media' => $breakpoint->breakpoint,
+        );
+      }
+    }
+  }
+  // Fallback image.
+  if (isset($variables['style_name']) && !empty($variables['style_name'])) {
+    $fallback_image = theme('image_style', $variables);
+  }
+  $matches = array();
+  preg_match('/src="([^"]*)"/', $fallback_image, $matches);
+  $fallback_image = '<img srcset="' . $matches[1] . '" alt="' . check_plain($variables['alt']) . '" title="' . check_plain($variables['title']) . '" />';
+  if (!empty($images)) {
+    $output[] = '<picture class="' . RESP_IMG_CLASS . '" >';
+
+    // Add variants to the output.
+    foreach ($images as $image) {
+      if (isset($image['media']) && !empty($image['media'])) {
+        $output[] = '<source media="' . $image['media'] . '" srcset="' . $image['srcset'] . '" />';
+      }
+      else {
+        $output[] = '<source srcset="' . $image['srcset'] . '" />';
+      }
+    }
+
+    $output[] = $fallback_image;
+    $output[] = '</picture>';
+    return implode("\n", $output);
+  }
+}
+
+/**
+ * colorbox_picture_formatter similar to colorbox_image_formatter.
+ *
+ * only differences are:
+ *   'breakpoints' => $variables['breakpoints'],
+ *   is the last line.
+ */
+function theme_colorbox_picture_formatter($variables) {
+  $item = $variables['item'];
+  $node = $variables['node'];
+  $field = $variables['field'];
+  $settings = $variables['display_settings'];
+
+  $image = array(
+    'path' => $item['uri'],
+    'alt' => $item['alt'],
+    'title' => $item['title'],
+    'style_name' => $settings['colorbox_node_style'],
+    'breakpoints' => $variables['breakpoints'],
+  );
+
+  if (isset($item['width']) && isset($item['height'])) {
+    $image['width'] = $item['width'];
+    $image['height'] = $item['height'];
+  }
+
+  switch ($settings['colorbox_caption']) {
+    case 'auto':
+      // If the title is empty use alt or the node title in that order.
+      if (!empty($image['title'])) {
+        $caption = $image['title'];
+      }
+      elseif (!empty($image['alt'])) {
+        $caption = $image['alt'];
+      }
+      elseif (!empty($node->title)) {
+        $caption = $node->title;
+      }
+      else {
+        $caption = '';
+      }
+      break;
+    case 'title':
+      $caption = $image['title'];
+      break;
+    case 'alt':
+      $caption = $image['alt'];
+      break;
+    case 'node_title':
+      $caption = $node->title;
+      break;
+    case 'custom':
+      $caption = token_replace($settings['colorbox_caption_custom'], array('node' => $node));
+      break;
+    default:
+      $caption = '';
+  }
+
+  // Shorten the caption for the example styles or when caption shortening is active.
+  $colorbox_style = variable_get('colorbox_style', 'default');
+  $trim_length = variable_get('colorbox_caption_trim_length', 75);
+  if (((strpos($colorbox_style, 'colorbox/example') !== FALSE) || variable_get('colorbox_caption_trim', 0)) && (drupal_strlen($caption) > $trim_length)) {
+    $caption = drupal_substr($caption, 0, $trim_length - 5) . '...';
+  }
+
+  // Build the gallery id.
+  $nid = !empty($node->nid) ? $node->nid : 'nid';
+  switch ($settings['colorbox_gallery']) {
+    case 'post':
+      $gallery_id = 'gallery-' . $nid;
+      break;
+    case 'page':
+      $gallery_id = 'gallery-all';
+      break;
+    case 'field_post':
+      $gallery_id = 'gallery-' . $nid . '-' . $field['field_name'];
+      break;
+    case 'field_page':
+      $gallery_id = 'gallery-' . $field['field_name'];
+      break;
+    case 'custom':
+      $gallery_id = $settings['colorbox_gallery_custom'];
+      break;
+    default:
+      $gallery_id = '';
+  }
+
+  if ($style_name = $settings['colorbox_image_style']) {
+    $path = image_style_url($style_name, $image['path']);
+  }
+  else {
+    $path = file_create_url($image['path']);
+  }
+
+  return theme('colorbox_picturefield', array('image' => $image, 'path' => $path, 'title' => $caption, 'gid' => $gallery_id));
+}
+
+/**
+ * theme_colorbox_picturefield similar to theme_colorbox_imagefield.
+ *
+ * only difference is: $image = theme('picture', $variables['image']);.
+ */
+function theme_colorbox_picturefield($variables) {
+  $class = array('colorbox');
+
+  if ($variables['image']['style_name'] == 'hide') {
+    $image = '';
+    $class[] = 'js-hide';
+  }
+  elseif (!empty($variables['image']['style_name'])) {
+    $image = theme('picture', $variables['image']);
+  }
+  else {
+    $image = theme('image', $variables['image']);
+  }
+
+  $options = array(
+    'html' => TRUE,
+    'attributes' => array(
+      'title' => $variables['title'],
+      'class' => implode(' ', $class),
+      'rel' => $variables['gid'],
+    )
+  );
+
+  return l($image, $variables['path'], $options);
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function resp_img_field_formatter_info_alter(&$info) {
+  foreach ($info as $formatter_key => &$formatter) {
+    if ($formatter_key == 'image') {
+      if (!isset($formatter['settings']) || !is_array($formatter['settings'])) {
+        $formatter['settings'] = array();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_image_default_styles().
+ */
+function resp_img_image_default_styles() {
+  $styles = array();
+  // Provide fake responsive image styles for users to select.
+  $breakpoint_groups = breakpoints_breakpoint_group_load_all();
+  if ($breakpoint_groups && !empty($breakpoint_groups)) {
+    foreach (array_keys($breakpoint_groups) as $machine_name) {
+      $styles[RESP_IMG_STYLE_PREFIX . $machine_name] = array(
+        'effects' => array(),
+      );
+    }
+  }
+  return $styles;
+}
+
+/**
+ * Implements hook_image_styles_alter().
+ */
+function resp_img_image_styles_alter(&$styles) {
+  $breakpoint_groups = breakpoints_breakpoint_group_load_all();
+  if ($breakpoint_groups && !empty($breakpoint_groups)) {
+    foreach ($breakpoint_groups as $machine_name => $breakpoint_group) {
+      $mapping = _resp_img_get_breakpoint_styles($machine_name);
+      $first_style = FALSE;
+      if (!empty($mapping)) {
+        $first_mapping = reset($mapping['mapping']);
+        $first_style = reset($first_mapping);
+      }
+      if ($first_style) {
+        $first_style = isset($styles[$first_style]) ? $styles[$first_style] : FALSE;
+      }
+      if ($first_style) {
+        $new_effects = array();
+        foreach ($first_style['effects'] as $effect) {
+          $new_effect = $effect;
+          unset($new_effect['isid']);
+          unset($new_effect['ieid']);
+          $new_effects[] = $new_effect;
+        }
+        $styles[RESP_IMG_STYLE_PREFIX . $machine_name]['effects'] = $new_effects;
+      }
+    }
+  }
+}
+
+/**
+ * Implements MODULE_preprocess_HOOK().
+ */
+function resp_img_preprocess_image_style_list(&$variables) {
+  $variables['styles'] = array_filter($variables['styles'], '_resp_img_filter_styles');
+}
+
+/**
+ * array_filter callback.
+ */
+function _resp_img_filter_styles($var) {
+  return strpos(is_array($var) ? $var['name'] : $var, RESP_IMG_STYLE_PREFIX) !== 0;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary_alter().
+ */
+function resp_img_field_formatter_settings_summary_alter(&$summary, $context) {
+  if (isset($context['field']['type']) && $context['field']['type'] === 'image') {
+    $settings = $context['instance']['display'][$context['view_mode']]['settings'];
+    if (isset($settings['image_style']) && strpos($settings['image_style'], RESP_IMG_STYLE_PREFIX) !== FALSE) {
+      $group_name = drupal_substr($settings['image_style'], drupal_strlen(RESP_IMG_STYLE_PREFIX));
+      $summary = 'Responsive mode activated using ' . $group_name;
+    }
+    if (isset($settings['colorbox_node_style']) && strpos($settings['colorbox_node_style'], RESP_IMG_STYLE_PREFIX) !== FALSE) {
+      $group_name = drupal_substr($settings['colorbox_node_style'], drupal_strlen(RESP_IMG_STYLE_PREFIX));
+      $summary .= '<br />Responsive mode activated using ' . $group_name;
+    }
+  }
+}
+
+function resp_img_entity_view_alter(&$build, $type) {
+  foreach (element_children($build) as $child) {
+    if (isset($build[$child]['#field_name'])) {
+      $build[$child]['#post_render'][] = 'resp_img_post_render';
+    }
+  }
+}
+
+/**
+ * #post_render callback.
+ */
+function resp_img_post_render($content, $element) {
+  return _resp_img_replace_picture($content);
+}
+
+function _resp_img_replace_picture($content) {
+  $result = array();
+  preg_match_all('/<img[^>]*>/i', $content, $result);
+  $orig_imgs = $imgs = $result[0];
+  $vars['image_style'] = 'image_style';
+  $vars['#formatter'] = 'picture';
+  $vars['#theme'] = 'picture_formatter';
+  foreach ($imgs as &$img) {
+    if (strpos($img, RESP_IMG_STYLE_PREFIX) !== FALSE) {
+      $xml = simplexml_load_string('<image>' . html_entity_decode($img, ENT_QUOTES, "utf-8") . '</image>');
+      if (isset($xml->img[0]) && is_object($xml->img[0])) {
+        $attributes = array();
+        foreach ($xml->img[0]->attributes() as $a => $b) {
+          $attributes[$a] = (string)$b;
+        }
+      }
+
+      if (isset($attributes['src']) && !empty($attributes['src'])) {
+        $group_name = drupal_substr($attributes['src'], strpos($attributes['src'], RESP_IMG_STYLE_PREFIX));
+        $group_name = str_replace(RESP_IMG_STYLE_PREFIX, '', drupal_substr($group_name, 0, strpos($group_name, '/')));
+        $breakpoint_styles = _resp_img_get_breakpoint_styles($group_name);
+
+        // @todo: Ugly! Find a better way?
+        $src = drupal_substr($attributes['src'], strpos($attributes['src'], RESP_IMG_STYLE_PREFIX . $group_name) + drupal_strlen(RESP_IMG_STYLE_PREFIX . $group_name) + 1);
+        $src = preg_replace('/\//', '://', $src, 1);
+        unset($attributes['src']);
+        $variables = array(
+          'path' => $src,
+          'breakpoints' => $breakpoint_styles,
+        );
+        if (isset($attributes['width'])) {
+          $variables['width'] = $attributes['width'];
+          unset($attributes['width']);
+        }
+        if (isset($attributes['height'])) {
+          $variables['height'] = $attributes['height'];
+          unset($attributes['height']);
+        }
+        $variables['attributes'] = $attributes;
+        if (isset($variables['attributes']['class'])) {
+          $variables['attributes']['class'] = explode(' ', $variables['attributes']['class']);
+        }
+        $variables['style_name'] = RESP_IMG_STYLE_PREFIX . $group_name;
+        $img = theme('picture', $variables);
+      }
+    }
+  }
+  $content = str_replace($orig_imgs, $imgs, $content);
+  return $content;
+}
+
+function _resp_img_get_breakpoint_styles($group_name) {
+  $active_breakpoints = &drupal_static('resp_img_breakpoints', FALSE);
+  if (!$active_breakpoints) {
+    $active_breakpoints = breakpoints_breakpoint_load_all_active();
+  }
+  $breakpoint_styles = array();
+  if ($mappings = resp_img_mapping_load('mappings.' . $group_name)) {
+    $group = breakpoints_breakpoint_group_load($group_name);
+    $breakpoints = array_intersect_key(drupal_map_assoc($group->breakpoints), $active_breakpoints);
+    $mappings->mapping = array_intersect_key($mappings->mapping, $breakpoints);
+    foreach ($mappings->mapping as $breakpoint_name => $multipliers) {
+      $settings = breakpoints_settings();
+      $existing_multipliers = drupal_map_assoc($settings->multipliers);
+      $multipliers = array_intersect_key($multipliers, array_intersect_key($existing_multipliers, array_filter($active_breakpoints[$breakpoint_name]->multipliers)));
+      if (!empty($multipliers) && is_array($multipliers)) {
+        foreach ($multipliers as $multiplier => $image_style) {
+          if (!empty($image_style)) {
+            if (!isset($breakpoint_styles['mapping'][$breakpoint_name])) {
+              $breakpoint_styles['mapping'][$breakpoint_name] = array();
+            }
+            $breakpoint_styles['mapping'][$breakpoint_name][$multiplier] = $image_style;
+          }
+        }
+      }
+    }
+  }
+  return $breakpoint_styles;
+}

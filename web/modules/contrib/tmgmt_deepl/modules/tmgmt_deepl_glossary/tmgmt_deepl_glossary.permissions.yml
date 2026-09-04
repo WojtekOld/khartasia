@@ -1,0 +1,17 @@
+delete deepl_glossary entities:
+  title: 'Delete DeepL glossary entities.'
+
+add deepl_glossary entities:
+  title: 'Add DeepL glossary entities.'
+
+edit deepl_glossary entities:
+  title: 'Edit DeepL glossary entities.'
+
+edit deepl_glossary glossary entries:
+  title: 'Edit DeepL glossary entries.'
+
+administer deepl_glossary entities:
+  title: 'Administer DeepL glossary entities.'
+
+access deepl_glossary overview:
+  title: 'Access DeepL glossary overview.'

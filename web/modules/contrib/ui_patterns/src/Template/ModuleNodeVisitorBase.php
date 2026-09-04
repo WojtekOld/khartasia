@@ -21,12 +21,6 @@ abstract class ModuleNodeVisitorBase implements NodeVisitorInterface {
    */
   protected ComponentPluginManager $componentManager;
 
-  /**
-   * Constructs a new ComponentNodeVisitor object.
-   *
-   * @param \Drupal\Core\Theme\ComponentPluginManager $component_plugin_manager
-   *   The component plugin manager.
-   */
   public function __construct(ComponentPluginManager $component_plugin_manager) {
     $this->componentManager = $component_plugin_manager;
   }
@@ -51,7 +45,7 @@ abstract class ModuleNodeVisitorBase implements NodeVisitorInterface {
    */
   protected function getComponent(Node $node): ?Component {
     $component_id = $node->getTemplateName();
-    if (!preg_match('/^[a-z]([a-zA-Z0-9_-]*[a-zA-Z0-9])*:[a-z]([a-zA-Z0-9_-]*[a-zA-Z0-9])*$/', $component_id)) {
+    if (!\preg_match('/^[a-z]([a-zA-Z0-9_-]*[a-zA-Z0-9])*:[a-z]([a-zA-Z0-9_-]*[a-zA-Z0-9])*$/', $component_id)) {
       return NULL;
     }
     try {
@@ -65,7 +59,7 @@ abstract class ModuleNodeVisitorBase implements NodeVisitorInterface {
   /**
    * Injects custom Twig nodes into given node as child nodes.
    *
-   * The function will be injected direct after  validate_component_props
+   * The function will be injected direct after validate_component_props
    * function already injected by SDC's ComponentNodeVisitor.
    *
    * @param \Twig\Node\Node $node

@@ -1,0 +1,87 @@
+=== AUDIT PAPERS (238 noeuds) ===
+
+Total papers : 238
+Avec espece(s) liee(s) : 238
+Sans espece : 0
+Multi-especes : 77
+Avec ecriture locale : 85
+Avec synonyme : 35
+Avec origine geo : 238
+
+--- Repartition nb especes par papier ---
+  1 espece(s) : 161 papiers
+  2 espece(s) : 33 papiers
+  3 espece(s) : 15 papiers
+  4 espece(s) : 18 papiers
+  5 espece(s) : 6 papiers
+  6 espece(s) : 3 papiers
+  7 espece(s) : 1 papiers
+  9 espece(s) : 1 papiers
+
+--- Origines geographiques ---
+  Japon : 106 papiers
+  Cor├®e : 85 papiers
+  Chine : 40 papiers
+  Thailande : 3 papiers
+  Japan : 3 papiers
+  Korea : 1 papiers
+
+--- Pas de doublons exacts dans papers ---
+
+
+=== AUDIT COMMON_NAMES (765 noeuds) ===
+
+Total common_names : 765
+Avec taxo liee : 765
+Sans taxo : 0
+Multi-taxo : 15
+Avec ecriture locale : 308
+Avec synonyme : 14
+
+--- Repartition par langue ---
+  Anglais : 268 noms
+  Fran├ºais : 179 noms
+  Chinois : 115 noms
+  Japonais : 108 noms
+  Cor├®en : 92 noms
+  Thai : 3 noms
+
+--- Noms identiques cross-langues (top 20) ---
+  'yamaai' : Japonais, Japonais
+  'ama' : Japonais, Cor├®en
+  'mercurialis' : Fran├ºais, Fran├ºais
+  'anpi' : Cor├®en, Cor├®en
+  'honghua' : Chinois, Japonais
+  'yanzhi' : Chinois, Japonais
+  'rongkui' : Chinois, Japonais
+  'ramie' : Anglais, Fran├ºais
+  'rum' : Anglais, Fran├ºais
+  'jute' : Anglais, Fran├ºais
+  'curcuma' : Anglais, Fran├ºais
+  'abaca' : Anglais, Fran├ºais
+  'roselle' : Anglais, Fran├ºais
+  'indigo' : Anglais, Cor├®en
+  'kenaf' : Anglais, Cor├®en
+  'rice paper plant' : Anglais, Anglais
+  'indian madder' : Anglais, Anglais
+
+--- 20 common_names SANS taxo liee ---
+
+--- Especes les plus citees dans common_names ---
+  Hibiscus cannabinus L. : 33 noms communs
+  Corchorus capsularis L. : 18 noms communs
+  Gossypium arboreum L. : 17 noms communs
+  Indigofera tinctoria L. : 17 noms communs
+  Cannabis sativa Linnaeus : 15 noms communs
+  Morus alba L. : 15 noms communs
+  Boehmeria nivea (L.) Gaudich. : 14 noms communs
+  Carthamus tinctorius L. : 14 noms communs
+  Areca catechu L. : 13 noms communs
+  Polygonum tinctorium Aiton : 13 noms communs
+  Curcuma longa L. : 13 noms communs
+  Miscanthus sinensis Anders. : 13 noms communs
+  Alcea rosea L. : 13 noms communs
+  Edgeworthia chrysantha Lindl. : 12 noms communs
+  Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. : 12 noms communs
+
+Done

@@ -1,0 +1,32 @@
+tmgmt_deepl_glossary.fetch_form:
+  path: '/admin/tmgmt/deepl_glossaries/fetch'
+  defaults:
+    _form: 'Drupal\tmgmt_deepl_glossary\Form\DeeplMultilingualGlossaryFetchForm'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _permission: 'administer deepl_glossary entities'
+
+tmgmt_deepl_glossary.csv_download:
+  path: '/admin/tmgmt/deepl_glossaries/dictionary/{deepl_ml_glossary_dictionary}/csv'
+  defaults:
+    _controller: 'Drupal\tmgmt_deepl_glossary\Controller\GlossaryDictionaryCsvController::download'
+  options:
+    _admin_route: TRUE
+    parameters:
+      deepl_ml_glossary_dictionary:
+        type: entity:deepl_ml_glossary_dictionary
+  requirements:
+    _permission: 'edit deepl_glossary glossary entries'
+
+tmgmt_deepl_glossary.csv_upload:
+  path: '/admin/tmgmt/deepl_glossaries/{deepl_ml_glossary}/csv-upload'
+  defaults:
+    _form: 'Drupal\tmgmt_deepl_glossary\Form\DeeplMultilingualGlossaryCsvUploadForm'
+  options:
+    _admin_route: TRUE
+    parameters:
+      deepl_ml_glossary:
+        type: entity:deepl_ml_glossary
+  requirements:
+    _permission: 'edit deepl_glossary glossary entries'

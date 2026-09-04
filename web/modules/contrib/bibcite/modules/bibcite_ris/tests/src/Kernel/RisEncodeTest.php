@@ -2,13 +2,16 @@
 
 namespace Drupal\Tests\bibcite_ris\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\bibcite_ris\Encoder\RISEncoder;
 use Drupal\Tests\bibcite_export\Kernel\FormatEncoderTestBase;
 
 /**
  * @coversDefaultClass \Drupal\bibcite_ris\Encoder\RISEncoder
- * @group bibcite
  */
+#[Group('bibcite')]
+#[RunTestsInSeparateProcesses]
 class RisEncodeTest extends FormatEncoderTestBase {
 
   /**

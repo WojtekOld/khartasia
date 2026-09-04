@@ -12,15 +12,13 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_skins\Definition\CssVariableDefinition;
 use Drupal\ui_skins_test\DummyCssVariablePluginManager;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Test the CSS variable plugin manager.
- *
- * @group ui_skins
- *
- * @coversDefaultClass \Drupal\ui_skins\CssVariable\CssVariablePluginManager
  */
+#[Group('ui_skins')]
 class CssVariablePluginManagerTest extends UnitTestCase {
 
   /**
@@ -73,8 +71,6 @@ class CssVariablePluginManagerTest extends UnitTestCase {
 
   /**
    * Tests the processDefinition().
-   *
-   * @covers ::processDefinition
    */
   public function testProcessDefinitionWillReturnException(): void {
     $plugin_id = 'test';
@@ -85,8 +81,6 @@ class CssVariablePluginManagerTest extends UnitTestCase {
 
   /**
    * Tests the processDefinition().
-   *
-   * @covers ::processDefinition
    */
   public function testProcessDefinition(): void {
     $plugin_id = 'test';
@@ -101,7 +95,7 @@ class CssVariablePluginManagerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getCategories
+   * Tests getCategories.
    */
   public function testGetCategories(): void {
     $this->cssVariablePluginManager->setCssVariables([
@@ -127,7 +121,7 @@ class CssVariablePluginManagerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getSortedDefinitions
+   * Tests getSortedDefinitions.
    */
   public function testGetSortedDefinitions(): void {
     $this->cssVariablePluginManager->setCssVariables([
@@ -254,7 +248,7 @@ class CssVariablePluginManagerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getGroupedDefinitions
+   * Tests getGroupedDefinitions.
    */
   public function testGetGroupedDefinitions(): void {
     $this->cssVariablePluginManager->setCssVariables([

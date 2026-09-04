@@ -27,7 +27,7 @@ trait AttributesFilterTrait {
    *   The element with the given class(es) in attributes or the unchanged
    *   element if passed value is not an array.
    *
-   * @see Drupal\Core\Template\TwigExtension::addClass()
+   * @see \Drupal\Core\Template\TwigExtension::addClass()
    */
   public function addClass(mixed $element, ...$classes): mixed {
     if (!\is_array($element)) {

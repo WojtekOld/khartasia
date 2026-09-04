@@ -1,0 +1,27 @@
+/**
+ * @file
+ * Supplies the ui_icons design tokens inside Drupal Canvas.
+ *
+ * ui_icons' icon.autocomplete.css builds its `--ui-icons--*` custom properties
+ * on top of Claro/Olivero theme variables (e.g. --input-padding-vertical,
+ * --input-border-color, --color-gray-050). Canvas's builder theme
+ * (canvas_stark) does not define those, and because ui_icons sets
+ * `--ui-icons-claro-size` to an always-present (but, here, invalid) calc(), the
+ * `var(…, fallback)` chain never reaches its literal fallback — so the preview
+ * box loses its size, border and background.
+ *
+ * Define concrete values on `.ui-icons-wrapper` / `.ui-autocomplete` (closer
+ * ancestors than `:root`, so they win for descendants regardless of stylesheet
+ * order). Values mirror ui_icons' own literal fallbacks.
+ */
+.ui-icons-wrapper,
+.ui-autocomplete {
+  --ui-icons--wrapper-size: 2.89rem;
+  --ui-icons--preview-size: calc(var(--ui-icons--wrapper-size) * 0.95);
+  --ui-icons--result-size: calc(var(--ui-icons--preview-size) * 0.8);
+  --ui-icons--border-radius: 0.3rem;
+  --ui-icons--border-color: #d3d4d9;
+  --ui-icons--preview-bg-color: #f3f4f9;
+  --ui-icons-preview-margin: 0.5rem;
+  --ui-icons-autocomplete-height: 40rem;
+}

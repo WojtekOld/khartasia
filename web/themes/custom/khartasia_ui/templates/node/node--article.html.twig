@@ -1,0 +1,177 @@
+{# node--article.html.twig — Fiche plante Khartasia v3 #}
+{{ attach_library('khartasia_ui/kh-plante') }}
+<article class="kh-plante">
+
+  {# TITRE + SYNONYMES — pleine largeur #}
+  <header class="kh-plante__header">
+    <h1 class="kh-plante__title">{{ node.label }}</h1>
+    {% if node.field_synonymes_bot.value %}
+      <div class="kh-plante__synonymes">
+        {{ node.field_synonymes_bot.value|raw }}
+      </div>
+    {% endif %}
+  </header>
+
+  {# CORPS — deux colonnes égales #}
+  <div class="kh-plante__body">
+
+    {# COLONNE GAUCHE — image + textes #}
+    <div class="kh-plante__col-left">
+
+      {# Image principale en haut #}
+      {% if content.field_image|render %}
+        <div class="kh-plante__main-image">
+          {{ content.field_image }}
+        </div>
+      {% endif %}
+
+      {# Aire de croissance #}
+      {% if node.field_aire_croissance.value %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Aire de croissance</h2>
+          <div class="kh-prose">{{ node.field_aire_croissance.value|raw }}</div>
+        </section>
+      {% endif %}
+
+      {# Textes multilingues #}
+      <section class="kh-plante__section">
+        <h2 class="kh-plante__section-title">Données par pays de fabrication</h2>
+        <div class="kh-lang-tabs">
+          <div class="kh-lang-tabs__nav">
+            <button class="kh-lang-tab active" data-lang="fr">Français</button>
+            <button class="kh-lang-tab" data-lang="zh">中文</button>
+            <button class="kh-lang-tab" data-lang="ja">日本語</button>
+            <button class="kh-lang-tab" data-lang="ko">한국어</button>
+            <button class="kh-lang-tab" data-lang="th">ภาษาไทย</button>
+          </div>
+          <div class="kh-lang-tabs__content">
+            {{ drupal_view('plante_textes_multilingues', 'block_1', node.id) }}
+          </div>
+        </div>
+      </section>
+
+      {# Zones géographiques #}
+      {% if node.field_zones_geo|length %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Zones de production</h2>
+          <div class="kh-accordion">
+            {% for item in node.field_zones_geo %}
+              {% set geo = item.entity %}
+              {% if geo %}
+                {% set pays = geo.field_pg_pays.entity %}
+                <div class="kh-accordion__item">
+                  <button class="kh-accordion__trigger" aria-expanded="false">
+                    <span>{{ pays ? pays.label : geo.label }}</span>
+                    <span class="kh-accordion__icon" aria-hidden="true">+</span>
+                  </button>
+                  <div class="kh-accordion__panel" hidden>
+                    {{ drupal_entity('node', geo.id, 'embedded') }}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      {# Papers liés #}
+      <section class="kh-plante__section">
+        <div class="kh-accordion">
+          <div class="kh-accordion__item">
+            <button class="kh-accordion__trigger" aria-expanded="false">
+              <span>Papiers fabriqués depuis cette plante</span>
+              <span class="kh-accordion__icon" aria-hidden="true">+</span>
+            </button>
+            <div class="kh-accordion__panel" hidden>
+              {% for paper in papers_lies %}<div class='kh-paper-item'><a href='{{ paper.url }}'>{{ paper.titre }}</a>{% if paper.origin %} - {{ paper.origin }}{% endif %}</div>{% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# Noms vernaculaires #}
+      <section class="kh-plante__section">
+        <div class="kh-accordion">
+          <div class="kh-accordion__item">
+            <button class="kh-accordion__trigger" aria-expanded="false">
+              <span>Noms vernaculaires</span>
+              <span class="kh-accordion__icon" aria-hidden="true">+</span>
+            </button>
+            <div class="kh-accordion__panel" hidden>
+              {% if noms_communs %}<table class='kh-noms-table'><thead><tr><th>Nom</th><th>Langue</th><th>Ecriture locale</th></tr></thead><tbody>{% for nom in noms_communs %}<tr><td><a href='{{ nom.url }}'>{{ nom.titre }}</a></td><td>{{ nom.langue }}</td><td>{{ nom.scripture }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# Galeries #}
+      {% if content.field_image_gallery_1|render %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Galerie</h2>
+          {{ content.field_image_gallery_1 }}
+          {% if content.field_image_gallery_2|render %}
+            {{ content.field_image_gallery_2 }}
+          {% endif %}
+        </section>
+      {% endif %}
+
+    </div>{# fin col-left #}
+
+    {# COLONNE DROITE — métadonnées #}
+    <div class="kh-plante__col-right">
+
+      {# Classification botanique #}
+      <div class="kh-meta-card">
+        <h3 class="kh-meta-card__title">Classification botanique</h3>
+        <dl class="kh-meta-card__dl">
+          {% if content.field_tax_order|render %}
+            <dt>Ordre</dt>
+            <dd>{{ content.field_tax_order }}</dd>
+          {% endif %}
+          {% if content.field_tax_family|render %}
+            <dt>Famille</dt>
+            <dd>{{ content.field_tax_family }}</dd>
+          {% endif %}
+          {% if content.field_tax_genus|render %}
+            <dt>Genre</dt>
+            <dd>{{ content.field_tax_genus }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+
+      {# Usage papetier #}
+      <div class="kh-meta-card">
+        <h3 class="kh-meta-card__title">Usage papetier</h3>
+        <dl class="kh-meta-card__dl">
+          {% if content.field_used_part_plant|render %}
+            <dt>Partie utilisée</dt>
+            <dd>{{ content.field_used_part_plant }}</dd>
+          {% endif %}
+          {% if content.field_use_paper_making|render %}
+            <dt>Usage</dt>
+            <dd>{{ content.field_use_paper_making }}</dd>
+          {% endif %}
+          {% if node.field_paper_name.value %}
+            <dt>Nom du papier</dt>
+            <dd>{{ node.field_paper_name.value|striptags }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+
+      {# Identification fibres #}
+      {# Identification fibres #}
+      {% if node.field_fibres.entity %}
+        <div class="kh-meta-card">
+          <h3 class="kh-meta-card__title">Identification des fibres</h3>
+          {{ drupal_entity('node', node.field_fibres.entity.id, 'embedded') }}
+        </div>
+      {% endif %}
+
+    </div>{# fin col-right #}
+
+  </div>{# fin body #}
+</article>
+
+
+
+

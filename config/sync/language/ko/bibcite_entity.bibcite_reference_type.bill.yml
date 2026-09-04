@@ -1,0 +1,7 @@
+fields:
+  bibcite_secondary_title:
+    label: '언어 코드'
+  bibcite_edition:
+    label: 세션
+  bibcite_original_publication:
+    label: 기록

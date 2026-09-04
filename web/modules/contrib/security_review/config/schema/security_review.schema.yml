@@ -1,0 +1,108 @@
+# The module's main settings.
+security_review.settings:
+  type: config_object
+  label: 'Security review settings'
+  constraints:
+    FullyValidatable: ~
+  mapping:
+    untrusted_roles:
+      type: sequence
+      label: 'Untrusted roles'
+      sequence:
+        type: string
+        label: 'Role ID'
+        constraints:
+          ConfigExists:
+            prefix: user.role.
+    log:
+      type: boolean
+      label: 'Logging enabled'
+    skipped:
+      type: sequence
+      label: 'Skipped checks'
+      sequence:
+        type: mapping
+        label: 'Skipped check name'
+        mapping:
+          skipped:
+            type: boolean
+            label: 'Is skipped'
+          skipped_by:
+            type: string
+            label: 'Skipped by'
+            constraints:
+              NotNull: []
+          skipped_on:
+            type: timestamp
+            label: 'Skipped on'
+            constraints:
+              NotBlank:
+                allowNull: true
+    views_access:
+      type: mapping
+      label: 'Views Access Check'
+      mapping:
+        ignore_default:
+          type: boolean
+          label: 'Ignore default views'
+        hushed_views:
+          type: sequence
+          label: 'Hushed views'
+          sequence:
+            type: string
+            label: 'View ID'
+            constraints:
+              NotBlank:
+                allowNull: true
+    upload_extensions:
+      type: mapping
+      label: 'Upload Extensions check'
+      mapping:
+        hush_upload_extensions:
+          type: sequence
+          label: 'Hushed uploaded extensions'
+          sequence:
+            type: string
+            label: 'Upload extensions to ignore'
+            constraints:
+              NotBlank:
+                allowNull: true
+    fields:
+      type: mapping
+      label: 'Fields check'
+      mapping:
+        known_risky_fields:
+          type: sequence
+          label: 'Hushed fields'
+          sequence:
+            type: string
+            label: 'Field hash to ignore'
+            constraints:
+              NotBlank:
+                allowNull: true
+    file_permissions:
+      type: mapping
+      label: 'File permissions check'
+      mapping:
+        hushed_files:
+          type: sequence
+          label: 'Hushed files'
+          sequence:
+            type: string
+            label: 'Directory to ignore'
+            constraints:
+              NotBlank:
+                allowNull: true
+    headers:
+      type: mapping
+      label: 'Headers check'
+      mapping:
+        headers_to_check:
+          type: sequence
+          label: 'Headers to check'
+          sequence:
+            type: string
+            label: 'Header name'
+            constraints:
+              NotBlank:
+                allowNull: true

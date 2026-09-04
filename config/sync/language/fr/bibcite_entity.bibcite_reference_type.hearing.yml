@@ -1,0 +1,12 @@
+label: Audition
+fields:
+  bibcite_secondary_title:
+    label: Comité
+  bibcite_edition:
+    label: Session
+  bibcite_number:
+    label: 'Numéro de document'
+  bibcite_place_published:
+    label: Ville
+  bibcite_original_publication:
+    label: Historique

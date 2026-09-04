@@ -1,0 +1,127 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the proc_reporting module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function proc_reporting_schema(): array {
+  $schema = [];
+
+  $schema['proc_reporting_update_tasks_snapshot'] = [
+    'description' => 'Hourly snapshots of pending re-encryption task counts per user.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary key.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Drupal user ID.',
+      ],
+      'user_name' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Denormalised user account name at snapshot time.',
+      ],
+      'update_task_count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Number of pending re-encryption tasks for this user.',
+      ],
+      'generated_at' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp when the snapshot was generated.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'uid' => ['uid'],
+      'generated_at' => ['generated_at'],
+    ],
+  ];
+
+  $schema['proc_reporting_daily_operations'] = [
+    'description' => 'Daily counts of encrypt, decrypt and re-encrypt operations per user.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary key.',
+      ],
+      'operation_date' => [
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Date of operations in YYYY-MM-DD format.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Drupal user ID.',
+      ],
+      'user_name' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Denormalised user account name.',
+      ],
+      'encrypt_count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Number of encrypt operations on this date.',
+      ],
+      'cipher_text_download_count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Number of decrypt operations on this date.',
+      ],
+      'reencrypt_count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Number of re-encrypt operations on this date.',
+      ],
+      'changed' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp of the last update to this row.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => [
+      'uid_date' => ['uid', 'operation_date'],
+    ],
+    'indexes' => [
+      'operation_date' => ['operation_date'],
+      'uid' => ['uid'],
+    ],
+  ];
+
+  return $schema;
+}

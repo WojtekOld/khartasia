@@ -1,0 +1,16 @@
+label: Logiciel
+fields:
+  bibcite_custom1:
+    label: Ordinateur
+  bibcite_secondary_title:
+    label: 'Titre de la série'
+  bibcite_edition:
+    label: Version
+  bibcite_pages:
+    label: Description
+  bibcite_type_of_work:
+    label: Type
+  bibcite_place_published:
+    label: Ville
+  bibcite_original_publication:
+    label: Contenu

@@ -5,7 +5,7 @@ package: "Testing"
 dependencies:
   - ui_patterns:ui_patterns_legacy
 
-# Information added by Drupal.org packaging script on 2026-03-05
-version: '2.0.15'
+# Information added by Drupal.org packaging script on 2026-08-28
+version: '2.0.20'
 project: 'ui_patterns'
-datestamp: 1772717214
+datestamp: 1787936640

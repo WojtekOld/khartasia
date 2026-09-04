@@ -39,7 +39,7 @@ class CslReferenceNormalizer extends ReferenceNormalizerBase {
   /**
    * {@inheritdoc}
    */
-  public function normalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
+  public function normalize($object, $format = NULL, array $context = []): array {
     /** @var \Drupal\bibcite_entity\Entity\ReferenceInterface $object */
 
     $attributes = parent::normalize($object, $format, $context);

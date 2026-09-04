@@ -2,9 +2,15 @@
 
 namespace Drupal\bibcite_bibtex\Encoder;
 
+use RenanBr\BibTexParser\Processor\TagNameCaseProcessor;
+use RenanBr\BibTexParser\Processor\NamesProcessor;
+use RenanBr\BibTexParser\Processor\KeywordsProcessor;
+use RenanBr\BibTexParser\Processor\DateProcessor;
+use RenanBr\BibTexParser\Processor\FillMissingProcessor;
+use RenanBr\BibTexParser\Processor\TrimProcessor;
+use RenanBr\BibTexParser\Processor\UrlFromDoiProcessor;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Parser;
-use RenanBr\BibTexParser\Processor;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
@@ -47,19 +53,18 @@ class BibtexEncoder implements EncoderInterface, DecoderInterface {
    * Initializes the listener and parser objects.
    */
   public function setUpParser() {
-    // Create and configure a Listener
+    // Create and configure a Listener.
     $this->listener = new Listener();
-    $this->listener->addProcessor(new Processor\TagNameCaseProcessor(CASE_LOWER));
-    $this->listener->addProcessor(new Processor\NamesProcessor());
-    $this->listener->addProcessor(new Processor\KeywordsProcessor());
-    $this->listener->addProcessor(new Processor\DateProcessor());
-    $this->listener->addProcessor(new Processor\FillMissingProcessor([/* ... */]));
-    $this->listener->addProcessor(new Processor\TrimProcessor());
-    $this->listener->addProcessor(new Processor\UrlFromDoiProcessor());
+    $this->listener->addProcessor(new TagNameCaseProcessor(CASE_LOWER));
+    $this->listener->addProcessor(new NamesProcessor());
+    $this->listener->addProcessor(new KeywordsProcessor());
+    $this->listener->addProcessor(new DateProcessor());
+    $this->listener->addProcessor(new FillMissingProcessor([/* ... */]));
+    $this->listener->addProcessor(new TrimProcessor());
+    $this->listener->addProcessor(new UrlFromDoiProcessor());
     // @todo Check whether the required package is installed.
     // $this->listener->addProcessor(new Processor\LatexToUnicodeProcessor());
-
-    // Create a Parser and attach the listener
+    // Create a Parser and attach the listener.
     $this->parser = new Parser();
     $this->parser->addListener($this->listener);
   }
@@ -105,7 +110,7 @@ class BibtexEncoder implements EncoderInterface, DecoderInterface {
       // Remove newlines from the abstract and title.
       foreach (['abstract', 'title'] as $field) {
         if (isset($entry[$field])) {
-          $entry[$field] =  preg_replace('/\n */', ' ', $entry[$field]);
+          $entry[$field] = preg_replace('/\n */', ' ', $entry[$field]);
         }
       }
       // Each author/editor should be a single string, not an array.
@@ -125,7 +130,7 @@ class BibtexEncoder implements EncoderInterface, DecoderInterface {
       }
       unset($entry['_type'], $entry['citation-key'], $entry['_original']);
       // Strip curly braces from each entry.
-      array_walk_recursive($entry, function(&$string) {
+      array_walk_recursive($entry, function (&$string) {
         $string = preg_replace('/[{}]/', '', $string);
       });
 
@@ -151,7 +156,7 @@ class BibtexEncoder implements EncoderInterface, DecoderInterface {
    *   - first
    *   - von
    *   - last
-   *   - jr
+   *   - jr.
    *
    * @return string
    *   A name like "First von Last Jr" if all parts are present.

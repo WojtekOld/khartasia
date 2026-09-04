@@ -1,0 +1,5 @@
+
+services:
+  Drupal\color_field\Hook\ColorFieldHooks:
+    class: Drupal\color_field\Hook\ColorFieldHooks
+    autowire: true

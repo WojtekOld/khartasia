@@ -1,0 +1,28 @@
+uuid: 0250b63f-74ba-4932-ada0-95edf77d417d
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_nom_parent
+    - node.type.common_names
+id: node.common_names.field_nom_parent
+field_name: field_nom_parent
+entity_type: node
+bundle: common_names
+label: 'Forme canonique parente'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      common_names: common_names
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\bibcite_import\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\bibcite_entity\Entity\Reference;
@@ -9,9 +12,9 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Basic import tests.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class ImportBasicTest extends KernelTestBase {
 
   /**
@@ -70,23 +73,21 @@ class ImportBasicTest extends KernelTestBase {
 
   /**
    * Test if export formats available after enabling modules.
-   *
-   * @dataProvider importData
    */
+  #[DataProvider('importData')]
   public function testAvailableFormats($format) {
     $this->assertTrue($this->formatManager->hasDefinition($format));
   }
 
   /**
    * Test decode and denormalization from available text formats to entity.
-   *
-   * @dataProvider importData
    */
+  #[DataProvider('importData')]
   public function testReferenceDeserialization($format, $text, $expected_type, $entity_expected_values) {
     $entries = $this->serializer->decode($text, $format);
 
     foreach ($entries as $entry) {
-      /* @var \Drupal\bibcite_entity\Entity\Reference $entity */
+      /** @var \Drupal\bibcite_entity\Entity\Reference $entity */
       $entity = $this->serializer->denormalize($entry, Reference::class, $format);
       $this->assertTrue($entity instanceof Reference);
       $this->assertEquals($expected_type, $entity->type->target_id);
@@ -105,7 +106,7 @@ class ImportBasicTest extends KernelTestBase {
   protected function assertEntityValues(EntityInterface $entity, array $expected_values) {
     foreach ($expected_values as $field_name => $expected_value) {
       if (!in_array($field_name, ['author', 'editor', 'keywords'])) {
-        /* @var Reference $entity */
+        /** @var Reference $entity */
         $this->assertNotEmpty($entity->get($field_name));
         $this->assertEquals($expected_value, $entity->{$field_name}->value);
       }

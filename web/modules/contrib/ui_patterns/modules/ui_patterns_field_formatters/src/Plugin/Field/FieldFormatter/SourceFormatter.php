@@ -9,6 +9,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,26 +24,16 @@ class SourceFormatter extends FormatterBase {
 
   /**
    * The component element builder.
-   *
-   * @var \Drupal\ui_patterns\Element\ComponentElementBuilder
    */
-  protected $componentElementBuilder;
+  protected ComponentElementBuilder $componentElementBuilder;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+    $instance->componentElementBuilder = $container->get(ComponentElementBuilder::class);
     return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function defaultSettings() {
-    $settings = parent::defaultSettings();
-    return $settings;
   }
 
   /**
@@ -53,7 +44,7 @@ class SourceFormatter extends FormatterBase {
     $contexts = $this->getComponentSourceContexts($items);
     $contexts['ui_patterns:lang_code'] = new Context(new ContextDefinition('any'), $langcode);
     $contexts['ui_patterns:field:items'] = new Context(new ContextDefinition('any'), $items);
-    for ($field_item_index = 0; $field_item_index < $items->count(); $field_item_index++) {
+    for ($field_item_index = 0; $field_item_index < $items->count(); ++$field_item_index) {
       $contexts['ui_patterns:field:index'] = new Context(new ContextDefinition('integer'), $field_item_index);
       $source_with_configuration = $items->get($field_item_index)->getValue();
       $fake_build = $this->componentElementBuilder->buildSource($fake_build, 'content', [], $source_with_configuration, $contexts);

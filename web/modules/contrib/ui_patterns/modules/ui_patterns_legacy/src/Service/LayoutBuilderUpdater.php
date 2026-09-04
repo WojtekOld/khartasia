@@ -22,7 +22,7 @@ class LayoutBuilderUpdater implements LayoutBuilderUpdaterInterface {
    *
    * @SuppressWarnings("PHPMD.CyclomaticComplexity")
    */
-  public function updateLayout(Section $section): FALSE|Section {
+  public function updateLayout(Section $section): false|Section {
     $layoutId = $section->getLayoutId();
 
     if (!\str_starts_with($layoutId, $this::PATTERN_PREFIX)) {
@@ -37,7 +37,7 @@ class LayoutBuilderUpdater implements LayoutBuilderUpdaterInterface {
     $componentId = $this->getNamespacedId($patternId);
     // No matching component found.
     // @todo Should we remove the section?
-    if ($patternId == $componentId) {
+    if ($patternId === $componentId) {
       return FALSE;
     }
 
@@ -80,7 +80,7 @@ class LayoutBuilderUpdater implements LayoutBuilderUpdaterInterface {
     foreach ($component['props']['properties'] as $propKey => $prop) {
       $propType = $component['props']['properties'][$propKey]['ui_patterns']['type_definition'];
 
-      if ($propKey == 'variant') {
+      if ($propKey === 'variant') {
         $layoutSettings['ui_patterns']['variant_id'] = $this->convertProp(
           (string) ($layoutSettings['pattern']['variant'] ?? ''),
           NULL,

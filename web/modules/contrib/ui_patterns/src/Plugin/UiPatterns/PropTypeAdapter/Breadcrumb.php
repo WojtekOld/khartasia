@@ -35,12 +35,12 @@ final class Breadcrumb extends PropTypeAdapterPluginBase {
    * {@inheritdoc}
    */
   public function transform(mixed $data): mixed {
-    if (!is_array($data)) {
+    if (!\is_array($data)) {
       return $data;
     }
     foreach ($data as $index => $item) {
-      $item["text"] = $item["title"];
-      unset($item["title"]);
+      $item['text'] = $item['title'];
+      unset($item['title']);
       $data[$index] = $item;
     }
     return $data;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_styles_page\Form;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ui_styles\StylePluginManagerInterface;
@@ -14,6 +15,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Theme settings for regions styles.
  */
 class RegionsThemeSettingsForm extends ConfigFormBase {
+
+  /**
+   * The root key of the tree of form elements.
+   */
+  public const string TREE_KEY = 'ui_styles_page_regions';
 
   /**
    * The plugin manager.
@@ -77,17 +83,17 @@ class RegionsThemeSettingsForm extends ConfigFormBase {
     $this->editableConfig = [
       $theme . '.settings',
     ];
-    $system_regions = \system_region_list($theme);
+    $system_regions = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', static fn () => \Drupal::service('theme_handler')->getTheme($theme)->listAllRegions(), static fn () => \system_region_list($theme));
     /** @var array $settings */
     $settings = $this->config($theme . '.settings')->get(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS) ?? [];
 
-    $form[UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS] = [
+    $form[$this::TREE_KEY] = [
       '#type' => 'container',
       '#tree' => TRUE,
     ];
 
     foreach ($system_regions as $region_name => $region) {
-      $form[UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS][$region_name] = [
+      $form[$this::TREE_KEY][$region_name] = [
         '#type' => 'ui_styles_styles',
         '#title' => $region,
         '#drupal_theme' => $theme,
@@ -110,12 +116,19 @@ class RegionsThemeSettingsForm extends ConfigFormBase {
       $theme . '.settings',
     ];
     /** @var array $values */
-    $values = $form_state->getValue(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS) ?? [];
+    $values = $form_state->getValue($this::TREE_KEY) ?? [];
     $values = \array_filter($values);
 
     $config = $this->config($theme . '.settings');
     if (empty($values)) {
       $config->clear(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS);
+
+      if (empty($config->get('third_party_settings.ui_styles_page'))) {
+        $config->clear('third_party_settings.ui_styles_page');
+      }
+      if (empty($config->get('third_party_settings'))) {
+        $config->clear('third_party_settings');
+      }
     }
     else {
       $config->set(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS, $values);

@@ -3,3 +3,7 @@ services:
     class: Drupal\ui_patterns_test\Resolver\TestContextEntityResolver
     tags:
       - { name: ui_patterns.context_entity_resolver }
+
+  Drupal\ui_patterns_test\Hook\UiPatternsTestTokensHooks:
+    class: Drupal\ui_patterns_test\Hook\UiPatternsTestTokensHooks
+    autowire: true

@@ -1,14 +1,17 @@
-services:
-  plugin.manager.ui_skins.css_variable:
-    class: Drupal\ui_skins\CssVariable\CssVariablePluginManager
-    arguments:
-      - '@cache.discovery'
-      - '@module_handler'
-      - '@theme_handler'
+parameters:
+  ui_skins.skip_procedural_hook_scan: true
 
-  plugin.manager.ui_skins.theme:
-    class: Drupal\ui_skins\Theme\ThemePluginManager
-    arguments:
-      - '@cache.discovery'
-      - '@module_handler'
-      - '@theme_handler'
+services:
+  _defaults:
+    autowire: true
+
+  Drupal\ui_skins\CssVariable\CssVariablePluginManager: ~
+  Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface: '@Drupal\ui_skins\CssVariable\CssVariablePluginManager'
+
+  Drupal\ui_skins\Theme\ThemePluginManager: ~
+  Drupal\ui_skins\Theme\ThemePluginManagerInterface: '@Drupal\ui_skins\Theme\ThemePluginManager'
+
+  # For BC.
+  # @todo Remove on 2.x branch.
+  plugin.manager.ui_skins.css_variable: '@Drupal\ui_skins\CssVariable\CssVariablePluginManager'
+  plugin.manager.ui_skins.theme: '@Drupal\ui_skins\Theme\ThemePluginManager'

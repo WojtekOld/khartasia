@@ -1,0 +1,16 @@
+services:
+  proc_metadata_transitioner.update_proc_metadata_service:
+    class: Drupal\proc_metadata_transitioner\Services\TransitionerService
+    arguments:
+      - '@entity_type.manager'
+      - '@database'
+      - '@logger.factory'
+      - '@tempstore.private'
+      - '@config.factory'
+      - '@proc.byte_size_formatter'
+      - '@date.formatter'
+  proc_metadata_transitioner.slice_target_entity_service:
+    class: Drupal\proc_metadata_transitioner\Services\SliceTargetEntityService
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.factory'

@@ -1,0 +1,11 @@
+uuid: 9f3dec3f-bbbf-45fa-8351-6bd18f936c32
+langcode: fr
+status: true
+dependencies:
+  config:
+    - taxonomy.vocabulary.synonymes_botaniques
+id: taxonomy_term.synonymes_botaniques
+target_entity_type_id: taxonomy_term
+target_bundle: synonymes_botaniques
+default_langcode: zxx
+language_alterable: false

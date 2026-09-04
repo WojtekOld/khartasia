@@ -18,7 +18,7 @@ interface ComponentFormDisplayInterface extends ConfigEntityInterface {
    *   The highest weight of the display options in the display, or NULL if the
    *   display is empty.
    */
-  public function getHighestWeight(): int|null;
+  public function getHighestWeight(): ?int;
 
   /**
    * Gets the display options for all components.
@@ -76,6 +76,6 @@ interface ComponentFormDisplayInterface extends ConfigEntityInterface {
    * @return string
    *   The sdc component id.
    */
-  public function getComponentId():string;
+  public function getComponentId(): string;
 
 }

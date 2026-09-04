@@ -9,6 +9,7 @@ use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginPropValueWidget;
+use Drupal\ui_patterns\SourceTags;
 use Drupal\ui_patterns\UnicodePatternValidatorTrait;
 
 /**
@@ -19,7 +20,7 @@ use Drupal\ui_patterns\UnicodePatternValidatorTrait;
   label: new TranslatableMarkup('Textfield'),
   description: new TranslatableMarkup('One-line text field.'),
   prop_types: ['string', 'identifier'],
-  tags: ['widget']
+  tags: [SourceTags::Widget->value]
 )]
 class TextfieldWidget extends SourcePluginPropValueWidget implements TrustedCallbackInterface {
 
@@ -43,24 +44,24 @@ class TextfieldWidget extends SourcePluginPropValueWidget implements TrustedCall
     ];
     $this->addRequired($form['value']);
     $description = [];
-    if (isset($this->propDefinition["pattern"])) {
-      $form['value']['#pattern_unicode'] = $this->propDefinition["pattern"];
-      $description[] = $this->t("Constraint: @pattern", ["@pattern" => $this->propDefinition["pattern"]]);
+    if (isset($this->propDefinition['pattern'])) {
+      $form['value']['#pattern_unicode'] = $this->propDefinition['pattern'];
+      $description[] = $this->t('Constraint: @pattern', ['@pattern' => $this->propDefinition['pattern']]);
     }
-    if (isset($this->propDefinition["maxLength"])) {
-      $form['value']['#maxlength'] = $this->propDefinition["maxLength"];
-      $form['value']['#size'] = $this->propDefinition["maxLength"];
-      $description[] = $this->t("Max length: @length", ["@length" => $this->propDefinition["maxLength"]]);
+    if (isset($this->propDefinition['maxLength'])) {
+      $form['value']['#maxlength'] = $this->propDefinition['maxLength'];
+      $form['value']['#size'] = $this->propDefinition['maxLength'];
+      $description[] = $this->t('Max length: @length', ['@length' => $this->propDefinition['maxLength']]);
     }
-    if (!isset($this->propDefinition["pattern"]) && isset($this->propDefinition["minLength"])) {
-      $form['value']['#pattern'] = "^.{" . $this->propDefinition["minLength"] . ",}$";
-      $description[] = $this->t("Min length: @length", ["@length" => $this->propDefinition["minLength"]]);
+    if (!isset($this->propDefinition['pattern']) && isset($this->propDefinition['minLength'])) {
+      $form['value']['#pattern'] = '^.{' . $this->propDefinition['minLength'] . ',}$';
+      $description[] = $this->t('Min length: @length', ['@length' => $this->propDefinition['minLength']]);
     }
-    if ((isset($form['value']['#pattern']) || isset($form['value']['#pattern_unicode'])) &&
-        !isset($form['value']['#title'])) {
-      $form['value']['#title'] = $this->propDefinition["title"] ?? $this->propId;
+    if ((isset($form['value']['#pattern']) || isset($form['value']['#pattern_unicode']))
+        && !isset($form['value']['#title'])) {
+      $form['value']['#title'] = $this->propDefinition['title'] ?? $this->propId;
     }
-    $form['value']["#description"] = implode("; ", $description);
+    $form['value']['#description'] = \implode('; ', $description);
     // @todo change when issue https://www.drupal.org/project/drupal/issues/2633550 is fixed.
     if (isset($form['value']['#pattern_unicode'])) {
       $form['value']['#element_validate'][] = [static::class, 'validateUnicodePattern'];
@@ -70,6 +71,13 @@ class TextfieldWidget extends SourcePluginPropValueWidget implements TrustedCall
 
   /**
    * {@inheritdoc}
+   *
+   * Textfield input is plain text. Don't escape or filter it here: the
+   * prop type already handles that — StringPropType escapes it,
+   * IdentifierPropType strips tags, SlotPropType routes it through
+   * #plain_text. Escaping here would double-escape downstream; allow-list
+   * filtering here would grant HTML rights this widget's config-edit
+   * permission does not imply.
    */
   public function getPropValue(): mixed {
     $value = parent::getPropValue();

@@ -1,0 +1,30 @@
+{# node--plante-geo--embedded.html.twig #}
+<div class="kh-geo-item">
+  {% if content.field_pg_utilisation|render %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Utilisation</h4>
+      <div class="kh-geo__content">{% if node.field_pg_utilisation.value %}<div class="field__item">{{ node.field_pg_utilisation.value|raw }}</div>{% endif %}</div>
+    </div>
+  {% endif %}
+  {% if content.field_pg_culture|render %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Culture</h4>
+      <div class="kh-geo__content">{% if node.field_pg_culture.value %}<div class="field__item">{{ node.field_pg_culture.value|raw }}</div>{% endif %}</div>
+    </div>
+  {% endif %}
+  {% if content.field_pg_intro|render %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Introduction papier</h4>
+      <div class="kh-geo__content">{% if node.field_pg_intro.value %}<div class="field__item">{{ node.field_pg_intro.value|raw }}</div>{% endif %}</div>
+    </div>
+  {% endif %}
+  {% if content.field_pg_preparation|render %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Mode de preparation</h4>
+      <div class="kh-geo__content">{% if node.field_pg_preparation.value %}<div class="field__item">{{ node.field_pg_preparation.value|raw }}</div>{% endif %}</div>
+    </div>
+  {% endif %}
+  {% if content.field_pg_source|render %}
+    <div class="kh-geo__source">{% if node.field_pg_source.value %}<span>{{ node.field_pg_source.value }}</span>{% endif %}</div>
+  {% endif %}
+</div>

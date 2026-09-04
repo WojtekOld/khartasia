@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -19,9 +20,7 @@ use Drupal\ui_patterns\Attribute\Source;
   context_definitions: [
     'entity' => new ContextDefinition('entity', label: new TranslatableMarkup('Entity'), required: TRUE),
   ],
-  tags: [
-    'context_switcher',
-  ]
+  tags: [SourceTags::ContextSwitcher->value]
 )]
 class EntityFieldSource extends DerivableContextSourceBase {
 
@@ -30,10 +29,10 @@ class EntityFieldSource extends DerivableContextSourceBase {
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
-    $form["derivable_context"]["#title"] = $this->t("Field");
+    $form['derivable_context']['#title'] = $this->t('Field');
     // When no derivable contexts exist, allow this form still be valid.
-    if (isset($form["derivable_context"]["#options"]) && empty($form["derivable_context"]["#options"])) {
-      $form["derivable_context"]["#required"] = FALSE;
+    if (isset($form['derivable_context']['#options']) && empty($form['derivable_context']['#options'])) {
+      $form['derivable_context']['#required'] = FALSE;
     }
     return $form;
   }
@@ -43,9 +42,9 @@ class EntityFieldSource extends DerivableContextSourceBase {
    */
   protected function getSourcesTagFilter(): array {
     return [
-      "widget:dismissible" => FALSE,
-      "widget" => FALSE,
-      "field" => TRUE,
+      SourceTags::WidgetDismissible->value => FALSE,
+      SourceTags::Widget->value => FALSE,
+      SourceTags::Field->value => TRUE,
     ];
   }
 
@@ -54,7 +53,7 @@ class EntityFieldSource extends DerivableContextSourceBase {
    */
   protected function getDerivationTagFilter(): ?array {
     return [
-      "field" => TRUE,
+      SourceTags::Field->value => TRUE,
     ];
   }
 
@@ -62,13 +61,17 @@ class EntityFieldSource extends DerivableContextSourceBase {
    * {@inheritdoc}
    */
   public function getChoiceSettings(string $choice_id): array {
-    [, $entity_type, $bundle, $field_name] = explode(':', $choice_id);
+    [, $entity_type, $bundle, $field_name] = \explode(':', $choice_id);
     $derived_context = $this->getDerivedContexts($choice_id)[0] ?? [];
     /** @var \Drupal\ui_patterns\Plugin\UiPatterns\Source\FieldFormatterSource $source_field_formatter */
     $source_field_formatter = $this->sourcePluginManager->getSource(
-      $this->getPropId(), $this->propDefinition, [
-        'source_id' => implode(':', ['field_formatter', $entity_type, $bundle, $field_name]),
-      ], $derived_context);
+      $this->getPropId(),
+      $this->propDefinition,
+      [
+        'source_id' => \implode(':', ['field_formatter', $entity_type, $bundle, $field_name]),
+      ],
+      $derived_context
+    );
     return [
       'derivable_context' => $choice_id,
       $choice_id => [

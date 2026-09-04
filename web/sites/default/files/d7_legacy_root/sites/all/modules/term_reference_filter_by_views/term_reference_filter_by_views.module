@@ -1,0 +1,147 @@
+<?php
+/**
+ * Implements hook_menu().
+ */
+function term_reference_filter_by_views_menu() {
+  $items['term_reference_filter_by_views/autocomplete'] = array(
+    'title' => 'Autocomplete taxonomy',
+    'page callback' => 'term_reference_filter_by_views_taxonomy_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+/**
+ * Implements hook_widget_field_form().
+ */
+function term_reference_filter_by_views_field_widget_form_alter(&$element, &$form_state, $context) {
+  // Add a css class to widget form elements for all fields of type mytype.
+  if ($context['field']['type'] == 'taxonomy_term_reference') {
+    //dsm($element);
+    if (!empty($context['instance']['filter_view'])) {
+      if ($element['#type'] == 'select' || $element['#type'] == 'radios' || $element['#type'] == 'checkboxes') {
+        $allowed = _term_reference_filter_by_views_get_allowed_values($context['instance']['filter_view']);
+        if (!empty($allowed)) {
+          // dsm($allowed);
+          $options = array();
+          $options = array_intersect_key($element['#options'], $allowed);
+          $element['#options'] = $options;
+        }
+      } elseif (isset($element['#autocomplete_path'])) {
+        //dsm($context['field']);
+        $element['#autocomplete_path'] = 'term_reference_filter_by_views/autocomplete/' . $element['#field_name'] . '/' . $context['instance']['filter_view'];
+      }
+    }
+    // Be sure not to overwrite existing attributes.
+  }
+}
+function term_reference_filter_by_views_form_field_ui_field_edit_form_alter(&$form) {
+  if ($form['#field']['type'] == 'taxonomy_term_reference') {
+    $views = views_get_all_views();
+    $options = array('' => 'none');
+    //dsm($form);    
+    foreach($views as $name => $view) {
+      if($view->base_table == 'taxonomy_term_data') {
+        foreach($view->display as $display) {
+          $options["$name-{$display->id}"] = "{$view->human_name}: {$display->display_title}";
+        }
+      }
+    }
+    $form['instance']['filter_view'] = array(
+      '#type' => 'select',
+      '#title' => 'Filter by view',
+      '#description' => t("Filter the available options based on whether they appear in the selected view."),
+      '#default_value' => isset($form['#instance']['filter_view']) ? $form['#instance']['filter_view'] : NULL,
+      '#options' => $options,
+    );
+  }
+}
+function term_reference_filter_by_views_taxonomy_autocomplete($field_name, $filter_view, $tags_typed = '') {
+  $field = field_info_field($field_name);
+
+  // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+  $tags_typed = drupal_explode_tags($tags_typed);
+  $tag_last = drupal_strtolower(array_pop($tags_typed));
+
+  $matches = array();
+  if ($tag_last != '') {
+
+    // Part of the criteria for the query come from the field's own settings.
+    $vids = array();
+    $vocabularies = taxonomy_vocabulary_get_names();
+    foreach ($field['settings']['allowed_values'] as $tree) {
+      $vids[] = $vocabularies[$tree['vocabulary']]->vid;
+    }
+
+    $query = db_select('taxonomy_term_data', 't');
+    $query->addTag('translatable');
+    $query->addTag('term_access');
+
+    // Do not select already entered terms.
+    if (!empty($tags_typed)) {
+      $query->condition('t.name', $tags_typed, 'NOT IN');
+    }
+    // Select rows that match by term name.
+    $tags_return = $query
+      ->fields('t', array('tid', 'name'))
+      ->condition('t.vid', $vids)
+      ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
+      ->range(0, 10)
+      ->execute()
+      ->fetchAllKeyed();
+
+    $prefix = count($tags_typed) ? drupal_implode_tags($tags_typed) . ', ' : '';
+
+    $term_matches = array();
+    $allowed = _term_reference_filter_by_views_get_allowed_values($filter_view);
+    if (!empty($allowed)) {
+      $tags_return = array_intersect_key($tags_return, $allowed);
+    }
+    foreach ($tags_return as $tid => $name) {
+      $n = $name;
+      // Term names containing commas or quotes must be wrapped in quotes.
+      if (strpos($name, ',') !== FALSE || strpos($name, '"') !== FALSE) {
+        $n = '"' . str_replace('"', '""', $name) . '"';
+      }
+      $term_matches[$prefix . $n] = check_plain($name);
+    }
+  }
+
+  drupal_json_output($term_matches);
+}
+/**
+ * Returns an array of allowed values defined by the given view.
+ *
+ * @param $filter
+ *   A view, in the format VIEWNAME-DISPLAYNAME
+ *
+ * @return
+ *   An array of term IDs (tid => tid) returned by the view.
+ */
+function _term_reference_filter_by_views_get_allowed_values($filter) {
+  $viewname = "";
+  $displayname = "";
+  $allowed = array();
+
+  if(module_exists('views') && $filter != '') {
+    list($viewname, $displayname) = explode("-", $filter);
+    $view = views_get_view($viewname);
+    if(is_object($view)) {
+      if($view->access($displayname)) {
+        $view->execute($displayname);
+        foreach($view->result as $item) {
+          $allowed[$item->tid] = $item->tid;
+        }
+      }
+      else {
+        drupal_set_message("Cannot access view for term reference tree widget.", 'warning');
+      }
+    }
+    else {
+      drupal_set_message("Term reference tree: no view named '$viewname'", 'warning');
+    }
+  }
+
+  return $allowed;
+}

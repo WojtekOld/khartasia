@@ -1,0 +1,14 @@
+proc_reporting.update_tasks:
+  title: 'Protected Content: Update Tasks Monitoring'
+  description: 'Hourly snapshots of pending re-encryption tasks per user.'
+  route_name: proc_reporting.update_tasks
+  parent: system.admin_reports
+  weight: 10
+
+proc_reporting.daily_operations:
+  title: 'Protected Content: Daily Operations'
+  description: 'Daily counts of encrypt, decrypt and re-encrypt operations per user.'
+  route_name: proc_reporting.daily_operations
+  parent: system.admin_reports
+  weight: 11
+

@@ -2,14 +2,14 @@ name: Bibliography & Citation - Entity
 type: module
 description: Storage for your bibliographic data.
 package: Bibliography & Citation
-core_version_requirement: ^8.8 || ^9 || ^10 || ^11
+core_version_requirement: ^10.1 || ^11 || ^12
 configure: bibcite_entity.reference.settings
 dependencies:
   - bibcite:bibcite
   - entity:entity
   - token:token
 
-# Information added by Drupal.org packaging script on 2026-04-27
-version: '3.1.0'
+# Information added by Drupal.org packaging script on 2026-07-15
+version: '3.1.2'
 project: 'bibcite'
-datestamp: 1777319710
+datestamp: 1784152534

@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
-use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
+use Drupal\Core\Cache\RefinableCacheableDependencyTrait;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
@@ -13,19 +14,24 @@ use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginTrait;
 use Drupal\Core\Plugin\Definition\DependentPluginDefinitionInterface;
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for source plugins.
  */
-abstract class DerivableContextPluginBase extends PluginBase implements
-  DerivableContextInterface,
-  ContextAwarePluginInterface,
-  ContainerFactoryPluginInterface {
+abstract class DerivableContextPluginBase extends PluginBase implements DerivableContextInterface, ContextAwarePluginInterface, ContainerFactoryPluginInterface, RefinableCacheableDependencyInterface {
 
   use ContextAwarePluginAssignmentTrait;
-  use ContextAwarePluginTrait;
+
+  // Cacheability collected while deriving (access results, entities) is what
+  // the render array needs, not the cacheability of the given contexts.
+  use ContextAwarePluginTrait, RefinableCacheableDependencyTrait {
+    RefinableCacheableDependencyTrait::getCacheContexts insteadof ContextAwarePluginTrait;
+    RefinableCacheableDependencyTrait::getCacheTags insteadof ContextAwarePluginTrait;
+    RefinableCacheableDependencyTrait::getCacheMaxAge insteadof ContextAwarePluginTrait;
+  }
   use StringTranslationTrait;
   use DependencySerializationTrait;
 
@@ -35,13 +41,6 @@ abstract class DerivableContextPluginBase extends PluginBase implements
    * @var array
    */
   protected $context = [];
-
-  /**
-   * All gathered plugin contexts.
-   *
-   * @var array
-   */
-  protected $gatheredContexts = [];
 
   /**
    * {@inheritdoc}
@@ -56,22 +55,10 @@ abstract class DerivableContextPluginBase extends PluginBase implements
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('context.repository'),
+      $container->get(ContextRepositoryInterface::class),
     );
   }
 
-  /**
-   * Constructs a \Drupal\Component\Plugin\PluginBase object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\Core\Plugin\Context\ContextRepositoryInterface $contextRepository
-   *   The context repository.
-   */
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -89,7 +76,7 @@ abstract class DerivableContextPluginBase extends PluginBase implements
   public function label(): string {
     $plugin_definition = $this->getPluginDefinition();
     // Cast the label to a string since it is a TranslatableMarkup object.
-    return ($plugin_definition instanceof PluginDefinitionInterface) ? $plugin_definition->id() : (string) ($plugin_definition["label"] ?? "");
+    return ($plugin_definition instanceof PluginDefinitionInterface) ? $plugin_definition->id() : (string) ($plugin_definition['label'] ?? '');
   }
 
   /**
@@ -114,7 +101,7 @@ abstract class DerivableContextPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function setConfiguration(array $configuration) : void {
+  public function setConfiguration(array $configuration): void {
     if (isset($configuration['contexts'])) {
       $this->context = $configuration['contexts'];
     }
@@ -134,6 +121,11 @@ abstract class DerivableContextPluginBase extends PluginBase implements
    * Set values for the defined contexts of this plugin.
    */
   private function setDefinedContextValues(): void {
+    $plugin_context_definitions = $this->getContextDefinitions();
+    if (empty($plugin_context_definitions)) {
+      return;
+    }
+
     // Fetch the available contexts.
     $available_contexts = $this->contextRepository->getAvailableContexts();
 
@@ -141,10 +133,8 @@ abstract class DerivableContextPluginBase extends PluginBase implements
     // Ensure that the contexts have data by getting corresponding runtime
     // contexts.
     $available_runtime_contexts += $this->contextRepository->getRuntimeContexts(
-      array_keys($available_contexts)
+      \array_keys($available_contexts)
     );
-    $plugin_context_definitions = $this->getContextDefinitions();
-    $this->gatheredContexts = $available_runtime_contexts;
     foreach ($plugin_context_definitions as $name => $plugin_context_definition) {
       // Identify and fetch the matching runtime context, with the plugin's
       // context definition.
@@ -153,7 +143,7 @@ abstract class DerivableContextPluginBase extends PluginBase implements
           $available_runtime_contexts,
           $plugin_context_definition
         );
-      $matching_context = reset($matches);
+      $matching_context = \reset($matches);
       if ($matching_context) {
         $this->setContextValue($name, $matching_context->getContextValue());
       }
@@ -163,12 +153,12 @@ abstract class DerivableContextPluginBase extends PluginBase implements
   /**
    * {@inheritDoc}
    */
-  public function calculateDependencies() : array {
+  public function calculateDependencies(): array {
     $plugin_definition = $this->getPluginDefinition();
     if ($plugin_definition instanceof PluginDefinitionInterface) {
       return ($plugin_definition instanceof DependentPluginDefinitionInterface) ? $plugin_definition->getConfigDependencies() : [];
     }
-    return $plugin_definition["config_dependencies"] ?? [];
+    return $plugin_definition['config_dependencies'] ?? [];
   }
 
 }

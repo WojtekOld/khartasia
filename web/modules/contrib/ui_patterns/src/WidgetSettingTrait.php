@@ -42,7 +42,7 @@ trait WidgetSettingTrait {
   /**
    * Merges default widget settings values into $settings.
    */
-  protected function mergeWidgetDefaults() : void {
+  protected function mergeWidgetDefaults(): void {
     $this->widgetSettings += $this->defaultWidgetSettings();
     $this->defaultWidgetSettingsMerged = TRUE;
   }
@@ -51,7 +51,7 @@ trait WidgetSettingTrait {
    * {@inheritdoc}
    */
   public function getWidgetSetting(string $key): mixed {
-    if (!$this->defaultWidgetSettingsMerged && !array_key_exists($key, $this->widgetSettings)) {
+    if (!$this->defaultWidgetSettingsMerged && !\array_key_exists($key, $this->widgetSettings)) {
       $this->mergeWidgetDefaults();
     }
     return $this->widgetSettings[$key] ?? NULL;
@@ -69,7 +69,7 @@ trait WidgetSettingTrait {
   /**
    * {@inheritdoc}
    */
-  public function setConfiguration(array $configuration) : void {
+  public function setConfiguration(array $configuration): void {
     if (isset($configuration['widget_settings'])) {
       $this->setWidgetSettings($configuration['widget_settings']);
     }
@@ -81,46 +81,41 @@ trait WidgetSettingTrait {
    */
   public function widgetSettingsForm(array $form, FormStateInterface $form_state): array {
     return [
-      'required' =>
-        [
-          '#title' => $this->t('Required'),
-          '#type' => 'checkbox',
-          '#default_value' => $this->getWidgetSetting('required') ?? FALSE,
+      'required' => [
+        '#title' => $this->t('Required'),
+        '#type' => 'checkbox',
+        '#default_value' => $this->getWidgetSetting('required') ?? FALSE,
+      ],
+      'title' => [
+        '#title' => $this->t('Title'),
+        '#type' => 'textfield',
+        '#default_value' => $this->getWidgetSetting('title') ?? '',
+      ],
+      'title_display' => [
+        '#title' => $this->t('Title display'),
+        '#type' => 'select',
+        '#options' => [
+          'before' => $this->t('Before'),
+          'after' => $this->t('After'),
+          'invisible' => $this->t('Invisible'),
         ],
-      'title' =>
-        [
-          '#title' => $this->t('Title'),
-          '#type' => 'textfield',
-          '#default_value' => $this->getWidgetSetting('title') ?? '',
+        '#default_value' => $this->getWidgetSetting('title_display') ?? 'after',
+      ],
+      'description' => [
+        '#title' => $this->t('Description'),
+        '#type' => 'textfield',
+        '#default_value' => $this->getWidgetSetting('description') ?? '',
+      ],
+      'description_display' => [
+        '#title' => $this->t('Description display'),
+        '#type' => 'select',
+        '#options' => [
+          'before' => $this->t('Before'),
+          'after' => $this->t('After'),
+          'invisible' => $this->t('Invisible'),
         ],
-      'title_display' =>
-        [
-          '#title' => $this->t('Title display'),
-          '#type' => 'select',
-          '#options' => [
-            'before' => $this->t('Before'),
-            'after' => $this->t('After'),
-            'invisible' => $this->t('Invisible'),
-          ],
-          '#default_value' => $this->getWidgetSetting('title_display') ?? 'after',
-        ],
-      'description' =>
-        [
-          '#title' => $this->t('Description'),
-          '#type' => 'textfield',
-          '#default_value' => $this->getWidgetSetting('description') ?? '',
-        ],
-      'description_display' =>
-        [
-          '#title' => $this->t('Description display'),
-          '#type' => 'select',
-          '#options' => [
-            'before' => $this->t('Before'),
-            'after' => $this->t('After'),
-            'invisible' => $this->t('Invisible'),
-          ],
-          '#default_value' => $this->getWidgetSetting('description_display') ?? 'after',
-        ],
+        '#default_value' => $this->getWidgetSetting('description_display') ?? 'after',
+      ],
     ];
   }
 

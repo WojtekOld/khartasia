@@ -1,0 +1,156 @@
+/*
+*
+*
+* Marinelli Css3 graphics
+* 
+*
+*/
+
+
+/*	Layout  initial: box-shadow:5px 5px 20px #051b32;
+	-webkit-box-shadow:5px 5px 20px #051b32;
+	-moz-box-shadow: -5px 5px 30px #062544;
+}
+-------------------------------------------------------------- */
+
+.cssgradients #contentWrapper{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #eee),color-stop(0.05, #fff));
+	background: -moz-linear-gradient(top center,#eee,#fff 5%);
+}
+
+.boxshadow #site-title{
+	text-shadow: rgba(10, 10, 10, 0.4) 2px 3px 3px;
+	
+}
+.boxshadow #site-slogan{
+	text-shadow: rgba(0,0,0, 0.5) 2px 3px 3px;
+	font-family: "Journal", Arial, Helvetica, sans-serif;
+    font-size: 2.8em;
+}
+
+.boxshadow #pageBorder{
+	box-shadow:0px 0px 6px #051b32;
+	-webkit-box-shadow:0px 2px 6px #051b32;
+	-moz-box-shadow: -5px 5px 10px #062544;
+}
+
+/*	Primary Links
+-------------------------------------------------------------- */
+
+.boxshadow #navigation-primary > ul > li > h2 > a,
+.boxshadow #navigation-primary > ul > li > a{
+	text-shadow: rgba(10, 10, 10, 0.4) 2px 3px 3px;
+}
+
+.cssgradients #navigation-primary h2 > a,
+.cssgradients #navigation-primary > ul > li > a{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #f0f0f0),color-stop(0.4, #b3b3b3));
+	background: -moz-linear-gradient(top center,#f0f0f0,#b3b3b3 40%);
+}
+
+.cssgradients #navigation-primary > ul > li > a.active,
+.cssgradients #navigation-primary > ul > li > h2 > a.active{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #b3b3b3),color-stop(0.4, #868686));
+	background: -moz-linear-gradient(top center,#b3b3b3,#868686 40%);
+}
+
+.cssgradients #navigation-primary > ul > li > a:hover,
+.cssgradients #navigation-primary > ul > li > h2 > a:hover,	
+.cssgradients #navigation-primary > ul > li:hover > a,
+.cssgradients #navigation-primary > ul > li:hover > h2 > a{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #f4d7ba),color-stop(0.4, #BD3C1F));
+	background: -moz-linear-gradient(top center,#f4d7ba,#BD3C1F 40%);
+}
+
+.cssgradients div.mega{
+	background: -webkit-gradient(linear, left bottom, left top, color-stop(0.0, #eee),color-stop(0.3, #fff));
+	background: -moz-linear-gradient(bottom center,#eee,#fff 30%);
+}
+
+/*	Nodes
+-------------------------------------------------------------- */
+
+.cssgradients .teaser-created-day{
+	background: -webkit-gradient(linear, left bottom, left top, color-stop(0.0, #eee),color-stop(0.3, #fff));
+	background: -moz-linear-gradient(bottom center,#eee,#fff 30%);
+}
+
+/*	blocks
+-------------------------------------------------------------- */
+
+.cssgradients #block-user-login .block-title{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #b3b3b3),color-stop(0.4, #868686));
+	background: -moz-linear-gradient(top center,#b3b3b3,#868686 40%);
+}
+
+/*	Advertise
+.rgba #header-image-text{
+	background: rgba(0, 0, 0, 0.8); pour le noir d'origine
+}
+-------------------------------------------------------------- */
+	
+.rgba #header-image-text{
+	background: rgba(240, 240, 240, 0.5);
+}
+
+.boxshadow #header-image-title{
+	text-shadow: rgba(10, 10, 10, 0.8) 2px 3px 3px;
+}
+
+
+/*	Typography and other drupal items
+-------------------------------------------------------------- */
+
+.cssgradients ul.primary li a{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #d7d7d7),color-stop(0.5, #eee));
+	background: -moz-linear-gradient(top center,#d7d7d7,#eee 50%);
+}
+
+.cssgradients ul.primary li a:hover{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #f4d7ba),color-stop(0.4, #BD3C1F));
+	background: -moz-linear-gradient(top center,#f4d7ba,#BD3C1F 40%);
+}
+
+.cssgradients ul.primary li.active a:hover{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #eee),color-stop(0.4, #fff));
+	background: -moz-linear-gradient(top center,#eee,#fff 40%);
+}
+
+.cssgradients .form-submit{
+	background: -webkit-gradient(linear, left bottom, left top, color-stop(0.0, #f2f2f2),color-stop(0.6, #e6e6e6));
+	background: -moz-linear-gradient(bottom center,#f2f2f2,#e6e6e6 60%);
+}
+
+.cssgradients #block-user-login .form-submit{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #b3b3b3),color-stop(0.4, #868686));
+	background: -moz-linear-gradient(top center,#b3b3b3,#868686 40%);
+}
+
+.cssgradients .form-submit:focus,
+.cssgradients #block-user-login .form-submit:focus{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #f4d7ba),color-stop(0.4, #BD3C1F));
+	background: -moz-linear-gradient(top center,#f4d7ba,#BD3C1F 40%);
+}
+
+.cssgradients .taxonomy-term-description{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #eee),color-stop(0.8, #fff));
+	background: -moz-linear-gradient(top center,#eee,#fff 80%);
+}
+
+.cssgradients #content .item-list ul.pager li.pager-current,
+.cssgradients #content .item-list ul.pager li.pager-item a:hover{
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, #f0f0f0),color-stop(0.4, #b3b3b3));
+	background: -moz-linear-gradient(top center,#f0f0f0,#b3b3b3 40%);
+}
+/* PERSONNALISATION: moja NE MARCHE PAS*/
+/*.cssgradients .article-left .field.field-name-field-class-botan-texte{
+    background: -moz-linear-gradient(center top , #EEEEEE, #FFFFFF 80%) repeat scroll 0 0 transparent;
+}
+*/
+/*
+.cssgradients .titre-chapitre {
+    background: -moz-linear-gradient(center top , #EEEEEE, #FFFFFF 80%) repeat scroll 0 0 transparent;
+}
+*/
+/* FIN moje "field field-name-field-class-botan-texte field-type-text-long field-label-above" */
+ 

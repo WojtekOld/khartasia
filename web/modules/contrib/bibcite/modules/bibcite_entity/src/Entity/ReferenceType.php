@@ -2,7 +2,9 @@
 
 namespace Drupal\bibcite_entity\Entity;
 
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the Reference type entity.
@@ -45,6 +47,43 @@ use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'bibcite_reference_type',
+  label: new TranslatableMarkup('Reference type'),
+  handlers: [
+    'access' => 'Drupal\bibcite_entity\ReferenceTypeAccessControlHandler',
+    'list_builder' => 'Drupal\bibcite_entity\ReferenceTypeListBuilder',
+    'form' => [
+      'add' => 'Drupal\bibcite_entity\Form\ReferenceTypeForm',
+      'edit' => 'Drupal\bibcite_entity\Form\ReferenceTypeForm',
+      'delete' => 'Drupal\bibcite_entity\Form\ReferenceTypeDeleteForm',
+    ],
+  ],
+  config_prefix: 'bibcite_reference_type',
+  bundle_of: 'bibcite_reference',
+  admin_permission: 'administer bibcite_reference',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+  ],
+  links: [
+    'add-form' => '/admin/structure/bibcite/reference/settings/types/add',
+    'edit-form' => '/admin/structure/bibcite/reference/settings/types/{bibcite_reference_type}',
+    'delete-form' => '/admin/structure/bibcite/reference/settings/types/{bibcite_reference_type}/delete',
+    'collection' => '/admin/structure/bibcite/reference/settings/types',
+  ],
+  config_export: [
+    'id',
+    'label',
+    'description',
+    'new_revision',
+    'override',
+    'preview_mode',
+    'citekey_pattern',
+    'fields',
+  ]
+)]
 class ReferenceType extends ConfigEntityBundleBase implements ReferenceTypeInterface {
 
   /**

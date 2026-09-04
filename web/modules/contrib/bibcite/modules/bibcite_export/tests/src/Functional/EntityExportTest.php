@@ -2,14 +2,17 @@
 
 namespace Drupal\Tests\bibcite_export\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\BrowserTestBase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Test for main export functions.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class EntityExportTest extends BrowserTestBase {
 
   /**
@@ -47,9 +50,8 @@ class EntityExportTest extends BrowserTestBase {
 
   /**
    * Test export URL's.
-   *
-   * @dataProvider exportDataProvider
    */
+  #[DataProvider('exportDataProvider')]
   public function testExportUrl($id, $format, $expected_result) {
     $this->drupalLogin($this->user);
 
@@ -60,9 +62,8 @@ class EntityExportTest extends BrowserTestBase {
 
   /**
    * Test export links.
-   *
-   * @dataProvider exportDataProvider
    */
+  #[DataProvider('exportDataProvider')]
   public function testExportLinks($id, $format, $expected_result) {
     $this->drupalLogin($this->user);
 
@@ -80,9 +81,8 @@ class EntityExportTest extends BrowserTestBase {
 
   /**
    * Test export all form.
-   *
-   * @dataProvider exportDataProvider
    */
+  #[DataProvider('exportDataProvider')]
   public function testExportAll($id, $format) {
     $this->drupalLogin($this->user);
 

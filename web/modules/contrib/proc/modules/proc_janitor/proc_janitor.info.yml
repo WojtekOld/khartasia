@@ -1,0 +1,12 @@
+name: 'PROC Janitor'
+type: module
+description: 'Maintenance tasks for Protected Content entities.'
+core_version_requirement: ^10 || ^11
+dependencies:
+  - proc:proc
+
+
+# Information added by Drupal.org packaging script on 2026-08-27
+version: '10.1.125'
+project: 'proc'
+datestamp: 1787857473

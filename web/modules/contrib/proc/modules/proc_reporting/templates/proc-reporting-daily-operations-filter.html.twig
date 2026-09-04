@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * Template for the Daily Operations report filter form.
+ *
+ * A plain HTML GET form so no Drupal form token is appended to the URL when
+ * filters are applied.
+ *
+ * Available variables:
+ * - label_date: Translated label for the date field.
+ * - label_uid: Translated label for the user-ID field.
+ * - label_filter: Translated label for the submit button.
+ * - label_reset: Translated label for the reset link.
+ * - date_filter: Currently applied date filter value (YYYY-MM-DD string or empty).
+ * - uid_filter: Currently applied user-ID filter value (integer > 0 or empty string).
+ * - reset_url: URL to reset / clear all filters.
+ */
+#}
+<form method="get" action="" class="proc-reporting-filter-form views-exposed-form" style="margin-bottom:1.5em">
+  <label for="proc-rpt-date">{{ label_date }}: </label>
+  <input type="date" id="proc-rpt-date" name="date" value="{{ date_filter }}" style="margin-right:1em" />
+  <label for="proc-rpt-uid">{{ label_uid }}: </label>
+  <input type="number" id="proc-rpt-uid" name="uid" value="{{ uid_filter }}" min="1" style="width:80px;margin-right:1em" />
+  <input type="submit" value="{{ label_filter }}" class="button" />
+  {% if date_filter or uid_filter %}
+    <a href="{{ reset_url }}" style="margin-left:.5em">{{ label_reset }}</a>
+  {% endif %}
+</form>
+

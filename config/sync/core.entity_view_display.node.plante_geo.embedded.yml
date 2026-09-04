@@ -1,0 +1,77 @@
+uuid: afa3d81d-c662-4e39-bfb7-bac26a80145d
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.embedded
+    - field.field.node.plante_geo.field_pg_culture
+    - field.field.node.plante_geo.field_pg_intro
+    - field.field.node.plante_geo.field_pg_lat
+    - field.field.node.plante_geo.field_pg_lng
+    - field.field.node.plante_geo.field_pg_pays
+    - field.field.node.plante_geo.field_pg_preparation
+    - field.field.node.plante_geo.field_pg_region
+    - field.field.node.plante_geo.field_pg_region_hist
+    - field.field.node.plante_geo.field_pg_source
+    - field.field.node.plante_geo.field_pg_utilisation
+    - node.type.plante_geo
+  module:
+    - text
+    - user
+id: node.plante_geo.embedded
+targetEntityType: node
+bundle: plante_geo
+mode: embedded
+content:
+  field_pg_culture:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_pg_intro:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_pg_pays:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_pg_preparation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_pg_source:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_pg_utilisation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  field_pg_lat: true
+  field_pg_lng: true
+  field_pg_region: true
+  field_pg_region_hist: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

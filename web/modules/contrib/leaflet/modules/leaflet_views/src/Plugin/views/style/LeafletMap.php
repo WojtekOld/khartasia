@@ -1220,7 +1220,7 @@ class LeafletMap extends StylePluginBase implements ContainerFactoryPluginInterf
    *
    * @param string $entity_type
    *   The entity type.
-   * @param string $entity_id
+   * @param string|int $entity_id
    *   The entity ID.
    * @param object|null $entity
    *   The entity or NULL.
@@ -1232,7 +1232,7 @@ class LeafletMap extends StylePluginBase implements ContainerFactoryPluginInterf
    * @return string
    *   The popup content.
    */
-  protected function getPopupContent(string $entity_type, string $entity_id, $entity, $result, string $langcode) {
+  protected function getPopupContent(string $entity_type, string|int $entity_id, $entity, $result, string $langcode) {
     // Define the Popup source and Popup view mode with backward
     // compatibility with Leaflet release < 2.x.
     $popup_source = !empty($this->options['description_field']) ?
@@ -1333,7 +1333,7 @@ class LeafletMap extends StylePluginBase implements ContainerFactoryPluginInterf
    *
    * @param array $feature
    *   The feature to process.
-   * @param string $entity_id
+   * @param string|int $entity_id
    *   The entity ID.
    * @param string|MarkupInterface $popup_content
    *   The popup content.
@@ -1350,7 +1350,7 @@ class LeafletMap extends StylePluginBase implements ContainerFactoryPluginInterf
    */
   protected function processFeature(
     array &$feature,
-    string $entity_id,
+    string|int $entity_id,
     string|MarkupInterface $popup_content,
     array $tokens,
     int $id,
@@ -1452,10 +1452,9 @@ class LeafletMap extends StylePluginBase implements ContainerFactoryPluginInterf
         case '#rendered_view_fields':
           // Normal rendering via view/row fields
           // (with labels options, formatters, classes, etc.).
-          $render_row = [
-            "markup" => $this->view->rowPlugin->render($result),
-          ];
-          // Render popup content, ensuring backward compatibility
+          $render_row = $this->view->rowPlugin->render($result);
+
+          // Render popup content, ensuring backward compatibility.
           $feature['tooltip']['value'] = $this->renderer->renderInIsolation($render_row);
           break;
 

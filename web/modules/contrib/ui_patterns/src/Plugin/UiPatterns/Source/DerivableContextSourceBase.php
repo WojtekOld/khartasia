@@ -8,9 +8,15 @@ use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\Context\ContextHandlerInterface;
+use Drupal\Core\Plugin\PreviewAwarePluginInterface;
 use Drupal\ui_patterns\DerivableContextPluginBase;
+use Drupal\ui_patterns\DerivableContextPluginManager;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
+use Drupal\ui_patterns\SourceMetadataKey;
 use Drupal\ui_patterns\SourcePluginBase;
+use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -18,33 +24,24 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Ready to use base class for source plugins using DerivableContexts.
  */
 abstract class DerivableContextSourceBase extends SourcePluginBase implements SourceWithChoicesInterface {
+
   /**
    * The source plugin manager.
-   *
-   * @var \Drupal\ui_patterns\SourcePluginManager
    */
-  protected $sourcePluginManager;
-
+  protected SourcePluginManager $sourcePluginManager;
 
   /**
    * The derivable context manager.
-   *
-   * @var \Drupal\ui_patterns\DerivableContextPluginManager
    */
-  protected $derivableContextManager;
-
+  protected DerivableContextPluginManager $derivableContextManager;
 
   /**
    * The context handler.
-   *
-   * @var \Drupal\Core\Plugin\Context\ContextHandlerInterface
    */
-  protected $contextHandler;
+  protected ContextHandlerInterface $contextHandler;
 
   /**
    * Sources.
-   *
-   * @var array|null
    */
   protected ?array $derivableContexts = NULL;
 
@@ -53,7 +50,7 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    *
    * @var array<\Drupal\ui_patterns\SourceInterface>
    */
-  protected $sourcePlugins = NULL;
+  protected $sourcePlugins;
 
   /**
    * {@inheritdoc}
@@ -70,9 +67,9 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
       $plugin_id,
       $plugin_definition
     );
-    $plugin->sourcePluginManager = $container->get('plugin.manager.ui_patterns_source');
-    $plugin->contextHandler = $container->get('context.handler');
-    $plugin->derivableContextManager = $container->get('plugin.manager.ui_patterns_derivable_context');
+    $plugin->sourcePluginManager = $container->get(SourcePluginManager::class);
+    $plugin->contextHandler = $container->get(ContextHandlerInterface::class);
+    $plugin->derivableContextManager = $container->get(DerivableContextPluginManager::class);
     return $plugin;
   }
 
@@ -81,8 +78,8 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    */
   public function defaultSettings(): array {
     return [
-      "derivable_context" => NULL,
-      "source" => [],
+      'derivable_context' => NULL,
+      'source' => [],
     ];
   }
 
@@ -96,12 +93,18 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
     $prop_type = $definition['ui_patterns']['type_definition'];
     $source_plugins = $this->getSourcePlugins();
     if (!$this->isSlot()) {
-      $source_plugin = (count($source_plugins) > 0) ? $source_plugins[0] : NULL;
-      return ($source_plugin) ? $source_plugin->getValue($prop_type) : NULL;
+      $source_plugin = (\count($source_plugins) > 0) ? $source_plugins[0] : NULL;
+      if (!$source_plugin) {
+        return NULL;
+      }
+      $value = $source_plugin->getValue($prop_type);
+      $this->addCacheableDependency($source_plugin);
+      return $value;
     }
     $returned = [];
     foreach ($source_plugins as $source_plugin) {
       $returned[] = $source_plugin->getValue($prop_type);
+      $this->addCacheableDependency($source_plugin);
     }
     return empty($returned) ? NULL : $returned;
   }
@@ -125,13 +128,15 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    * @return array
    *   The derived contexts.
    */
-  protected function getDerivedContexts(string $derivable_context) : array {
+  protected function getDerivedContexts(string $derivable_context): array {
     /** @var \Drupal\ui_patterns\DerivableContextInterface $derivable_context_plugin */
     $derivable_context_plugin = $this->derivableContextManager->createInstance($derivable_context, DerivableContextPluginBase::buildConfiguration($this->getContextForDerivation()));
     if (!$derivable_context_plugin) {
       return [];
     }
-    return $derivable_context_plugin->getDerivedContexts() ?? [];
+    $derived_contexts = $derivable_context_plugin->getDerivedContexts() ?? [];
+    $this->addCacheableDependency($derivable_context_plugin);
+    return $derived_contexts;
   }
 
   /**
@@ -151,29 +156,29 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
       return $this->sourcePlugins;
     }
     $sources = $this->getSetting($derivable_context) ?? [];
-    if (!is_array($sources) || !array_key_exists("value", $sources)) {
+    if (!\is_array($sources) || !\array_key_exists('value', $sources)) {
       return $this->sourcePlugins;
     }
-    $sources = $sources["value"];
+    $sources = $sources['value'];
 
     if ($this->isSlot()) {
-      if (isset($sources["sources"])) {
-        $source_configuration = array_values($sources["sources"])[0];
+      if (isset($sources['sources'])) {
+        $source_configuration = \array_values($sources['sources'])[0];
       }
     }
     else {
       $source_configuration = $sources;
     }
 
-    if (!isset($source_configuration["source_id"])) {
+    if (!isset($source_configuration['source_id'])) {
       return $this->sourcePlugins;
     }
 
     foreach ($derived_contexts as $derived_context) {
-      $target_plugin_configuration = array_merge($source_configuration["source"] ?? [], [
-        "context" => $derived_context,
+      $target_plugin_configuration = \array_merge($source_configuration['source'] ?? [], [
+        'context' => $derived_context,
       ]);
-      $this->sourcePlugins[] = $this->createSourcePlugin($source_configuration["source_id"], $target_plugin_configuration, $derived_context);
+      $this->sourcePlugins[] = $this->createSourcePlugin($source_configuration['source_id'], $target_plugin_configuration, $derived_context);
     }
     return $this->sourcePlugins;
   }
@@ -203,32 +208,32 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   Form state.
    *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   *
    * @return array
    *   Returned form
    *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
-   *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  private function buildDerivableContextSelectorForm(array &$form, FormStateInterface $form_state) : array {
+  private function buildDerivableContextSelectorForm(array &$form, FormStateInterface $form_state): array {
     $derivableContexts = $this->listCompatibleDerivableContexts();
-    $wrapper_id = Html::getId(implode("_", $this->formArrayParents ?? []) . "_derivable_context_selector");
+    $wrapper_id = Html::getId(\implode('_', $this->formArrayParents ?? []) . '_derivable_context_selector');
     $options_derivable_contexts = $this->getDerivableContextsOptions();
     $form = [
       '#type' => 'container',
-      "#tree" => TRUE,
+      '#tree' => TRUE,
     ];
     if (empty($options_derivable_contexts)) {
-      $form["derivable_context"] = [
-        "#markup" => $this->t("Not available"),
+      $form['derivable_context'] = [
+        '#markup' => $this->t('Not available'),
       ];
       return $form;
     }
     $derivable_context = $this->getSelectedDerivableContext($form_state, $options_derivable_contexts);
-    $form["derivable_context"] = [
-      "#type" => "select",
-      "#title" => $this->t("Context"),
-      "#options" => $options_derivable_contexts,
+    $form['derivable_context'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Context'),
+      '#options' => $options_derivable_contexts,
       '#default_value' => $derivable_context,
       '#ajax' => [
         'callback' => [__CLASS__, 'onDerivableContextChange'],
@@ -236,46 +241,45 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
         'method' => 'replaceWith',
       ],
       '#executes_submit_callback' => FALSE,
-      '#empty_value' => NULL,
       '#empty_option' => $this->t('- Select -'),
       '#required' => TRUE,
     ];
     $source_container = [
       '#type' => 'container',
-      '#attributes' => ["id" => $wrapper_id, "class" => ["derivable-context-source-wrapper"]],
+      '#attributes' => ['id' => $wrapper_id, 'class' => ['derivable-context-source-wrapper']],
       '#tree' => TRUE,
     ];
-    if (!$derivable_context || !array_key_exists($derivable_context, $derivableContexts)) {
+    if (!$derivable_context || !\array_key_exists($derivable_context, $derivableContexts)) {
       $form[$derivable_context ?? ''] = $source_container;
       return $form;
     }
     $source = $this->getSetting($derivable_context) ?? [];
-    $source = $source["value"] ?? [];
+    $source = $source['value'] ?? [];
     /** @var \Drupal\ui_patterns\DerivableContextInterface $derivable_context_plugin */
     $derivable_context_plugin = $this->derivableContextManager->createInstance($derivable_context, DerivableContextPluginBase::buildConfiguration($this->context));
     $derived_contexts = $derivable_context_plugin->getDerivedContexts();
     $form[$derivable_context] = $source_container;
-    if (count($derived_contexts) === 0) {
+    if (\count($derived_contexts) === 0) {
       return $form;
     }
     $derivable_context_form = &$form[$derivable_context];
-    $derived_context = reset($derived_contexts);
-    $component_id = isset($derived_context["component_id"]) ? $derived_context["component_id"]->getContextValue() : NULL;
+    $derived_context = \reset($derived_contexts);
+    $component_id = isset($derived_context['component_id']) ? $derived_context['component_id']->getContextValue() : NULL;
     $is_slot = $this->isSlot();
     // When option is within a group.
     $group_label = $this->getDerivableContextsOptionGroupLabel($options_derivable_contexts, $derivable_context);
     if (!empty($group_label)) {
-      $derivable_context_form["group_label"] = [
-        "#markup" => $this->t('From') . ' <span class="plugin-name">' . $group_label . '</span><hr/>',
+      $derivable_context_form['group_label'] = [
+        '#markup' => $this->t('From') . ' <span class="plugin-name">' . $group_label . '</span><hr/>',
       ];
     }
-    $derivable_context_form["value"] = [
+    $derivable_context_form['value'] = [
       '#type' => $is_slot ? 'component_slot_form' : 'component_prop_form',
       '#component_id' => $component_id,
       '#title' => '',
       '#cardinality_multiple' => FALSE,
       '#display_remove' => FALSE,
-      "#wrap" => FALSE,
+      '#wrap' => FALSE,
       '#' . ($is_slot ? 'slot_id' : 'prop_id') => $this->getPropId(),
       '#tree' => TRUE,
       '#default_value' => $source,
@@ -296,7 +300,7 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    * @return string|null
    *   The selected and validated derivable context.
    */
-  private function getSelectedDerivableContext(FormStateInterface $form_state, array $options_derivable_contexts) : ?string {
+  private function getSelectedDerivableContext(FormStateInterface $form_state, array $options_derivable_contexts): ?string {
     $derivable_context = (string) ($this->getSetting('derivable_context') ?? '');
     if (!$derivable_context) {
       $derivable_context = $form_state->getValue('derivable_context') ?? NULL;
@@ -304,14 +308,14 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
     // Validate the selected derivable context.
     if ($derivable_context && !isset($options_derivable_contexts[$derivable_context])) {
       // Reset value, or take the first one if only one is available.
-      $derivable_context = (count($options_derivable_contexts) === 1) ? key($options_derivable_contexts) : NULL;
+      $derivable_context = (\count($options_derivable_contexts) === 1) ? \key($options_derivable_contexts) : NULL;
       if ($form_state->isProcessingInput()) {
         $this->cleanUserInput($form_state->getCompleteForm(), $form_state);
       }
     }
     // Set default value to the only available option.
-    if (!$derivable_context && count($options_derivable_contexts) === 1) {
-      $derivable_context = array_key_first($options_derivable_contexts);
+    if (!$derivable_context && \count($options_derivable_contexts) === 1) {
+      $derivable_context = \array_key_first($options_derivable_contexts);
     }
     return $derivable_context;
   }
@@ -336,9 +340,9 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
     $prop_form = NestedArray::getValue($complete_form, $this->formArrayParents);
     if ($prop_form) {
       $input = $form_state->getUserInput();
-      $prop_input = &NestedArray::getValue($input, $prop_form["#parents"] ?? []);
-      if (isset($prop_input["source"])) {
-        unset($prop_input["source"]);
+      $prop_input = &NestedArray::getValue($input, $prop_form['#parents'] ?? []);
+      if (isset($prop_input['source'])) {
+        unset($prop_input['source']);
         // Reset the user input, form state values
         // will be recomputed by FormBuilder.
         $form_state->setUserInput($input);
@@ -352,13 +356,13 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    * @return array<string, mixed>
    *   The options.
    */
-  protected function getDerivableContextsOptions() : array {
+  protected function getDerivableContextsOptions(): array {
     $choices = $this->getChoices();
     $options_derivable_contexts = [];
     foreach ($choices as $choice_id => $choice) {
-      $options_derivable_contexts[$choice_id] = $choice["label"];
+      $options_derivable_contexts[$choice_id] = $choice['label'];
     }
-    asort($options_derivable_contexts);
+    \asort($options_derivable_contexts);
     return $options_derivable_contexts;
   }
 
@@ -373,13 +377,12 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    * @return string|null
    *   The label.
    */
-  protected function getDerivableContextsOptionGroupLabel(array $options_derivable_contexts, string $derivable_context) : ?string {
-
+  protected function getDerivableContextsOptionGroupLabel(array $options_derivable_contexts, string $derivable_context): ?string {
     if (isset($options_derivable_contexts[$derivable_context])) {
       return NULL;
     }
     foreach ($options_derivable_contexts as $group_key => $grouped_option_keys) {
-      if (!is_array($grouped_option_keys)) {
+      if (!\is_array($grouped_option_keys)) {
         continue;
       }
       if (isset($grouped_option_keys[$derivable_context])) {
@@ -417,15 +420,16 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
     }
     try {
       // Field formatter trick.
-      $configuration["settings"] = $configuration["settings"] ?? [];
+      $configuration['settings'] = $configuration['settings'] ?? [];
       /** @var \Drupal\ui_patterns\SourceInterface $plugin */
       $plugin = $this->sourcePluginManager->createInstance(
         $plugin_id,
-        SourcePluginBase::buildConfiguration($this->propId, $this->propDefinition, ["source" => $configuration], $contexts, $form_array_parents)
+        SourcePluginBase::buildConfiguration($this->propId, $this->propDefinition, ['source' => $configuration], $contexts, $form_array_parents)
       );
-      // If ($contexts && $plugin instanceof ContextAwarePluginInterface) {
-      // $this->contextHandler->applyContextMapping($plugin, $contexts);
-      // }.
+      // Not built by ComponentElementBuilder::buildSource().
+      if ($plugin instanceof PreviewAwarePluginInterface) {
+        $plugin->setInPreview(ComponentElementBuilder::isInPreview($contexts));
+      }
       return $plugin;
     }
     catch (\Exception $e) {
@@ -451,8 +455,8 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
     // settings forms may be different, e.g. for layout builder, core, ...
     if (!empty($triggeringElement['#array_parents'])) {
       $subformKeys = $triggeringElement['#array_parents'];
-      array_pop($subformKeys);
-      $subformKeys[] = $triggeringElement["#value"];
+      \array_pop($subformKeys);
+      $subformKeys[] = $triggeringElement['#value'];
       $subform = NestedArray::getValue($form, $subformKeys);
       $form_state->setRebuild();
       return $subform;
@@ -468,24 +472,24 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  protected function listCompatibleDerivableContexts() : array {
+  protected function listCompatibleDerivableContexts(): array {
     if ($this->derivableContexts) {
       return $this->derivableContexts;
     }
     $derivable_contexts = $this->listDerivableContexts();
     $source_tag_filter = $this->getSourcesTagFilter();
     $prop_type_plugin_id = $this->propDefinition['ui_patterns']['type_definition']->getPluginId();
-    $this->derivableContexts = array_filter($derivable_contexts, function ($derivable_context, $derivable_context_id) use ($source_tag_filter, $prop_type_plugin_id) {
+    $this->derivableContexts = \array_filter($derivable_contexts, function ($derivable_context, $derivable_context_id) use ($source_tag_filter, $prop_type_plugin_id) {
       /** @var \Drupal\ui_patterns\DerivableContextInterface $derivable_context_plugin */
       $derivable_context_plugin = $this->derivableContextManager->createInstance($derivable_context_id, DerivableContextPluginBase::buildConfiguration($this->context));
       $derived_contexts = $derivable_context_plugin->getDerivedContexts();
-      if (count($derived_contexts) === 0) {
+      if (\count($derived_contexts) === 0) {
         return FALSE;
       }
-      $derived_context = reset($derived_contexts);
+      $derived_context = \reset($derived_contexts);
       $sources = $this->sourcePluginManager->getDefinitionsForPropType($prop_type_plugin_id, $derived_context, $source_tag_filter);
-      return (count($sources) > 0);
-    }, ARRAY_FILTER_USE_BOTH);
+      return \count($sources) > 0;
+    }, \ARRAY_FILTER_USE_BOTH);
     return $this->derivableContexts;
   }
 
@@ -495,7 +499,7 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
    * @return array
    *   Definitions of blocks
    */
-  protected function listDerivableContexts() : array {
+  protected function listDerivableContexts(): array {
     return $this->derivableContextManager->getDefinitionsMatchingContextsAndTags($this->context, $this->getDerivationTagFilter());
   }
 
@@ -508,16 +512,15 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
     foreach ($derivableContexts as $derivable_context_plugin_id => $derivable_context) {
       $metadata = $derivable_context['metadata'] ?? [];
       $choice = [
-        "label" => $derivable_context["label"],
-        "original_id" => $derivable_context_plugin_id,
-        "group" => $metadata["group"] ?? NULL,
-        "provider" => $metadata['provider'] ?? NULL,
+        'label' => $derivable_context['label'],
+        'original_id' => $derivable_context_plugin_id,
+        // Derivable contexts have no group. The key stays for a uniform
+        // choice shape across sources; BlockSource fills it.
+        'group' => NULL,
+        'provider' => $metadata[SourceMetadataKey::Provider->value] ?? NULL,
       ];
       if ($choice['label'] instanceof MarkupInterface) {
         $choice['label'] = (string) $choice['label'];
-      }
-      if ($choice['group'] instanceof MarkupInterface) {
-        $choice['group'] = (string) $choice['group'];
       }
       $choices[$derivable_context_plugin_id] = $choice;
     }
@@ -546,7 +549,7 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies() : array {
+  public function calculateDependencies(): array {
     $dependencies = parent::calculateDependencies();
     $derivable_context = $this->getSetting('derivable_context') ?? NULL;
     if (!$derivable_context) {

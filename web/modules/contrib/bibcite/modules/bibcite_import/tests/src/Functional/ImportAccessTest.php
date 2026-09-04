@@ -2,13 +2,15 @@
 
 namespace Drupal\Tests\bibcite_import\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test access to import form.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class ImportAccessTest extends BrowserTestBase {
 
   /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\ui_icons_field\Unit\Plugin;
+namespace Drupal\Tests\ui_icons_field\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\StringTranslation\TranslationInterface;
@@ -13,12 +13,14 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the IconWidget class.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[CoversClass(IconWidget::class)]
 #[Group('ui_icons')]
 class IconWidgetUnitTest extends UnitTestCase {
@@ -46,15 +48,13 @@ class IconWidgetUnitTest extends UnitTestCase {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
-    $this->container->set('string_translation', $this->createMock(TranslationInterface::class));
+    $this->container->set('string_translation', $this->createStub(TranslationInterface::class));
     \Drupal::setContainer($this->container);
-
-    $fieldDefinition = $this->createMock('Drupal\Core\Field\FieldDefinition');
 
     $this->widget = new IconWidget(
       'icon_widget',
       [],
-      $fieldDefinition,
+      $this->createStub('Drupal\Core\Field\FieldDefinition'),
       [],
       []
     );
@@ -64,7 +64,7 @@ class IconWidgetUnitTest extends UnitTestCase {
    * Tests the massageFormValues method.
    */
   public function testMassageFormValues(): void {
-    $form_state = $this->createMock('Drupal\Core\Form\FormState');
+    $form_state = $this->createStub('Drupal\Core\Form\FormState');
 
     $values = [];
 

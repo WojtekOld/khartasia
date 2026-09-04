@@ -1,0 +1,16 @@
+label: Manuscrit
+fields:
+  bibcite_secondary_title:
+    label: 'Titre de la collection'
+  bibcite_volume:
+    label: 'Volume/Espace de stockage'
+  bibcite_number_of_volumes:
+    label: 'Numéro de manuscrit'
+  bibcite_number:
+    label: 'Numéro de folio'
+  bibcite_publisher:
+    label: Bibliothèque/Archive
+  bibcite_place_published:
+    label: Ville
+  bibcite_alternate_title:
+    label: Abrévation

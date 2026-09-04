@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
-use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
@@ -19,8 +19,6 @@ abstract class PropTypePluginBase extends PluginBase implements PropTypeInterfac
 
   /**
    * Normalizer service.
-   *
-   * @var \Drupal\ui_patterns\UiPatternsNormalizerInterface|null
    */
   protected static ?UiPatternsNormalizerInterface $uiPatternsNormalizer;
 
@@ -30,9 +28,9 @@ abstract class PropTypePluginBase extends PluginBase implements PropTypeInterfac
    * @return \Drupal\ui_patterns\UiPatternsNormalizerInterface
    *   The normalizer service.
    */
-  protected static function normalizer() : UiPatternsNormalizerInterface {
+  protected static function normalizer(): UiPatternsNormalizerInterface {
     if (!isset(static::$uiPatternsNormalizer)) {
-      static::$uiPatternsNormalizer = \Drupal::service('ui_patterns.normalizer');
+      static::$uiPatternsNormalizer = \Drupal::service(UiPatternsNormalizerInterface::class);
     }
     return static::$uiPatternsNormalizer;
   }
@@ -42,7 +40,7 @@ abstract class PropTypePluginBase extends PluginBase implements PropTypeInterfac
    */
   public function label(): string {
     // Cast the label to a string since it is a TranslatableMarkup object.
-    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? $this->pluginDefinition->id() : (string) ($this->pluginDefinition["label"] ?? '');
+    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? $this->pluginDefinition->id() : (string) ($this->pluginDefinition['label'] ?? '');
   }
 
   /**
@@ -56,7 +54,7 @@ abstract class PropTypePluginBase extends PluginBase implements PropTypeInterfac
    * Get default source ID.
    */
   public function getDefaultSourceId(): string {
-    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? '' : (string) ($this->pluginDefinition["default_source"] ?? '');
+    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? '' : (string) ($this->pluginDefinition['default_source'] ?? '');
   }
 
   /**
@@ -75,10 +73,10 @@ abstract class PropTypePluginBase extends PluginBase implements PropTypeInterfac
       $summary[] = $definition['description'];
     }
     if (isset($definition['default'])) {
-      $summary[] = $this->t("Default: @default", ["@default" => json_encode($definition['default'])]);
+      $summary[] = $this->t('Default: @default', ['@default' => \json_encode($definition['default'])]);
     }
     if (isset($definition['ui_patterns']['required']) && $definition['ui_patterns']['required']) {
-      $summary[] = $this->t("Required");
+      $summary[] = $this->t('Required');
     }
     return $summary;
   }

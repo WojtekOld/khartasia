@@ -1,0 +1,5 @@
+services:
+  _defaults:
+    autoconfigure: true
+    autowire: true
+  Drupal\sophron_guesser_test\EventSubscriber\SophronTestEventSubscriber: ~

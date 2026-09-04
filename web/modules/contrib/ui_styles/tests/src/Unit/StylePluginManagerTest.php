@@ -6,6 +6,7 @@ namespace Drupal\Tests\ui_styles\Unit;
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Transliteration\TransliterationInterface;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -17,6 +18,7 @@ use Drupal\ui_styles\Definition\StyleDefinition;
 use Drupal\ui_styles\Source\SourcePluginManagerInterface;
 use Drupal\ui_styles_test\DummyStylePluginManager;
 use Drupal\ui_styles_test\Plugin\UiStyles\Source\TestSelect;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -26,6 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  *
  * @coversDefaultClass \Drupal\ui_styles\StylePluginManager
  */
+#[Group('ui_styles')]
 class StylePluginManagerTest extends UnitTestCase {
 
   /**
@@ -711,6 +714,13 @@ class StylePluginManagerTest extends UnitTestCase {
 
     // Test addStyleToBlockContent > #theme:block > #theme:field
     // > media_thumbnail.
+    $attribute_key = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.4',
+      currentCallable: static fn (): string => '#attributes',
+      deprecatedCallable: static fn (): string => '#item_attributes',
+    );
+
     $element = [
       '#theme' => 'block',
       'content' => [
@@ -719,17 +729,17 @@ class StylePluginManagerTest extends UnitTestCase {
         'test' => [
           // Allowed #attributes tag.
           '#theme' => 'image_formatter',
-          '#item_attributes' => [
+          $attribute_key => [
             'class' => ['original-class'],
           ],
         ],
       ],
     ];
-    /** @var array{content: array{test: array{"#item_attributes": array{class: array}}}} $newElement */
+    /** @var array{content: array{test: array{$attribute_key: array{class: array}}}} $newElement */
     $newElement = $this->stylePluginManager->addClasses($element, ['added-class'], 'extra-class');
-    $this->assertContains('original-class', $newElement['content']['test']['#item_attributes']['class']);
-    $this->assertContains('added-class', $newElement['content']['test']['#item_attributes']['class']);
-    $this->assertContains('extra-class', $newElement['content']['test']['#item_attributes']['class']);
+    $this->assertContains('original-class', $newElement['content']['test'][$attribute_key]['class']);
+    $this->assertContains('added-class', $newElement['content']['test'][$attribute_key]['class']);
+    $this->assertContains('extra-class', $newElement['content']['test'][$attribute_key]['class']);
 
     // Test addStyleToBlockContent > #theme:block > #theme:field
     // > !isAcceptingAttributes.
@@ -934,6 +944,13 @@ class StylePluginManagerTest extends UnitTestCase {
 
     // Test addStyleToBlockContent > #theme:block > #theme:field
     // > image_formatter.
+    $attribute_key = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.4',
+      currentCallable: static fn (): string => '#attributes',
+      deprecatedCallable: static fn (): string => '#item_attributes',
+    );
+
     $element = [
       '#theme' => 'block',
       'content' => [
@@ -941,20 +958,27 @@ class StylePluginManagerTest extends UnitTestCase {
         '#formatter' => 'dummy',
         'test_image_formatter' => [
           '#theme' => 'image_formatter',
-          '#item_attributes' => [
+          $attribute_key => [
             'class' => ['original-class'],
           ],
         ],
       ],
     ];
-    /** @var array{content: array{test_image_formatter: array{"#item_attributes": array{class: array}}}} $newElement */
+    /** @var array{content: array{test_image_formatter: array{$attribute_key: array{class: array}}}} $newElement */
     $newElement = $this->stylePluginManager->addClasses($element, ['added-class'], 'extra-class');
-    $this->assertContains('original-class', $newElement['content']['test_image_formatter']['#item_attributes']['class']);
-    $this->assertContains('added-class', $newElement['content']['test_image_formatter']['#item_attributes']['class']);
-    $this->assertContains('extra-class', $newElement['content']['test_image_formatter']['#item_attributes']['class']);
+    $this->assertContains('original-class', $newElement['content']['test_image_formatter'][$attribute_key]['class']);
+    $this->assertContains('added-class', $newElement['content']['test_image_formatter'][$attribute_key]['class']);
+    $this->assertContains('extra-class', $newElement['content']['test_image_formatter'][$attribute_key]['class']);
 
     // Test addStyleToBlockContent > #theme:block > #theme:field
     // > responsive_image_formatter.
+    $attribute_key = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.4',
+      currentCallable: static fn (): string => '#attributes',
+      deprecatedCallable: static fn (): string => '#item_attributes',
+    );
+
     $element = [
       '#theme' => 'block',
       'content' => [
@@ -962,17 +986,17 @@ class StylePluginManagerTest extends UnitTestCase {
         '#formatter' => 'dummy',
         'test_responsive_image_formatter' => [
           '#theme' => 'responsive_image_formatter',
-          '#item_attributes' => [
+          $attribute_key => [
             'class' => ['original-class'],
           ],
         ],
       ],
     ];
-    /** @var array{content: array{test_responsive_image_formatter: array{"#item_attributes": array{class: array}}}} $newElement */
+    /** @var array{content: array{test_responsive_image_formatter: array{$attribute_key: array{class: array}}}} $newElement */
     $newElement = $this->stylePluginManager->addClasses($element, ['added-class'], 'extra-class');
-    $this->assertContains('original-class', $newElement['content']['test_responsive_image_formatter']['#item_attributes']['class']);
-    $this->assertContains('added-class', $newElement['content']['test_responsive_image_formatter']['#item_attributes']['class']);
-    $this->assertContains('extra-class', $newElement['content']['test_responsive_image_formatter']['#item_attributes']['class']);
+    $this->assertContains('original-class', $newElement['content']['test_responsive_image_formatter'][$attribute_key]['class']);
+    $this->assertContains('added-class', $newElement['content']['test_responsive_image_formatter'][$attribute_key]['class']);
+    $this->assertContains('extra-class', $newElement['content']['test_responsive_image_formatter'][$attribute_key]['class']);
   }
 
 }

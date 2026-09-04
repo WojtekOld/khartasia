@@ -1,10 +1,10 @@
 services:
   _defaults:
     autoconfigure: true
-  # Render elements management.
-  ui_patterns_ui.component_display_form:
-    class: Drupal\ui_patterns_ui\Element\ComponentDisplayForm
+    autowire: true
 
-  ui_patterns_ui.subscriber:
-    class: Drupal\ui_patterns_ui\Routing\RouteSubscriber
-    arguments: ['@entity_type.manager', '@plugin.manager.sdc']
+  Drupal\ui_patterns_ui\Routing\RouteSubscriber: ~
+
+  Drupal\ui_patterns_ui\Hook\ComponentFormDisplayHooks: ~
+  Drupal\ui_patterns_ui\Hook\ComponentPreBuildAlter: ~
+  Drupal\ui_patterns_ui\Hook\UiPatternsUiHooks: ~

@@ -6,6 +6,8 @@ namespace Drupal\Tests\ui_styles_page\Functional;
 
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\ui_styles_page\UiStylesPageInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test uninstall ui_styles_page module.
@@ -13,6 +15,9 @@ use Drupal\ui_styles_page\UiStylesPageInterface;
  * @group ui_styles
  * @group ui_styles_page
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_page')]
+#[RunTestsInSeparateProcesses]
 class UiStylesPageUninstallTest extends UiStylesPageFunctionalTestBase {
 
   /**
@@ -45,14 +50,16 @@ class UiStylesPageUninstallTest extends UiStylesPageFunctionalTestBase {
     ]);
     $themeSettings->save();
 
-    $settings = $themeSettings->get(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS);
-    $this->assertNotNull($settings);
+    $this->assertNotNull($themeSettings->get(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS));
+    $this->assertNotNull($themeSettings->get('third_party_settings.ui_styles_page'));
+    $this->assertNotNull($themeSettings->get('third_party_settings'));
 
     $this->moduleInstaller->uninstall(['ui_styles_page']);
 
     $themeSettings = $this->configFactory->getEditable($this->defaultTheme . '.settings');
-    $settings = $themeSettings->get(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS);
-    $this->assertNull($settings);
+    $this->assertNull($themeSettings->get(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS));
+    $this->assertNull($themeSettings->get('third_party_settings.ui_styles_page'));
+    $this->assertNull($themeSettings->get('third_party_settings'));
   }
 
 }

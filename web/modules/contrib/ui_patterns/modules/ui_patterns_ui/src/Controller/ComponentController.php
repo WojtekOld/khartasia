@@ -18,12 +18,15 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 final class ComponentController extends ControllerBase {
 
+  public function __construct(
+    protected ComponentPluginManager $componentPluginManager,
+  ) {}
+
   /**
    * Redirects to the default route of a specified component.
    */
-  public function forward(string $component_id):RedirectResponse {
-    $component_plugin_manager = self::getComponentPluginManager();
-    $component = $component_plugin_manager->find($component_id);
+  public function forward(string $component_id): RedirectResponse {
+    $component = $this->componentPluginManager->find($component_id);
     return (new TrustedRedirectResponse($this->getDefaultRoute($component)
       ->toString()))
       ->addCacheableDependency((new CacheableMetadata())->setCacheMaxAge(0));
@@ -39,7 +42,6 @@ final class ComponentController extends ControllerBase {
       '#title' => $this->t('Component List'),
       '#rows' => [],
       '#empty' => $this->t('There are no @label yet.', ['@label' => '']),
-
     ];
     foreach ($this->load() as $component) {
       if ($row = $this->buildComponentRow($component)) {
@@ -55,24 +57,16 @@ final class ComponentController extends ControllerBase {
   }
 
   /**
-   * The component plugin manager.
-   */
-  public static function getComponentPluginManager(): ComponentPluginManager {
-    return \Drupal::service('plugin.manager.sdc');
-  }
-
-  /**
    * Load all components, sorted by provider and label.
    */
   public function load(): array {
-    $component_plugin_manager = self::getComponentPluginManager();
-    /* @phpstan-ignore method.notFound */
-    $definitions = $component_plugin_manager->getNegotiatedSortedDefinitions();
-    $plugin_ids = array_keys($definitions);
+    // @phpstan-ignore method.notFound
+    $definitions = $this->componentPluginManager->getNegotiatedSortedDefinitions();
+    $plugin_ids = \array_keys($definitions);
     // @phpstan-ignore-next-line
-    return array_values(array_filter(array_map(
+    return \array_values(\array_filter(\array_map(
       // @phpstan-ignore-next-line
-      [$component_plugin_manager, 'createInstance'],
+      [$this->componentPluginManager, 'createInstance'],
       $plugin_ids
     )));
   }
@@ -96,7 +90,7 @@ final class ComponentController extends ControllerBase {
   public function buildComponentRow(Component $component): array {
     $definition = $component->getPluginDefinition();
     $row['label'] = $component->metadata->name;
-    $row['provider'] = is_array($definition) ? $definition['provider'] : '';
+    $row['provider'] = \is_array($definition) ? $definition['provider'] : '';
     $row['operations']['data'] = [
       '#type' => 'operations',
       '#links' => $this->getComponentOperations($component),
@@ -118,18 +112,16 @@ final class ComponentController extends ControllerBase {
    *   The URL object representing the default route for the component.
    */
   private function getDefaultRoute(Component $component) {
-
     $default_display = ComponentFormDisplay::loadDefault($component->getPluginId());
 
     if ($default_display !== NULL) {
       return $default_display->toUrl();
     }
-    else {
-      $route = 'entity.component_form_display.' . $component->getPluginId() . '.add_form';
-      return Url::fromRoute($route, [
-        'component_id' => $component->getPluginId(),
-      ]);
-    }
+
+    $route = 'entity.component_form_display.' . $component->getPluginId() . '.add_form';
+    return Url::fromRoute($route, [
+      'component_id' => $component->getPluginId(),
+    ]);
   }
 
   /**

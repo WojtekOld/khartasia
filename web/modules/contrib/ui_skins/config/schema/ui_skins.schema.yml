@@ -1,9 +1,16 @@
-ui_skins.css_variables:
-  type: 'sequence'
-  label: 'CSS variables'
-  sequence:
-    type: 'ui_skins.css_variable'
-    label: 'CSS variable'
+theme_settings.third_party.ui_skins:
+  type: mapping
+  label: 'UI Skins settings'
+  mapping:
+    theme:
+      type: 'string'
+      label: 'Theme'
+    css_variables:
+      type: 'sequence'
+      label: 'CSS variables'
+      sequence:
+        type: 'ui_skins.css_variable'
+        label: 'CSS variable'
 
 ui_skins.css_variable:
   type: 'sequence'
@@ -11,7 +18,3 @@ ui_skins.css_variable:
   sequence:
     type: 'string'
     label: 'Scope value'
-
-ui_skins.theme:
-  type: 'string'
-  label: 'Theme'

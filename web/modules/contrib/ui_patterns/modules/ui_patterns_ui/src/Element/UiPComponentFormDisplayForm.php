@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns_ui\Element;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
@@ -12,23 +13,22 @@ use Drupal\ui_patterns_ui\Entity\ComponentFormDisplay;
 
 /**
  * Component display form element.
- *
- * @FormElement("uip_display_form")
  */
+#[FormElement('uip_display_form')]
 class UiPComponentFormDisplayForm extends FormElementBase {
 
   /**
    * Returns the source manager.
    */
   public static function getSourceManager(): SourcePluginManager {
-    return \Drupal::service('plugin.manager.ui_patterns_source');
+    return \Drupal::service(SourcePluginManager::class);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = get_class($this);
+    $class = static::class;
     return [
       '#input' => TRUE,
       '#multiple' => FALSE,
@@ -42,7 +42,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
         [$class, 'afterBuild'],
       ],
       '#element_validate' => [
-              [$class, 'elementValidate'],
+        [$class, 'elementValidate'],
       ],
       '#theme_wrappers' => ['form_element'],
     ];
@@ -52,8 +52,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
    * {@inheritdoc}
    */
   public static function valueCallback(&$element, $input, FormStateInterface $form_state) {
-
-    if (is_array($input)) {
+    if (\is_array($input)) {
       $display_id = $element['#display_id'];
       $display = ComponentFormDisplay::load($display_id);
       $variant_id = NULL;
@@ -64,7 +63,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
           $variant_id = $source;
           continue;
         }
-        if (in_array($key, ['props', 'slots', 'component_id', 'display_id', 'variant_id'])) {
+        if (\in_array($key, ['props', 'slots', 'component_id', 'display_id', 'variant_id'], TRUE)) {
           continue;
         }
         if ($display->isSlot($key)) {
@@ -92,14 +91,13 @@ class UiPComponentFormDisplayForm extends FormElementBase {
       $element['#default_value'] = $output;
       return $output;
     }
-    else {
-      return [
-        'component_id' => NULL,
-        'variant_id' => NULL,
-        'props' => [],
-        'slots' => [],
-      ];
-    }
+
+    return [
+      'component_id' => NULL,
+      'variant_id' => NULL,
+      'props' => [],
+      'slots' => [],
+    ];
   }
 
   /**
@@ -110,7 +108,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public static function elementValidate(array &$element, FormStateInterface $form_state) : void {
+  public static function elementValidate(array &$element, FormStateInterface $form_state): void {
     $element['#value'] = self::valueCallback($element, $form_state->getValue($element['#parents']), $form_state);
     if (isset($element['#value'])) {
       $form_state->setValueForElement($element, $element['#value']);
@@ -120,7 +118,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
   /**
    * {@inheritdoc}
    */
-  public static function afterBuild(array $element, FormStateInterface $form_state) : array {
+  public static function afterBuild(array $element, FormStateInterface $form_state): array {
     return $element;
   }
 
@@ -207,7 +205,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
       $element[$prop_slot_id]['#default_value'] = ['sources' => $configuration];
       $element[$prop_slot_id]['#tag_filter'] = $element['#tag_filter'] ?? [];
       $element[$prop_slot_id]['#prefix'] = "<div class='component-form-slot'>";
-      $element[$prop_slot_id]['#suffix'] = "</div>";
+      $element[$prop_slot_id]['#suffix'] = '</div>';
     }
     else {
       $configuration = $element['#default_value']['props'][$prop_slot_id] ?? [];

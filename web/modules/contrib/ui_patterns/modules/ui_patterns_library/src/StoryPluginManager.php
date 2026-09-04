@@ -14,6 +14,7 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Plugin\Factory\ContainerFactory;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\ui_patterns_library\Discovery\DirectoryWithMetadataPluginDiscovery;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Defines a plugin manager to deal with stories.
@@ -28,6 +29,7 @@ use Drupal\ui_patterns_library\Discovery\DirectoryWithMetadataPluginDiscovery;
  *   component: STRING
  *   slots: ARRAY
  *   slots: PROPS
+ *
  * @endcode
  *
  * @see \Drupal\ui_patterns_library\StoryDefault
@@ -52,12 +54,10 @@ final class StoryPluginManager extends DefaultPluginManager {
     'class' => StoryDefault::class,
   ];
 
-  /**
-   * Constructs StoryPluginManager object.
-   */
   public function __construct(
     ModuleHandlerInterface $module_handler,
     protected ThemeHandlerInterface $themeHandler,
+    #[Autowire(service: 'cache.discovery')]
     CacheBackendInterface $cache_backend,
     protected FileSystemInterface $fileSystem,
     protected MessengerInterface $messenger,
@@ -83,9 +83,9 @@ final class StoryPluginManager extends DefaultPluginManager {
     $negotiated_definition = $manager->negotiateDefinition($component_id);
     $replacer_component_id = $negotiated_definition['replaced_by'] ?? $component_id;
 
-    $definitions = array_filter($definitions, static function ($definition) use ($component_id, $replacer_component_id) {
-      return isset($definition['component']) &&
-        ($definition['component'] === $component_id || $definition['component'] === $replacer_component_id);
+    $definitions = \array_filter($definitions, static function ($definition) use ($component_id, $replacer_component_id) {
+      return isset($definition['component'])
+        && ($definition['component'] === $component_id || $definition['component'] === $replacer_component_id);
     });
     foreach ($definitions as $story_id => $definition) {
       // A story in a replaced component will replace the original story,
@@ -127,8 +127,8 @@ final class StoryPluginManager extends DefaultPluginManager {
       ...$this->moduleHandler->getModuleDirectories(),
       ...$this->themeHandler->getThemeDirectories(),
     ];
-    return array_map(
-      static fn(string $path) => rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'components',
+    return \array_map(
+      static fn (string $path) => \rtrim($path, \DIRECTORY_SEPARATOR) . \DIRECTORY_SEPARATOR . 'components',
       $extension_directories
     );
   }
@@ -149,14 +149,14 @@ final class StoryPluginManager extends DefaultPluginManager {
    */
   protected function setComponentId(array $definition): array {
     if (
-      isset($definition['component']) &&
-      is_string($definition['component']) &&
-      $this->checkComponentId($definition['component'])
-      ) {
+      isset($definition['component'])
+      && \is_string($definition['component'])
+      && $this->checkComponentId($definition['component'])
+    ) {
       return $definition;
     }
-    [$provider, $component_id] = explode(":", $definition["id"]);
-    $definition['component'] = $provider . ":" . $component_id;
+    [$provider, $component_id] = \explode(':', $definition['id']);
+    $definition['component'] = $provider . ':' . $component_id;
     return $definition;
   }
 
@@ -167,7 +167,7 @@ final class StoryPluginManager extends DefaultPluginManager {
    * plugin ID minus the component ID.
    */
   protected function setMachineName(array $definition): array {
-    [, , $story_id] = explode(":", $definition["id"]);
+    [, , $story_id] = \explode(':', $definition['id']);
     $definition['machineName'] = $story_id;
     return $definition;
   }
@@ -178,7 +178,7 @@ final class StoryPluginManager extends DefaultPluginManager {
   protected function checkComponentId(string $component_id): bool {
     $machine_name = '([a-z0-9_-])+';
     $regex = '/^' . $machine_name . '\:' . $machine_name . '$/i';
-    return (bool) preg_match($regex, $component_id);
+    return (bool) \preg_match($regex, $component_id);
   }
 
   /**
@@ -202,16 +202,16 @@ final class StoryPluginManager extends DefaultPluginManager {
       if ($prop['type'] === 'Drupal\Core\Template\Attribute') {
         $story['props'][$prop_id] = [];
       }
-      if (!isset($prop["examples"]) || empty($prop["examples"])) {
-        if (in_array($prop_id, $definition['props']['required'] ?? [])) {
+      if (!isset($prop['examples']) || empty($prop['examples'])) {
+        if (\in_array($prop_id, $definition['props']['required'] ?? [], TRUE)) {
           $default = $this->getDefaultValue($prop);
-          if (!is_null($default)) {
+          if ($default !== NULL) {
             $story['props'][$prop_id] = $default;
           }
         }
         continue;
       }
-      $story['props'][$prop_id] = $prop["examples"][0];
+      $story['props'][$prop_id] = $prop['examples'][0];
     }
     return $story;
   }
@@ -228,10 +228,10 @@ final class StoryPluginManager extends DefaultPluginManager {
   protected function initStoryFromSlots(array $slots): array {
     $story = [];
     foreach ($slots as $slot_id => $slot) {
-      if (!isset($slot["examples"]) || empty($slot["examples"])) {
-        $slot["examples"] = [$slot['title']];
+      if (!isset($slot['examples']) || empty($slot['examples'])) {
+        $slot['examples'] = [$slot['title']];
       }
-      $story['slots'][$slot_id] = $slot["examples"][0];
+      $story['slots'][$slot_id] = $slot['examples'][0];
     }
     return $story;
   }
@@ -269,7 +269,7 @@ final class StoryPluginManager extends DefaultPluginManager {
     // There is this weird mechanism in SDC adding the object type to all
     // props. We need to deal with that until we remove it.
     // @see \Drupal\Core\Theme\Component\ComponentMetadata::parseSchemaInfo()
-    if (is_array($prop['type']) && empty(\array_diff($prop['type'], ['object', 'boolean']))) {
+    if (\is_array($prop['type']) && empty(\array_diff($prop['type'], ['object', 'boolean']))) {
       return FALSE;
     }
 

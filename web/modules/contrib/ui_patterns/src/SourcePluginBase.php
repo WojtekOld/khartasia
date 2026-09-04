@@ -6,7 +6,8 @@ namespace Drupal\ui_patterns;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Component\Plugin\Exception\ContextException;
-use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
+use Drupal\Core\Cache\RefinableCacheableDependencyTrait;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -16,6 +17,7 @@ use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Plugin\ContextAwarePluginTrait;
 use Drupal\Core\Plugin\Definition\DependentPluginDefinitionInterface;
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -27,16 +29,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for source plugins.
  */
-abstract class SourcePluginBase extends PluginBase implements
-  SourceInterface,
-  ContainerFactoryPluginInterface {
+abstract class SourcePluginBase extends PluginBase implements SourceInterface, ContainerFactoryPluginInterface, RefinableCacheableDependencyInterface {
 
   use ContextAwarePluginAssignmentTrait;
-  use ContextAwarePluginTrait;
+
+  // Cacheability collected while computing the value (access results,
+  // entities) is what the render array needs, not the cacheability of the
+  // given contexts. Merged by ComponentElementBuilder.
+  use ContextAwarePluginTrait, RefinableCacheableDependencyTrait {
+    RefinableCacheableDependencyTrait::getCacheContexts insteadof ContextAwarePluginTrait;
+    RefinableCacheableDependencyTrait::getCacheTags insteadof ContextAwarePluginTrait;
+    RefinableCacheableDependencyTrait::getCacheMaxAge insteadof ContextAwarePluginTrait;
+  }
   use StringTranslationTrait;
   use DependencySerializationTrait;
   use PluginDependencyTrait;
-
 
   /**
    * Definition of the targeted prop.
@@ -56,13 +63,6 @@ abstract class SourcePluginBase extends PluginBase implements
   protected $context = [];
 
   /**
-   * All gathered plugin contexts.
-   *
-   * @var array
-   */
-  protected $gatheredContexts = [];
-
-  /**
    * The plugin settings.
    *
    * @var array
@@ -76,13 +76,12 @@ abstract class SourcePluginBase extends PluginBase implements
    */
   protected $defaultSettingsMerged = FALSE;
 
-
   /**
-   * Use for settings form, to know where the form is used exactly (Optional)
+   * Use for settings form, to know where the form is used exactly (Optional).
    *
    * @var array<string>|null
    */
-  protected $formArrayParents = NULL;
+  protected $formArrayParents;
 
   /**
    * {@inheritdoc}
@@ -104,40 +103,16 @@ abstract class SourcePluginBase extends PluginBase implements
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.ui_patterns_prop_type'),
-      $container->get('context.repository'),
-      $container->get('current_route_match'),
-      $container->get('ui_patterns.sample_entity_generator'),
-      $container->get('module_handler'),
-      $container->get('token'),
-      $container->get('ui_patterns.normalizer')
+      $container->get(PropTypePluginManager::class),
+      $container->get(ContextRepositoryInterface::class),
+      $container->get(RouteMatchInterface::class),
+      $container->get(SampleEntityGeneratorInterface::class),
+      $container->get(ModuleHandlerInterface::class),
+      $container->get(Token::class),
+      $container->get(UiPatternsNormalizerInterface::class)
     );
   }
 
-  /**
-   * Constructs a \Drupal\Component\Plugin\PluginBase object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\ui_patterns\PropTypePluginManager $propTypeManager
-   *   The prop type manager.
-   * @param \Drupal\Core\Plugin\Context\ContextRepositoryInterface $contextRepository
-   *   The context repository.
-   * @param \Drupal\Core\Routing\RouteMatchInterface $routeMatch
-   *   The route match service.
-   * @param \Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface $sampleEntityGenerator
-   *   The sample entity generator service.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
-   *   The module handler service.
-   * @param \Drupal\Core\Utility\Token $token
-   *   The token service.
-   * @param \Drupal\ui_patterns\UiPatternsNormalizerInterface $normalizer
-   *   The normalizer service.
-   */
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -167,7 +142,7 @@ abstract class SourcePluginBase extends PluginBase implements
    */
   public function getSetting(string $key): mixed {
     // Merge defaults if we have no value for the key.
-    if (!$this->defaultSettingsMerged && !array_key_exists($key, $this->settings)) {
+    if (!$this->defaultSettingsMerged && !\array_key_exists($key, $this->settings)) {
       $this->mergeDefaults();
     }
 
@@ -177,7 +152,7 @@ abstract class SourcePluginBase extends PluginBase implements
   /**
    * Merges default settings values into $settings.
    */
-  protected function mergeDefaults() : void {
+  protected function mergeDefaults(): void {
     $this->settings += $this->defaultSettings();
     $this->defaultSettingsMerged = TRUE;
   }
@@ -206,14 +181,14 @@ abstract class SourcePluginBase extends PluginBase implements
       $choice_id = $this->getChoice($this->settings);
       if ($choice_id) {
         $choices = $this->getChoices();
-        if (isset($choices[$choice_id]) && isset($choices[$choice_id]['label'])) {
+        if (isset($choices[$choice_id], $choices[$choice_id]['label'])) {
           // Return the label of the selected choice.
           return (string) $choices[$choice_id]['label'];
         }
       }
     }
     // Cast the label to a string since it is a TranslatableMarkup object.
-    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? $this->pluginDefinition->id() : (string) ($this->pluginDefinition["label"] ?? '');
+    return ($this->pluginDefinition instanceof PluginDefinitionInterface) ? $this->pluginDefinition->id() : (string) ($this->pluginDefinition['label'] ?? '');
   }
 
   /**
@@ -232,7 +207,7 @@ abstract class SourcePluginBase extends PluginBase implements
     $source_plugin_definition = $this->getPluginDefinition();
     $prop_type_id = $prop_type->getPluginId();
     $source_prop_types = ($source_plugin_definition instanceof PluginDefinitionInterface) ? NULL : $source_plugin_definition['prop_types'];
-    if (!is_array($source_prop_types) || in_array($prop_type_id, $source_prop_types)) {
+    if (!\is_array($source_prop_types) || \in_array($prop_type_id, $source_prop_types, TRUE)) {
       return $data;
     }
     $convertible_props = $this->propTypeManager->getConvertibleProps($prop_type_id);
@@ -240,18 +215,18 @@ abstract class SourcePluginBase extends PluginBase implements
     // to find a conversion path from expected prop type.
     // @todo select the shortest conversion path?
     foreach ($source_prop_types as $convertible_prop_type) {
-      if (!array_key_exists($convertible_prop_type, $convertible_props)) {
+      if (!\array_key_exists($convertible_prop_type, $convertible_props)) {
         continue;
       }
       // We start a conversion.
       $data = $this->getPropValue();
       // A path exists, we follow the conversion path.
       $conversion_path = $convertible_props[$convertible_prop_type];
-      $conversion_path = array_reverse($conversion_path);
-      $conversion_path_size = count($conversion_path);
-      for ($conversion_iter = 0; $conversion_iter < $conversion_path_size - 1; $conversion_iter++) {
+      $conversion_path = \array_reverse($conversion_path);
+      $conversion_path_size = \count($conversion_path);
+      for ($conversion_iter = 0; $conversion_iter < $conversion_path_size - 1; ++$conversion_iter) {
         try {
-          $to_prop_class = $this->propTypeManager->getDefinition($conversion_path[$conversion_iter + 1])["class"];
+          $to_prop_class = $this->propTypeManager->getDefinition($conversion_path[$conversion_iter + 1])['class'];
           $data = $to_prop_class::convertFrom($conversion_path[$conversion_iter], $data);
         }
         catch (\UnhandledMatchError $e) {
@@ -275,7 +250,7 @@ abstract class SourcePluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function setConfiguration(array $configuration) : void {
+  public function setConfiguration(array $configuration): void {
     if (isset($configuration['prop_definition'])) {
       $this->propDefinition = $configuration['prop_definition'];
     }
@@ -293,7 +268,7 @@ abstract class SourcePluginBase extends PluginBase implements
       $this->context = $configuration['contexts'];
     }
 
-    if (isset($configuration['form_array_parents']) && is_array($configuration['form_array_parents'])) {
+    if (isset($configuration['form_array_parents']) && \is_array($configuration['form_array_parents'])) {
       $this->formArrayParents = $configuration['form_array_parents'];
     }
 
@@ -312,12 +287,12 @@ abstract class SourcePluginBase extends PluginBase implements
       'prop_definition' => $prop_definition,
       'contexts' => $source_contexts,
       'settings' => $settings['source'] ?? [],
-      'widget_settings' => array_merge([
+      'widget_settings' => \array_merge([
         'title_display' => 'invisible',
         'title' => $prop_definition['title'] ?? '',
         'description_display' => 'invisible',
         'description' => $prop_definition['description'] ?? '',
-        'required' => ($prop_definition["ui_patterns"]["required"] ?? FALSE) == TRUE,
+        'required' => ($prop_definition['ui_patterns']['required'] ?? FALSE) === TRUE,
       ], $widget_settings),
       'context_mapping' => $context_mapping,
       'form_array_parents' => $form_array_parents,
@@ -348,7 +323,12 @@ abstract class SourcePluginBase extends PluginBase implements
   /**
    * Set values for the defined contexts of this plugin.
    */
-  private function setDefinedContextValues() : void {
+  private function setDefinedContextValues(): void {
+    $plugin_context_definitions = $this->getContextDefinitions();
+    if (empty($plugin_context_definitions)) {
+      return;
+    }
+
     $configuration = $this->getConfiguration();
     // Fetch the available contexts.
     $available_contexts = $this->contextRepository->getAvailableContexts();
@@ -357,10 +337,8 @@ abstract class SourcePluginBase extends PluginBase implements
     // Ensure that the contexts have data by getting corresponding runtime
     // contexts.
     $available_runtime_contexts += $this->contextRepository->getRuntimeContexts(
-      array_keys($available_contexts)
+      \array_keys($available_contexts)
     );
-    $plugin_context_definitions = $this->getContextDefinitions();
-    $this->gatheredContexts = $available_runtime_contexts;
     foreach ($plugin_context_definitions as $name => $plugin_context_definition) {
       // Identify and fetch the matching runtime context, with the plugin's
       // context definition.
@@ -371,7 +349,7 @@ abstract class SourcePluginBase extends PluginBase implements
         );
       $matching_context = NULL;
       $context_mapping = $configuration['context_mapping'] ?? [];
-      if (isset($context_mapping[$name]) && isset($matches[$context_mapping[$name]])) {
+      if (isset($context_mapping[$name], $matches[$context_mapping[$name]])) {
         $matching_context = $matches[$context_mapping[$name]];
       }
       if ($matching_context) {
@@ -388,23 +366,27 @@ abstract class SourcePluginBase extends PluginBase implements
   }
 
   /**
-   * {@inheritdoc}
+   * Get one metadata value from the plugin definition.
+   *
+   * @param \Drupal\ui_patterns\SourceMetadataKey $key
+   *   The metadata key.
+   *
+   * @return mixed
+   *   The value, or NULL when this definition has no metadata (non-derived
+   *   sources) or the key is unset on this derivative.
    */
-  public function getCustomPluginMetadata(string $key): mixed {
+  protected function getMetadata(SourceMetadataKey $key): mixed {
     $plugin_definition = $this->getPluginDefinition();
-    if (empty($plugin_definition) ||
-      !is_array($plugin_definition) ||
-      !is_array($plugin_definition['metadata']) ||
-      !array_key_exists($key, $plugin_definition['metadata'])) {
+    if (!\is_array($plugin_definition) || !\is_array($plugin_definition['metadata'] ?? NULL)) {
       return NULL;
     }
-    return $plugin_definition['metadata'][$key];
+    return $plugin_definition['metadata'][$key->value] ?? NULL;
   }
 
   /**
    * {@inheritDoc}
    */
-  public function calculateDependencies() : array {
+  public function calculateDependencies(): array {
     // This will get data from 'config_dependencies' inside plugin definition.
     // return $this->getPluginDependencies($this);
     $plugin_definition = $this->getPluginDefinition();
@@ -413,9 +395,9 @@ abstract class SourcePluginBase extends PluginBase implements
       $dependencies = ($plugin_definition instanceof DependentPluginDefinitionInterface) ? $plugin_definition->getConfigDependencies() : [];
     }
     else {
-      $dependencies = $plugin_definition["config_dependencies"] ?? [];
+      $dependencies = $plugin_definition['config_dependencies'] ?? [];
     }
-    static::mergeConfigDependencies($dependencies, ["module" => ['ui_patterns']]);
+    static::mergeConfigDependencies($dependencies, ['module' => ['ui_patterns']]);
     return $dependencies;
   }
 
@@ -429,20 +411,20 @@ abstract class SourcePluginBase extends PluginBase implements
    * @param array<string, array<string> > $new_dependencies
    *   Dependencies to merge.
    */
-  public static function mergeConfigDependencies(array &$dependencies, array $new_dependencies) : void {
+  public static function mergeConfigDependencies(array &$dependencies, array $new_dependencies): void {
     foreach ($new_dependencies as $type => $list) {
       foreach ($list as $name) {
         if (empty($dependencies[$type])) {
           $dependencies[$type] = [$name];
-          if (count($dependencies) > 1) {
+          if (\count($dependencies) > 1) {
             // Ensure a consistent order of type keys.
-            ksort($dependencies);
+            \ksort($dependencies);
           }
         }
-        elseif (!in_array($name, $dependencies[$type])) {
+        elseif (!\in_array($name, $dependencies[$type], TRUE)) {
           $dependencies[$type][] = $name;
           // Ensure a consistent order of dependency names.
-          sort($dependencies[$type], SORT_FLAG_CASE);
+          \sort($dependencies[$type], \SORT_FLAG_CASE);
         }
       }
     }
@@ -481,7 +463,7 @@ abstract class SourcePluginBase extends PluginBase implements
       return \Drupal::service('token.entity_mapper')->getTokenTypeForEntityType($entity_type_id);
     }
     // Emulate token module service.
-    return str_starts_with($entity_type_id, 'taxonomy_') ? str_replace('taxonomy_', '', $entity_type_id) : $entity_type_id;
+    return \str_starts_with($entity_type_id, 'taxonomy_') ? \str_replace('taxonomy_', '', $entity_type_id) : $entity_type_id;
   }
 
   /**
@@ -512,11 +494,11 @@ abstract class SourcePluginBase extends PluginBase implements
    * @param string $form_key
    *   The form key to use.
    */
-  protected function addTokenTreeLink(array &$form, string $form_key = "help"): void {
+  protected function addTokenTreeLink(array &$form, string $form_key = 'help'): void {
     if ($this->moduleHandler->moduleExists('token')) {
       $form[$form_key] = [
         '#theme' => 'token_tree_link',
-        '#token_types' => array_keys($this->getTokenData()),
+        '#token_types' => \array_keys($this->getTokenData()),
       ];
     }
   }
@@ -540,14 +522,14 @@ abstract class SourcePluginBase extends PluginBase implements
     }
     $this->normalizer->convertToScalar($value);
     if (empty($value)) {
-      return "";
+      return '';
     }
     // If the entity is new, we are probably in a preview system and there can
     // be side effects. Determine if we need to skip rendering?
     $tokenData = $this->getTokenData();
-    return $markup ?
-        $this->token->replace($value, $tokenData, ['clear' => TRUE], $bubbleable_metadata) :
-        $this->token->replacePlain($value, $tokenData, ['clear' => TRUE], $bubbleable_metadata);
+    return $markup
+        ? $this->token->replace($value, $tokenData, ['clear' => TRUE], $bubbleable_metadata)
+        : $this->token->replacePlain($value, $tokenData, ['clear' => TRUE], $bubbleable_metadata);
   }
 
   /**
@@ -559,8 +541,8 @@ abstract class SourcePluginBase extends PluginBase implements
    * @return bool
    *   TRUE if the value is naturally convertible to string.
    */
-  protected static function isConvertibleToString(mixed $value) : bool {
-    return (is_string($value) || is_object($value) || is_array($value));
+  protected static function isConvertibleToString(mixed $value): bool {
+    return \is_string($value) || \is_object($value) || \is_array($value);
   }
 
 }

@@ -5,6 +5,7 @@ ui_patterns_component:
     FullyValidatable: ~
   mapping:
     component_id:
+      # string instead of machine_name because of the colon.
       type: string
       label: 'Component ID'
       nullable: true
@@ -34,8 +35,12 @@ ui_patterns_prop:
   label: 'Prop'
   mapping:
     source_id:
+      # string instead of machine_name because of the colon.
       type: string
       label: 'Prop source ID'
+    node_id:
+      type: string
+      label: 'Node ID'
     source:
       type: ui_patterns_source.[%parent.source_id]
       label: 'Prop source configuration'
@@ -56,11 +61,23 @@ ui_patterns_slot_source:
   label: 'Slot source'
   mapping:
     source_id:
+      # string instead of machine_name because of the colon.
       type: string
       label: 'Slot source ID'
     source:
       type: ui_patterns_source.[%parent.source_id]
       label: 'Slot source configuration'
+    third_party_settings:
+      # Third party settings are always optional: they're an optional extension
+      # point.
+      requiredKey: false
+      type: sequence
+      label: 'Third party settings'
+      sequence:
+        type: '[%parent.%parent.%type].third_party.[%key]'
     _weight:
-      type: string
+      type: weight
       label: 'Slot source weight'
+    node_id:
+      type: string
+      label: 'Node ID'

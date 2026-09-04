@@ -7,6 +7,9 @@
 
 declare(strict_types=1);
 
+use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
+use Drupal\ui_patterns\SourceInterface;
+
 /**
  * Alter Hook for SDC Component definition.
  *
@@ -16,7 +19,10 @@ declare(strict_types=1);
  * @see \Drupal\ui_patterns\ComponentPluginManager
  */
 function hook_component_info_alter(array &$definitions) {
-  $definitions['COMPONENT_ID']['slots']['slot_name']["title"] = 'demo';
+  $definitions['COMPONENT_ID']['slots']['slot_name']['title'] = 'demo';
+  // Restrict a slot: the listed components (IDs or tags) only, two at most.
+  $definitions['COMPONENT_ID']['slots']['slot_name']['expected'] = ['OTHER_COMPONENT_ID', 'a_tag'];
+  $definitions['COMPONENT_ID']['slots']['slot_name']['maxItems'] = 2;
 }
 
 /**
@@ -31,10 +37,10 @@ function hook_component_info_alter(array &$definitions) {
  *
  * @SuppressWarnings("PHPMD.UnusedFormalParameter")
  */
-function hook_ui_patterns_source_value_alter(mixed &$value, \Drupal\ui_patterns\SourceInterface $source, array &$source_configuration) : void {
+function hook_ui_patterns_source_value_alter(mixed &$value, SourceInterface $source, array &$source_configuration): void {
   $type_definition = $source->getPropDefinition()['ui_patterns']['type_definition'];
-  if ($type_definition instanceof \Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType) {
-    if (is_array($value)) {
+  if ($type_definition instanceof SlotPropType) {
+    if (\is_array($value)) {
       $value['#cache']['tags'][] = 'custom_cache_tag';
     }
   }
@@ -51,6 +57,4 @@ function hook_ui_patterns_source_value_alter(mixed &$value, \Drupal\ui_patterns\
  *
  * @SuppressWarnings("PHPMD.UnusedFormalParameter")
  */
-function hook_ui_patterns_component_pre_build_alter(array &$element): void {
-
-}
+function hook_ui_patterns_component_pre_build_alter(array &$element): void {}

@@ -6,6 +6,7 @@ namespace Drupal\ui_patterns_field\Plugin\UiPatterns\Source;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Plugin\UiPatterns\Source\FieldPropertySource;
 use Drupal\ui_patterns_field\Plugin\Derivative\UIPatternsSourceFieldPropertySourceDeriver;
 use Drupal\ui_patterns_field\Plugin\Field\FieldType\SourceValueItem;
@@ -24,10 +25,8 @@ class UIPatternsSourceFieldPropertySource extends FieldPropertySource {
 
   /**
    * The component element builder.
-   *
-   * @var \Drupal\ui_patterns\Element\ComponentElementBuilder
    */
-  protected $componentElementBuilder;
+  protected ComponentElementBuilder $componentElementBuilder;
 
   /**
    * {@inheritdoc}
@@ -46,7 +45,7 @@ class UIPatternsSourceFieldPropertySource extends FieldPropertySource {
       $plugin_definition
     );
     // Defined in parent class FieldSourceBase.
-    $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+    $instance->componentElementBuilder = $container->get(ComponentElementBuilder::class);
     return $instance;
   }
 
@@ -69,7 +68,7 @@ class UIPatternsSourceFieldPropertySource extends FieldPropertySource {
       return NULL;
     }
     $source_configuration = $field_item_at_delta->source ?? [];
-    if (!is_array($source_configuration)) {
+    if (!\is_array($source_configuration)) {
       $source_configuration = [];
     }
     return $this->extractComponentPropValue($source_configuration);
@@ -84,24 +83,24 @@ class UIPatternsSourceFieldPropertySource extends FieldPropertySource {
    * @return mixed
    *   The prop value.
    */
-  protected function extractComponentPropValue(array $source_configuration) : mixed {
+  protected function extractComponentPropValue(array $source_configuration): mixed {
     $component_configuration = $source_configuration['component'] ?? [];
     // $component_id = $component_configuration['component_id'] ?? NULL;
     $propDefinition = $this->getPropDefinition();
     $propId = $this->getPropId();
     /** @var \Drupal\ui_patterns\PropTypeInterface $propType */
-    $propType = $propDefinition["ui_patterns"]["type_definition"];
+    $propType = $propDefinition['ui_patterns']['type_definition'];
     $contexts = $this->getContexts();
     $build = [];
-    if ($propType->getPluginId() === "slot") {
-      $sources = $component_configuration['slots'][$propId]["sources"] ?? [];
+    if ($propType->getPluginId() === 'slot') {
+      $sources = $component_configuration['slots'][$propId]['sources'] ?? [];
       foreach ($sources as $source) {
         $build = $this->componentElementBuilder->buildSource($build, $propId, $propDefinition, $source, $contexts);
       }
       return $build['#slots'][$propId] ?? [];
     }
     $build = [];
-    $prop_source_config = (($propId === "variant") && !empty($component_configuration["variant_id"])) ? $component_configuration["variant_id"] : ($component_configuration['props'][$propId] ?? []);
+    $prop_source_config = (($propId === 'variant') && !empty($component_configuration['variant_id'])) ? $component_configuration['variant_id'] : ($component_configuration['props'][$propId] ?? []);
     if (empty($prop_source_config)) {
       return NULL;
     }
@@ -113,7 +112,7 @@ class UIPatternsSourceFieldPropertySource extends FieldPropertySource {
     $prop_typ_types = [];
     if (isset($this->propDefinition['type'])) {
       // Type can be an array of types or a single type.
-      $prop_typ_types = is_array($this->propDefinition['type']) ? $this->propDefinition['type'] : [$this->propDefinition['type']];
+      $prop_typ_types = \is_array($this->propDefinition['type']) ? $this->propDefinition['type'] : [$this->propDefinition['type']];
     }
     return $this->transTypeProp($property_value, $prop_typ_types);
   }

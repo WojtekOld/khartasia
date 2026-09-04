@@ -21,8 +21,6 @@ abstract class ComponentFormatterBase extends FormatterBase {
 
   /**
    * The component plugin manager.
-   *
-   * @var \Drupal\Core\Theme\ComponentPluginManager
    */
   protected ComponentPluginManager $componentPluginManager;
 
@@ -31,7 +29,7 @@ abstract class ComponentFormatterBase extends FormatterBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->componentPluginManager = $container->get('plugin.manager.sdc');
+    $instance->componentPluginManager = $container->get(ComponentPluginManager::class);
     return $instance;
   }
 
@@ -48,10 +46,9 @@ abstract class ComponentFormatterBase extends FormatterBase {
       $options[$component_id] = $component['name'];
     }
     $settings = $this->getSetting('ui_patterns');
-    $summary["selected"] = $this->t('No component selected.')->render();
+    $summary['selected'] = $this->t('No component selected.')->render();
     if (!empty($settings['component_id'])) {
-
-      $summary["selected"] = $this->t('Component ":component" selected.', [':component' => $options[$settings['component_id']] ?? ""])->render();
+      $summary['selected'] = $this->t('Component ":component" selected.', [':component' => $options[$settings['component_id']] ?? ''])->render();
     }
     return $summary;
   }
@@ -84,8 +81,8 @@ abstract class ComponentFormatterBase extends FormatterBase {
     // Thus, when source plugins will be fetched and displayed,
     // we properly get them especially source plugins
     // with context_requirements having field_granularity:item.
-    if (is_array($this->context) && array_key_exists("context_requirements", $this->context) && $this->context["context_requirements"]->hasValue("field_granularity:item")) {
-      $injected_contexts = RequirementsContext::addToContext(["field_granularity:item"], $injected_contexts);
+    if (\is_array($this->context) && \array_key_exists('context_requirements', $this->context) && $this->context['context_requirements']->hasValue('field_granularity:item')) {
+      $injected_contexts = RequirementsContext::addToContext(['field_granularity:item'], $injected_contexts);
     }
     return [
       'ui_patterns' => $this->buildComponentsForm($form_state, $injected_contexts),
@@ -103,7 +100,7 @@ abstract class ComponentFormatterBase extends FormatterBase {
    */
   protected function getComponentSourceContexts(?FieldItemListInterface $items = NULL): array {
     $contexts = parent::getComponentSourceContexts($items);
-    return RequirementsContext::addToContext(["field_formatter"], $contexts);
+    return RequirementsContext::addToContext(['field_formatter'], $contexts);
   }
 
   /**
@@ -118,7 +115,7 @@ abstract class ComponentFormatterBase extends FormatterBase {
     }
     $component_dependencies = $this->calculateComponentDependencies($component_id, $this->getComponentSourceContexts());
     SourcePluginBase::mergeConfigDependencies($dependencies, $component_dependencies);
-    SourcePluginBase::mergeConfigDependencies($dependencies, ["module" => ["ui_patterns_field_formatters"]]);
+    SourcePluginBase::mergeConfigDependencies($dependencies, ['module' => ['ui_patterns_field_formatters']]);
     return $dependencies;
   }
 

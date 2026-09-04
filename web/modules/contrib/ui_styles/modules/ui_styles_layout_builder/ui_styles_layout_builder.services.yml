@@ -5,3 +5,7 @@ services:
       - '@plugin.manager.ui_styles'
     tags:
       - { name: event_subscriber }
+
+  Drupal\ui_styles_layout_builder\Hook\UiStylesLayoutBuilderHooks:
+    class: Drupal\ui_styles_layout_builder\Hook\UiStylesLayoutBuilderHooks
+    autowire: true

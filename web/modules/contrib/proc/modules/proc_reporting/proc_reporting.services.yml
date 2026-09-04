@@ -1,0 +1,14 @@
+services:
+  proc_reporting.service:
+    class: Drupal\proc_reporting\Service\ProcReportingService
+    arguments:
+      - '@database'
+      - '@entity_type.manager'
+      - '@logger.factory'
+      - '@state'
+      - '@datetime.time'
+  logger.channel.proc_reporting:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: ['@logger.factory', 'get']
+    arguments:
+      - 'proc_reporting'

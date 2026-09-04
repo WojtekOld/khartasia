@@ -1,0 +1,88 @@
+uuid: 5846f1ef-fa2c-4c49-8ed5-954dc8a3f509
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.plante_texte.field_aire_utilis_ml
+    - field.field.node.plante_texte.field_gen_culture_ml
+    - field.field.node.plante_texte.field_graphie_locale_ml
+    - field.field.node.plante_texte.field_intr_paper_ml
+    - field.field.node.plante_texte.field_langue_texte
+    - field.field.node.plante_texte.field_mode_prep_ml
+    - field.field.node.plante_texte.field_plante_ref
+    - field.field.node.plante_texte.field_view_pap_plant_ml
+    - node.type.plante_texte
+  module:
+    - text
+    - user
+id: node.plante_texte.default
+targetEntityType: node
+bundle: plante_texte
+mode: default
+content:
+  field_aire_utilis_ml:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_gen_culture_ml:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_graphie_locale_ml:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_intr_paper_ml:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_langue_texte:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_mode_prep_ml:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_plante_ref:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_view_pap_plant_ml:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true

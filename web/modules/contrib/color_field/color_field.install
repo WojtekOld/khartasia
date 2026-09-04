@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Color Fields module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Enable the widget submodules that were split out from color_field.
+ *
+ * @see https://www.drupal.org/project/color_field/issues/3453011
+ */
+function color_field_update_9001(): void {
+  $modules = [
+    'color_field_widget_spectrum',
+    'color_field_widget_grid',
+  ];
+  \Drupal::service('module_installer')->install($modules);
+}

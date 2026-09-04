@@ -2,9 +2,11 @@
 
 namespace Drupal\bibcite\Plugin;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\bibcite\Annotation\BibCiteProcessor as AnnotationBibCiteProcessor;
+use Drupal\bibcite\Attribute\BibCiteProcessor as AttributeBibCiteProcessor;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Provides the Processor plugin manager.
@@ -23,7 +25,14 @@ class BibCiteProcessorManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/BibCiteProcessor', $namespaces, $module_handler, 'Drupal\bibcite\Plugin\BibCiteProcessorInterface', 'Drupal\bibcite\Annotation\BibCiteProcessor');
+    parent::__construct(
+      'Plugin/BibCiteProcessor',
+      $namespaces,
+      $module_handler,
+      BibCiteProcessorInterface::class,
+      AttributeBibCiteProcessor::class,
+      AnnotationBibCiteProcessor::class,
+    );
 
     $this->alterInfo('bibcite_bibcite_processor_info');
     $this->setCacheBackend($cache_backend, 'bibcite_bibcite_processor_plugins');

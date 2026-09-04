@@ -1,0 +1,22 @@
+name: "UI Patterns Test slot constraints"
+props:
+  type: object
+  properties: {}
+slots:
+  slot_max:
+    title: "Two items at most"
+    maxItems: 2
+  slot_expected:
+    title: "Expected components"
+    expected:
+      - "ui_patterns_test:test-form-component"
+      - "wrapper"
+  slot_both:
+    title: "Expected components, one to two items"
+    minItems: 1
+    maxItems: 2
+    expected:
+      - "ui_patterns_test:test-form-component"
+      - "wrapper"
+  slot_free:
+    title: "Free"

@@ -28,6 +28,7 @@ class FormLayoutBuilderConfigureSectionAlter {
     /** @var \Drupal\layout_builder\Form\ConfigureSectionForm $formObject */
     $formObject = $formState->getFormObject();
     $section = $formObject->getCurrentSection();
+    $isUiPatterns2 = \str_starts_with($section->getLayoutId(), 'ui_patterns:');
 
     // Section.
     $form['ui_styles'] = [
@@ -42,26 +43,32 @@ class FormLayoutBuilderConfigureSectionAlter {
       ],
     ];
 
-    // Regions.
-    /** @var array $regions_configuration */
-    $regions_configuration = $section->getThirdPartySetting('ui_styles', 'regions', []);
-    $regions = $section->getLayout()->getPluginDefinition()->getRegions();
-    if (!empty($regions)) {
-      $form['ui_styles']['regions'] = [
-        '#type' => 'container',
-      ];
+    if ($isUiPatterns2) {
+      $form['ui_styles']['section']['#description'] = $this->t('Use the attributes prop instead of the section styles.');
     }
-    foreach ($regions as $region_name => $region_infos) {
-      $form['ui_styles']['regions'][$region_name] = [
-        '#type' => 'ui_styles_styles',
-        '#title' => $this->t('@region_label region styles', [
-          '@region_label' => $region_infos['label'] ?? '',
-        ]),
-        '#default_value' => [
-          'selected' => $regions_configuration[$region_name]['selected'] ?? [],
-          'extra' => $regions_configuration[$region_name]['extra'] ?? '',
-        ],
-      ];
+    // Regions does not work with an UIP2 component.
+    else {
+      // Regions.
+      /** @var array $regions_configuration */
+      $regions_configuration = $section->getThirdPartySetting('ui_styles', 'regions', []);
+      $regions = $section->getLayout()->getPluginDefinition()->getRegions();
+      if (!empty($regions)) {
+        $form['ui_styles']['regions'] = [
+          '#type' => 'container',
+        ];
+      }
+      foreach ($regions as $region_name => $region_infos) {
+        $form['ui_styles']['regions'][$region_name] = [
+          '#type' => 'ui_styles_styles',
+          '#title' => $this->t('@region_label region styles', [
+            '@region_label' => $region_infos['label'] ?? '',
+          ]),
+          '#default_value' => [
+            'selected' => $regions_configuration[$region_name]['selected'] ?? [],
+            'extra' => $regions_configuration[$region_name]['extra'] ?? '',
+          ],
+        ];
+      }
     }
 
     // Our submit handler must execute before the default one, because the

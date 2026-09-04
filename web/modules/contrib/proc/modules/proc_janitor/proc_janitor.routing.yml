@@ -1,0 +1,16 @@
+proc_janitor.settings_form:
+  path: '/admin/config/system/proc/janitor'
+  defaults:
+    _title: 'Protected Content janitor settings'
+    _form: 'Drupal\proc_janitor\Form\SettingsForm'
+  requirements:
+    _permission: 'administer proc configuration'
+
+proc_janitor.batch_cleanup_form:
+  path: '/admin/config/system/proc/janitor/run-maintenance'
+  defaults:
+    _title: 'Run Protected Content janitor maintenance task'
+    _form: 'Drupal\proc_janitor\Form\BatchCleanupForm'
+  requirements:
+    _permission: 'administer proc configuration'
+

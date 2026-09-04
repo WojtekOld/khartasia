@@ -1,0 +1,7 @@
+fields:
+  bibcite_custom5:
+    label: 格式
+  bibcite_type_of_work:
+    label: 类型
+  bibcite_place_published:
+    label: 城市

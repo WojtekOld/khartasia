@@ -1,3 +1,7 @@
-ui_styles_entity_status.unpublished:
-  type: ui_styles.selected_mapping
-  label: 'Unpublished entity styles'
+theme_settings.third_party.ui_styles_entity_status:
+  type: mapping
+  label: 'UI Styles Entity Status settings'
+  mapping:
+    unpublished:
+      type: ui_styles.selected_mapping
+      label: 'Unpublished entity styles'

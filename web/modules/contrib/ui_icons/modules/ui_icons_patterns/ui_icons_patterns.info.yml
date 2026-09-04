@@ -1,13 +1,13 @@
 name: 'UI Icons for UI Patterns'
 type: module
-description: 'Icons integration with UI Patterns 1.x and UI Patterns 2.x.'
+description: 'Icons integration with UI Patterns 2.x.'
 package: User interface
-core_version_requirement: ^10.3 || ^11.0
+core_version_requirement: ^11.3 || ^12.0
 dependencies:
   - ui_icons:ui_icons
   - ui_patterns:ui_patterns
 
-# Information added by Drupal.org packaging script on 2026-04-16
-version: '1.1.2'
+# Information added by Drupal.org packaging script on 2026-08-03
+version: '2.0.0'
 project: 'ui_icons'
-datestamp: 1776334470
+datestamp: 1785781859

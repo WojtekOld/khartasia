@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_test_related
+    - node.type.test_article
+id: node.test_article.field_test_related
+field_name: field_test_related
+entity_type: node
+bundle: test_article
+label: 'Related article'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      test_article: test_article
+    sort:
+      field: _none
+    auto_create: false
+field_type: entity_reference

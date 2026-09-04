@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\ui_styles\Service;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\Extension\ThemeSettingsProvider;
 use Drupal\ui_skins\UiSkinsInterface;
 use Drupal\ui_skins\UiSkinsUtility;
 use Drupal\ui_styles\StylePluginManagerInterface;
@@ -206,7 +208,7 @@ class StylesheetGenerator implements StylesheetGeneratorInterface {
       $css_variables = [];
       foreach ($this->themeHandler->listInfo() as $theme => $themeObject) {
         /** @var array<string, array<string, array<string>>>|null $ui_skins_css_variables_settings */
-        $ui_skins_css_variables_settings = \theme_get_setting(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, $theme);
+        $ui_skins_css_variables_settings = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.3.0', static fn () => \Drupal::service(ThemeSettingsProvider::class)->getSetting(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, $theme), static fn () => \theme_get_setting(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, $theme));
         if (!\is_array($ui_skins_css_variables_settings)) {
           continue;
         }

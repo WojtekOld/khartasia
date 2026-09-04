@@ -19,7 +19,7 @@ class ConfigurationConverter {
   /**
    * Mapping between 1.x modules and 2.x ones.
    */
-  public const LEGACY_MODULES_MAPPING = [
+  public const array LEGACY_MODULES_MAPPING = [
     'ui_patterns_ds' => 'ui_patterns_ds',
     'ui_patterns_entity_links' => 'ui_patterns',
     'ui_patterns_field_formatters' => 'ui_patterns_field_formatters',
@@ -281,7 +281,7 @@ class ConfigurationConverter {
     if (isset($section['components'])) {
       foreach ($section['components'] as &$component) {
         // UI Patterns Pattern Block.
-        if (isset($component['configuration']['provider']) && $component['configuration']['provider'] == 'ui_patterns_pattern_block') {
+        if (isset($component['configuration']['provider']) && $component['configuration']['provider'] === 'ui_patterns_pattern_block') {
           $legacyPatternId = \str_replace('pattern_block:', '', $component['configuration']['id']);
           $legacyPatternSettings = $component['configuration']['pattern'];
 
@@ -309,8 +309,8 @@ class ConfigurationConverter {
           $componentsIds = [];
           $context = [];
 
-          $parsedID = explode(':', $component["configuration"]["id"]);
-          if ($parsedID[0] == 'field_block') {
+          $parsedID = \explode(':', $component['configuration']['id']);
+          if ($parsedID[0] === 'field_block') {
             $context['entity_type_id'] = $parsedID[1];
             $context['entity_bundle'] = $parsedID[2];
             $context['field_name'] = $parsedID[3];
@@ -417,11 +417,11 @@ class ConfigurationConverter {
     };
 
     // If cardinality is 1, not possible to get 'ui_patterns_component'.
-    if ($newType == 'ui_patterns_component'
+    if ($newType === 'ui_patterns_component'
       && isset($context['entity_type_id'], $context['field_name'])
     ) {
       $definitions = $this->entityFieldManager->getFieldStorageDefinitions($context['entity_type_id']);
-      if (isset($definitions[$context['field_name']]) && $definitions[$context['field_name']]->getCardinality() == 1) {
+      if (isset($definitions[$context['field_name']]) && $definitions[$context['field_name']]->getCardinality() === 1) {
         $newType = 'ui_patterns_component_per_item';
       }
     }
@@ -694,7 +694,7 @@ class ConfigurationConverter {
       }
       // Sometimes settings have a level per pattern.
       elseif (isset($settings[$component['machineName']])
-        && is_array($settings[$component['machineName']])
+        && \is_array($settings[$component['machineName']])
         && \array_key_exists($propKey, $settings[$component['machineName']])
       ) {
         $propType = $component['props']['properties'][$propKey]['ui_patterns']['type_definition'];
@@ -807,7 +807,7 @@ class ConfigurationConverter {
     // @todo We might want to add more brain power here to adapt source_id to
     //   the legacy setting type.
     $value = $prop;
-    if (is_array($value) && isset($value['input'])) {
+    if (\is_array($value) && isset($value['input'])) {
       $value = $value['input'];
     }
 
@@ -889,17 +889,17 @@ class ConfigurationConverter {
   public function convertSlotSourceId(string $legacySlotSourceId = '', string $legacySlotPlugin = '', array $context = []): string {
     if (isset($context['usage'])
       && $context['usage'] === 'field_group'
-      && $legacySlotPlugin == 'fields'
+      && $legacySlotPlugin === 'fields'
     ) {
       return 'field_group_child';
     }
-    if ($legacySlotPlugin == 'field_raw_properties'
+    if ($legacySlotPlugin === 'field_raw_properties'
     && isset($context['entity_type_id'], $context['field_name'])
     ) {
       return 'field_property:' . $context['entity_type_id'] . ':' . $context['field_name'] . ':' . $legacySlotSourceId;
     }
-    if ($legacySlotPlugin == 'field_meta_properties'
-      && $legacySlotSourceId == '_formatted'
+    if ($legacySlotPlugin === 'field_meta_properties'
+      && $legacySlotSourceId === '_formatted'
       && isset($context['entity_type_id'], $context['entity_bundle'], $context['field_name'])
     ) {
       return 'field_formatter:' . $context['entity_type_id'] . ':' . $context['entity_bundle'] . ':' . $context['field_name'];
@@ -939,16 +939,16 @@ class ConfigurationConverter {
     $legacySlotPlugin = $legacySlotSource['plugin'] ?? NULL;
     $legacySlotSourceId = $legacySlotSource['source'] ?? NULL;
 
-    if ($legacySlotPlugin == 'view_style' && $legacySlotSourceId == 'title') {
+    if ($legacySlotPlugin === 'view_style' && $legacySlotSourceId === 'title') {
       // Nothing to do in this case.
       return [];
     }
-    if ($legacySlotPlugin == 'view_style' && $legacySlotSourceId == 'rows') {
+    if ($legacySlotPlugin === 'view_style' && $legacySlotSourceId === 'rows') {
       return [
         'ui_patterns_views_field' => '',
       ];
     }
-    if ($legacySlotPlugin == 'views_row') {
+    if ($legacySlotPlugin === 'views_row') {
       return [
         'ui_patterns_views_field' => $legacySlotSource['source'],
       ];
@@ -956,7 +956,7 @@ class ConfigurationConverter {
 
     if (isset($context['usage'])
       && $context['usage'] === 'field_group'
-      && $legacySlotPlugin == 'fields'
+      && $legacySlotPlugin === 'fields'
     ) {
       return [
         'field_group_child' => $legacySlotSourceId,
@@ -965,8 +965,8 @@ class ConfigurationConverter {
 
     if (isset($context['usage'])
       && $context['usage'] === 'field_formatter'
-      && $legacySlotPlugin == 'field_meta_properties'
-      && $legacySlotSourceId == '_formatted'
+      && $legacySlotPlugin === 'field_meta_properties'
+      && $legacySlotSourceId === '_formatted'
     ) {
       return [
         'type' => $legacySlotSource['type'],

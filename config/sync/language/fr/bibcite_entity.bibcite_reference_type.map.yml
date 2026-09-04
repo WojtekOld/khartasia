@@ -1,0 +1,12 @@
+label: Carte
+fields:
+  bibcite_custom1:
+    label: Échelle
+  bibcite_secondary_title:
+    label: 'Titre de la série'
+  bibcite_pages:
+    label: Description
+  bibcite_type_of_work:
+    label: Type
+  bibcite_place_published:
+    label: Ville

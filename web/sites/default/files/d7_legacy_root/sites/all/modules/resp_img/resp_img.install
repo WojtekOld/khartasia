@@ -1,0 +1,194 @@
+<?php
+/**
+ * @file
+ * Install/schema hooks for the resp_img module.
+ */
+/**
+ * Implements hook_schema().
+ */
+function resp_img_schema() {
+  $schema = array();
+  $schema['resp_img_mapping'] = array(
+    'description' => 'Responsible images and styles mappings to breakpoints',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'The internal identifier for this mapping',
+        'no export' => TRUE, // do not export database only keys.
+      ),
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The machine name of the mapping',
+      ),
+      'breakpoint_group' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The group this mapping belongs to',
+      ),
+      'mapping' => array(
+        'type' => 'blob',
+        'not null' => TRUE,
+        'description' => 'The mappings linked to the breakpoints group',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    // CTools exportable object definition
+    'export' => array(
+      'key' => 'machine_name',
+      'key name' => 'machine_name',
+      'primary key' => 'id',
+      'identifier' => 'resp_img_mapping',
+      'admin_title' => 'label',
+      'default hook' => 'default_resp_img_mapping',
+      'api' => array(
+        'owner' => 'resp_img',
+        'api' => 'default_resp_img_mapping',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Update to 2.x
+ */
+function resp_img_update_7200(&$sandbox) {
+  // Install the new schema.
+  if (!db_table_exists('resp_img_mapping')) {
+    drupal_install_schema('resp_img');
+  }
+
+  // Check if the 1.x table exists.
+  // Check for the default suffix, we can't do much without it.
+  if (db_table_exists('resp_img_suffix') && variable_get('resp_img_default_suffix', '') != '') {
+    // Load all 1.x suffix'
+    $default = variable_get('resp_img_default_suffix', '');
+    $length = drupal_strlen($default);
+    $suffixes = db_select('resp_img_suffix', 'r')->fields('r')->orderBy('breakpoint')->execute()->fetchAll();
+    array_unshift($suffixes, (object)array('suffix' => $default, 'label' => 'Default', 'breakpoint' => 0, 'name' => 'default'));
+    $styles = array_keys(image_styles());
+    $group_style_mapping = array();
+    $weight = 0;
+    $groups = array();
+
+    foreach ($styles as $style) {
+      if (drupal_substr($style, -$length) === $default) {
+        // We found a responsive style, we need to create a group for it.
+        $groups[] = drupal_substr($style, 0, -$length);
+      }
+    }
+    $groups = array_unique($groups);
+
+    // Create the breakpoints, breakpoint groups and mappings.
+    foreach ($groups as $group) {
+      $breakpoints = array();
+      foreach ($suffixes as $suffix) {
+        // Check if the style exists.
+        if (in_array($group . $suffix->suffix, $styles)) {
+          // Check if the breakpoint exists.
+          $breakpoint_obj = breakpoints_breakpoint_load_by_fullkey('custom.user.update.' . $suffix->name);
+          if (!$breakpoint_obj) {
+            // Create a breakpoint.
+            $breakpoint_obj = breakpoints_breakpoint_empty_object();
+            $breakpoint_obj->name = $suffix->label;
+            $breakpoint_obj->machine_name = 'custom.user.update.' . $suffix->name;
+            $breakpoint_obj->breakpoint = '(min-width: ' . $suffix->breakpoint . 'px)';
+            $breakpoint_obj->source = 'user';
+            $breakpoint_obj->source_type = 'custom';
+            $breakpoint_obj->weight = $weight++;
+            $multipliers = variable_get('breakpoints_multipliers',  array('1x', '2x', '3x'));
+            $multipliers = array_combine($multipliers, array_fill(0, count($multipliers), 0));
+            if (isset($multipliers['1x'])) {
+              unset($multipliers['1x']);
+            }
+            $breakpoint_obj->multipliers = $multipliers;
+            breakpoints_breakpoint_save($breakpoint_obj);
+          }
+          $breakpoints[$breakpoint_obj->machine_name] = $group . $suffix->suffix;
+        }
+      }
+
+      // Create a group.
+      $group_obj = breakpoints_breakpoint_group_empty_object();
+      $group_obj->name = check_plain($group);
+      $group_obj->machine_name = str_replace('-', '_', drupal_clean_css_identifier($group_obj->name));
+      $group_obj->breakpoints = array_keys($breakpoints);
+      breakpoints_breakpoint_group_save($group_obj);
+      $group_style_mapping[$group_obj->machine_name] = $group . $suffix->suffix;
+
+      // Create a mapping
+      $mapping_obj = new stdClass();
+      $mapping_obj->mapping = array();
+      $mapping_obj->machine_name = 'mappings.' . $group_obj->machine_name;
+      $mapping_obj->breakpoint_group = $group_obj->machine_name;
+      foreach ($breakpoints as $breakpoint_name => $style) {
+        $mapping_obj->mapping[$breakpoint_name]['1x'] = $style;
+      }
+      resp_img_mapping_save($mapping_obj);
+    }
+
+    // Change the field settings.
+    $instances = field_read_instances(array('field_name' => array_keys(field_read_fields(array('type' => array('image'))))));
+    foreach ($instances as $instance) {
+      foreach ($instance['display'] as $view_mode => $settings) {
+        if (isset($instance['display'][$view_mode]['settings']['image_style'])) {
+          if ($new_style = array_search($instance['display'][$view_mode]['settings']['image_style'], $group_style_mapping)) {
+            $instance['display'][$view_mode]['settings']['image_style'] = RESP_IMG_STYLE_PREFIX . $new_style;
+          }
+        }
+        if (isset($instance['display'][$view_mode]['settings']['colorbox_node_style'])) {
+          if ($new_style = array_search($instance['display'][$view_mode]['settings']['colorbox_node_style'], $group_style_mapping)) {
+            $instance['display'][$view_mode]['settings']['colorbox_node_style'] = RESP_IMG_STYLE_PREFIX . $new_style;
+          }
+        }
+        field_update_instance($instance);
+      }
+    }
+  }
+
+  // Delete variables.
+  $vars = array(
+    'resp_img_block_enabled',
+    'resp_img_default_suffix',
+    'resp_img_forceredirect',
+    'resp_img_forceresize',
+    'resp_img_purgeexpire',
+    'resp_img_reloadonresize',
+    'resp_img_use_device_pixel_ratio',
+  );
+  foreach ($vars as $var) {
+    variable_del($var);
+  }
+
+  // Delete table.
+  if (db_table_exists('resp_img_suffix')) {
+    db_drop_table('resp_img_suffix');
+  }
+}
+
+/**
+ * Change the resp_img prefix in the field settings.
+ */
+function resp_img_update_7201() {
+  // Change the field settings.
+  $instances = field_read_instances(array('field_name' => array_keys(field_read_fields(array('type' => array('image'))))));
+  foreach ($instances as $instance) {
+    foreach ($instance['display'] as $view_mode => $settings) {
+      if (isset($instance['display'][$view_mode]['settings']['image_style'])) {
+        $instance['display'][$view_mode]['settings']['image_style'] = preg_replace('/^resp__img__/', RESP_IMG_STYLE_PREFIX,  $instance['display'][$view_mode]['settings']['image_style']);
+      }
+      if (isset($instance['display'][$view_mode]['settings']['colorbox_node_style'])) {
+        $instance['display'][$view_mode]['settings']['colorbox_node_style'] = preg_replace('/^resp__img__/', RESP_IMG_STYLE_PREFIX,  $instance['display'][$view_mode]['settings']['colorbox_node_style']);
+      }
+      field_update_instance($instance);
+    }
+  }
+}

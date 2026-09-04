@@ -2,15 +2,17 @@
 
 namespace Drupal\Tests\bibcite_entity\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\bibcite_entity\Entity\Reference;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
  * Tests reference field level access.
- *
- * @group bibcite
  */
+#[Group('bibcite')]
+#[RunTestsInSeparateProcesses]
 class ReferenceFieldAccessTest extends EntityKernelTestBase {
 
   /**
@@ -54,8 +56,16 @@ class ReferenceFieldAccessTest extends EntityKernelTestBase {
     $content_admin_user = $this->createUser(['administer bibcite_reference']);
 
     // Two different editor users.
-    $page_creator_user = $this->createUser(['create book bibcite_reference', 'edit own book bibcite_reference', 'delete own book bibcite_reference']);
-    $page_manager_user = $this->createUser(['create book bibcite_reference', 'edit any book bibcite_reference', 'delete any book bibcite_reference']);
+    $page_creator_user = $this->createUser([
+      'create book bibcite_reference',
+      'edit own book bibcite_reference',
+      'delete own book bibcite_reference',
+    ]);
+    $page_manager_user = $this->createUser([
+      'create book bibcite_reference',
+      'edit any book bibcite_reference',
+      'delete any book bibcite_reference',
+    ]);
 
     // An unprivileged user.
     $page_unrelated_user = $this->createUser(['view bibcite_reference']);

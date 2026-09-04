@@ -13,7 +13,7 @@ class PropConverter {
    * Convert prop.
    */
   public function convert(array $setting): array {
-    return match ($setting["type"]) {
+    return match ($setting['type']) {
       'attributes' => [
         '$ref' => 'ui-patterns://attributes',
       ],
@@ -57,7 +57,7 @@ class PropConverter {
         'enum' => $values,
       ],
     ];
-    if (!empty(array_diff($values, $labels))) {
+    if (!empty(\array_diff($values, $labels))) {
       $prop['items']['meta:enum'] = $setting['options'];
     }
     return $prop;
@@ -73,7 +73,7 @@ class PropConverter {
       'type' => $this->getEnumType($values),
       'enum' => $values,
     ];
-    if (!empty(array_diff($values, $labels))) {
+    if (!empty(\array_diff($values, $labels))) {
       $prop['meta:enum'] = $setting['options'];
     }
     return $prop;
@@ -85,18 +85,18 @@ class PropConverter {
   private function getEnumType(array $values): array|string {
     $types = [];
     foreach ($values as $value) {
-      if (is_int($value)) {
-        $types[] = "integer";
+      if (\is_int($value)) {
+        $types[] = 'integer';
         continue;
       }
-      if (is_float($value)) {
-        $types[] = "number";
+      if (\is_float($value)) {
+        $types[] = 'number';
         continue;
       }
-      $types[] = "string";
+      $types[] = 'string';
     }
-    $types = array_unique($types);
-    if (count($types) == 1) {
+    $types = \array_unique($types);
+    if (\count($types) === 1) {
       return $types[0];
     }
     return $types;

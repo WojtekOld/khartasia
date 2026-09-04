@@ -10,12 +10,14 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons_field\Plugin\Field\FieldType\IconType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the IconType class.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[CoversClass(IconType::class)]
 #[Group('ui_icons')]
 class IconTypeTest extends UnitTestCase {
@@ -46,7 +48,7 @@ class IconTypeTest extends UnitTestCase {
    * Test the schema method.
    */
   public function testSchema(): void {
-    $schema = $this->iconType::schema($this->createMock(FieldStorageDefinitionInterface::class));
+    $schema = $this->iconType::schema($this->createStub(FieldStorageDefinitionInterface::class));
 
     $this->assertCount(1, $schema['columns']);
     $this->assertArrayHasKey('target_id', $schema['columns']);
@@ -56,9 +58,16 @@ class IconTypeTest extends UnitTestCase {
    * Test the propertyDefinitions method.
    */
   public function testPropertyDefinitions(): void {
-    $properties = $this->iconType::propertyDefinitions($this->createMock(FieldStorageDefinitionInterface::class));
+    $properties = $this->iconType::propertyDefinitions($this->createStub(FieldStorageDefinitionInterface::class));
 
     $this->assertSame('string', $properties['target_id']->getDataType());
+  }
+
+  /**
+   * Test the mainPropertyName method.
+   */
+  public function testMainPropertyName(): void {
+    $this->assertSame('target_id', $this->iconType::mainPropertyName());
   }
 
 }

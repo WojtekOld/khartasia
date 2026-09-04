@@ -7,10 +7,11 @@ namespace Drupal\Tests\ui_icons_menu\Kernel;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\ui_icons_menu\Hook\UiIconsMenuHooks;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Test the ui_icons_menu module.
@@ -19,7 +20,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
  */
 #[RunTestsInSeparateProcesses]
 #[Group('ui_icons')]
-#[CoversNothing]
+#[CoversClass(UiIconsMenuHooks::class)]
 class UiIconsMenuTest extends KernelTestBase {
 
   /**
@@ -44,12 +45,12 @@ class UiIconsMenuTest extends KernelTestBase {
   }
 
   /**
-   * Tests ui_icons_menu_entity_base_field_info_alter().
+   * Tests UiIconsMenuHooks::entityBaseFieldInfoAlter().
    */
   public function testEntityBaseFieldInfoAlter(): void {
     $entity_type = $this->container->get('entity_type.manager')->getDefinition('menu_link_content');
     $fields = MenuLinkContent::baseFieldDefinitions($entity_type);
-    ui_icons_menu_entity_base_field_info_alter($fields, $entity_type);
+    $this->container->get(UiIconsMenuHooks::class)->entityBaseFieldInfoAlter($fields, $entity_type);
 
     $this->assertArrayHasKey('link', $fields);
 
@@ -74,7 +75,7 @@ class UiIconsMenuTest extends KernelTestBase {
   }
 
   /**
-   * Tests ui_icons_menu_preprocess_menu().
+   * Tests UiIconsMenuHooks::preprocessMenu().
    */
   #[DataProvider('iconDisplayDataProvider')]
   public function testPreprocessMenu(?string $iconDisplay, array $expectedOrder): void {
@@ -106,7 +107,7 @@ class UiIconsMenuTest extends KernelTestBase {
     }
     $url->setOptions($options);
 
-    ui_icons_menu_preprocess_menu($variables);
+    $this->container->get(UiIconsMenuHooks::class)->preprocessMenu($variables);
     $actual = (string) $variables['items'][0]['title'];
 
     // Test the position of the dom element, the icon test is prefix by icon id,

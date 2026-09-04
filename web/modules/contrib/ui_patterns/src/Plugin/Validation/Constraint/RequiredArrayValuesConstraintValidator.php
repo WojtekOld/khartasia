@@ -16,14 +16,14 @@ class RequiredArrayValuesConstraintValidator extends ConstraintValidator {
    * {@inheritdoc}
    */
   public function validate(mixed $value, Constraint $constraint): void {
-    assert($constraint instanceof RequiredArrayValuesConstraint);
-    if (!is_array($value)) {
+    \assert($constraint instanceof RequiredArrayValuesConstraint);
+    if (!\is_array($value)) {
       $this->context->buildViolation($constraint->notArrayMessage)->addViolation();
       return;
     }
-    $values = array_values($value);
+    $values = \array_values($value);
     foreach ($constraint->requiredValues as $requiredValue) {
-      if (!in_array($requiredValue, $values)) {
+      if (!\in_array($requiredValue, $values, TRUE)) {
         $this->context->buildViolation($constraint->requiredValueMessage)->setParameter('@value', $requiredValue)
           ->atPath((string) $requiredValue)->setInvalidValue($requiredValue)
           ->addViolation();

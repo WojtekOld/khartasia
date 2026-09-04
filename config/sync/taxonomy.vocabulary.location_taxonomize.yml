@@ -1,9 +1,0 @@
-uuid: 673aee56-6439-4645-8830-9ab9cd3bdbb0
-langcode: en
-status: true
-dependencies: {  }
-name: Emplacement
-vid: location_taxonomize
-description: 'This vocabulary is synchronized with Location data automatically by the Location taxonomize module'
-weight: 0
-new_revision: false

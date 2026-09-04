@@ -18,7 +18,7 @@ class UiPatternsServiceProvider extends ServiceProviderBase {
    */
   public function register(ContainerBuilder $container): void {
     $modules = $container->getParameterBag()->get('container.modules');
-    if (is_array($modules) === FALSE) {
+    if (\is_array($modules) === FALSE) {
       return;
     }
     if (isset($modules['layout_builder'])) {
@@ -34,7 +34,6 @@ class UiPatternsServiceProvider extends ServiceProviderBase {
       $service->addArgument(new Reference('ui_patterns.sample_entity_generator'));
       $service->addTag('ui_patterns.context_entity_resolver', ['priority' => 20]);
     }
-
   }
 
 }

@@ -12,8 +12,6 @@ use Drupal\Core\File\FileSystemInterface;
 
 /**
  * Plugin deriver for UI Patterns library.
- *
- * @package Drupal\ui_patterns_library\Deriver
  */
 class ComponentDiscovery {
 
@@ -22,22 +20,18 @@ class ComponentDiscovery {
    *
    * @var array
    */
-  const FILE_EXTENSIONS = [
-    ".ui_patterns.yml",
-    ".patterns.yml",
-    ".pattern.yml",
+  public const array FILE_EXTENSIONS = [
+    '.ui_patterns.yml',
+    '.patterns.yml',
+    '.pattern.yml',
   ];
 
-  /**
-   * Constructs a ComponentDiscovery.
-   */
   public function __construct(
     protected ExtensionPathResolver $pathResolver,
     protected ModuleHandlerInterface $moduleHandler,
     protected ThemeHandlerInterface $themeHandler,
     protected FileSystemInterface $filesystem,
-  ) {
-  }
+  ) {}
 
   /**
    * Discover components.
@@ -45,12 +39,12 @@ class ComponentDiscovery {
   public function discover(string $extension): array {
     $components = [];
     $path = $this->getExtensionPath($extension);
-    foreach (array_keys($this->fileScanDirectory($path)) as $file_path) {
-      $content = file_get_contents($file_path) ?: "";
+    foreach (\array_keys($this->fileScanDirectory($path)) as $file_path) {
+      $content = \file_get_contents($file_path) ?: '';
       foreach (Yaml::decode($content) as $id => $definition) {
         $definition['id'] = $id;
-        $definition['base path'] = dirname($file_path);
-        $definition['file name'] = basename($file_path);
+        $definition['base path'] = \dirname($file_path);
+        $definition['file name'] = \basename($file_path);
         $components[$file_path] = $definition;
       }
     }
@@ -71,8 +65,8 @@ class ComponentDiscovery {
   public function extensionExists(string $extension): bool {
     $type = $this->getExtensionType($extension);
     return match ($type) {
-      "module" => $this->moduleHandler->moduleExists($extension),
-      "theme" => $this->themeHandler->themeExists($extension),
+      'module' => $this->moduleHandler->moduleExists($extension),
+      'theme' => $this->themeHandler->themeExists($extension),
       default => FALSE
     };
   }
@@ -91,17 +85,17 @@ class ComponentDiscovery {
    * Wrapper method for global function call.
    */
   protected function fileScanDirectory(string $directory): array {
-    if (!is_dir($directory)) {
+    if (!\is_dir($directory)) {
       return [];
     }
     $options = ['nomask' => $this->getNoMask()];
     $extensions = self::FILE_EXTENSIONS;
-    $extensions = array_map('preg_quote', $extensions);
-    $extensions = implode('|', $extensions);
+    $extensions = \array_map('preg_quote', $extensions);
+    $extensions = \implode('|', $extensions);
     $files = $this->filesystem->scanDirectory($directory, "/{$extensions}$/", $options);
     // In different file systems order of files in a folder can be different
     // that can break tests. So let's sort them alphabetically manually.
-    ksort($files);
+    \ksort($files);
     return $files;
   }
 
@@ -115,10 +109,10 @@ class ComponentDiscovery {
     $ignore = [];
     // We add 'tests' directory to the ones found in settings.
     $ignore[] = 'tests';
-    array_walk($ignore, function (&$value) {
-      $value = preg_quote($value, '/');
+    \array_walk($ignore, static function (&$value) {
+      $value = \preg_quote($value, '/');
     });
-    return '/^' . implode('|', $ignore) . '$/';
+    return '/^' . \implode('|', $ignore) . '$/';
   }
 
 }

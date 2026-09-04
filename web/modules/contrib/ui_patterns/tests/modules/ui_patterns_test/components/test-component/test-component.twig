@@ -45,7 +45,11 @@
   </div>
   <div class="ui-patterns-props-links">
     {% for item in links %}
-      {% if item.url %}
+      {% if item.is_button %}
+        <li>
+          <button type="button"{{ item.link_attributes }}>{{ item.title }}</button>
+        </li>
+      {% elseif item.url %}
         <li>
           <a href="{{ item.url }}">{{ item.title }}</a>
         </li>

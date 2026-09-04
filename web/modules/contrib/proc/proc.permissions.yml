@@ -1,0 +1,13 @@
+administer proc configuration:
+  title: 'Administer proc configuration'
+  restrict access: true
+administer proc entity:
+  title: 'Administer proc entity'
+edit proc entity:
+  title: 'Edit proc entity'
+delete proc entity:
+  title: 'Delete proc entity'
+add proc entity:
+  title: 'Add proc entity'
+view proc entity:
+  title: 'View proc entity'

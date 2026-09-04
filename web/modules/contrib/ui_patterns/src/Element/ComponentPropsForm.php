@@ -6,6 +6,7 @@ namespace Drupal\ui_patterns\Element;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 
 /**
@@ -21,6 +22,7 @@ use Drupal\Core\Render\Element;
  *     'props' => [],
  *   ],
  * ];
+ *
  * @endcode
  *
  * Value example:
@@ -33,6 +35,7 @@ use Drupal\Core\Render\Element;
  *       ]
  *     ],
  *   ]
+ *
  * @endcode
  *
  * Configuration:
@@ -40,16 +43,15 @@ use Drupal\Core\Render\Element;
  *  '#component_id' => Required Component ID.
  *  '#source_contexts' => The context of the sources.
  *  '#tag_filter' => Filter sources based on these tags.
- *
- * @FormElement("component_props_form")
  */
+#[FormElement('component_props_form')]
 class ComponentPropsForm extends ComponentFormBase {
 
   /**
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = get_class($this);
+    $class = static::class;
     return [
       '#input' => TRUE,
       '#multiple' => FALSE,
@@ -87,7 +89,7 @@ class ComponentPropsForm extends ComponentFormBase {
     }
     $configuration = $element['#default_value']['props'] ?? [];
     if ($element['#render_headings']) {
-      $prop_heading = new FormattableMarkup("<p><strong>@title</strong></p>", ["@title" => t("Props")]);
+      $prop_heading = new FormattableMarkup('<p><strong>@title</strong></p>', ['@title' => \t('Props')]);
       $element[] = [
         '#markup' => $prop_heading,
       ];
@@ -100,8 +102,8 @@ class ComponentPropsForm extends ComponentFormBase {
       $prop_type = $prop['ui_patterns']['type_definition'];
       $element[$prop_id] = [
         '#type' => 'component_prop_form',
-        '#title' => $prop["title"] ?? $prop_type->label(),
-        '#description' => $prop["description"] ?? $prop_type->getPluginDefinition()['description'] ?? NULL,
+        '#title' => $prop['title'] ?? $prop_type->label(),
+        '#description' => $prop['description'] ?? $prop_type->getPluginDefinition()['description'] ?? NULL,
         '#default_value' => $configuration[$prop_id] ?? [],
         '#source_contexts' => $contexts,
         '#tag_filter' => $element['#tag_filter'],
@@ -110,11 +112,11 @@ class ComponentPropsForm extends ComponentFormBase {
         '#wrap' => $element['#wrap'] ?? TRUE,
         '#render_sources' => $element['#render_sources'] ?? TRUE,
       ];
-      if (is_array($prop_filter) && !in_array($prop_id, $prop_filter)) {
+      if (\is_array($prop_filter) && !\in_array($prop_id, $prop_filter, TRUE)) {
         $element[$prop_id]['#access'] = FALSE;
       }
     }
-    if (count(Element::children($element)) === 0) {
+    if (\count(Element::children($element)) === 0) {
       $element['#access'] = FALSE;
     }
     return $element;

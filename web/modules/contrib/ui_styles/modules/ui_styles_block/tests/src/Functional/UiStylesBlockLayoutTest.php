@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_styles_block\Functional;
 
 use Drupal\Core\Url;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Block layout UI Styles tests.
@@ -12,6 +14,9 @@ use Drupal\Core\Url;
  * @group ui_styles
  * @group ui_styles_block
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_block')]
+#[RunTestsInSeparateProcesses]
 class UiStylesBlockLayoutTest extends UiStylesBlockFunctionalTestBase {
 
   /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
 use Drupal\Component\Plugin\Exception\ContextException;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -22,10 +23,8 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
 
   /**
    * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
-  protected $entityFieldManager;
+  protected EntityFieldManagerInterface $entityFieldManager;
 
   /**
    * {@inheritdoc}
@@ -43,7 +42,7 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
       $plugin_id,
       $plugin_definition
     );
-    $instance->entityFieldManager = $container->get('entity_field.manager');
+    $instance->entityFieldManager = $container->get(EntityFieldManagerInterface::class);
     return $instance;
   }
 
@@ -53,8 +52,8 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
     $form['label_map'] = [
-      "#type" => "label",
-      "#title" => $this->propDefinition['title'] ?? '' . ": " . $this->label(),
+      '#type' => 'label',
+      '#title' => $this->propDefinition['title'] ?? ': ' . $this->label(),
     ];
     return $form;
   }
@@ -62,10 +61,10 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
   /**
    * Returns the field name.
    *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   *
    * @return string
    *   The field name.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
    */
   protected function getFieldName(): string {
     return $this->getContextValue('field_name');
@@ -74,10 +73,10 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
   /**
    * Returns the bundle.
    *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   *
    * @return string
    *   The bundle.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
    */
   protected function getBundle(): string {
     return $this->getContextValue('bundle');
@@ -86,25 +85,25 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
   /**
    * Returns the entity type id.
    *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   *
    * @return string|null
    *   The entity type id.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
    */
   protected function getEntityTypeId(): ?string {
     if ($entity = $this->getEntity()) {
       return $entity->getEntityTypeId();
     }
-    throw new ContextException("Entity not found");
+    throw new ContextException('Entity not found');
   }
 
   /**
    * Returns the entity from context.
    *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   *
    * @return \Drupal\Core\Entity\EntityInterface|null
    *   The entity
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
    */
   protected function getEntity(): ?EntityInterface {
     return $this->getContextValue('entity');
@@ -123,7 +122,7 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
     }
     $field_definitions = $this->entityFieldManager->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
     $field_name = $this->getFieldName();
-    if (!array_key_exists($field_name, $field_definitions)) {
+    if (!\array_key_exists($field_name, $field_definitions)) {
       return NULL;
     }
     return $field_definitions[$field_name];

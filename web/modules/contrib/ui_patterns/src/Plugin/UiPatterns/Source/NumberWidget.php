@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginPropValueWidget;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -17,7 +18,7 @@ use Drupal\ui_patterns\SourcePluginPropValueWidget;
   label: new TranslatableMarkup('Number'),
   description: new TranslatableMarkup('Numeric input, with special numeric validation.'),
   prop_types: ['number'],
-  tags: ['widget', 'widget:dismissible']
+  tags: [SourceTags::Widget->value, SourceTags::WidgetDismissible->value]
 )]
 class NumberWidget extends SourcePluginPropValueWidget {
 
@@ -46,25 +47,25 @@ class NumberWidget extends SourcePluginPropValueWidget {
       '#default_value' => $this->getSetting('value'),
       '#step' => 0.01,
     ];
-    if ($this->propDefinition["type"] === "integer") {
+    if ($this->propDefinition['type'] === 'integer') {
       $form['value']['#step'] = 1;
     }
     // Because of SDC's ComponentMetadata::parseSchemaInfo() which is adding
     // "object" type to all props to "allows deferring rendering in Twig to the
     // render pipeline". Remove it as soon as this weird mechanism is removed
     // from SDC.
-    $type = $this->propDefinition["type"];
-    if (is_array($type) && in_array("integer", $type) && !in_array("number", $type, TRUE)) {
+    $type = $this->propDefinition['type'];
+    if (\is_array($type) && \in_array('integer', $type, TRUE) && !\in_array('number', $type, TRUE)) {
       $form['value']['#step'] = 1;
     }
-    if (is_string($type) && $type === 'integer') {
+    if (\is_string($type) && $type === 'integer') {
       $form['value']['#step'] = 1;
     }
-    if (isset($this->propDefinition["minimum"])) {
-      $form['value']['#min'] = $this->propDefinition["minimum"];
+    if (isset($this->propDefinition['minimum'])) {
+      $form['value']['#min'] = $this->propDefinition['minimum'];
     }
-    if (isset($this->propDefinition["maximum"])) {
-      $form['value']['#max'] = $this->propDefinition["maximum"];
+    if (isset($this->propDefinition['maximum'])) {
+      $form['value']['#max'] = $this->propDefinition['maximum'];
     }
     $this->addRequired($form['value']);
     return $form;

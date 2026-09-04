@@ -5,28 +5,18 @@
  * Builds placeholder replacement tokens for entity-related data.
  */
 
+declare(strict_types=1);
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\ui_patterns_test\Hook\UiPatternsTestTokensHooks;
 
 /**
  * Implements hook_token_info().
  */
+#[LegacyHook]
 function ui_patterns_test_token_info(): array {
-  $type = [
-    'name' => t('Node Tests'),
-    'description' => t('Tokens related to individual content items, or "nodes".'),
-    'needs-data' => 'entity_test',
-  ];
-
-  // Core tokens for nodes.
-  $entity['id'] = [
-    'name' => t("Entity ID"),
-    'description' => t('The unique ID of the content item, or "entity_test".'),
-  ];
-
-  return [
-    'types' => ['node' => $type],
-    'tokens' => ['node' => $entity],
-  ];
+  return Drupal::service(UiPatternsTestTokensHooks::class)->tokenInfo();
 }
 
 /**
@@ -34,24 +24,7 @@ function ui_patterns_test_token_info(): array {
  *
  * @SuppressWarnings("PHPMD.UnusedFormalParameter")
  */
+#[LegacyHook]
 function ui_patterns_test_tokens(string $type, array $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata): array {
-  $replacements = [];
-
-  if ($type == 'node' && !empty($data['node'])) {
-    $entity = $data['node'];
-    foreach ($tokens as $name => $original) {
-      switch ($name) {
-        // Simple key values on the node.
-        case 'id':
-          $replacements[$original] = $entity->id();
-          break;
-
-        case 'name':
-          $replacements[$original] = $entity->name();
-          break;
-
-      }
-    }
-  }
-  return $replacements;
+  return Drupal::service(UiPatternsTestTokensHooks::class)->tokens($type, $tokens, $data, $options, $bubbleable_metadata);
 }

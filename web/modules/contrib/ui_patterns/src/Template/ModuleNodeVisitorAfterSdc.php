@@ -32,22 +32,21 @@ class ModuleNodeVisitorAfterSdc extends ModuleNodeVisitorBase {
     }
     $line = $node->getTemplateLine();
     $function = $this->buildPreprocessPropsFunction($line, $component, $env);
-    $node = $this->injectFunction($node, $function);
-    return $node;
+    return $this->injectFunction($node, $function);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getPriority(): int {
-    $priority = &drupal_static(__METHOD__);
+    $priority = &\drupal_static(__METHOD__);
     if (!isset($priority)) {
       $original_node_visitor = new CoreComponentNodeVisitor($this->componentManager);
       // Ensure that this node visitor's priority is higher than core's visitor,
       // because this class has to run after core's class.
       $priority = $original_node_visitor->getPriority() + 1;
     }
-    return is_numeric($priority) ? (int) $priority : 0;
+    return \is_numeric($priority) ? (int) $priority : 0;
   }
 
   /**

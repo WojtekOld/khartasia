@@ -32,16 +32,16 @@ class ComponentAlterer implements TrustedCallbackInterface {
    *   Render array.
    */
   public static function processLayoutBuilderRegions(array $element) {
-    if (!isset($element["#layout"])) {
+    if (!isset($element['#layout'])) {
       return $element;
     }
     foreach (Element::children($element) as $region_id) {
       // Example of blocks found here: layout_builder_add_block & region_label.
       foreach (Element::children($element[$region_id]) as $block_id) {
-        $element["#slots"][$region_id][$block_id] = $element[$region_id][$block_id];
+        $element['#slots'][$region_id][$block_id] = $element[$region_id][$block_id];
       }
       // Support for drag&drop and other attributes manipulation in preview.
-      if ($element['#layout']->isInPreview() && isset($element[$region_id]['#attributes']) && isset($element['#slots'][$region_id])) {
+      if ($element['#layout']->isInPreview() && isset($element[$region_id]['#attributes'], $element['#slots'][$region_id])) {
         $element['#slots'][$region_id] = [
           '#type' => 'html_tag',
           '#tag' => 'div',

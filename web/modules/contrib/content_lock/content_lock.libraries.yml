@@ -1,0 +1,6 @@
+drupal.content_lock.settings:
+  js:
+    js/content_lock_settings.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

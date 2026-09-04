@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns\Plugin\Context;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 
 /**
@@ -22,8 +23,19 @@ class RequirementsContextDefinition extends ContextDefinition {
    * @return RequirementsContextDefinition
    *   The requirements context definition instance.
    */
-  public static function fromRequirements(array $requirements = [], ?string $label = NULL) : RequirementsContextDefinition {
-    return new static("any", $label, TRUE, FALSE, NULL, NULL, ["RequiredArrayValues" => $requirements]);
+  public static function fromRequirements(array $requirements = [], ?string $label = NULL): RequirementsContextDefinition {
+    $constraints = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.4',
+      currentCallable: static function () use ($requirements): array {
+        return ['RequiredArrayValues' => ['requiredValues' => $requirements]];
+      },
+      deprecatedCallable: static function () use ($requirements): array {
+        return ['RequiredArrayValues' => $requirements];
+      },
+    );
+
+    return new static('any', $label, TRUE, FALSE, NULL, NULL, $constraints);
   }
 
 }

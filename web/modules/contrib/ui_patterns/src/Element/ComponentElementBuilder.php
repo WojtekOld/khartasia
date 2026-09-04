@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Element;
 
 use Drupal\Component\Plugin\Exception\ContextException;
+use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\Component;
+use Drupal\Core\Plugin\Context\ContextInterface;
+use Drupal\Core\Plugin\PreviewAwarePluginInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Theme\ComponentPluginManager;
@@ -16,11 +20,21 @@ use Drupal\ui_patterns\PropTypeInterface;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Component render element builder.
  */
 class ComponentElementBuilder implements TrustedCallbackInterface {
+
+  /**
+   * Source context telling the sources they render a preview.
+   *
+   * A context, so nested sources get it without any extra work.
+   *
+   * @see \Drupal\Core\Plugin\PreviewAwarePluginInterface
+   */
+  protected const IN_PREVIEW_CONTEXT = 'ui_patterns:in_preview';
 
   /**
    * {@inheritdoc}
@@ -29,16 +43,13 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
     return ['build'];
   }
 
-  /**
-   * Constructs a ComponentElementBuilder.
-   */
   public function __construct(
     protected SourcePluginManager $sourcesManager,
     protected ComponentPluginManager $componentPluginManager,
     protected ModuleHandlerInterface $moduleHandler,
+    #[Autowire(service: 'logger.channel.ui_patterns')]
     protected LoggerInterface $logger,
-  ) {
-  }
+  ) {}
 
   /**
    * Build component data provided to the SDC element.
@@ -87,14 +98,53 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
   }
 
   /**
+   * Removes empty array values in a possible render array.
+   */
+  protected function removeEmptyArrayValuesInRenderArray(array &$data): void {
+    $keys_to_remove = [];
+    foreach ($data as $key => $value) {
+      if (!\is_int($key) && $key !== '' && $key[0] === '#') {
+        continue;
+      }
+      if (\is_array($value) && empty($value)) {
+        $keys_to_remove[] = $key;
+      }
+    }
+    foreach ($keys_to_remove as $key) {
+      unset($data[$key]);
+    }
+  }
+
+  /**
+   * Clean false negative from Element::isRenderArray.
+   *
+   * @param mixed $data
+   *   Possible render array.
+   *
+   * @return mixed
+   *   Cleaned render array.
+   */
+  protected function cleanPotentialRenderArray(mixed $data): mixed {
+    if (!\is_array($data)) {
+      return $data;
+    }
+    if ($this->isSingletonRenderArray($data)) {
+      return $this->cleanPotentialRenderArray(\array_values($data)[0]);
+    }
+    $this->removeEmptyArrayValuesInRenderArray($data);
+    return $data;
+  }
+
+  /**
    * Add data to a prop or a slot.
    */
   protected function addDataToComponent(array &$build, string $prop_or_slot_id, PropTypeInterface $prop_type, mixed $data): void {
     if ($prop_type instanceof SlotPropType) {
-      if ($data !== NULL && Element::isRenderArray($data)) {
-        if ($this->isSingletonRenderArray($data)) {
-          $data = array_values($data)[0];
-        }
+      if ($data === NULL) {
+        return;
+      }
+      $data = $this->cleanPotentialRenderArray($data);
+      if (Element::isRenderArray($data)) {
         $build['#slots'][$prop_or_slot_id][] = $data;
       }
     }
@@ -149,7 +199,7 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
    * @return mixed
    *   The updated build array.
    */
-  public function buildSource(array $build, string $prop_or_slot_id, array $definition, array $configuration, array $contexts) : mixed {
+  public function buildSource(array $build, string $prop_or_slot_id, array $definition, array $configuration, array $contexts): mixed {
     try {
       if (empty($configuration['source_id'])) {
         return $build;
@@ -157,6 +207,9 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
       $source = $this->sourcesManager->getSource($prop_or_slot_id, $definition, $configuration, $contexts);
       if (!$source) {
         return $build;
+      }
+      if ($source instanceof PreviewAwarePluginInterface) {
+        $source->setInPreview($this->isInPreview($contexts));
       }
       /** @var \Drupal\ui_patterns\PropTypeInterface $prop_type */
       $prop_type = $source->getPropDefinition()['ui_patterns']['type_definition'];
@@ -167,18 +220,37 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
       // Alter the value by hook implementations.
       $this->moduleHandler->alter('ui_patterns_source_value', $data, $source, $configuration);
       $this->addDataToComponent($build, $prop_or_slot_id, $prop_type, $data);
+      if ($source instanceof CacheableDependencyInterface) {
+        CacheableMetadata::createFromRenderArray($build)->addCacheableDependency($source)->applyTo($build);
+      }
     }
     catch (ContextException $e) {
       // ContextException is thrown when a required context is missing.
       // We don't want to break the render process, so we just ignore the prop.
-      $error_message = t("Context error for '@prop_id' in component '@component_id': @message", [
+      $this->logger->error("Context error for '@prop_id' in component '@component_id': @message", [
         '@prop_id' => $prop_or_slot_id,
         '@component_id' => $build['#component'] ?? '',
         '@message' => $e->getMessage(),
       ]);
-      $this->logger->error($error_message);
     }
     return $build;
+  }
+
+  /**
+   * Whether the contexts mark this render as a preview.
+   *
+   * Also read by DerivableContextSourceBase.
+   *
+   * @param array $contexts
+   *   Source contexts.
+   *
+   * @return bool
+   *   TRUE when rendering a preview.
+   */
+  public static function isInPreview(array $contexts): bool {
+    $context = $contexts[self::IN_PREVIEW_CONTEXT] ?? NULL;
+    // getContextValue() throws on a context without value.
+    return $context instanceof ContextInterface && $context->hasContextValue() && (bool) $context->getContextValue();
   }
 
   /**
@@ -220,8 +292,8 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
 
     // Simplify single-element arrays.
     // Weird hack, we take care of sequences injected in single sub value.
-    if ($this->isSingletonRenderArray($build['#slots'][$slot_id]) &&
-      count(Element::children($build['#slots'][$slot_id][0])) !== 0
+    if ($this->isSingletonRenderArray($build['#slots'][$slot_id])
+      && \count(Element::children($build['#slots'][$slot_id][0])) !== 0
     ) {
       $build['#slots'][$slot_id] = $build['#slots'][$slot_id][0];
     }
@@ -239,11 +311,11 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
    *   TRUE if the render array is a singleton, FALSE otherwise.
    */
   protected function isSingletonRenderArray(array $candidate): bool {
-    if (count($candidate) !== 1) {
+    if (\count($candidate) !== 1) {
       return FALSE;
     }
-    $key = array_key_first($candidate);
-    return (is_int($key) || ($key === '') || $key[0] !== '#');
+    $key = \array_key_first($candidate);
+    return \is_int($key) || ($key === '') || $key[0] !== '#';
   }
 
   /**
@@ -261,7 +333,7 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
    *
    * @see \Drupal\Core\Config\Entity\ConfigDependencyManager
    */
-  public function calculateComponentDependencies(?string $component_id = NULL, array $configuration = [], array $contexts = []) : array {
+  public function calculateComponentDependencies(?string $component_id = NULL, array $configuration = [], array $contexts = []): array {
     $dependencies = [];
     try {
       $component = $this->componentPluginManager->find($component_id ?? $configuration['component_id']);
@@ -291,7 +363,7 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
    * @return array
    *   An array of dependencies keyed by the type of dependency.
    */
-  protected function calculateComponentDependenciesProps(Component $component, array $configuration = [], array $contexts = []) : array {
+  protected function calculateComponentDependenciesProps(Component $component, array $configuration = [], array $contexts = []): array {
     $dependencies = [];
     $props = $component->metadata->schema['properties'] ?? [];
     foreach ($props as $prop_id => $definition) {
@@ -318,12 +390,12 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
    * @return array
    *   An array of dependencies keyed by the type of dependency.
    */
-  protected function calculateComponentDependenciesSlots(Component $component, array $configuration = [], array $contexts = []) : array {
+  protected function calculateComponentDependenciesSlots(Component $component, array $configuration = [], array $contexts = []): array {
     $dependencies = [];
     $slots = $component->metadata->slots ?? [];
     foreach ($slots as $slot_id => $definition) {
       $slot_configuration = $configuration['slots'][$slot_id] ?? [];
-      if (!isset($slot_configuration['sources']) || !is_array($slot_configuration['sources'])) {
+      if (!isset($slot_configuration['sources']) || !\is_array($slot_configuration['sources'])) {
         continue;
       }
       foreach ($slot_configuration['sources'] as $source_configuration) {

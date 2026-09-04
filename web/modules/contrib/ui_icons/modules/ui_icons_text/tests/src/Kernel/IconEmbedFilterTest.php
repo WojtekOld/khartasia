@@ -10,13 +10,15 @@ use Drupal\ui_icons_text\Plugin\Filter\IconEmbed;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Test the IconPreview class.
+ * Test the IconEmbed filter.
  *
  * @internal
  */
-#[CoversClass(IconPreview::class)]
+#[RunTestsInSeparateProcesses]
+#[CoversClass(IconEmbed::class)]
 #[Group('ui_icons')]
 class IconEmbedFilterTest extends KernelTestBase {
 

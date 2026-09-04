@@ -7,12 +7,14 @@ namespace Drupal\Tests\ui_skins\Functional;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Url;
 use Drupal\ui_skins\UiSkinsInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Theme mode tests.
- *
- * @group ui_skins
  */
+#[Group('ui_skins')]
+#[RunTestsInSeparateProcesses]
 class ThemeTest extends UiSkinsFunctionalTestBase {
 
   /**
@@ -120,14 +122,14 @@ class ThemeTest extends UiSkinsFunctionalTestBase {
         'theme' => $theme,
       ]));
 
-      $this->assertSession()->elementExists('css', '#edit-ui-skins-theme');
+      $this->assertSession()->elementExists('css', '#edit-theme');
 
       foreach ($form_infos['present'] as $option_key => $option_label) {
-        $this->assertEquals($option_label, $this->assertSession()->optionExists('ui_skins_theme', $option_key)->getText());
+        $this->assertEquals($option_label, $this->assertSession()->optionExists('theme', $option_key)->getText());
       }
 
       foreach ($form_infos['absent'] as $option_key => $option_label) {
-        $this->assertSession()->optionNotExists('ui_skins_theme', $option_key);
+        $this->assertSession()->optionNotExists('theme', $option_key);
       }
     }
   }
@@ -150,7 +152,7 @@ class ThemeTest extends UiSkinsFunctionalTestBase {
       'theme' => 'ui_skins_test_subsubtheme',
     ]));
     $this->submitForm([
-      'ui_skins_theme' => 'ui_skins_test_subsubtheme',
+      'theme' => 'ui_skins_test_subsubtheme',
     ], 'Save configuration');
 
     $config = $this->config('ui_skins_test_subsubtheme.settings');

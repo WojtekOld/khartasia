@@ -2,9 +2,10 @@
 
 namespace Drupal\bibcite_entity\Plugin\views\filter;
 
+use Drupal\bibcite_entity\Entity\Keyword;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\bibcite_entity\Entity\Keyword;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\ManyToOne;
 
 /**
@@ -14,8 +15,14 @@ use Drupal\views\Plugin\views\filter\ManyToOne;
  *
  * @ViewsFilter("bibcite_keyword_id")
  */
+#[ViewsFilter("bibcite_keyword_id")]
 class KeywordId extends ManyToOne {
 
+  /**
+   * Whether or not multiples should always be used.
+   *
+   * @var bool
+   */
   protected $alwaysMultiple = TRUE;
 
   /**

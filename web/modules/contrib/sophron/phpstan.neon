@@ -1,0 +1,26 @@
+# Configuration file for PHPStan static code checking, see https://phpstan.org.
+
+includes:
+  - phar://phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+
+  level: 5
+
+  paths:
+    - .
+
+  ignoreErrors:
+    - "#^Unsafe usage of new static#"
+
+  typeAliases:
+    GenericMap: """
+      array<string,array<string,array<string,array<int<0,max>,string>>>>
+    """
+    MimeMap: """
+      array{
+        't': array<'e'|'desc'|'a',array<string,array<int<0,max>,string>>>,
+        'e': array<'t',array<string,array<int<0,max>,string>>>,
+        'a': array<'t',array<string,array<int<0,max>,string>>>
+      }
+    """

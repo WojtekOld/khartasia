@@ -26,9 +26,6 @@ final class UiPatternsLegacyCommands extends DrushCommands {
 
   use AutowireTrait;
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     #[Autowire(service: 'ui_patterns_legacy.component_converter')]
     private readonly ComponentConverter $componentConverter,

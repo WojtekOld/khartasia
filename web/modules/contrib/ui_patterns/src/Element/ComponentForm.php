@@ -8,7 +8,10 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Theme\ComponentPluginManager;
 
 /**
  * Provides a Component form builder element.
@@ -21,6 +24,7 @@ use Drupal\Core\Render\RenderContext;
  *   '#default_value' => [
  *   ],
  * ];
+ *
  * @endcode
  *
  * Value example:
@@ -41,6 +45,7 @@ use Drupal\Core\Render\RenderContext;
  *     ],
  *   ]
  *  ]
+ *
  * @endcode
  *
  * Additional Configuration:
@@ -49,16 +54,17 @@ use Drupal\Core\Render\RenderContext;
  *   If unset a component selector is set.
  * '#source_contexts' => The context of the sources.
  * '#tag_filter' => Filter sources based on this tags.
- *
- * @FormElement("component_form")
+ * '#component_filter' => Component IDs the selector offers, NULL for all. The
+ *   selected component always stays.
  */
+#[FormElement('component_form')]
 class ComponentForm extends ComponentFormBase {
 
   /**
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = get_class($this);
+    $class = static::class;
     return [
       // The component id.
       '#component_id' => NULL,
@@ -72,6 +78,7 @@ class ComponentForm extends ComponentFormBase {
       '#default_value' => NULL,
       '#source_contexts' => [],
       '#tag_filter' => [],
+      '#component_filter' => NULL,
       '#allow_override' => TRUE,
       '#process' => [
         [$class, 'buildForm'],
@@ -98,9 +105,10 @@ class ComponentForm extends ComponentFormBase {
    * @return array
    *   The altered element.
    */
-  public static function afterBuild(array $element, FormStateInterface $form_state) : array {
+  public static function afterBuild(array $element, FormStateInterface $form_state): array {
     if ($form_state->isProcessingInput()) {
       static::elementValidate($element, $form_state);
+      static::resetSwitchedSiblingsInput($element, $form_state);
     }
     return $element;
   }
@@ -115,10 +123,10 @@ class ComponentForm extends ComponentFormBase {
     // The processed values, stored in '#value', are bubbled up to the
     // parent element here and then copied to the form state.
     if (isset($element['#value'])) {
-      if (isset($element['slots']) && isset($element['slots']['#value'])) {
+      if (isset($element['slots'], $element['slots']['#value'])) {
         $element['#value']['slots'] = $element['slots']['#value'];
       }
-      if (isset($element['props']) && isset($element['props']['#value'])) {
+      if (isset($element['props'], $element['props']['#value'])) {
         $element['#value']['props'] = $element['props']['#value'];
       }
       $form_state->setValueForElement($element, $element['#value']);
@@ -129,28 +137,29 @@ class ComponentForm extends ComponentFormBase {
    * {@inheritdoc}
    */
   public static function valueCallback(&$element, $input, FormStateInterface $form_state) {
+    // The form is built from the raw input, not from the stored value: the
+    // stored value is outdated after any AJAX change, and a plain submit has a
+    // single pass in which the form must already match what the browser
+    // shows. On an AJAX request this builds a newly selected sub-form one
+    // pass earlier than core expects; see
+    // ComponentFormBase::resetSwitchedSiblingsInput().
     if ($input) {
       $value = [
         'component_id' => $input['component_id'] ?? NULL,
         'variant_id' => $input['variant_id'] ?? NULL,
         'props' => $input['props'] ?? [],
         'slots' => $input['slots'] ?? [],
-        'third_party_settings' => $input['third_party_settings'] ?? NULL,
-        'node_id' => $input['node_id'] ?? NULL,
       ];
       $element['#default_value'] = $value;
       return $value;
     }
-    else {
-      return [
-        'component_id' => NULL,
-        'variant_id' => NULL,
-        'props' => [],
-        'slots' => [],
-        'third_party_settings' => NULL,
-        'node_id' => NULL,
-      ];
-    }
+
+    return [
+      'component_id' => NULL,
+      'variant_id' => NULL,
+      'props' => [],
+      'slots' => [],
+    ];
   }
 
   /**
@@ -158,8 +167,7 @@ class ComponentForm extends ComponentFormBase {
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  public static function buildForm(array &$element, FormStateInterface $form_state) : array {
-
+  public static function buildForm(array &$element, FormStateInterface $form_state): array {
     $initial_component_id = $element['#component_id'] ?? NULL;
     $component_id = self::getSelectedComponentId($element);
     $wrapper_id = static::getElementId($element, 'ui-patterns-component');
@@ -168,15 +176,16 @@ class ComponentForm extends ComponentFormBase {
       $element['#source_contexts']['component_id'] = new Context($contextComponentDefinition, $component_id);
     }
     if (empty($initial_component_id)) {
-      $component_selector_form = array_merge(self::buildComponentSelectorForm(
+      $component_selector_form = \array_merge(self::buildComponentSelectorForm(
         $wrapper_id,
         $component_id,
         $element['#component_required'] ?? TRUE,
-      ), ["#ajax_url" => $element["#ajax_url"] ?? NULL]);
-      $element["component_id"] = self::expandAjax($component_selector_form);
+        $element['#component_filter'] ?? NULL,
+      ), ['#ajax_url' => $element['#ajax_url'] ?? NULL]);
+      $element['component_id'] = self::expandAjax($component_selector_form);
     }
     else {
-      $element["component_id"] = [
+      $element['component_id'] = [
         '#type' => 'hidden',
         '#value' => $component_id,
       ];
@@ -204,7 +213,7 @@ class ComponentForm extends ComponentFormBase {
     array &$element,
     string $wrapper_id,
     ?string $component_id,
-  ) : void {
+  ): void {
     $element['#prefix'] = '<div id="' . $wrapper_id . '">';
     $element['#suffix'] = '</div>';
     if (!$component_id) {
@@ -218,7 +227,7 @@ class ComponentForm extends ComponentFormBase {
         $element['#default_value']['variant_id'] ?? NULL,
       );
       $prop_filter = $element['#prop_filter'] ?? NULL;
-      if (is_array($prop_filter) && !in_array("variant", $prop_filter)) {
+      if (\is_array($prop_filter) && !\in_array('variant', $prop_filter, TRUE)) {
         $element['variant_id']['#access'] = FALSE;
       }
     }
@@ -248,20 +257,23 @@ class ComponentForm extends ComponentFormBase {
     ?string $wrapper_id,
     ?string $selected_component_id,
     bool $required = TRUE,
+    ?array $component_filter = NULL,
   ): array {
-    /* @phpstan-ignore method.notFound */
-    $definitions = \Drupal::service("plugin.manager.sdc")->getNegotiatedGroupedDefinitions();
+    // @phpstan-ignore method.notFound
+    $definitions = \Drupal::service(ComponentPluginManager::class)->getNegotiatedGroupedDefinitions();
     $options = [];
     foreach ($definitions as $group_id => $group) {
-      foreach ($group as $component_id => $definition) {
-
+      // Keep the selected component, or a saved configuration could not be
+      // edited anymore.
+      $kept = \array_flip($component_filter ?? \array_keys($group)) + [(string) $selected_component_id => TRUE];
+      foreach (\array_intersect_key($group, $kept) as $component_id => $definition) {
         $options[$group_id][$component_id] = $definition['annotated_name'];
       }
     }
     return [
-      "#type" => "select",
-      "#title" => t("Component"),
-      "#options" => $options,
+      '#type' => 'select',
+      '#title' => \t('Component'),
+      '#options' => $options,
       '#default_value' => $selected_component_id,
       '#ajax' => [
         'callback' => [static::class, 'changeSelectorFormChangeAjax'],
@@ -270,8 +282,10 @@ class ComponentForm extends ComponentFormBase {
       ],
       '#executes_submit_callback' => FALSE,
       '#empty_value' => '',
-      '#empty_option' => t('- None -'),
+      '#empty_option' => \t('- None -'),
       '#required' => $required,
+      // Read by ComponentFormBase::resetSwitchedSiblingsInput().
+      '#ui_patterns_resets_siblings' => TRUE,
     ];
   }
 
@@ -284,14 +298,13 @@ class ComponentForm extends ComponentFormBase {
   private static function buildComponentVariantSelectorForm(
     array $element,
     string $component_id,
-    array|NULL $default_variant_id,
+    ?array $default_variant_id,
   ): array {
-
     return [
-      "#type" => "component_prop_form",
-      "#title" => t("Variant"),
-      "#component_id" => $component_id,
-      "#prop_id" => 'variant',
+      '#type' => 'component_prop_form',
+      '#title' => \t('Variant'),
+      '#component_id' => $component_id,
+      '#prop_id' => 'variant',
       '#default_value' => $default_variant_id,
       '#source_contexts' => $element['#source_contexts'],
       '#render_sources' => $element['#render_sources'] ?? TRUE,
@@ -306,7 +319,7 @@ class ComponentForm extends ComponentFormBase {
    */
   private static function buildSlotsForm(array $element, string $component_id): array {
     return [
-      '#title' => t('Slots'),
+      '#title' => \t('Slots'),
       '#type' => 'component_slots_form',
       '#component_id' => $component_id,
       '#source_contexts' => $element['#source_contexts'],
@@ -325,7 +338,7 @@ class ComponentForm extends ComponentFormBase {
    */
   private static function buildPropsForm(array $element, string $component_id): array {
     return [
-      '#title' => t('Props'),
+      '#title' => \t('Props'),
       '#type' => 'component_props_form',
       '#component_id' => $component_id,
       '#source_contexts' => $element['#source_contexts'],
@@ -348,9 +361,9 @@ class ComponentForm extends ComponentFormBase {
   public static function changeSelectorFormChangeAjax(
     array $form,
     FormStateInterface $form_state,
-  ) : array {
+  ): array {
     $parents = $form_state->getTriggeringElement()['#array_parents'];
-    $sub_form = NestedArray::getValue($form, array_slice($parents, 0, -1));
+    $sub_form = NestedArray::getValue($form, \array_slice($parents, 0, -1));
     $form_state->setRebuild();
     return $sub_form;
   }
@@ -366,27 +379,27 @@ class ComponentForm extends ComponentFormBase {
    * @return bool
    *   return TRUE if errors were found.
    */
-  protected static function openWrappedElementsWithErrors(array &$element, FormStateInterface $form_state) : bool {
+  protected static function openWrappedElementsWithErrors(array &$element, FormStateInterface $form_state): bool {
     $errors = $form_state->getErrors();
-    if (count($errors) === 0) {
+    if (\count($errors) === 0) {
       return FALSE;
     }
-    $element_name = implode("][", $element["#parents"]);
+    $element_name = \implode('][', $element['#parents']);
     $error_elements_found = FALSE;
-    foreach (array_keys($errors) as $error_name) {
-      if (!str_starts_with($error_name, $element_name)) {
+    foreach (\array_keys($errors) as $error_name) {
+      if (!\str_starts_with($error_name, $element_name)) {
         continue;
       }
       $error_elements_found = TRUE;
-      $parents = array_slice(explode("][", $error_name), count($element["#parents"]));
-      if (count($parents) < 2) {
+      $parents = \array_slice(\explode('][', $error_name), \count($element['#parents']));
+      if (\count($parents) < 2) {
         continue;
       }
-      $parents_of_prop_or_slot = array_slice($parents, 0, 2);
+      $parents_of_prop_or_slot = \array_slice($parents, 0, 2);
       $prop_or_slot = NestedArray::getValue($element, $parents_of_prop_or_slot);
-      if (!empty($prop_or_slot) && isset($prop_or_slot["#wrap"]) && $prop_or_slot["#wrap"]) {
+      if (!empty($prop_or_slot) && isset($prop_or_slot['#wrap']) && $prop_or_slot['#wrap']) {
         $parents_of_prop_or_slot[] = $parents_of_prop_or_slot[1];
-        $parents_of_prop_or_slot[] = "#open";
+        $parents_of_prop_or_slot[] = '#open';
         NestedArray::setValue($element, $parents_of_prop_or_slot, TRUE);
       }
     }
@@ -396,11 +409,11 @@ class ComponentForm extends ComponentFormBase {
   /**
    * Form element validation handler.
    */
-  public static function validateFormElement(array &$element, FormStateInterface $form_state) : void {
+  public static function validateFormElement(array &$element, FormStateInterface $form_state): void {
     if (static::openWrappedElementsWithErrors($element, $form_state)) {
       return;
     }
-    if (isset($element["#component_validation"]) && !$element["#component_validation"]) {
+    if (isset($element['#component_validation']) && !$element['#component_validation']) {
       return;
     }
     try {
@@ -413,8 +426,8 @@ class ComponentForm extends ComponentFormBase {
           '#source_contexts' => $element['#source_contexts'] ?? [],
         ];
         $context = new RenderContext();
-        $renderer = \Drupal::service("renderer");
-        $renderer->executeInRenderContext($context, function () use (&$build, $renderer) {
+        $renderer = \Drupal::service(RendererInterface::class);
+        $renderer->executeInRenderContext($context, static function () use (&$build, $renderer) {
           return $renderer->render($build);
         });
       }

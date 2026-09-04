@@ -1,0 +1,4 @@
+services:
+  Drupal\ui_patterns_field_formatters\Hook\UiPatternsFieldFormattersHooks:
+    class: Drupal\ui_patterns_field_formatters\Hook\UiPatternsFieldFormattersHooks
+    autowire: true

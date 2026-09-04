@@ -1,16 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ui_patterns_blocks\Functional;
 
+use Drupal\Core\Block\BlockManagerInterface;
+use Drupal\Core\Extension\ThemeInstallerInterface;
 use Drupal\Tests\ui_patterns\Functional\UiPatternsFunctionalTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test component rendering with Layout Builder.
  *
- * @group ui_patterns_blocks
+ * @internal
+ *
+ * @coversNothing
  */
-class BlockLayoutTest extends UiPatternsFunctionalTestBase {
+#[Group('ui_patterns')]
+#[Group('ui_patterns_blocks')]
+#[RunTestsInSeparateProcesses]
+final class BlockLayoutTest extends UiPatternsFunctionalTestBase {
 
   use TestDataTrait;
 
@@ -28,33 +39,27 @@ class BlockLayoutTest extends UiPatternsFunctionalTestBase {
   ];
 
   /**
-   * {@inheritdoc}
+   * The block plugin manager.
    */
-  protected $strictConfigSchema = TRUE;
-
-  /**
-   * The layout plugin manager.
-   *
-   * @var \Drupal\Core\Block\BlockManagerInterface
-   */
-  protected $blockManager;
+  protected BlockManagerInterface $blockManager;
 
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
-    \Drupal::service('theme_installer')->install(['ui_patterns_test_theme']);
+    \Drupal::service(ThemeInstallerInterface::class)->install(['ui_patterns_test_theme']);
     \Drupal::configFactory()
       ->getEditable('system.theme')
       ->set('default', 'ui_patterns_test_theme')
       ->save();
+
     if ($this->user) {
       $this->drupalCreateRole(['administer blocks'], 'custom_role');
       $this->user->addRole('custom_role');
       $this->user->save();
     }
-    $this->blockManager = $this->container->get('plugin.manager.block');
+    $this->blockManager = $this->container->get(BlockManagerInterface::class);
   }
 
   /**
@@ -62,12 +67,13 @@ class BlockLayoutTest extends UiPatternsFunctionalTestBase {
    */
   public function testBlockLayout(): void {
     $test_data = self::loadTestDataFixture();
-    $test_blocks_no_context = self::loadTestDataFixture(__DIR__ . "/../../fixtures/tests.blocks.no_context.yml");
-    $tests = array_merge($test_data->getTestSets(), $test_blocks_no_context->getTestSets());
+    $test_blocks_no_context = self::loadTestDataFixture(__DIR__ . '/../../fixtures/tests.blocks.no_context.yml');
+    $tests = \array_merge($test_data->getTestSets(), $test_blocks_no_context->getTestSets());
     $config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/block.block.test_block.yml');
     $ui_patterns_config = &$config_import['settings']['ui_patterns'];
+
     foreach ($tests as $test_set) {
-      if (isset($test_set['entity']) && is_array($test_set['entity']) && (count($test_set['entity']) > 0)) {
+      if (isset($test_set['entity']) && \is_array($test_set['entity']) && (\count($test_set['entity']) > 0)) {
         // We skip tests with an entity.
         continue;
       }
@@ -80,25 +86,28 @@ class BlockLayoutTest extends UiPatternsFunctionalTestBase {
         ->condition('theme', 'ui_patterns_test_theme')
         ->condition('region', 'content')
         ->execute();
-      $this->assertArrayHasKey('test_block', $block_ids, print_r($block_ids, TRUE));
+      self::assertArrayHasKey('test_block', $block_ids, \print_r($block_ids, TRUE));
       $this->drupalGet('/user');
       $this->validateRenderedComponent($test_set);
-      if (isset($test_set["assertSession"])) {
-        $this->assertSessionObject($test_set["assertSession"]);
+
+      if (isset($test_set['assertSession'])) {
+        $this->assertSessionObject($test_set['assertSession']);
       }
       // We check that the form is appearing.
       $this->drupalGet('/admin/structure/block/manage/test_block');
       $this->assertSession()->statusCodeEquals(200);
+
       if (isset($test_set['component'])) {
-        if (isset($test_set['component']['props']) && is_array($test_set['component']['props'])) {
+        if (isset($test_set['component']['props']) && \is_array($test_set['component']['props'])) {
           foreach ($test_set['component']['props'] as $prop_key => $prop) {
-            if (!isset($prop["source"])) {
+            if (!isset($prop['source'])) {
               continue;
             }
-            foreach ($prop["source"] as $source_key => $source_value) {
-              if (is_array($source_value) ||
-                str_starts_with($prop_key, "enum_list") ||
-                ($prop_key === "enum_set")) {
+
+            foreach ($prop['source'] as $source_key => $source_value) {
+              if (\is_array($source_value)
+                || \str_starts_with($prop_key, 'enum_list')
+                || ($prop_key === 'enum_set')) {
                 continue;
               }
               $this->assertSession()->elementExists('css', '[name="settings[ui_patterns][props][' . $prop_key . '][source][' . $source_key . ']"]');

@@ -1,0 +1,40 @@
+/**
+ * @file
+ * Component widget in the editing view.
+ */
+
+.ck-content .drupal-component__preview {
+  pointer-events: none;
+}
+
+.ck-content [data-drupal-component-preview="loading"] {
+  min-height: 1.5rem;
+  opacity: 0.5;
+}
+
+.ck-content .drupal-component__placeholder {
+  padding: 0.5em 1em;
+  opacity: 0.7;
+  border: 1px dashed currentColor;
+}
+
+/**
+ * The component form arrives over AJAX, after jQuery UI sized and placed
+ * the dialog: pin the dialog in the viewport and scroll its content, so
+ * that the Embed button stays reachable.
+ */
+.ui-dialog.ui-patterns-ckeditor5-dialog {
+  position: fixed;
+  top: 5vh !important;
+  left: 5vw !important;
+  display: flex;
+  flex-direction: column;
+  width: 90vw !important;
+  max-height: 90vh;
+}
+
+.ui-dialog.ui-patterns-ckeditor5-dialog .ui-dialog-content {
+  overflow: auto;
+  flex: 1 1 auto;
+  max-height: none;
+}

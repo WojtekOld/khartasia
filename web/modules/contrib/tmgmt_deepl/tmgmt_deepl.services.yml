@@ -1,0 +1,20 @@
+services:
+  tmgmt_deepl.client_factory:
+    class: Drupal\tmgmt_deepl\DeepLClientFactory
+
+  tmgmt_deepl.api:
+    class: Drupal\tmgmt_deepl\DeeplTranslatorApi
+    arguments: ['@messenger', '@key.repository', '@file_system', '@extension.list.module', '@entity_type.manager', '@tmgmt_deepl.client_factory']
+  tmgmt_deepl.batch:
+    class: Drupal\tmgmt_deepl\DeeplTranslatorBatch
+    arguments: ['@tmgmt_deepl.api', '@tmgmt.data', '@module_handler', '@file.usage']
+
+  Drupal\tmgmt_deepl\Hook\TmgmtDeeplHooks:
+    class: Drupal\tmgmt_deepl\Hook\TmgmtDeeplHooks
+    autowire: true
+
+  Drupal\tmgmt_deepl\DeeplTranslatorApiInterface:
+    alias: tmgmt_deepl.api
+
+  Drupal\file\FileUsage\FileUsageInterface:
+    alias: file.usage

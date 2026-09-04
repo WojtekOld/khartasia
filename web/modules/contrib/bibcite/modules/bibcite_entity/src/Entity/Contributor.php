@@ -2,10 +2,12 @@
 
 namespace Drupal\bibcite_entity\Entity;
 
-use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the Contributor entity.
@@ -53,6 +55,44 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *   field_ui_base_route = "bibcite_entity.contributor.settings"
  * )
  */
+#[ContentEntityType(
+  id: 'bibcite_contributor',
+  label: new TranslatableMarkup('Contributor'),
+  handlers: [
+    'storage' => 'Drupal\bibcite_entity\ContributorStorage',
+    'view_builder' => 'Drupal\Core\Entity\EntityViewBuilder',
+    'list_builder' => 'Drupal\bibcite_entity\ContributorListBuilder',
+    'views_data' => 'Drupal\bibcite_entity\ContributorViewsData',
+    'form' => [
+      'default' => 'Drupal\bibcite_entity\Form\ContributorForm',
+      'add' => 'Drupal\bibcite_entity\Form\ContributorForm',
+      'edit' => 'Drupal\bibcite_entity\Form\ContributorForm',
+      'delete' => 'Drupal\Core\Entity\ContentEntityDeleteForm',
+    ],
+    'access' => 'Drupal\bibcite_entity\ContributorAccessControlHandler',
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+    ],
+  ],
+  base_table: 'bibcite_contributor',
+  admin_permission: 'administer bibcite_contributor',
+  entity_keys: [
+    'id' => 'id',
+    'uuid' => 'uuid',
+    'langcode' => 'langcode',
+  ],
+  links: [
+    'canonical' => '/bibcite/contributor/{bibcite_contributor}',
+    'edit-form' => '/bibcite/contributor/{bibcite_contributor}/edit',
+    'delete-form' => '/bibcite/contributor/{bibcite_contributor}/delete',
+    'bibcite-merge-form' => '/bibcite/contributor/{bibcite_contributor}/merge',
+    'add-form' => '/bibcite/contributor/add',
+    'bibcite-merge-multiple-form' => '/admin/content/bibcite/contributor/merge',
+    'delete-multiple-form' => '/admin/content/bibcite/contributor/delete',
+    'collection' => '/admin/content/bibcite/contributor',
+  ],
+  field_ui_base_route: 'bibcite_entity.contributor.settings'
+)]
 class Contributor extends ContentEntityBase implements ContributorInterface {
 
   use EntityChangedTrait;

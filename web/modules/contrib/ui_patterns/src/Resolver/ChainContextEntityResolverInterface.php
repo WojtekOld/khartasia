@@ -18,7 +18,7 @@ interface ChainContextEntityResolverInterface extends ContextEntityResolverInter
    * @param \Drupal\ui_patterns\Resolver\ContextEntityResolverInterface $resolver
    *   The resolver.
    */
-  public function addResolver(ContextEntityResolverInterface $resolver):void;
+  public function addResolver(ContextEntityResolverInterface $resolver): void;
 
   /**
    * Gets all added resolvers.

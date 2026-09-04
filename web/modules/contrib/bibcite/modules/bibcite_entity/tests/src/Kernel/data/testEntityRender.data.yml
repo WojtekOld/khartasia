@@ -30,3 +30,15 @@
     bibcite_pages: '5-18'
     bibcite_publisher: Journal
   - 'Proin ut laoreet purus. Maecenas sed scelerisque leo. (Vol. 2, pp. 5-18). (2001). (Vol. 2). Journal.'
+-
+  -
+    title: 'Test Malformed Date'
+    type: audiovisual
+    author:
+      -
+        first_name: 'Samuel'
+        last_name: 'Johnson'
+    bibcite_year: 2026
+    bibcite_date: 'January-September/2026'
+    bibcite_abstract: 'The publication date is malformed. It should be omitted and the rest of the citation rendered'
+  - 'Test Malformed Date. (2026).'

@@ -23,10 +23,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Field widget for a predefined component display form.
  */
 #[FieldWidget(
-  id: "ui_patterns_ui_component_form_display",
-  label: new TranslatableMarkup("Component Display Form (UI Patterns UI)"),
-  description: new TranslatableMarkup("Displays a predefined Component Form Display."),
-  field_types: ["ui_patterns_source"],
+  id: 'ui_patterns_ui_component_form_display',
+  label: new TranslatableMarkup('Component Display Form (UI Patterns UI)'),
+  description: new TranslatableMarkup('Displays a predefined Component Form Display.'),
+  field_types: ['ui_patterns_source'],
 )]
 class ComponentFormDisplayWidget extends WidgetBase {
 
@@ -34,15 +34,11 @@ class ComponentFormDisplayWidget extends WidgetBase {
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The component plugin manager.
-   *
-   * @var \Drupal\Core\Theme\ComponentPluginManager
    */
   protected ComponentPluginManager $componentPluginManager;
 
@@ -51,8 +47,8 @@ class ComponentFormDisplayWidget extends WidgetBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->componentPluginManager = $container->get('plugin.manager.sdc');
-    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->componentPluginManager = $container->get(ComponentPluginManager::class);
+    $instance->entityTypeManager = $container->get(EntityTypeManagerInterface::class);
     return $instance;
   }
 
@@ -82,11 +78,11 @@ class ComponentFormDisplayWidget extends WidgetBase {
       ->loadByProperties(['status' => TRUE]);
 
     foreach ($form_displays as $id => $form_display) {
-      $label = sprintf('[%s] %s', $form_display->getComponentId(), $form_display->label());
+      $label = \sprintf('[%s] %s', $form_display->getComponentId(), $form_display->label());
       $options[$this->escapeDisplayId($id)] = $label;
     }
 
-    asort($options);
+    \asort($options);
 
     return $options;
   }
@@ -95,7 +91,7 @@ class ComponentFormDisplayWidget extends WidgetBase {
    * Converts dot notation to double pipes for safe storage.
    */
   private function escapeDisplayId(string $id): string {
-    return str_replace('.', '||', $id);
+    return \str_replace('.', '||', $id);
   }
 
   /**
@@ -105,7 +101,7 @@ class ComponentFormDisplayWidget extends WidgetBase {
     if ($id === NULL) {
       return NULL;
     }
-    return str_replace('||', '.', $id);
+    return \str_replace('||', '.', $id);
   }
 
   /**
@@ -122,7 +118,7 @@ class ComponentFormDisplayWidget extends WidgetBase {
       '#required' => TRUE,
       '#options' => $options,
       '#empty_value' => '',
-      '#empty_option' => t('- None -'),
+      '#empty_option' => $this->t('- None -'),
     ];
 
     $element['additional_display_ids'] = [
@@ -161,7 +157,7 @@ class ComponentFormDisplayWidget extends WidgetBase {
     $parents = $form['#parents'];
     if (!static::getWidgetState($parents, $field_name, $form_state)) {
       $field_state = [
-        'items_count' => count($items) - 1,
+        'items_count' => \count($items) - 1,
         'array_parents' => [],
       ];
       static::setWidgetState($parents, $field_name, $form_state, $field_state);
@@ -187,7 +183,7 @@ class ComponentFormDisplayWidget extends WidgetBase {
     $display_id = $this->unescapeDisplayId($settings['display_id']) ?? NULL;
     $display_component_form = $settings['display_component_form'] ?? FALSE;
     $additional_display_ids = $settings['additional_display_ids'] ?? [];
-    $additional_display_ids = array_filter($additional_display_ids);
+    $additional_display_ids = \array_filter($additional_display_ids);
     $additional_display_ids_values = [$display_id];
     if ($additional_display_ids) {
       foreach ($additional_display_ids as $additional_display_id) {
@@ -214,9 +210,9 @@ class ComponentFormDisplayWidget extends WidgetBase {
       return $element;
     }
 
-    $source_data = $item_delta_value["source"] ?? [];
-    $component_default_value = $source_data['component'] ??
-      [
+    $source_data = $item_delta_value['source'] ?? [];
+    $component_default_value = $source_data['component']
+      ?? [
         '#component_id' => $component_id,
         '#display_id' => $display_id,
       ];
@@ -251,10 +247,9 @@ class ComponentFormDisplayWidget extends WidgetBase {
     $contexts = [];
     if ($entity = $items?->getEntity()) {
       $contexts['entity'] = EntityContext::fromEntity($entity);
-      $contexts['bundle'] = new Context(ContextDefinition::create('string'), $contexts["entity"]->getContextValue()->bundle() ?? "");
+      $contexts['bundle'] = new Context(ContextDefinition::create('string'), $contexts['entity']->getContextValue()->bundle() ?? '');
     }
-    $contexts = RequirementsContext::addToContext(["field_granularity:item"], $contexts);
-    return $contexts;
+    return RequirementsContext::addToContext(['field_granularity:item'], $contexts);
   }
 
 }

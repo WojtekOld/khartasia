@@ -1,0 +1,216 @@
+openpgpjs:
+  version: 5.0.1
+  license:
+    name: GNU Lesser General Public License v3.0
+    url: https://github.com/openpgpjs/openpgpjs/blob/main/LICENSE
+    gpl-compatible: true
+  js:
+    js/third_party/unpkg.com/openpgp.min.js: { minified: true }
+
+proc-generate-keys:
+  version: 10.1.102
+  js:
+    js/proc-generate-keys.js: { }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+
+proc-encrypt:
+  version: 10.1.102
+  js:
+    js/proc-encrypt.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-encrypt-text:
+  version: 10.1.102
+  js:
+    js/proc-encrypt-text.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-decrypt-dialog:
+  version: 10.1.102
+  js:
+    js/proc-decrypt-dialog.js: { }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+
+proc-decrypt:
+  version: 10.1.102
+  js:
+    js/proc-decrypt.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/drupal.ajax
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+
+proc-api:
+  version: 10.1.102
+  js:
+    js/proc-api.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+    - core/drupal.dialog.ajax
+    - proc/openpgpjs
+
+proc-field:
+  version: 10.1.102
+  css:
+    theme:
+      css/proc-field-ops.css: {}
+  js:
+    js/proc-field.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-decrypt-list:
+  version: 10.1.102
+  js:
+    js/proc-decrypt-list.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-update:
+  version: 10.1.102
+  js:
+    js/proc-update.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/drupal.ajax
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+
+proc-decrypt-handler-module:
+  version: 10.1.102
+  js:
+    js/modules/proc-decrypt-handler-module.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-process-decryption-module:
+  version: 10.1.102
+  js:
+    js/modules/proc-process-decryption-module.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-handle-decryption-result-module:
+  version: 10.1.102
+  js:
+    js/modules/proc-handle-decryption-result-module.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-open-file-action-module:
+  version: 10.1.102
+  js:
+    js/modules/proc-open-file-action-module.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+    - core/drupal.dialog.ajax
+    - core/jquery.form
+
+proc-decrypt-list-items-module:
+  version: 10.1.102
+  js:
+    js/modules/atomics/proc-decrypt-list-items-module.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupal.message
+    - core/drupalSettings
+
+proc-update-batch:
+  version: 10.1.102
+  js:
+    js/proc-update-batch.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/drupal.ajax
+    - core/jquery
+    - core/once
+    - core/drupal.message
+    - core/drupalSettings
+
+proc-evict-expired-pass-cache-module:
+  version: 10.1.102
+  js:
+    js/modules/proc-evict-expired-pass-cache-module.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupalSettings
+
+proc-field-ui-icons:
+  version: 10.1.102
+  css:
+    theme:
+      css/proc-field-ui-icons.css: {}
+
+proc-sw-register:
+  version: 10.1.102
+  js:
+    js/proc-sw-register.js: { attributes: { type: module } }
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - proc/openpgpjs

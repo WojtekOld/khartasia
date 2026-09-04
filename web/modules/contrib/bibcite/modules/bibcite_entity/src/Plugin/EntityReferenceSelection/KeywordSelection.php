@@ -2,7 +2,9 @@
 
 namespace Drupal\bibcite_entity\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\Attribute\EntityReferenceSelection;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Provides specific access control for the contributor entity type.
@@ -17,6 +19,15 @@ use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
  *   weight = 1
  * )
  */
+#[EntityReferenceSelection(
+  id: 'default:bibcite_keyword',
+  label: new TranslatableMarkup('Keyword selection'),
+  entity_types: [
+    'bibcite_keyword',
+  ],
+  group: 'default',
+  weight: 1
+)]
 class KeywordSelection extends DefaultSelection {
 
   /**

@@ -7,40 +7,18 @@ dependencies:
     - field.field.node.article.body
     - field.field.node.article.comment
     - field.field.node.article.field_aire_croissance
-    - field.field.node.article.field_aire_utilis
-    - field.field.node.article.field_aire_utilis_ch
-    - field.field.node.article.field_aire_utilis_ja
-    - field.field.node.article.field_aire_utilis_ko
-    - field.field.node.article.field_aire_utilis_thai
-    - field.field.node.article.field_class_botan_texte
     - field.field.node.article.field_fibres
-    - field.field.node.article.field_fiel_gen_cult_thai
-    - field.field.node.article.field_gen_cult_ch
-    - field.field.node.article.field_gen_cult_jap
-    - field.field.node.article.field_gen_cult_ko
-    - field.field.node.article.field_gen_culture
     - field.field.node.article.field_ident_fibre
     - field.field.node.article.field_image
     - field.field.node.article.field_image_gallery_1
     - field.field.node.article.field_image_gallery_2
-    - field.field.node.article.field_intr_paper_ch
-    - field.field.node.article.field_intr_paper_jap
-    - field.field.node.article.field_intr_paper_ko
-    - field.field.node.article.field_intr_paper_thai
-    - field.field.node.article.field_mode_prep
-    - field.field.node.article.field_mode_prep_ch
-    - field.field.node.article.field_mode_prep_ja
-    - field.field.node.article.field_mode_prep_ko
-    - field.field.node.article.field_mode_prep_thai
     - field.field.node.article.field_paper_name
     - field.field.node.article.field_synonymes_bot
-    - field.field.node.article.field_tags
     - field.field.node.article.field_tax_family
     - field.field.node.article.field_tax_genus
     - field.field.node.article.field_tax_order
     - field.field.node.article.field_use_paper_making
     - field.field.node.article.field_used_part_plant
-    - field.field.node.article.field_vern_name
     - field.field.node.article.field_zones_geo
     - node.type.article
   module:
@@ -59,40 +37,18 @@ hidden:
   body: true
   comment: true
   field_aire_croissance: true
-  field_aire_utilis: true
-  field_aire_utilis_ch: true
-  field_aire_utilis_ja: true
-  field_aire_utilis_ko: true
-  field_aire_utilis_thai: true
-  field_class_botan_texte: true
   field_fibres: true
-  field_fiel_gen_cult_thai: true
-  field_gen_cult_ch: true
-  field_gen_cult_jap: true
-  field_gen_cult_ko: true
-  field_gen_culture: true
   field_ident_fibre: true
   field_image: true
   field_image_gallery_1: true
   field_image_gallery_2: true
-  field_intr_paper_ch: true
-  field_intr_paper_jap: true
-  field_intr_paper_ko: true
-  field_intr_paper_thai: true
-  field_mode_prep: true
-  field_mode_prep_ch: true
-  field_mode_prep_ja: true
-  field_mode_prep_ko: true
-  field_mode_prep_thai: true
   field_paper_name: true
   field_synonymes_bot: true
-  field_tags: true
   field_tax_family: true
   field_tax_genus: true
   field_tax_order: true
   field_use_paper_making: true
   field_used_part_plant: true
-  field_vern_name: true
   field_zones_geo: true
   langcode: true
   search_api_excerpt: true

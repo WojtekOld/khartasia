@@ -1,0 +1,9 @@
+fields:
+  bibcite_custom4:
+    label: 类型
+  bibcite_custom5:
+    label: 格式
+  bibcite_type_of_work:
+    label: 中等
+  bibcite_place_published:
+    label: 国家/地区

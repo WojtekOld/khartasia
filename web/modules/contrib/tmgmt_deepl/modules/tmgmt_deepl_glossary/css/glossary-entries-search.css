@@ -1,0 +1,10 @@
+.entries-search-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.entries-search-container .entries-search-input,
+.entries-search-container .entries-reset-button {
+  margin: 0;
+}

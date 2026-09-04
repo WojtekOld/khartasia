@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ * Handlers for batch operations in proc_metadata_transitioner module.
+ */
+
+/**
+ * Handler for switching re-encryption metadata operations in batch.
+ *
+ * @param int $op_index
+ *   The progress operation progress ID/index.
+ * @param array $context
+ *   The batch context.
+ * @param string $operation
+ *   The operation to perform: 'addMetadata' or 'removeMetadata'.
+ *
+ * @throws \Drupal\Core\TempStore\TempStoreException
+ */
+function proc_metadata_transitioner__switch_re_enc_metadata(int $op_index, array $context, string $operation): void {
+  $store = \Drupal::service('tempstore.private')->get('proc_metadata_transitioner');
+  $store->set(
+    'procs_updated',
+    \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->$operation($context, $op_index) + $store->get('procs_updated')
+  );
+}
+
+/**
+ * Batch 'finished' callback for adding metadata.
+ *
+ * @param bool $success
+ *   Indicates whether the batch completed successfully.
+ */
+function proc_metadata_transitioner__batch_add_metadata_finished(bool $success): void {
+  $messenger = \Drupal::messenger();
+  if (!$success) {
+    $messenger->addMessage(
+      t('An error occurred while processing batch operations.')
+    );
+    return;
+  }
+  $store = \Drupal::service('tempstore.private')->get('proc_metadata_transitioner');
+  $start_time_raw = $store->get('start_time_raw');
+  $missing_ref_ciphers = $store->get('missing_referenced_proc_ciphers') ?? [];
+  $messenger->addMessage(t('⚪ Candidate host entities: @count .', ['@count' => $store->get('candidate_host_content_ids_count')]));
+  $messenger->addMessage(t('⚪ Confirmed host entities (where procs need updating): @count .', ['@count' => count($store->get('host_contents_unique_ids'))]));
+  $messenger->addMessage(t('⚪ Unique referenced PROCs: @count .', ['@count' => count($store->get('selected_unique_proc_ids'))]));
+  $messenger->addMessage(t('⚪ Misplaced PROC(s): @count .', ['@count' => $store->get('procs_misplaced')]));
+  $messenger->addMessage(t('⚪ Missing referenced PROC ciphers (might be caused by keys being referenced instead of ciphers): @count .', ['@count' => count($missing_ref_ciphers)]));
+  $messenger->addMessage(t('⚪ PROC(s) populated with re-encryption metadata: @count .', ['@count' => $store->get('add_metadata_updated_count')]));
+  $messenger->addMessage(t('⚪ PROC(s) found with re-encryption metadata: @count .', ['@count' => $store->get('already_fulfilled')]));
+  $messenger->addMessage(t('⚪ Sizes sum: @count .', ['@count' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->byteSizeFormatter->formatSize($store->get('procs_size_sum'))]));
+  $messenger->addMessage(t(
+    '⚪ Generation timespan sum: @count .',
+    ['@count' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->dateFormatter->formatInterval((int) $store->get('procs_encryption_generation_timespan'), 2)]
+  ));
+  $messenger->addMessage(t(
+    "⏱ Processing was started at: @time",
+    ['@time' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->dateFormatter->format((int) $start_time_raw, 'short')]
+  ));
+  $messenger->addMessage(t(
+    "⏲ Processing finished at: @time",
+    ['@time' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->dateFormatter->format((int) microtime(TRUE), 'short')]
+  ));
+  $messenger->addMessage(t("⌛ Total time taken: @time",
+    ['@time' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->dateFormatter->formatInterval((int) microtime(TRUE) - (int) $start_time_raw)]
+  ));
+}
+
+/**
+ * Batch 'finished' callback for removing metadata.
+ *
+ * @param bool $success
+ *   Indicates whether the batch completed successfully.
+ * @param array $operations
+ *   The operations that were processed in the batch.
+ */
+function proc_metadata_transitioner__batch_remove_metadata_finished(bool $success, array $operations): void {
+  $messenger = \Drupal::messenger();
+  if (!$success) {
+    $messenger->addMessage(
+      t('An error occurred while processing batch operations.')
+    );
+    return;
+  }
+  $store = \Drupal::service('tempstore.private')->get('proc_metadata_transitioner');
+  $result = $store->get('procs_updated');
+  $start_time_raw = $store->get('start_time_raw');
+
+  $procs_count = $store->get('procs_count');
+
+  $messenger->addMessage(t('✅ Total processed: @count PROC(s).', ['@count' => $procs_count]));
+  $messenger->addMessage(t('✅ Re-encryption metadata removed in @count PROC(s).', ['@count' => $result]));
+  $messenger->addMessage(t('☀️ Skipped PROC(s) for absent metadata: @count .', ['@count' => $procs_count - $result]));
+  $messenger->addMessage(t(
+    "⏱ Processing was started at: @time",
+    ['@time' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->dateFormatter->format((int) $start_time_raw, 'short')]
+  ));
+  $messenger->addMessage(t(
+    "⏲ Processing finished at: @time",
+    ['@time' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->dateFormatter->format((int) microtime(TRUE), 'short')]
+  ));
+  $messenger->addMessage(t(
+    "⌛ Total time taken: @time",
+    ['@time' => \Drupal::service('proc_metadata_transitioner.update_proc_metadata_service')->dateFormatter->formatInterval((int) microtime(TRUE) - (int) $start_time_raw)]
+  ));
+}

@@ -9,6 +9,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\EnumTrait;
 use Drupal\ui_patterns\SourcePluginPropValueWidget;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -18,7 +19,7 @@ use Drupal\ui_patterns\SourcePluginPropValueWidget;
   label: new TranslatableMarkup('Select'),
   description: new TranslatableMarkup('A drop-down menu or scrolling selection box.'),
   prop_types: ['enum', 'variant'],
-  tags: ['widget']
+  tags: [SourceTags::Widget->value]
 )]
 class SelectWidget extends SourcePluginPropValueWidget {
 
@@ -32,8 +33,8 @@ class SelectWidget extends SourcePluginPropValueWidget {
     $form['value'] = [
       '#type' => 'select',
       '#default_value' => $this->getSetting('value'),
-      "#options" => static::getEnumOptions($this->propDefinition),
-      "#empty_option" => $this->t("- Select -"),
+      '#options' => static::getEnumOptions($this->propDefinition),
+      '#empty_option' => $this->t('- Select -'),
     ];
     $this->addRequired($form['value']);
     // With Firefox, autocomplete may override #default_value.

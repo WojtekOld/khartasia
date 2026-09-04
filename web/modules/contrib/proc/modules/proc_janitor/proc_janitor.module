@@ -1,0 +1,156 @@
+<?php
+
+/**
+ * @file
+ * Hooks for the PROC Janitor module.
+ */
+
+/**
+ * Implements hook_cron().
+ */
+function proc_janitor_cron(): void {
+  $run_on_cron = (bool) \Drupal::config('proc_janitor.settings')->get('run_on_cron');
+  if (!$run_on_cron) {
+    return;
+  }
+
+  try {
+    /** @var \Drupal\proc_janitor\Service\ProcJanitorMaintenanceServiceInterface $maintenance */
+    $maintenance = \Drupal::service('proc_janitor.maintenance');
+    $result = $maintenance->runCleanup();
+
+    // A previous run is still holding the lock. Log is already emitted by
+    // the service. Nothing more to do for this cron invocation.
+    if ($result['locked'] ?? FALSE) {
+      return;
+    }
+
+    $deleted = (int) ($result['deleted'] ?? 0);
+    $failed = (int) ($result['failed'] ?? 0);
+
+    if ($result['candidates'] == 0 && $deleted == 0) {
+      \Drupal::logger('proc_janitor')->notice(
+        'There was no orphan cipher proc entities to be deleted.'
+      );
+    }
+
+    if ($deleted > 0 || $failed > 0) {
+      \Drupal::logger('proc_janitor')->notice(
+        'PROC Janitor run completed. Candidate orphans: @candidates, deleted: @deleted, failed: @failed, orphan_minimal_age: @min_age, orphan_maximal_age: @max_age (0 means no upper limit).',
+        [
+          '@candidates' => (int) ($result['candidates'] ?? 0),
+          '@deleted' => $deleted,
+          '@failed' => $failed,
+          '@min_age' => (int) ($result['orphan_minimal_age'] ?? 0),
+          '@max_age' => (int) ($result['orphan_maximal_age'] ?? 0),
+        ]
+      );
+    }
+
+    // Purge old reporting data.
+    $maintenance->purgeReportingData();
+  }
+  catch (\Throwable $e) {
+    \Drupal::logger('proc_janitor')->error('PROC Janitor cron failed: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Batch operation callback for running janitor maintenance.
+ *
+ * @param int $operation_index
+ *   The index of the current batch operation.
+ * @param array $proc_ids
+ *   The chunk of proc IDs to process.
+ * @param int $orphan_minimal_age
+ *   The minimal age in seconds for orphaned entities.
+ * @param int $total_operations
+ *   The total number of operations in the batch.
+ * @param array $context
+ *   The batch context array.
+ */
+function proc_janitor_batch_run_cleanup(int $operation_index, array $proc_ids, int $orphan_minimal_age, int $total_operations, array &$context): void {
+  /** @var \Drupal\proc_janitor\Service\ProcJanitorMaintenanceServiceInterface $maintenance */
+  $maintenance = \Drupal::service('proc_janitor.maintenance');
+
+  if (!isset($context['results']['total_candidates'])) {
+    $context['results']['total_candidates'] = 0;
+    $context['results']['total_deleted'] = 0;
+    $context['results']['total_failed'] = 0;
+    $context['results']['total_update_jobs_modified'] = 0;
+    $context['results']['orphan_minimal_age'] = $orphan_minimal_age;
+    $context['results']['orphan_maximal_age'] = (int) \Drupal::config('proc_janitor.settings')->get('orphan_maximal_age');
+  }
+
+  // Process the chunk of proc IDs.
+  $result = $maintenance->runCleanupForProcIds($proc_ids, $orphan_minimal_age);
+
+  // Accumulate results across all operations.
+  $context['results']['total_candidates'] += (int) ($result['candidates'] ?? 0);
+  $context['results']['total_deleted'] += (int) ($result['deleted'] ?? 0);
+  $context['results']['total_failed'] += (int) ($result['failed'] ?? 0);
+  $context['results']['total_update_jobs_modified'] += (int) ($result['update_jobs_modified'] ?? 0);
+
+  $context['message'] = t('Processed chunk @current of @total', [
+    '@current' => $operation_index + 1,
+    '@total' => $total_operations,
+  ]);
+}
+
+/**
+
+/**
+ * Batch operation callback for purging old reporting data.
+ *
+ * @param array $context
+ *   The batch context array.
+ */
+function proc_janitor_batch_purge_reporting(array &$context): void {
+  /** @var \Drupal\proc_janitor\Service\ProcJanitorMaintenanceServiceInterface $maintenance */
+  $maintenance = \Drupal::service('proc_janitor.maintenance');
+  $result = $maintenance->purgeReportingData();
+
+  $context['results']['reporting_snapshots_deleted'] = (int) ($result['snapshots_deleted'] ?? 0);
+  $context['results']['reporting_operations_deleted'] = (int) ($result['operations_deleted'] ?? 0);
+  $context['message'] = t('Purging old reporting data...');
+}
+
+/**
+ * Batch finished callback for janitor maintenance.
+ *
+ * @param bool $success
+ *   Indicates whether batch completed successfully.
+ * @param array $results
+ *   Results collected during batch processing.
+ */
+function proc_janitor_batch_finished(bool $success, array $results): void {
+  $messenger = \Drupal::messenger();
+  if (!$success) {
+    $messenger->addError(t('An error occurred while running the maintenance task.'));
+    return;
+  }
+
+  $messenger->addStatus(t(
+    'Maintenance task finished. Candidates: @candidates, deleted: @deleted, failed: @failed, update_jobs cleaned in @modified keyring(s), orphan_minimal_age: @min_age seconds, orphan_maximal_age: @max_age seconds (0 means no upper limit).',
+    [
+      '@candidates' => (int) ($results['total_candidates'] ?? 0),
+      '@deleted' => (int) ($results['total_deleted'] ?? 0),
+      '@failed' => (int) ($results['total_failed'] ?? 0),
+      '@modified' => (int) ($results['total_update_jobs_modified'] ?? 0),
+      '@min_age' => (int) ($results['orphan_minimal_age'] ?? 0),
+      '@max_age' => (int) ($results['orphan_maximal_age'] ?? 0),
+    ]
+  ));
+
+  $snapshots_deleted = (int) ($results['reporting_snapshots_deleted'] ?? 0);
+  $operations_deleted = (int) ($results['reporting_operations_deleted'] ?? 0);
+  if ($snapshots_deleted > 0 || $operations_deleted > 0) {
+    $messenger->addStatus(t(
+      'Reporting data purge: @snapshots snapshot row(s) and @operations daily operation row(s) deleted.',
+      [
+        '@snapshots' => $snapshots_deleted,
+        '@operations' => $operations_deleted,
+      ]
+    ));
+  }
+}

@@ -18,15 +18,10 @@ use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
  */
 class FieldLayoutContextEntityResolver implements ContextEntityResolverInterface {
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected SampleEntityGeneratorInterface $sampleEntityGenerator,
-  ) {
-
-  }
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -48,13 +43,13 @@ class FieldLayoutContextEntityResolver implements ContextEntityResolverInterface
    * @return \Drupal\Core\Entity\EntityInterface|null
    *   The entity if found or null.
    */
-  protected function guessFieldLayoutEntity(?FormStateInterface $form_state = NULL) : ?EntityInterface {
+  protected function guessFieldLayoutEntity(?FormStateInterface $form_state = NULL): ?EntityInterface {
     if ($form_state !== NULL) {
       $form_object = $form_state->getFormObject();
-      if (($form_object instanceof FieldLayoutEntityViewDisplayEditForm) ||
-        ($form_object instanceof FieldLayoutEntityFormDisplayEditForm)) {
+      if (($form_object instanceof FieldLayoutEntityViewDisplayEditForm)
+        || ($form_object instanceof FieldLayoutEntityFormDisplayEditForm)) {
         $entity = $form_object->getEntity();
-        if (($entity instanceof FieldLayoutEntityViewDisplay)|| ($entity instanceof FieldLayoutEntityFormDisplay)) {
+        if (($entity instanceof FieldLayoutEntityViewDisplay) || ($entity instanceof FieldLayoutEntityFormDisplay)) {
           return $this->sampleEntityGenerator->get($entity->getTargetEntityTypeId(), $entity->getTargetBundle());
         }
       }

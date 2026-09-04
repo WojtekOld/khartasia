@@ -8,6 +8,9 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_styles_test\MachineNameTraitTestClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Kernel tests for Machine Name Trait.
@@ -16,6 +19,8 @@ use Drupal\ui_styles_test\MachineNameTraitTestClass;
  *
  * @coversDefaultClass \Drupal\ui_styles\MachineNameTrait
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class MachineNameTraitTest extends KernelTestBase {
 
   use StringTranslationTrait;
@@ -52,6 +57,7 @@ class MachineNameTraitTest extends KernelTestBase {
    *
    * @dataProvider providerTestStrings
    */
+  #[DataProvider('providerTestStrings')]
   public function testGetMachineNameString(string|TranslatableMarkup $input, string $expected): void {
     $this->assertSame($expected, $this->testClass->callMachineName($input));
   }
@@ -63,6 +69,7 @@ class MachineNameTraitTest extends KernelTestBase {
    *
    * @dataProvider providerTestStrings
    */
+  #[DataProvider('providerTestStrings')]
   public function testGetMachineNameTranslatableMarkup(string $input, string $expected): void {
     // phpcs:disable Drupal.Semantics.FunctionT.NotLiteralString
     $this->assertSame($expected, $this->testClass->callMachineName($this->t($input)));

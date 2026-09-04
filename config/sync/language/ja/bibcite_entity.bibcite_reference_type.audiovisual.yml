@@ -1,0 +1,7 @@
+fields:
+  bibcite_custom5:
+    label: フォーマット
+  bibcite_type_of_work:
+    label: タイプ
+  bibcite_place_published:
+    label: 市区町村

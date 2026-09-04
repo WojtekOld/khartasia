@@ -1,0 +1,9 @@
+fields:
+  bibcite_edition:
+    label: 설명
+  bibcite_type_of_work:
+    label: 종류
+  bibcite_place_published:
+    label: 도시
+  bibcite_alternate_title:
+    label: 줄임말

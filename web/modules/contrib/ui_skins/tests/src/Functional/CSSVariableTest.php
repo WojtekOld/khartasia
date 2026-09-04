@@ -6,12 +6,14 @@ namespace Drupal\Tests\ui_skins\Functional;
 
 use Drupal\ui_skins\UiSkinsInterface;
 use Drupal\ui_skins\UiSkinsUtility;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * CSS variables tests.
- *
- * @group ui_skins
  */
+#[Group('ui_skins')]
+#[RunTestsInSeparateProcesses]
 class CSSVariableTest extends UiSkinsFunctionalTestBase {
 
   /**

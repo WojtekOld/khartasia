@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Test tags'
+vid: test_tags
+description: 'Tags for end-to-end tests.'
+weight: 0
+new_revision: false

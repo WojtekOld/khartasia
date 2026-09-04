@@ -22,3 +22,7 @@ services:
       defaultType: 'Generic'
       contributorKey: 'authors'
       keywordKey: 'keywords'
+
+  Drupal\bibcite_endnote\Hook\BibciteEndnoteHooks:
+    class: Drupal\bibcite_endnote\Hook\BibciteEndnoteHooks
+    autowire: true

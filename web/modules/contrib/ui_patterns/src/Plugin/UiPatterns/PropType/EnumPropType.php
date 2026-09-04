@@ -20,7 +20,6 @@ use Drupal\ui_patterns\PropTypePluginBase;
   schema: ['type' => ['string', 'number', 'integer'], 'enum' => []],
   priority: 10,
   typed_data: ['float', 'integer', 'string'],
-
 )]
 class EnumPropType extends PropTypePluginBase {
 
@@ -32,8 +31,8 @@ class EnumPropType extends PropTypePluginBase {
   public function getSummary(array $definition): array {
     $summary = parent::getSummary($definition);
     if (isset($definition['enum'])) {
-      $values = implode(", ", static::getAllowedValues($definition));
-      $summary[] = $this->t("Allowed values: @values", ["@values" => $values]);
+      $values = \implode(', ', static::getAllowedValues($definition));
+      $summary[] = $this->t('Allowed values: @values', ['@values' => $values]);
     }
     return $summary;
   }
@@ -43,8 +42,8 @@ class EnumPropType extends PropTypePluginBase {
    */
   public static function normalize(mixed $value, ?array $definition = NULL): mixed {
     // First get the enum array.
-    $enum = (!is_array($definition)) ? [] : ($definition['enum'] ?? []);
-    if (!is_array($enum)) {
+    $enum = (!\is_array($definition)) ? [] : ($definition['enum'] ?? []);
+    if (!\is_array($enum)) {
       $enum = [];
     }
     return static::normalizer()->normalizeEnumValue($value, $enum) ?? static::enumDefaultValue($definition);

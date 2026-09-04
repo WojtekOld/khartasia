@@ -19,20 +19,20 @@ class UiPatternsUiLocalAction extends DeriverBase implements ContainerDeriverInt
 
   use StringTranslationTrait;
 
-  /**
-   * Constructs a UiPatternsUiLocalAction object.
-   */
-  public function __construct(protected RouteProviderInterface $routeProvider, protected ComponentPluginManager $componentPluginManager, protected EntityTypeManagerInterface $entityTypeManager) {
-  }
+  public function __construct(
+    protected RouteProviderInterface $routeProvider,
+    protected ComponentPluginManager $componentPluginManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+  ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
-      $container->get('router.route_provider'),
-      $container->get('plugin.manager.sdc'),
-      $container->get('entity_type.manager'),
+      $container->get(RouteProviderInterface::class),
+      $container->get(ComponentPluginManager::class),
+      $container->get(EntityTypeManagerInterface::class),
     );
   }
 

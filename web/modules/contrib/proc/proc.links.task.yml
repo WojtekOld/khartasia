@@ -1,0 +1,18 @@
+entity.proc.view:
+  title: 'View'
+  route_name: entity.proc.canonical
+  base_route: entity.proc.canonical
+entity.proc.edit_form:
+  title: 'Edit'
+  route_name: entity.proc.edit_form
+  base_route: entity.proc.canonical
+entity.proc.delete_form:
+  title: 'Delete'
+  route_name: entity.proc.delete_form
+  base_route: entity.proc.canonical
+  weight: 10
+entity.proc.collection:
+  title: 'Protected Contents'
+  route_name: entity.proc.collection
+  base_route: system.admin_content
+  weight: 10

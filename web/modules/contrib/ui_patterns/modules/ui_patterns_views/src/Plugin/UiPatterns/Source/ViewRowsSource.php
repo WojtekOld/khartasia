@@ -18,7 +18,7 @@ use Drupal\views\ViewExecutable;
   id: 'view_rows',
   label: new TranslatableMarkup('[View] Rows'),
   description: new TranslatableMarkup('View rows results.'),
-  prop_types: ['slot'], tags: ['views'],
+  prop_types: ['slot'],
   context_requirements: ['views:style'],
   context_definitions: [
     'ui_patterns_views:view_entity' => new EntityContextDefinition('entity:view', label: new TranslatableMarkup('View')),
@@ -70,7 +70,7 @@ class ViewRowsSource extends ViewsSourceBase {
     // When there is only one row,
     // we wrap it in an array to prevent the slot normalization
     // to break the structure.
-    return self::renderOutput((count($rows) === 1) ? [$rows] : $rows);
+    return self::renderOutput((\count($rows) === 1) ? [$rows] : $rows);
   }
 
   /**
@@ -93,9 +93,9 @@ class ViewRowsSource extends ViewsSourceBase {
     }
     $view_style_plugin = $view->getStyle();
     if ($view_style_plugin) {
-      $field_names = $field_name ? [$field_name] : array_keys($field_options);
+      $field_names = $field_name ? [$field_name] : \array_keys($field_options);
       foreach ($rows as $row_index => &$row) {
-        $index = isset($row["#row"], $row["#row"]->index) ? $row["#row"]->index : $row_index;
+        $index = isset($row['#row'], $row['#row']->index) ? $row['#row']->index : $row_index;
         $new_row = $this->renderRowWithFields($view, $view_style_plugin, $field_names, $index);
         // When a specific field is selected,
         // we simplify the array to be the field value only.
@@ -119,7 +119,7 @@ class ViewRowsSource extends ViewsSourceBase {
    * @return array
    *   The rendered row as an array of fields.
    */
-  protected function renderRowWithFields(ViewExecutable $view, StylePluginBase $view_style_plugin, array $field_names, int $index) : array {
+  protected function renderRowWithFields(ViewExecutable $view, StylePluginBase $view_style_plugin, array $field_names, int $index): array {
     $new_row = [];
     foreach ($field_names as $one_field_name) {
       $field_output = $view_style_plugin->getField($index, $one_field_name);
@@ -140,13 +140,13 @@ class ViewRowsSource extends ViewsSourceBase {
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
     $field_options = self::getViewsFieldOptions($this->getView());
-    if (is_array($field_options)) {
+    if (\is_array($field_options)) {
       $form['ui_patterns_views_field'] = [
         '#type' => 'select',
         '#title' => $this->t('Fields rendered in rows'),
         '#description' => $this->t('Render only this field in the rows.'),
         '#options' => $field_options,
-        '#default_value' => $this->getSetting('ui_patterns_views_field') ?? "",
+        '#default_value' => $this->getSetting('ui_patterns_views_field') ?? '',
         '#required' => FALSE,
         '#empty_option' => $this->t('All'),
       ];

@@ -1,4 +1,3 @@
-
 include:
   - project: $_GITLAB_TEMPLATES_REPO
     ref: $_GITLAB_TEMPLATES_REF
@@ -8,14 +7,67 @@ include:
       - "/includes/include.drupalci.workflows.yml"
 
 variables:
+  _PHPUNIT_CONCURRENT: '1'
+  _PHPUNIT_TESTGROUPS: 'ui_icons'
+  # 2.0.x declares `^11.3 || ^12.0`, so Drupal 12 has to be covered by CI and
+  # not only by the info files. The next-major variants build against
+  # DRUPAL_NEXT_MAJOR (12) and are allow_failure in the templates, so a broken
+  # core dev snapshot reports without blocking the pipeline.
+  # @see https://project.pages.drupalcode.org/gitlab_templates/info/variants/
+  # OPT_IN_TEST_NEXT_MAJOR: '1'
+  # _AUTORUN_NEXT_MAJOR: 'push-and-mr'
   SKIP_PHPMD:
     value: '0'
     description: 'Set to 1 to skip the PHPMD CI job'
+  SKIP_E2E_TESTS:
+    value: '0'
+    description: 'Set to 1 to skip the E2E tests CI job'
+  PLAYWRIGHT_DEBUG_LEVEL:
+    value: 'error'
+    description: 'E2E tests verbosity level. Can be: error, warn, info, http, verbose, debug, silly.'
+  PLAYWRIGHT_TEST_PROJECT:
+    value: 'firefox'
+    description: 'Set to a comma-separated list of project.'
+  PLAYWRIGHT_TEST_TAG:
+    value: 'base'
+    description: "The tag to use for E2E tests. Defaults to 'base'."
+  PLAYWRIGHT_TEST_WORKERS:
+    value: '4'
+    description: 'Number of workers for Playwright job.'
+  CI_MAIN_PROJECT_NAME: ui_icons
+  KUBERNETES_CPU_REQUEST: 16
+
+.manual-rule: &manual-rule
+  - when: manual
+    allow_failure: true
+
+## Define some rules to lighten the CI, inspiration from project_browser:
+## https://git.drupalcode.org/project/project_browser/-/blob/2.0.x/.gitlab-ci.yml
+
+# @todo remove when https://www.drupal.org/project/gitlab_templates/issues/3452183
+.is-push-rule: &is-push-rule
+  if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ROOT_NAMESPACE == "project"
+
+.php-files-change-rule: &php-files-change-rule
+  - if: $_FOR_EVERY_MR_COMMIT == "true" || $_FOR_EVERY_MR_COMMIT == null
+    changes:
+      - "**/*.{php,module,inc,install,theme,profile}"
+    when: on_success
+
+.module-config-files-change-rule: &module-config-files-change-rule
+  - if: $_FOR_EVERY_MR_COMMIT == "true" || $_FOR_EVERY_MR_COMMIT == null
+    changes:
+      # config schema and/or default config
+      - config
+      - modules/**/config
+    when: on_success
 
 cspell:
   allow_failure: true
   variables:
-    _CSPELL_IGNORE_PATHS: '**/build/icon.js, *.json, **/*.svg'
+    _CSPELL_IGNORE_PATHS: '**/translations/, **/composer.json, *.po, **/build/icon.js, *.neon, **/env.dist, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml, mkdocs.yml, CHANGELOG.md, CLAUDE.md'
+
+## PHPMD job in Drupal CI ##
 
 .skip-phpmd-rule: &skip-phpmd-rule
   if: '$SKIP_PHPMD == "1"'
@@ -35,7 +87,7 @@ cspell:
       BASELINE_FILE="${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}/.phpmd.baseline.xml"
       PHPMD_CONFIG="${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}/.phpmd.xml"
       if [ -f "$BASELINE_FILE" ]; then
-        sed -i "s#/builds/project/display_builder#${CI_PROJECT_DIR}#g" "$BASELINE_FILE"
+        sed -i "s#/builds/project/${CI_MAIN_PROJECT_NAME}#${CI_PROJECT_DIR}#g" "$BASELINE_FILE"
       fi
       if [ -f "$PHPMD_CONFIG" ]; then
         BASELINE_ARG=""
@@ -60,3 +112,101 @@ cspell:
 
 phpmd:
   extends: .phpmd-base
+  rules:
+    - *skip-phpmd-rule
+    - *is-push-rule
+    - *php-files-change-rule
+    - *manual-rule
+
+### Playwright tests in ci. ###
+
+# Basic Playwright rules.
+.skip-e2e-tests-rule: &skip-e2e-tests-rule
+  if: '$SKIP_E2E_TESTS == "1"'
+  when: never
+
+.playwright-tests-exist-rule: &playwright-tests-exist-rule
+  - exists:
+      - tests/src/Playwright/Tests/*.spec.*
+      - modules/*/tests/src/Playwright/Tests/*.spec.*
+      - tests/modules/*/tests/src/Playwright/Tests/*.spec.*
+    when: on_success
+
+.playwright-base:
+  # @see https://github.com/devdrupal33/display_builder_test
+  image: ghcr.io/devdrupal33/display_builder_test:main
+  extends: .test-variables
+  stage: test
+  needs: [composer]
+  services:
+    - !reference [.with-database]
+  rules:
+    - *skip-e2e-tests-rule
+    - *playwright-tests-exist-rule
+    - *manual-rule
+  variables:
+    # Standard variables for Playwright. Mostly similar to NightwatchJS tests.
+    # This is required for the job to work.
+    DRUPAL_TEST_BASE_URL: "${SIMPLETEST_BASE_URL}"
+    DRUPAL_TEST_SETUP_FILE: 'core/tests/Drupal/TestSite/TestSiteInstallTestScript.php'
+    DRUPAL_WEB_ROOT: $_WEB_ROOT
+    DRUPAL_TEST_WEBSERVER_USER: www-data
+    # Specific Playwright job rules.
+    PLAYWRIGHT_SKIP_TEARDOWN: true
+    # From the Docker image
+    PLAYWRIGHT_BROWSERS_PATH: /var/www/pw-browsers
+  before_script:
+    - !reference [.check-composer-end-code]
+    - !reference [.setup-webserver]
+    - !reference [.simpletest-db]
+    # Important to set here to have a value from simpletest-db.
+    - export DRUPAL_TEST_DB_URL=$SIMPLETEST_DB
+    - !reference [.show-environment-variables]
+    - !reference [.show-context]
+    - echo -e "\e[0Ksection_end:`date +%s`:lib_install\r\e[0K"
+    # Install playwright and packages, already cached in the image.
+    - echo -e "\e[0Ksection_start:`date +%s`:playwright_install[collapsed=true]\r\e[0KPlaywright install..."
+    - npm install
+    - npx playwright install
+    - echo -e "\e[0Ksection_end:`date +%s`:playwright_install\r\e[0K"
+  script:
+    - npx playwright install --list
+    - |
+      _PROJECT_FLAGS=""
+      for p in $(echo "${PLAYWRIGHT_TEST_PROJECT}" | tr ',' ' '); do
+        _PROJECT_FLAGS="${_PROJECT_FLAGS} --project ${p}"
+      done
+      echo -e "[cmd] npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS}"
+      npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS}
+  after_script:
+    - |
+      cat > ${CI_PROJECT_DIR}/test-results/links.json << EOF
+      {
+        "playwright": [
+          {
+            "external_link": {
+              "label": "Playwright report",
+              "url": "https://project.pages.drupalcode.org/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
+            }
+          }
+        ]
+      }
+      EOF
+  artifacts:
+    expose_as: 'Playwright Test Reports'
+    when: always
+    expire_in: 3 mos
+    paths:
+      - playwright-report/
+      - test-results/
+    reports:
+      junit:
+        - test-results/playwright.xml
+      annotations: test-results/links.json
+
+playwright:
+  extends: .playwright-base
+  allow_failure: false
+  variables:
+    PLAYWRIGHT_TEST_PROJECT: firefox, chromium
+    PLAYWRIGHT_TEST_TAG: base

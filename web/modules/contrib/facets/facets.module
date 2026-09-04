@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\Theme\ThemePreprocess;
 use Drupal\Core\Url;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\Entity\FacetSource;
@@ -216,7 +217,7 @@ function facets_entity_predelete(EntityInterface $entity) {
  * @see https://www.drupal.org/node/1842756
  */
 function facets_preprocess_facets_item_list(array &$variables) {
-  /** @var \Drupal\facets\Entity\FacetInterface $facet */
+  /** @var \Drupal\facets\FacetInterface $facet */
   $facet = $variables['facet'];
   if ($facet !== NULL) {
     if ($facet->get('show_title') === TRUE) {
@@ -229,7 +230,16 @@ function facets_preprocess_facets_item_list(array &$variables) {
       $variables['cache_max_age'] = $facet->getCacheMaxAge() . ' seconds';
     }
   }
-  template_preprocess_item_list($variables);
+  DeprecationHelper::backwardsCompatibleCall(
+    \Drupal::VERSION,
+    '11.3.0',
+    function () use (&$variables): void {
+      \Drupal::service(ThemePreprocess::class)->preprocessItemList($variables);
+    },
+    function () use (&$variables): void {
+      template_preprocess_item_list($variables);
+    },
+  );
 }
 
 /**

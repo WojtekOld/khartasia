@@ -7,6 +7,7 @@ namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\Plugin\Derivative\FieldPropertySourceDeriver;
+use Drupal\ui_patterns\SourceMetadataKey;
 
 /**
  * Plugin implementation of the prop source.
@@ -25,7 +26,7 @@ class FieldPropertySource extends FieldValueSourceBase {
   public function getPropValue(): mixed {
     $items = $this->getEntityFieldItemList();
     $delta = (isset($this->context['ui_patterns:field:index'])) ? $this->getContextValue('ui_patterns:field:index') : 0;
-    $property = $this->getCustomPluginMetadata('property');
+    $property = $this->getMetadata(SourceMetadataKey::Property);
     if (empty($property) || empty($items)) {
       return NULL;
     }
@@ -34,13 +35,16 @@ class FieldPropertySource extends FieldValueSourceBase {
     if (!$field_item_at_delta) {
       return NULL;
     }
-    $property_value = $field_item_at_delta->get($property)->getValue();
     $prop_typ_types = [];
     if (isset($this->propDefinition['type'])) {
       // Type can be an array of types or a single type.
-      $prop_typ_types = is_array($this->propDefinition['type']) ? $this->propDefinition['type'] : [$this->propDefinition['type']];
+      $prop_typ_types = \is_array($this->propDefinition['type']) ? $this->propDefinition['type'] : [$this->propDefinition['type']];
     }
-    return $this->transTypeProp($property_value, $prop_typ_types);
+    // Return the raw property value: trust is carried by its type. A
+    // processed property (TextProcessed) is FilteredMarkup, which the prop
+    // type keeps as safe HTML; a raw string property (StringInterface) is
+    // a plain string, which Twig autoescapes at render.
+    return $this->transTypeProp($field_item_at_delta->get($property)->getValue(), $prop_typ_types);
   }
 
   /**
@@ -51,15 +55,15 @@ class FieldPropertySource extends FieldValueSourceBase {
    * @param array<string> $prop_types
    *   The prop types.
    *
-   * @return bool|float|int
+   * @return bool|float|int|mixed
    *   The value converted.
    */
   protected function transTypeProp(mixed $value, array $prop_types): mixed {
     foreach ($prop_types as $prop_type) {
       $converted = match ($prop_type) {
-        'integer' => is_int($value) ? $value : (int) $value,
-        'float', 'decimal' => is_float($value) ? $value : (float) $value,
-        'boolean' => is_bool($value) ? $value : (bool) $value,
+        'integer' => \is_int($value) ? $value : (int) $value,
+        'float', 'decimal' => \is_float($value) ? $value : (float) $value,
+        'boolean' => \is_bool($value) ? $value : (bool) $value,
         default => NULL,
       };
       if ($converted !== NULL) {

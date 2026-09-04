@@ -13,19 +13,6 @@ use Drupal\Core\Plugin\Discovery\RegexRecursiveFilterIterator;
  */
 class DirectoryWithMetadataDiscovery extends YamlDirectoryDiscovery {
 
-  /**
-   * Constructs a DirectoryWithMetadataDiscovery object.
-   *
-   * @param array $directories
-   *   An array of directories to scan, keyed by the provider. The value can
-   *   either be a string or an array of strings. The string values should be
-   *   the path of a directory to scan.
-   * @param string $file_cache_key_suffix
-   *   The file cache key suffix. This should be unique for each type of
-   *   discovery.
-   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
-   *   The file system service.
-   */
   public function __construct(array $directories, string $file_cache_key_suffix, protected FileSystemInterface $fileSystem) {
     parent::__construct($directories, $file_cache_key_suffix);
   }
@@ -62,16 +49,16 @@ class DirectoryWithMetadataDiscovery extends YamlDirectoryDiscovery {
    */
   protected function getIdentifier($file, array $data): string {
     $full_id = \basename($file, '.story.yml');
-    [$component_id, $story_id] = explode(".", $full_id);
+    [$component_id, $story_id] = \explode('.', $full_id);
     // A story author can explicitly target a component in the definition if
     // the story is in an other provider (theme or module) than the target
     // component.
-    if (isset($data["component"]) && is_string($data["component"]) && !empty($data["component"])) {
-      return sprintf('%s:%s', $data["component"], $story_id);
+    if (isset($data['component']) && \is_string($data['component']) && !empty($data['component'])) {
+      return \sprintf('%s:%s', $data['component'], $story_id);
     }
-    $provider_paths = array_flip($this->directories);
+    $provider_paths = \array_flip($this->directories);
     $provider = $this->findProvider($file, $provider_paths);
-    return sprintf('%s:%s:%s', $provider, $component_id, $story_id);
+    return \sprintf('%s:%s:%s', $provider, $component_id, $story_id);
   }
 
   /**
@@ -90,14 +77,14 @@ class DirectoryWithMetadataDiscovery extends YamlDirectoryDiscovery {
    *   The provider
    */
   private function findProvider(string $file, array $provider_paths): string {
-    $parts = explode(DIRECTORY_SEPARATOR, $file);
-    array_pop($parts);
+    $parts = \explode(\DIRECTORY_SEPARATOR, $file);
+    \array_pop($parts);
     if (empty($parts)) {
       return '';
     }
-    $provider = $provider_paths[implode(DIRECTORY_SEPARATOR, $parts)] ?? '';
+    $provider = $provider_paths[\implode(\DIRECTORY_SEPARATOR, $parts)] ?? '';
     return empty($provider)
-      ? $this->findProvider(implode(DIRECTORY_SEPARATOR, $parts), $provider_paths)
+      ? $this->findProvider(\implode(\DIRECTORY_SEPARATOR, $parts), $provider_paths)
       : $provider;
   }
 

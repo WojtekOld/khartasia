@@ -2,9 +2,11 @@
 
 namespace Drupal\bibcite_entity\Plugin;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\bibcite_entity\Annotation\BibciteLink as AnnotationBibciteLink;
+use Drupal\bibcite_entity\Attribute\BibciteLink as AttributeBibciteLink;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Provides the Link plugin manager.
@@ -23,7 +25,14 @@ class BibciteLinkPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/bibcite/link', $namespaces, $module_handler, 'Drupal\bibcite_entity\Plugin\BibciteLinkPluginInterface', 'Drupal\bibcite_entity\Annotation\BibciteLink');
+    parent::__construct(
+      'Plugin/bibcite/link',
+      $namespaces,
+      $module_handler,
+      BibciteLinkPluginInterface::class,
+      AttributeBibciteLink::class,
+      AnnotationBibciteLink::class,
+    );
 
     $this->alterInfo('bibcite_entity_bibcite_link_info');
     $this->setCacheBackend($cache_backend, 'bibcite_entity_bibcite_link_plugins');

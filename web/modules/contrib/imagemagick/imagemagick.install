@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * @file
+ * ImageMagick installation scripts.
+ */
+
+/**
+ * Minimum schema version to allow upgrading from.
+ */
+function imagemagick_update_last_removed(): int {
+  return 8304;
+}
+
+/**
+ * Remove the 'locale' config setting.
+ */
+function imagemagick_update_8305(): void {
+  $config_factory = \Drupal::configFactory();
+  $config_factory->getEditable('imagemagick.settings')
+    ->clear('locale')
+    ->save(TRUE);
+}
+
+/**
+ * Adds the 'imagemagick_version' config setting.
+ */
+function imagemagick_update_8306(): void {
+  $config_factory = \Drupal::configFactory();
+  $config_factory->getEditable('imagemagick.settings')
+    ->set('imagemagick_version', 'v6')
+    ->save(TRUE);
+}
+
+/**
+ * Force caches rebuild to reflect changes to service parameters.
+ */
+function imagemagick_update_8307(): void {
+}

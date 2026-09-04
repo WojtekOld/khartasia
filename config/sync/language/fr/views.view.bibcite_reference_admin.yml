@@ -1,0 +1,65 @@
+display:
+  default:
+    display_options:
+      exposed_form:
+        options:
+          submit_button: Filtrer
+          reset_button_label: Réinitialiser
+          exposed_sorts_label: 'Trier par'
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+      pager:
+        options:
+          tags:
+            previous: ‹‹
+            next: ››
+            first: '« Premier'
+            last: 'Dernier »'
+          expose:
+            items_per_page_label: 'Éléments par page'
+            items_per_page_options_all_label: '- Tout -'
+            offset_label: Décalage
+      fields:
+        bibcite_reference_bulk_form:
+          label: 'Mise à jour en masse'
+          action_title: Action
+        title:
+          label: Titre
+          separator: ', '
+        type:
+          label: Type
+          separator: ', '
+        uid:
+          label: Auteur
+          separator: ', '
+        status:
+          label: État
+          settings:
+            format_custom_true: Publié
+            format_custom_false: 'Non publié'
+          separator: ', '
+        changed:
+          label: 'Mis à jour'
+          separator: ', '
+        operations:
+          label: Actions
+      filters:
+        title:
+          expose:
+            label: Titre
+        type:
+          expose:
+            label: Type
+        status:
+          expose:
+            label: Publié
+          group_info:
+            label: 'Statut de publication'
+            group_items:
+              1:
+                title: Publié
+              2:
+                title: 'Non publié'
+      title: Références
+  page_1:
+    display_title: Page

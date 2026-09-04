@@ -11,11 +11,11 @@ use Drupal\layout_builder\Section;
  */
 interface LayoutBuilderUpdaterInterface {
 
-  public const PATTERN_PREFIX = 'pattern_';
+  public const string PATTERN_PREFIX = 'pattern_';
 
-  public const COMPONENT_PREFIX = 'ui_patterns:';
+  public const string COMPONENT_PREFIX = 'ui_patterns:';
 
-  public const COMPONENT_NAMESPACE_PARTS = 2;
+  public const int COMPONENT_NAMESPACE_PARTS = 2;
 
   /**
    * Update layout overrides.
@@ -26,6 +26,6 @@ interface LayoutBuilderUpdaterInterface {
    * @return \Drupal\layout_builder\Section|false
    *   A section if the section had been updated.
    */
-  public function updateLayout(Section $section): FALSE|Section;
+  public function updateLayout(Section $section): false|Section;
 
 }

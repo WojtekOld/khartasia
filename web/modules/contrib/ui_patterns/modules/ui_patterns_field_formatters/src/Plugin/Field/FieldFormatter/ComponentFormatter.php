@@ -33,7 +33,7 @@ class ComponentFormatter extends ComponentFormatterBase {
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
-    if (count($items) === 0) {
+    if (\count($items) === 0) {
       return [];
     }
     $context = $this->getComponentSourceContexts($items);
@@ -53,10 +53,10 @@ class ComponentFormatter extends ComponentFormatterBase {
    */
   public static function isApplicable(FieldDefinitionInterface $field_definition) {
     $cardinality = $field_definition->getFieldStorageDefinition()->getCardinality();
-    $result = (parent::isApplicable($field_definition) && (
-        ($cardinality === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) ||
-        ($cardinality > 1)));
-    return $result;
+    return parent::isApplicable($field_definition) && (
+      ($cardinality === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+        || ($cardinality > 1)
+    );
   }
 
   /**
@@ -64,7 +64,7 @@ class ComponentFormatter extends ComponentFormatterBase {
    */
   protected function getComponentSourceContexts(?FieldItemListInterface $items = NULL): array {
     // Set the context of field and entity (override the method trait).
-    return RequirementsContext::addToContext(["field_granularity:items"], parent::getComponentSourceContexts($items));
+    return RequirementsContext::addToContext(['field_granularity:items'], parent::getComponentSourceContexts($items));
   }
 
 }

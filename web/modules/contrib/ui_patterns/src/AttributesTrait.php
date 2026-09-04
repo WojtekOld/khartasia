@@ -18,17 +18,17 @@ trait AttributesTrait {
    */
   protected static function buildAttributesRegexPattern(): string {
     // Attribute names are a mix of ASCII lower and upper alphas.
-    $attr_name = "[a-zA-Z\-]+";
+    $attr_name = '[a-zA-Z\-]+';
     // Discard double quotes which are used for delimiting.
     $double_quoted_value = '[^"]*';
-    $space = "\s*";
-    $attr = sprintf("%s=\"%s\"%s", $attr_name, $double_quoted_value, $space);
+    $space = '\s*';
+    $attr = \sprintf('%s="%s"%s', $attr_name, $double_quoted_value, $space);
     // Start and end delimiters are not expected here, they will be added:
     // - by \Drupal\Core\Render\Element\FormElementBase::validatePattern for
     //   server side validation
     // - in the HTML5 pattern attribute, for client side validation
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern
-    return $space . "(" . $attr . ")*";
+    return $space . '(' . $attr . ')*';
   }
 
   /**
@@ -36,9 +36,9 @@ trait AttributesTrait {
    */
   protected static function buildClassRegexPattern(): string {
     // Each classname cannot start with a hyphen followed by a digit or a digit.
-    $class_name = "(?!(?:\\d|[-]\\d))[\\S]+";
+    $class_name = '(?!(?:\d|[-]\d))[\S]+';
     // Pattern for valid CSS class names.
-    return "\\s*(" . $class_name . "(\\s+" . $class_name . ")*)?\\s*";
+    return '\s*(' . $class_name . '(\s+' . $class_name . ')*)?\s*';
   }
 
   /**
@@ -51,7 +51,7 @@ trait AttributesTrait {
    *   TRUE if the value is for attributes, FALSE otherwise.
    */
   protected static function isValueForAttributes(string $value): bool {
-    return str_contains($value, '=');
+    return \str_contains($value, '=');
   }
 
   /**
@@ -64,13 +64,13 @@ trait AttributesTrait {
    *   Attributes mapping.
    */
   protected static function convertValueToAttributesMapping(mixed $value): array {
-    if (empty($value) || !is_string($value)) {
+    if (empty($value) || !\is_string($value)) {
       return [];
     }
     if (static::isValueForAttributes($value)) {
       return static::convertStringToAttributesMapping($value);
     }
-    return static::convertStringToAttributesMapping(sprintf('class="%s"', $value));
+    return static::convertStringToAttributesMapping(\sprintf('class="%s"', $value));
   }
 
   /**

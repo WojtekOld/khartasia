@@ -2,13 +2,16 @@
 
 namespace Drupal\Tests\bibcite_marc\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\bibcite_marc\Encoder\MarcEncoder;
 use Drupal\Tests\bibcite_export\Kernel\FormatEncoderTestBase;
 
 /**
  * @coversDefaultClass \Drupal\bibcite_marc\Encoder\MarcEncoder
- * @group bibcite
  */
+#[Group('bibcite')]
+#[RunTestsInSeparateProcesses]
 class MarcEncodeTest extends FormatEncoderTestBase {
 
   /**

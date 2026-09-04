@@ -16,24 +16,24 @@ class RenderableConverter {
    */
   public string $extension = '';
 
-  const COMMON_RENDER_PROPERTIES = [
-    "type",
-    "id",
-    "settings",
-    "fields",
-    "printed",
-    "input",
-    "pre_render",
-    "cache",
-    "context",
-    "attached",
-    "variant",
-    "attributes",
+  public const array COMMON_RENDER_PROPERTIES = [
+    'type',
+    'id',
+    'settings',
+    'fields',
+    'printed',
+    'input',
+    'pre_render',
+    'cache',
+    'context',
+    'attached',
+    'variant',
+    'attributes',
   ];
 
-  public function __construct(protected ComponentPluginManager $componentPluginManager) {
-    $this->extension = '';
-  }
+  public function __construct(
+    protected ComponentPluginManager $componentPluginManager,
+  ) {}
 
   /**
    * Set extension (theme, module, profile).
@@ -54,7 +54,7 @@ class RenderableConverter {
       $renderable = $this->convertRenderElement($renderable, '#');
     }
     foreach ($renderable as $key => $value) {
-      if (!is_array($value)) {
+      if (!\is_array($value)) {
         continue;
       }
       $renderable[$key] = $this->convert($value);
@@ -66,10 +66,10 @@ class RenderableConverter {
    * Convert render element (render arrays using #type).
    */
   public function convertRenderElement(array $renderable, string $prefix = '#'): array {
-    if ('pattern' === $renderable[$prefix . 'type']) {
+    if ($renderable[$prefix . 'type'] === 'pattern') {
       return $this->convertPattern($renderable, $prefix);
     }
-    if ('pattern_preview' === $renderable[$prefix . 'type']) {
+    if ($renderable[$prefix . 'type'] === 'pattern_preview') {
       return $this->convertPatternPreview($renderable, $prefix);
     }
     return $renderable;
@@ -79,26 +79,26 @@ class RenderableConverter {
    * Convert legacy render element to SDC render element.
    */
   public function convertPattern(array $element, string $prefix = '#'): array {
-    if (!array_key_exists($prefix . "id", $element) || !is_string($element[$prefix . "id"])) {
+    if (!\array_key_exists($prefix . 'id', $element) || !\is_string($element[$prefix . 'id'])) {
       return $element;
     }
-    $element[$prefix . "type"] = "component";
+    $element[$prefix . 'type'] = 'component';
     $element = $this->resolveCompactFormat($element, $prefix);
-    $element[$prefix . "id"] = $this->getNamespacedId($element[$prefix . "id"]);
-    $element[$prefix . "component"] = $element[$prefix . "id"];
-    unset($element[$prefix . "id"]);
-    if (array_key_exists($prefix . "fields", $element) && is_array($element[$prefix . "fields"])) {
-      $slots = $element[$prefix . "fields"];
-      $element[$prefix . "slots"] = $this->convertSlots($slots, $prefix);
-      unset($element[$prefix . "fields"]);
+    $element[$prefix . 'id'] = $this->getNamespacedId($element[$prefix . 'id']);
+    $element[$prefix . 'component'] = $element[$prefix . 'id'];
+    unset($element[$prefix . 'id']);
+    if (\array_key_exists($prefix . 'fields', $element) && \is_array($element[$prefix . 'fields'])) {
+      $slots = $element[$prefix . 'fields'];
+      $element[$prefix . 'slots'] = $this->convertSlots($slots, $prefix);
+      unset($element[$prefix . 'fields']);
     }
-    if (array_key_exists($prefix . "settings", $element) && is_array($element[$prefix . "settings"])) {
-      $element[$prefix . "props"] = $element[$prefix . "settings"];
-      unset($element[$prefix . "settings"]);
+    if (\array_key_exists($prefix . 'settings', $element) && \is_array($element[$prefix . 'settings'])) {
+      $element[$prefix . 'props'] = $element[$prefix . 'settings'];
+      unset($element[$prefix . 'settings']);
     }
-    if (array_key_exists($prefix . "variant", $element) && is_string($element[$prefix . "variant"])) {
-      $element[$prefix . "props"]["variant"] = $element[$prefix . "variant"];
-      unset($element[$prefix . "variant"]);
+    if (\array_key_exists($prefix . 'variant', $element) && \is_string($element[$prefix . 'variant'])) {
+      $element[$prefix . 'props']['variant'] = $element[$prefix . 'variant'];
+      unset($element[$prefix . 'variant']);
     }
     return $element;
   }
@@ -109,7 +109,7 @@ class RenderableConverter {
   private function convertSlots(array $slots, string $prefix = '#'): array {
     foreach ($slots as $slot_id => $slot) {
       // Single scalars are managed by the SDC render element.
-      if (!is_array($slot)) {
+      if (!\is_array($slot)) {
         continue;
       }
       // However, list of scalars must be converted to list of render arrays.
@@ -122,13 +122,13 @@ class RenderableConverter {
    * List of scalars must be converted to list of render arrays.
    */
   public function convertListSlot(array $slot, string $prefix = '#'): array {
-    if (!array_is_list($slot)) {
+    if (!\array_is_list($slot)) {
       return $slot;
     }
     foreach ($slot as $index => $item) {
-      if (is_scalar($item)) {
+      if (\is_scalar($item)) {
         $item = [
-          $prefix . "plain_text" => $item,
+          $prefix . 'plain_text' => $item,
         ];
       }
       $slot[$index] = $item;
@@ -140,18 +140,18 @@ class RenderableConverter {
    * Convert pattern_preview elements.
    */
   protected function convertPatternPreview(array $element, string $prefix = '#'): array {
-    if (!array_key_exists($prefix . "id", $element) || !is_string($element[$prefix . "id"])) {
+    if (!\array_key_exists($prefix . 'id', $element) || !\is_string($element[$prefix . 'id'])) {
       return $element;
     }
-    $element[$prefix . "type"] = "component";
+    $element[$prefix . 'type'] = 'component';
     $element = $this->resolveCompactFormat($element, $prefix);
-    $element[$prefix . "id"] = $this->getNamespacedId($element[$prefix . "id"]);
-    $element[$prefix . "component"] = $element[$prefix . "id"];
-    $element[$prefix . "story"] = "preview";
-    unset($element[$prefix . "id"]);
-    if (array_key_exists($prefix . "variant", $element) && is_string($element[$prefix . "variant"])) {
-      $element[$prefix . "props"]["variant"] = $element[$prefix . "variant"];
-      unset($element[$prefix . "variant"]);
+    $element[$prefix . 'id'] = $this->getNamespacedId($element[$prefix . 'id']);
+    $element[$prefix . 'component'] = $element[$prefix . 'id'];
+    $element[$prefix . 'story'] = 'preview';
+    unset($element[$prefix . 'id']);
+    if (\array_key_exists($prefix . 'variant', $element) && \is_string($element[$prefix . 'variant'])) {
+      $element[$prefix . 'props']['variant'] = $element[$prefix . 'variant'];
+      unset($element[$prefix . 'variant']);
     }
     return $element;
   }
@@ -160,25 +160,25 @@ class RenderableConverter {
    * Resolve UI Patterns 1.x compact format.
    */
   protected function resolveCompactFormat(array $element, string $prefix = '#'): array {
-    $component_id = $this->getNamespacedId($element[$prefix . "id"]);
+    $component_id = $this->getNamespacedId($element[$prefix . 'id']);
     $definitions = $this->componentPluginManager->getDefinitions();
     if (!isset($definitions[$component_id])) {
       return $element;
     }
     $definition = $definitions[$component_id];
-    $slots = array_keys($definition['slots'] ?? []);
-    $props = array_keys($definition['props']['properties'] ?? []);
+    $slots = \array_keys($definition['slots'] ?? []);
+    $props = \array_keys($definition['props']['properties'] ?? []);
     foreach ($element as $property => $value) {
-      if (in_array($property, self::COMMON_RENDER_PROPERTIES)) {
+      if (\in_array($property, self::COMMON_RENDER_PROPERTIES, TRUE)) {
         continue;
       }
-      $property = str_replace('#', "", $property);
-      if (in_array($property, $slots)) {
+      $property = \str_replace('#', '', $property);
+      if (\in_array($property, $slots, TRUE)) {
         $element[$prefix . 'fields'][$property] = $value;
         unset($element[$prefix . $property]);
         continue;
       }
-      if (in_array($property, $props)) {
+      if (\in_array($property, $props, TRUE)) {
         $element[$prefix . 'settings'][$property] = $value;
         unset($element[$prefix . $property]);
       }
@@ -190,12 +190,12 @@ class RenderableConverter {
    * Get namespaced (SDC style) component ID from UI Patterns 1.x ID.
    */
   public function getNamespacedId(string $component_id): string {
-    $parts = explode(":", $component_id);
-    if (count(array_filter($parts)) === 2) {
+    $parts = \explode(':', $component_id);
+    if (\count(\array_filter($parts)) === 2) {
       // Already namespaced.
       return $component_id;
     }
-    if (count(array_filter($parts)) > 2) {
+    if (\count(\array_filter($parts)) > 2) {
       // Unexpected situation.
       return $component_id;
     }
@@ -212,7 +212,7 @@ class RenderableConverter {
     // If not found in the 'current' extension, return the first found result.
     foreach ($components as $component) {
       $definition = $component->getPluginDefinition();
-      $machine_name = is_array($definition) ? $definition["machineName"] : ($definition->machineName ?? NULL);
+      $machine_name = \is_array($definition) ? $definition['machineName'] : ($definition->machineName ?? NULL);
       if ($machine_name === $component_id) {
         return $component->getPluginId();
       }

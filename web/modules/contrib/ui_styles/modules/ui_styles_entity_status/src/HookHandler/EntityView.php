@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\ui_styles_entity_status\HookHandler;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
+use Drupal\Core\Extension\ThemeSettingsProvider;
 use Drupal\Core\Template\AttributeHelper;
 use Drupal\layout_builder\Entity\LayoutEntityDisplayInterface;
 use Drupal\ui_styles\SectionStorageTrait;
@@ -66,7 +68,7 @@ class EntityView implements ContainerInjectionInterface {
     }
 
     /** @var array $settings */
-    $settings = \theme_get_setting(UiStylesEntityStatusInterface::UNPUBLISHED_CLASSES_THEME_SETTING_KEY) ?? [];
+    $settings = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.3.0', static fn () => \Drupal::service(ThemeSettingsProvider::class)->getSetting(UiStylesEntityStatusInterface::UNPUBLISHED_CLASSES_THEME_SETTING_KEY), static fn () => \theme_get_setting(UiStylesEntityStatusInterface::UNPUBLISHED_CLASSES_THEME_SETTING_KEY)) ?? [];
     if (empty($settings)) {
       return;
     }

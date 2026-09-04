@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - field.field.node.papers.body
+    - field.field.node.papers.field_famille_fibreuse
     - field.field.node.papers.field_genus_pap_entity
     - field.field.node.papers.field_genus_taxo_pap
     - field.field.node.papers.field_origin_taxo
@@ -31,6 +32,12 @@ content:
   created:
     type: datetime_timestamp
     weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_famille_fibreuse:
+    type: options_select
+    weight: 121
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -111,6 +118,11 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  url_redirects:
+    weight: 50
+    region: content
+    settings: {  }
     third_party_settings: {  }
 hidden:
   field_genus_taxo_pap: true

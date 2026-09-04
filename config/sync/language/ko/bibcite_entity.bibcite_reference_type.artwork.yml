@@ -1,0 +1,5 @@
+fields:
+  bibcite_pages:
+    label: 설명
+  bibcite_place_published:
+    label: 도시

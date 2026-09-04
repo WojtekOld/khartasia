@@ -2,6 +2,9 @@
 
 namespace Drupal\bibcite_entity\Plugin\Action;
 
+use Drupal\Core\Action\Attribute\Action;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
 /**
  * Regenerate citekey for reference.
  *
@@ -11,6 +14,11 @@ namespace Drupal\bibcite_entity\Plugin\Action;
  *   type = "bibcite_reference",
  * )
  */
+#[Action(
+  id: 'bibcite_entity_reference_regenerate_citekey',
+  label: new TranslatableMarkup('Regenerate citation key'),
+  type: 'bibcite_reference'
+)]
 class ReferenceRegenerateCitekey extends EntitySaveBase {
 
   /**

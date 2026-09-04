@@ -1,0 +1,14 @@
+proc_janitor.settings_form:
+  title: 'Janitor'
+  description: 'Configure the Protected Content janitor maintenance task.'
+  parent: proc.settings_form
+  route_name: proc_janitor.settings_form
+  weight: 20
+
+proc_janitor.batch_cleanup_form:
+  title: 'Run janitor maintenance task'
+  description: 'Run orphan cipher cleanup as a GUI batch operation.'
+  parent: proc_janitor.settings_form
+  route_name: proc_janitor.batch_cleanup_form
+  weight: 21
+

@@ -1,0 +1,5 @@
+
+services:
+  Drupal\bibcite_export\Hook\BibciteExportHooks:
+    class: Drupal\bibcite_export\Hook\BibciteExportHooks
+    autowire: true

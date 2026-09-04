@@ -1,0 +1,7 @@
+parameters:
+  ignoreErrors:
+    - identifier: missingType.generics
+    - identifier: missingType.iterableValue
+    - '#Dynamic call to static method PHPUnit\\Framework\\.*#'
+  level: max
+  reportUnmatchedIgnoredErrors: false

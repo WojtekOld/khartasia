@@ -7,7 +7,6 @@ namespace Drupal\ui_patterns_legacy;
 use Drupal\Core\Render\Component\Exception\InvalidComponentDataException;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\Component\ComponentValidator;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Component converter.
@@ -19,22 +18,9 @@ class ComponentConverter {
    */
   protected string $extension;
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     private readonly RendererInterface $renderer,
-  ) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    return new static(
-      $container->get('renderer')
-    );
-  }
+  ) {}
 
   /**
    * Set extension (theme, module, profile).
@@ -63,8 +49,8 @@ class ComponentConverter {
     }
     if (\array_key_exists('settings', $source)) {
       $target['props'] = [
-        "type" => 'object',
-        "properties" => $this->getPropsFromSettings($source['settings']),
+        'type' => 'object',
+        'properties' => $this->getPropsFromSettings($source['settings']),
       ];
       $required_props = $this->getRequiredPropsFromSettings($source['settings']);
       if (!empty($required_props)) {
@@ -82,8 +68,7 @@ class ComponentConverter {
    */
   private function processLibraryProperties(array $source, array $target): array {
     $target = $this->addProperty('links', $source, 'links', $target);
-    $target = $this->addProperty('tags', $source, 'tags', $target);
-    return $target;
+    return $this->addProperty('tags', $source, 'tags', $target);
   }
 
   /**
@@ -97,8 +82,7 @@ class ComponentConverter {
     // template.
     $target = $this->addProperty('path', $source, 'path', $target);
     // The path to the preview image (relative to the 'path' given).
-    $target = $this->addProperty('icon', $source, 'icon', $target);
-    return $target;
+    return $this->addProperty('icon', $source, 'icon', $target);
   }
 
   /**
@@ -149,7 +133,7 @@ class ComponentConverter {
       $prop = [];
       $prop = $this->addProperty('label', $setting, 'title', $prop);
       $prop = $this->addProperty('description', $setting, 'description', $prop);
-      $prop = array_merge($prop, $converter->convert($setting));
+      $prop = \array_merge($prop, $converter->convert($setting));
       if (\array_key_exists('default_value', $setting)) {
         $prop['default'] = $setting['default_value'];
       }
@@ -164,7 +148,7 @@ class ComponentConverter {
   private function getRequiredPropsFromSettings(array $settings): array {
     $props = [];
     foreach ($settings as $setting_id => $setting) {
-      if (\array_key_exists('required', $setting) && $setting["required"]) {
+      if (\array_key_exists('required', $setting) && $setting['required']) {
         $props[] = $setting_id;
       }
     }
@@ -178,7 +162,7 @@ class ComponentConverter {
     if (!\array_key_exists($source_key, $source)) {
       return $target;
     }
-    if (is_null($source[$source_key])) {
+    if ($source[$source_key] === NULL) {
       return $target;
     }
     $value = $source[$source_key];
@@ -215,11 +199,11 @@ class ComponentConverter {
     if (empty($dependencies)) {
       return $consolidated_library;
     }
-    $consolidated_library = array_merge(
-       [
-         'dependencies' => $dependencies,
-       ],
-       $consolidated_library,
+    $consolidated_library = \array_merge(
+      [
+        'dependencies' => $dependencies,
+      ],
+      $consolidated_library,
     );
     // For each component, SDC adds a library with the name
     // "sdc/{extension}--{machine_name_with_dashes}.
@@ -227,10 +211,10 @@ class ComponentConverter {
     // "my_theme" the asset library is "sdc/my_theme--my-banner".
     // On UI Patterns 1.x, it was "ui_patterns/{component_id}.{library_id}".
     foreach ($consolidated_library['dependencies'] as $index => $dependency) {
-      if (str_starts_with($dependency, 'ui_patterns/') && str_contains($dependency, '.')) {
-        $component_id = (preg_split('/(\/|\.)/', $dependency) ?: [$dependency])[1];
-        $component_id = str_replace('_', '-', $component_id);
-        $consolidated_library['dependencies'][$index] = 'sdc/' . $this->extension . "--" . $component_id;
+      if (\str_starts_with($dependency, 'ui_patterns/') && \str_contains($dependency, '.')) {
+        $component_id = (\preg_split('/(\/|\.)/', $dependency) ?: [$dependency])[1];
+        $component_id = \str_replace('_', '-', $component_id);
+        $consolidated_library['dependencies'][$index] = 'sdc/' . $this->extension . '--' . $component_id;
       }
     }
     return $consolidated_library;
@@ -244,16 +228,16 @@ class ComponentConverter {
     $sdc_validator = new ComponentValidator();
     $is_valid = $sdc_validator->validateDefinition($definition, FALSE);
     if (!$is_valid) {
-      $errors[] = sprintf('Component "%s" definition is not valid.', $definition['id']);
+      $errors[] = \sprintf('Component "%s" definition is not valid.', $definition['id']);
     }
     if (!isset($definition['stories'])) {
       return $errors;
     }
-    foreach (array_keys($definition['stories']) as $story_id) {
+    foreach (\array_keys($definition['stories']) as $story_id) {
       $renderable = [
-        "#type" => "component_story",
-        "#component" => $definition['id'],
-        "#story" => $story_id,
+        '#type' => 'component_story',
+        '#component' => $definition['id'],
+        '#story' => $story_id,
       ];
       try {
         $this->renderer->renderInIsolation($renderable);

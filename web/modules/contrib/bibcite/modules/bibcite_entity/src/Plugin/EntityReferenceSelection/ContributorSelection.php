@@ -3,7 +3,9 @@
 namespace Drupal\bibcite_entity\Plugin\EntityReferenceSelection;
 
 use Drupal\bibcite_entity\Entity\Contributor;
+use Drupal\Core\Entity\Attribute\EntityReferenceSelection;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Provides specific access control for the contributor entity type.
@@ -16,6 +18,15 @@ use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
  *   weight = 1
  * )
  */
+#[EntityReferenceSelection(
+  id: 'default:bibcite_contributor',
+  label: new TranslatableMarkup('Contributor selection'),
+  entity_types: [
+    'bibcite_contributor',
+  ],
+  group: 'default',
+  weight: 1
+)]
 class ContributorSelection extends DefaultSelection {
 
   /**

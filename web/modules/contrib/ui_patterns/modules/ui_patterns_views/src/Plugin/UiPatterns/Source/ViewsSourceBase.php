@@ -8,6 +8,7 @@ use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\SharedTempStore;
+use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -18,10 +19,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Plugin implementation of the source.
  */
 abstract class ViewsSourceBase extends SourcePluginBase {
+
   /**
    * The views temp store.
-   *
-   * @var \Drupal\Core\TempStore\SharedTempStore|null
    */
   protected ?SharedTempStore $tempStore = NULL;
 
@@ -41,7 +41,7 @@ abstract class ViewsSourceBase extends SourcePluginBase {
       $plugin_definition
     );
     if ($plugin->moduleHandler->moduleExists('views_ui')) {
-      $plugin->tempStore = $container->get('tempstore.shared')->get('views');
+      $plugin->tempStore = $container->get(SharedTempStoreFactory::class)->get('views');
     }
     return $plugin;
   }
@@ -52,13 +52,13 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * @return \Drupal\views\ViewExecutable|null
    *   The view executable.
    */
-  protected function getView() : ?ViewExecutable {
+  protected function getView(): ?ViewExecutable {
     try {
-      if (isset($this->context["ui_patterns_views:view"])) {
-        return $this->getContextValue("ui_patterns_views:view");
+      if (isset($this->context['ui_patterns_views:view'])) {
+        return $this->getContextValue('ui_patterns_views:view');
       }
-      if (isset($this->context["ui_patterns_views:view_entity"])) {
-        return $this->getViewExecutable($this->getContextValue("ui_patterns_views:view_entity"));
+      if (isset($this->context['ui_patterns_views:view_entity'])) {
+        return $this->getViewExecutable($this->getContextValue('ui_patterns_views:view_entity'));
       }
     }
     catch (ContextException) {
@@ -75,7 +75,7 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * @return \Drupal\views\ViewExecutable|null
    *   The view executable.
    */
-  protected function getViewExecutable($view) : ?ViewExecutable {
+  protected function getViewExecutable($view): ?ViewExecutable {
     if ($view && $this->tempStore && ($view_in_edition = $this->tempStore->get((string) $view->id()))) {
       return $view_in_edition->getExecutable();
     }
@@ -91,19 +91,19 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * @return array|null
    *   The options or NULL if not applicable.
    */
-  protected static function getViewsFieldOptions(?ViewExecutable $view = NULL) : ?array {
+  protected static function getViewsFieldOptions(?ViewExecutable $view = NULL): ?array {
     if (!$view || !$view->display_handler) {
       return NULL;
     }
-    $fields_options = $view->display_handler->getOption("fields") ?? [];
+    $fields_options = $view->display_handler->getOption('fields') ?? [];
     // Maybe a test on $row_options type could be done here
     // $row_options = $view->display_handler->getOption("row") ?? [];.
-    if (!is_array($fields_options) || count($fields_options) < 1) {
+    if (!\is_array($fields_options) || \count($fields_options) < 1) {
       return NULL;
     }
     $options = [];
     foreach ($fields_options as $field_id => $field) {
-      $options[$field_id] = empty($field['label']) ? $field_id : sprintf("%s (%s)", $field['label'], $field_id);
+      $options[$field_id] = empty($field['label']) ? $field_id : \sprintf('%s (%s)', $field['label'], $field_id);
     }
     return $options;
   }
@@ -116,15 +116,15 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * @param \Drupal\views\ViewExecutable $view
    *   The current view.
    *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   *
    * @return bool
    *   Return TRUE if the field need to be removed from render.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
    */
   protected function isViewFieldExcluded(string $field_name, ViewExecutable $view): bool {
     $field = $this->getViewField($field_name, $view);
     // Exclude field.
-    return !$field || (is_array($field->options) && ($field->options['exclude'] ?? FALSE));
+    return !$field || (\is_array($field->options) && ($field->options['exclude'] ?? FALSE));
   }
 
   /**
@@ -137,10 +137,10 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * @param \Drupal\views\ViewExecutable|null $view
    *   The current view.
    *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   *
    * @return bool
    *   Return TRUE if the field need to be removed from render.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
    */
   protected function isViewFieldHidden(string $field_name, mixed $field_output, ?ViewExecutable $view = NULL): bool {
     $field = $this->getViewField($field_name, $view);
@@ -151,7 +151,7 @@ abstract class ViewsSourceBase extends SourcePluginBase {
     $options = $this->getViewPluginOptions();
     $empty_value = $field->isValueEmpty($field_output, $field->options['empty_zero']);
     // Remove field if empty.
-    return $empty_value && ($field->options['hide_empty'] === TRUE || $options['hide_empty'] === TRUE);
+    return $empty_value && ($field->options['hide_empty'] === TRUE || ($options['hide_empty'] ?? FALSE) === TRUE);
   }
 
   /**
@@ -165,11 +165,11 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * @return \Drupal\views\Plugin\views\field\FieldPluginBase|null
    *   The field plugin or NULL if not found.
    */
-  protected function getViewField(string $field_name, ?ViewExecutable $view) : ?FieldPluginBase {
+  protected function getViewField(string $field_name, ?ViewExecutable $view): ?FieldPluginBase {
     if (!$view) {
       $view = $this->getView();
     }
-    if (!$view || !is_array($view->field) || !isset($view->field[$field_name]) || !($view->field[$field_name] instanceof FieldPluginBase)) {
+    if (!$view || !\is_array($view->field) || !isset($view->field[$field_name]) || !($view->field[$field_name] instanceof FieldPluginBase)) {
       return NULL;
     }
     return $view->field[$field_name];
@@ -178,13 +178,13 @@ abstract class ViewsSourceBase extends SourcePluginBase {
   /**
    * Returns the view row options.
    *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   *
    * @return array
    *   The view row options.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
    */
-  protected function getViewPluginOptions() : array {
-    return isset($this->context["ui_patterns_views:plugin:options"]) ? $this->getContextValue("ui_patterns_views:plugin:options") : [];
+  protected function getViewPluginOptions(): array {
+    return isset($this->context['ui_patterns_views:plugin:options']) ? $this->getContextValue('ui_patterns_views:plugin:options') : [];
   }
 
   /**
@@ -194,8 +194,8 @@ abstract class ViewsSourceBase extends SourcePluginBase {
     $form = parent::settingsForm($form, $form_state);
     $propTitle = $this->propDefinition['title'] ?? '';
     $form['label_map'] = [
-      "#type" => "label",
-      "#title" => empty($propTitle) ? $this->label() : $propTitle . ": " . $this->label(),
+      '#type' => 'label',
+      '#title' => empty($propTitle) ? $this->label() : $propTitle . ': ' . $this->label(),
     ];
     return $form;
   }
@@ -219,7 +219,7 @@ abstract class ViewsSourceBase extends SourcePluginBase {
         '#children' => (string) $output,
       ];
     }
-    if (is_scalar($output)) {
+    if (\is_scalar($output)) {
       return ['#children' => $output];
     }
     return $output;

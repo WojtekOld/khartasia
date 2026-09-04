@@ -18,7 +18,7 @@ class StoriesSyntaxConverter {
   /**
    * An array with one (and only one) of those keys may be a render array.
    */
-  public const RENDER_KEYS = [
+  public const array RENDER_KEYS = [
     'markup',
     'plain_text',
     'theme',
@@ -31,7 +31,7 @@ class StoriesSyntaxConverter {
     '#type',
   ];
 
-  public const KNOWN_PROPERTIES = [
+  public const array KNOWN_PROPERTIES = [
     'type' => [
       'item_list' => [
         'list_type',
@@ -69,7 +69,7 @@ class StoriesSyntaxConverter {
   /**
    * List of render properties which should have been children instead.
    */
-  public const PROPERTIES_INSTEAD_OF_CHILDREN = [
+  public const array PROPERTIES_INSTEAD_OF_CHILDREN = [
     'type' => [
       'component' => [
         'slots',
@@ -253,7 +253,7 @@ class StoriesSyntaxConverter {
     // An array needs one, and only one, of those properties to be a render
     // array.
     $intersect = \array_intersect(\array_keys($array), self::RENDER_KEYS);
-    if (\count($intersect) != 1) {
+    if (\count($intersect) !== 1) {
       return FALSE;
     }
     // This property has to be a string value.

@@ -1,0 +1,15 @@
+name = Responsive images and styles
+description = Responsive images and styles
+core = 7.x
+dependencies[] = field_formatter_settings
+dependencies[] = breakpoints
+dependencies[] = ctools
+files[] = resp_img.module
+configure = admin/config/media/resp_img
+
+; Information added by Drupal.org packaging script on 2016-03-23
+version = "7.x-2.0"
+core = "7.x"
+project = "resp_img"
+datestamp = "1458723840"
+

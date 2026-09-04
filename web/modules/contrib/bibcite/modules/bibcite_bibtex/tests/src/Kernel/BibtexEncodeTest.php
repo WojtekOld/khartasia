@@ -2,13 +2,16 @@
 
 namespace Drupal\Tests\bibcite_bibtex\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\bibcite_bibtex\Encoder\BibtexEncoder;
 use Drupal\Tests\bibcite_export\Kernel\FormatEncoderTestBase;
 
 /**
  * @coversDefaultClass \Drupal\bibcite_bibtex\Encoder\BibtexEncoder
- * @group bibcite
  */
+#[Group('bibcite')]
+#[RunTestsInSeparateProcesses]
 class BibtexEncodeTest extends FormatEncoderTestBase {
 
   /**

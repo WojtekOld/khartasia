@@ -8,6 +8,8 @@
 declare(strict_types=1);
 
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Utility\UpdateException;
 use Drupal\ui_patterns_legacy\Service\LayoutBuilderUpdaterInterface;
 
@@ -19,11 +21,11 @@ use Drupal\ui_patterns_legacy\Service\LayoutBuilderUpdaterInterface;
  * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
  */
 function ui_patterns_post_update_update_layout_builder_override_ui_patterns_2(array &$sandbox): MarkupInterface {
-  if (!\Drupal::moduleHandler()->moduleExists('layout_builder')) {
+  if (!Drupal::moduleHandler()->moduleExists('layout_builder')) {
     return \t('Layout builder is not installed, nothing to update.');
   }
 
-  if (!\Drupal::moduleHandler()->moduleExists('ui_patterns_legacy')) {
+  if (!Drupal::moduleHandler()->moduleExists('ui_patterns_legacy')) {
     throw new UpdateException('Not possible to update Layout Builder overrides. Enable ui_patterns_legacy module before.');
   }
 
@@ -33,12 +35,12 @@ function ui_patterns_post_update_update_layout_builder_override_ui_patterns_2(ar
     $sandbox['total'] = 0;
 
     // Get all entity types containing layout_section fields to prepare batch.
-    $layout_section_field_mapping = \Drupal::service('entity_field.manager')
+    $layout_section_field_mapping = Drupal::service(EntityFieldManagerInterface::class)
       ->getFieldMapByFieldType('layout_section');
     foreach ($layout_section_field_mapping as $entity_type_id => $entity_fields) {
       $sandbox['entity_fields'][$entity_type_id] = [];
       /** @var \Drupal\Core\Entity\EntityStorageInterface $entity_storage */
-      $entity_storage = \Drupal::service('entity_type.manager')->getStorage($entity_type_id);
+      $entity_storage = Drupal::service(EntityTypeManagerInterface::class)->getStorage($entity_type_id);
 
       // There should be only one field but in case of custom development or
       // contrib module allowing other section fields on the same entity type.
@@ -61,24 +63,24 @@ function ui_patterns_post_update_update_layout_builder_override_ui_patterns_2(ar
   }
 
   // Do not continue if no entities are found.
-  if ($sandbox['total'] == 0) {
+  if ($sandbox['total'] === 0) {
     $sandbox['#finished'] = 1;
     return \t('No entities to update.');
   }
 
   /** @var \Drupal\ui_patterns_legacy\Service\LayoutBuilderUpdaterInterface $updater */
-  $updater = \Drupal::service('ui_patterns_legacy.layout_builder_updater');
+  $updater = Drupal::service(LayoutBuilderUpdaterInterface::class);
 
   // Loop on the entity types even if we will process only one entity type per
   // batch run.
   foreach ($sandbox['entity_fields'] as $entity_type_id => $entity_fields) {
     // No more entities of this type to process.
-    if ($sandbox['count'][$entity_type_id] == 0) {
+    if ($sandbox['count'][$entity_type_id] === 0) {
       continue;
     }
 
     /** @var \Drupal\Core\Entity\EntityStorageInterface $entity_storage */
-    $entity_storage = \Drupal::service('entity_type.manager')->getStorage($entity_type_id);
+    $entity_storage = Drupal::service(EntityTypeManagerInterface::class)->getStorage($entity_type_id);
     /** @var string $entity_id_key */
     $entity_id_key = $entity_storage->getEntityType()->getKey('id');
 
@@ -151,7 +153,7 @@ function ui_patterns_post_update_update_layout_builder_override_ui_patterns_2(ar
 
     // If it is the last batch run for this entity type, reset the
     // current_entity_id for the next entity type.
-    if ($sandbox['count'][$entity_type_id] == 0) {
+    if ($sandbox['count'][$entity_type_id] === 0) {
       $sandbox['current_entity_id'] = 0;
     }
 
@@ -159,10 +161,9 @@ function ui_patterns_post_update_update_layout_builder_override_ui_patterns_2(ar
   }
 
   $sandbox['#finished'] = ($sandbox['progress'] / $sandbox['total']);
-  if ($sandbox['#finished'] == 1) {
+  if ($sandbox['#finished'] === 1) {
     return \t('Entities using Layout Builder override have been updated. After update is ok, you can uninstall the UI Patterns Legacy module and uninstall UI Patterns Blocks if not using it.');
   }
-  else {
-    return \t('Updating entities using Layout Builder override');
-  }
+
+  return \t('Updating entities using Layout Builder override');
 }

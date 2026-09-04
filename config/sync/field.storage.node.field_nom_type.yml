@@ -1,0 +1,45 @@
+uuid: e752578c-7692-4a5b-9303-89206b0c0390
+langcode: fr
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_nom_type
+field_name: field_nom_type
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: canonique_scientifique
+      label: 'Canonique scientifique'
+    -
+      value: canonique_regional
+      label: 'Canonique regional'
+    -
+      value: phonetique|
+      label: Phonétique
+    -
+      value: commercial
+      label: Commercial
+    -
+      value: toponyme
+      label: Toponyme
+    -
+      value: archaique
+      label: Archaïque
+    -
+      value: romanisation
+      label: Romanisation
+    -
+      value: populaire
+      label: Populaire
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

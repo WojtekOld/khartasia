@@ -1,0 +1,14 @@
+label: Rapport
+fields:
+  bibcite_secondary_title:
+    label: 'Titre de la série'
+  bibcite_number:
+    label: 'Numéro de document'
+  bibcite_type_of_work:
+    label: Type
+  bibcite_publisher:
+    label: Institution
+  bibcite_place_published:
+    label: Ville
+  bibcite_original_publication:
+    label: Contenu

@@ -145,9 +145,36 @@ class IconSearch implements ContainerInjectionInterface {
       return [];
     }
 
-    // Multiple scenarios to check.
-    $exact_order_pattern = '/\b' . implode('\b.*\b', $search_terms) . '\b/i';
+    $patterns = $this->buildSearchPatterns($search_terms);
 
+    // Search with a priority.
+    $matches_priority = array_fill_keys(array_keys($patterns), []);
+    foreach (array_keys($icons) as $icon_full_id) {
+      $icon_data = IconDefinition::getIconDataFromId($icon_full_id);
+
+      // Priority search is on id and then pack for order.
+      $icon_search = $icon_data['icon_id'] . ' ' . $icon_data['pack_id'];
+
+      $priority = $this->matchPriority($icon_search, $patterns, $matches_priority, $max_result);
+      if (NULL !== $priority) {
+        $matches_priority[$priority][$icon_full_id] = $icon_full_id;
+      }
+    }
+
+    return array_slice(array_merge(...array_values($matches_priority)), 0, $max_result);
+  }
+
+  /**
+   * Builds the search patterns, ordered from the most to the least specific.
+   *
+   * @param array $search_terms
+   *   The sanitized, lowercased search words.
+   *
+   * @return array
+   *   PCRE patterns keyed by priority: exact order, any order, any part, any
+   *   part in any order.
+   */
+  private function buildSearchPatterns(array $search_terms): array {
     $any_order_pattern = '/\b(' . implode('|', $search_terms) . ')\b.*\b(' . implode('|', $search_terms) . ')\b/i';
     $any_order_pattern = preg_replace_callback('/\((.*?)\)/', function ($match) {
       return '(' . implode('|', array_map(function ($word) {
@@ -155,51 +182,46 @@ class IconSearch implements ContainerInjectionInterface {
       }, explode('|', $match[1]))) . ')';
     }, $any_order_pattern);
 
-    $any_part_pattern = '/' . implode('.*', array_map('preg_quote', $search_terms)) . '/i';
+    return [
+      '/\b' . implode('\b.*\b', $search_terms) . '\b/i',
+      $any_order_pattern,
+      '/' . implode('.*', array_map('preg_quote', $search_terms)) . '/i',
+      '/\b(?:' . implode('|', array_map(function ($word) {
+        return preg_quote($word, '/') . '\b.*\b|\b.*\b' . preg_quote($word, '/');
+      }, $search_terms)) . ')/i',
+    ];
+  }
 
-    $any_part_any_order_pattern = '/\b(?:' . implode('|', array_map(function ($word) {
-      return preg_quote($word, '/') . '\b.*\b|\b.*\b' . preg_quote($word, '/');
-    }, $search_terms)) . ')/i';
-
-    // Search with a priority.
-    // @todo optimize as it looks messy.
-    $matches_priority = [0 => [], 1 => [], 2 => [], 3 => []];
-    $icon_list = array_keys($icons);
-    foreach ($icon_list as $icon_full_id) {
-      $icon_data = IconDefinition::getIconDataFromId($icon_full_id);
-
-      // Priority search is on id and then pack for order.
-      $icon_search = $icon_data['icon_id'] . ' ' . $icon_data['pack_id'];
-
-      if (preg_match($exact_order_pattern, $icon_search)) {
-        if (count($matches_priority[0]) < $max_result) {
-          $matches_priority[0][$icon_full_id] = $icon_full_id;
-          continue;
-        }
+  /**
+   * Finds the priority bucket an icon belongs to, if any.
+   *
+   * A pattern is only tried while every higher priority bucket still has room,
+   * so once the best matches fill up the search stops widening.
+   *
+   * @param string $icon_search
+   *   The haystack, `icon_id pack_id`.
+   * @param array $patterns
+   *   Patterns by priority, from ::buildSearchPatterns().
+   * @param array $matches
+   *   Matches collected so far, keyed by priority.
+   * @param int $max_result
+   *   Maximum result per priority bucket.
+   *
+   * @return int|null
+   *   The priority to record the icon under, or NULL to skip it.
+   */
+  private function matchPriority(string $icon_search, array $patterns, array $matches, int $max_result): ?int {
+    foreach ($patterns as $priority => $pattern) {
+      if ($priority > 0 && count($matches[$priority - 1]) >= $max_result) {
+        return NULL;
       }
-      elseif (count($matches_priority[0]) < $max_result && preg_match($any_order_pattern, $icon_search)) {
-        if (count($matches_priority[1]) < $max_result) {
-          $matches_priority[1][$icon_full_id] = $icon_full_id;
-          continue;
-        }
-      }
-      elseif (count($matches_priority[0]) < $max_result && count($matches_priority[1]) < $max_result && preg_match($any_part_pattern, $icon_search)) {
-        if (count($matches_priority[2]) < $max_result) {
-          $matches_priority[2][$icon_full_id] = $icon_full_id;
-          continue;
-        }
-      }
-      elseif (count($matches_priority[0]) < $max_result && count($matches_priority[1]) < $max_result && count($matches_priority[2]) < $max_result && preg_match($any_part_any_order_pattern, $icon_search)) {
-        if (count($matches_priority[3]) < $max_result) {
-          $matches_priority[3][$icon_full_id] = $icon_full_id;
-          continue;
-        }
+
+      if (preg_match($pattern, $icon_search)) {
+        return count($matches[$priority]) < $max_result ? $priority : NULL;
       }
     }
 
-    $matches = array_slice(array_merge($matches_priority[0], $matches_priority[1], $matches_priority[2], $matches_priority[3]), 0, $max_result);
-
-    return $matches;
+    return NULL;
   }
 
   /**

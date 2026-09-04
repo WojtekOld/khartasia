@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -19,7 +22,7 @@ use Drupal\ui_patterns\SourcePluginBase;
   label: new TranslatableMarkup('Wysiwyg'),
   description: new TranslatableMarkup('Wysiwyg editor'),
   prop_types: ['slot'],
-  tags: ['widget']
+  tags: [SourceTags::Widget->value]
 )]
 class WysiwygWidget extends SourcePluginBase implements TrustedCallbackInterface {
 
@@ -39,22 +42,27 @@ class WysiwygWidget extends SourcePluginBase implements TrustedCallbackInterface
    * @return array
    *   Processed element
    */
-  public static function textFormat(array $element) : array {
+  public static function textFormat(array $element): array {
     if (!isset($element['#ui_patterns']) || !$element['#ui_patterns']) {
       return $element;
     }
-    if (isset($element['format']['format']['#access']) &&
-      !$element['format']['format']['#access']) {
+    if (isset($element['format']['format']['#access'])
+      && !$element['format']['format']['#access']) {
       // See code at Drupal\filter\Element\TextFormat::processTextFormat()
       // when the format is not accessible, we need to make it accessible.
       $element['format']['format']['#access'] = TRUE;
     }
     $config = \Drupal::configFactory()->get('filter.settings');
     $fallback_format = $config->get('fallback_format');
-    $formats = filter_formats();
+    $formats = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.4.0',
+      static fn () => \Drupal::service(FilterFormatRepositoryInterface::class)->getAllFormats(),
+      static fn () => \filter_formats(),
+    );
     // We add the fallback format to the list of options if removed.
-    if (array_key_exists($fallback_format, $formats)
-      && !array_key_exists($fallback_format, $element['format']['format']['#options'])) {
+    if (\array_key_exists($fallback_format, $formats)
+      && !\array_key_exists($fallback_format, $element['format']['format']['#options'])) {
       $element['format']['format']['#options'][$fallback_format] = $formats[$fallback_format]->label();
     }
     return $element;
@@ -66,8 +74,8 @@ class WysiwygWidget extends SourcePluginBase implements TrustedCallbackInterface
   public function defaultSettings(): array {
     return [
       'value' => [
-        "value" => '',
-        "format" => '',
+        'value' => '',
+        'format' => '',
       ],
     ];
   }
@@ -77,9 +85,9 @@ class WysiwygWidget extends SourcePluginBase implements TrustedCallbackInterface
    */
   public function getPropValue(): mixed {
     return [
-      "#type" => "processed_text",
-      "#text" => $this->getSetting('value')['value'],
-      "#format" => $this->getSetting('value')['format'],
+      '#type' => 'processed_text',
+      '#text' => $this->getSetting('value')['value'],
+      '#format' => $this->getSetting('value')['format'],
     ];
   }
 
@@ -93,14 +101,20 @@ class WysiwygWidget extends SourcePluginBase implements TrustedCallbackInterface
       '#type' => 'text_format',
       '#ui_patterns' => TRUE,
     ];
-    if (is_array($value) && array_key_exists("value", $value)) {
+    if (\is_array($value) && \array_key_exists('value', $value)) {
       $element['#default_value'] = $value['value'];
     }
-    if (is_array($value) && array_key_exists("format", $value) && !empty($value['format'])) {
+    if (\is_array($value) && \array_key_exists('format', $value) && !empty($value['format'])) {
       $element['#format'] = $value['format'];
     }
     else {
-      $element['#format'] = filter_fallback_format();
+      $element['#format'] = DeprecationHelper::backwardsCompatibleCall(
+        \Drupal::VERSION,
+        '11.4.0',
+        // @phpstan-ignore-next-line
+        static fn () => \Drupal::service(FilterFormatRepositoryInterface::class)->getFallbackFormatId(),
+        static fn () => \filter_fallback_format(),
+      );
     }
     $form['value'] = $element;
     $this->addRequired($form['value']);
@@ -113,20 +127,20 @@ class WysiwygWidget extends SourcePluginBase implements TrustedCallbackInterface
   public function settingsSummary(): array {
     $value = $this->getSetting('value')['value'] ?? '';
     return [
-      substr(strip_tags($value), 0, 20),
+      \substr(\strip_tags($value), 0, 20),
     ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies() : array {
+  public function calculateDependencies(): array {
     $dependencies = parent::calculateDependencies();
     $value = $this->getSetting('value');
-    if (!is_array($value) || !array_key_exists("format", $value)) {
+    if (!\is_array($value) || !\array_key_exists('format', $value)) {
       return $dependencies;
     }
-    $format = FilterFormat::load($value["format"]);
+    $format = FilterFormat::load($value['format']);
     if ($format) {
       SourcePluginBase::mergeConfigDependencies($dependencies, [$format->getConfigDependencyKey() => [$format->getConfigDependencyName()]]);
     }

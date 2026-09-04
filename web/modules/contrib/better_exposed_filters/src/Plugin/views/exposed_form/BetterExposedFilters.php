@@ -407,6 +407,7 @@ class BetterExposedFilters extends InputRequired {
       '#type' => 'item',
       '#description' => $this->t('No sort elements have been exposed yet.'),
       '#access' => !$is_sort_exposed,
+      '#input' => FALSE,
     ];
 
     if ($is_sort_exposed) {
@@ -480,6 +481,7 @@ class BetterExposedFilters extends InputRequired {
       '#type' => 'item',
       '#description' => $this->t('No pager elements have been exposed yet.'),
       '#access' => !$is_pager_exposed,
+      '#input' => FALSE,
     ];
 
     if ($is_pager_exposed) {
@@ -840,7 +842,18 @@ class BetterExposedFilters extends InputRequired {
       }
 
       if (!empty($bef_options['general']['autosubmit_hide'])) {
+        // Always hide the submit button itself. The actions container is
+        // not always a rendered, attribute-honoring wrapper (e.g. inline
+        // exposed forms render the button with no form-actions div), so
+        // hiding only the container can leave the button visible.
         $form['actions']['submit']['#attributes']['class'][] = 'js-hide';
+
+        // When submit is the only action, also hide the container so it
+        // does not leave an empty block (the intent of #3568944).
+        $children = array_diff(Element::children($form['actions']), ['submit']);
+        if (empty($children)) {
+          $form['actions']['#attributes']['class'][] = 'js-hide';
+        }
       }
     }
 
@@ -937,6 +950,12 @@ class BetterExposedFilters extends InputRequired {
       $form['actions']['reset']['#op'] = 'reset';
       $form['actions']['reset']['#type'] = 'submit';
       $form['actions']['reset']['#id'] = Html::getUniqueId('edit-reset-' . $this->view->storage->id());
+      $form['actions']['reset']['#limit_validation_errors'] = [];
+      $form['actions']['reset']['#submit'][] = [$this, 'resetForm'];
+
+      if ($this->view->display_handler->ajaxEnabled()) {
+        $form['#attached']['library'][] = 'better_exposed_filters/reset_ajax';
+      }
     }
 
     // Ensure default process/pre_render callbacks are included when a BEF

@@ -29,7 +29,7 @@ class StoryDefault extends PluginBase implements StoryInterface {
   public function machineName(): string {
     $def = $this->pluginDefinition;
     if ($def instanceof PluginDefinitionInterface) {
-      [,, $story_id] = explode(':', $def->id());
+      [,, $story_id] = \explode(':', $def->id());
       return $story_id;
     }
     return (string) ($def['machineName'] ?? '');
@@ -52,7 +52,7 @@ class StoryDefault extends PluginBase implements StoryInterface {
   public function component(): string {
     $def = $this->pluginDefinition;
     if ($def instanceof PluginDefinitionInterface) {
-      [$provider, $component_id] = explode(':', $def->id());
+      [$provider, $component_id] = \explode(':', $def->id());
       return $provider . ':' . $component_id;
     }
     return (string) ($def['component'] ?? '');

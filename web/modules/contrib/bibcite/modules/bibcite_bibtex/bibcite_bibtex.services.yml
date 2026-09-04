@@ -14,3 +14,7 @@ services:
       defaultType: 'misc'
       contributorKey: 'author'
       keywordKey: 'keywords'
+
+  Drupal\bibcite_bibtex\Hook\BibciteBibtexHooks:
+    class: Drupal\bibcite_bibtex\Hook\BibciteBibtexHooks
+    autowire: true

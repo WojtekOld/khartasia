@@ -12,33 +12,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides block plugin definitions for components.
  *
- * @see \Drupal\ui_patterns\Plugin\Block\ComponentBlock
+ * @see \Drupal\ui_patterns_blocks\Plugin\Block\ComponentBlock
  */
 class ComponentBlock extends DeriverBase implements ContainerDeriverInterface {
 
-  /**
-   * The component plugin manager.
-   *
-   * @var \Drupal\ui_patterns\ComponentPluginManager
-   */
-  protected $pluginManager;
-
-  /**
-   * Constructs new ComponentBlock.
-   *
-   * @param \Drupal\ui_patterns\ComponentPluginManager $plugin_manager
-   *   The component plugin manager.
-   */
-  public function __construct(ComponentPluginManager $plugin_manager) {
-    $this->pluginManager = $plugin_manager;
-  }
+  public function __construct(
+    protected ComponentPluginManager $pluginManager,
+  ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
-      $container->get('plugin.manager.sdc')
+      $container->get(ComponentPluginManager::class)
     );
   }
 
@@ -46,6 +33,8 @@ class ComponentBlock extends DeriverBase implements ContainerDeriverInterface {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
+    // Block definitions are always arrays, never PluginDefinitionInterface.
+    \assert(\is_array($base_plugin_definition));
     /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->pluginManager;
     /** @var array<string, array> $components */

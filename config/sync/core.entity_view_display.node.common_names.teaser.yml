@@ -8,6 +8,8 @@ dependencies:
     - field.field.node.common_names.field_genus_com_entity
     - field.field.node.common_names.field_genus_taxo
     - field.field.node.common_names.field_language_taxo_vern
+    - field.field.node.common_names.field_nom_parent
+    - field.field.node.common_names.field_nom_type
     - field.field.node.common_names.field_ver_local_scripture
     - field.field.node.common_names.field_vern_syn
     - node.type.common_names
@@ -36,6 +38,9 @@ hidden:
   field_genus_com_entity: true
   field_genus_taxo: true
   field_language_taxo_vern: true
+  field_nom_parent: true
+  field_nom_type: true
   field_ver_local_scripture: true
   field_vern_syn: true
   langcode: true
+  search_api_excerpt: true

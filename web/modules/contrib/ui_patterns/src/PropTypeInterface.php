@@ -22,10 +22,10 @@ interface PropTypeInterface extends WithJsonSchemaInterface, PluginInspectionInt
   /**
    * Convert value from an other type.
    *
+   * @throws \UnhandledMatchError
+   *
    * @return mixed
    *   Converted value.
-   *
-   * @throws \UnhandledMatchError
    */
   public static function convertFrom(string $prop_type, mixed $value): mixed;
 

@@ -2,6 +2,9 @@
 
 namespace Drupal\bibcite_entity\Plugin\Action;
 
+use Drupal\Core\Action\Attribute\Action;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
 /**
  * Delete contributor action.
  *
@@ -12,5 +15,11 @@ namespace Drupal\bibcite_entity\Plugin\Action;
  *   confirm_form_route_name = "entity.bibcite_contributor.delete_multiple_form",
  * )
  */
+#[Action(
+  id: 'bibcite_entity_contributor_delete',
+  label: new TranslatableMarkup('Delete contributors'),
+  type: 'bibcite_contributor',
+  confirm_form_route_name: 'entity.bibcite_contributor.delete_multiple_form'
+)]
 class ContributorDelete extends EntityDeleteBase {
 }

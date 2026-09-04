@@ -25,14 +25,14 @@ trait UnicodePatternValidatorTrait {
    * @see https://www.drupal.org/project/drupal/issues/2633550
    * @see https://www.drupal.org/project/webform/issues/3002374
    */
-  public static function validateUnicodePattern(array &$element, FormStateInterface $form_state) : void {
+  public static function validateUnicodePattern(array &$element, FormStateInterface $form_state): void {
     if ($element['#value'] !== '') {
       if (!static::pregMatchUnicodePattern($element['#pattern_unicode'], $element['#value'])) {
         if (!empty($element['#pattern_error'])) {
           $form_state->setError($element, $element['#pattern_error']);
         }
         else {
-          $form_state->setError($element, t('%name field is not in the right format.', ['%name' => $element['#title']]));
+          $form_state->setError($element, \t('%name field is not in the right format.', ['%name' => $element['#title']]));
         }
       }
     }
@@ -49,9 +49,9 @@ trait UnicodePatternValidatorTrait {
    * @return bool
    *   TRUE if the pattern matches the subject, FALSE otherwise.
    */
-  public static function pregMatchUnicodePattern(string $pattern, string $subject): bool {
+  protected static function pregMatchUnicodePattern(string $pattern, string $subject): bool {
     $pattern = '{^(?:' . static::convertRegexToPcreFormat($pattern) . ')$}u';
-    return (bool) preg_match($pattern, $subject);
+    return (bool) \preg_match($pattern, $subject);
   }
 
   /**
@@ -63,9 +63,9 @@ trait UnicodePatternValidatorTrait {
    * @return string
    *   PCRE format pattern.
    */
-  public static function convertRegexToPcreFormat(string $pattern): string {
+  protected static function convertRegexToPcreFormat(string $pattern): string {
     // JavaScript-escaped Unicode characters to PCRE escape sequence format.
-    return preg_replace('/\\\\u([a-fA-F0-9]{4})/', '\\x{\\1}', $pattern);
+    return \preg_replace('/\\\u([a-fA-F0-9]{4})/', '\x{\1}', $pattern);
   }
 
 }

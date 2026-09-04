@@ -1,0 +1,11 @@
+fields:
+  bibcite_secondary_title:
+    label: コード
+  bibcite_edition:
+    label: セッション
+  bibcite_place_published:
+    label: 国
+  bibcite_alternate_title:
+    label: 略語
+  bibcite_original_publication:
+    label: 履歴

@@ -1,0 +1,90 @@
+uuid: 8bf2fa53-76f3-4d98-ad2c-0f6bc6e9b435
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.plante_geo.field_pg_culture
+    - field.field.node.plante_geo.field_pg_intro
+    - field.field.node.plante_geo.field_pg_lat
+    - field.field.node.plante_geo.field_pg_lng
+    - field.field.node.plante_geo.field_pg_pays
+    - field.field.node.plante_geo.field_pg_preparation
+    - field.field.node.plante_geo.field_pg_region
+    - field.field.node.plante_geo.field_pg_region_hist
+    - field.field.node.plante_geo.field_pg_source
+    - field.field.node.plante_geo.field_pg_utilisation
+    - node.type.plante_geo
+  module:
+    - text
+    - user
+id: node.plante_geo.default
+targetEntityType: node
+bundle: plante_geo
+mode: default
+content:
+  field_pg_culture:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_pg_intro:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_pg_pays:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_pg_preparation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_pg_region:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_pg_region_hist:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_pg_source:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_pg_utilisation:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+hidden:
+  field_pg_lat: true
+  field_pg_lng: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

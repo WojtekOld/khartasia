@@ -1,0 +1,12 @@
+tmgmt_deepl_glossary.entries_search:
+  version: 1.0
+  js:
+    js/glossary-entries-search.js: {}
+  css:
+    theme:
+      css/glossary-entries-search.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
+    - core/once

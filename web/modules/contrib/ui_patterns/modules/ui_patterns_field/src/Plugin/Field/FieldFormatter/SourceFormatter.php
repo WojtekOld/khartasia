@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns_field\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
@@ -12,6 +14,9 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
+use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
+use Drupal\ui_patterns\Resolver\ChainContextEntityResolverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -26,66 +31,47 @@ class SourceFormatter extends FormatterBase {
 
   /**
    * The component element builder.
-   *
-   * @var \Drupal\ui_patterns\Element\ComponentElementBuilder
    */
-  protected $componentElementBuilder;
-
+  protected ComponentElementBuilder $componentElementBuilder;
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
-  protected $entityFieldManager;
+  protected EntityFieldManagerInterface $entityFieldManager;
 
   /**
    * The sample entity generator.
-   *
-   * @var \Drupal\ui_patterns\Entity\SampleEntityGenerator
    */
-  protected $sampleEntityGenerator;
+  protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
    * The chain context entity resolver.
-   *
-   * @var \Drupal\ui_patterns\Resolver\ContextEntityResolverInterface
    */
-  protected $chainContextEntityResolver;
+  protected ChainContextEntityResolverInterface $chainContextEntityResolver;
 
   /**
    * The provided plugin contexts.
    *
    * @var array|null
    */
-  protected $context = NULL;
+  protected $context;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
-    $instance->entityTypeManager = $container->get('entity_type.manager');
-    $instance->entityFieldManager = $container->get('entity_field.manager');
-    $instance->sampleEntityGenerator = $container->get('ui_patterns.sample_entity_generator');
-    $instance->chainContextEntityResolver = $container->get('ui_patterns.chain_context_entity_resolver');
+    $instance->componentElementBuilder = $container->get(ComponentElementBuilder::class);
+    $instance->entityTypeManager = $container->get(EntityTypeManagerInterface::class);
+    $instance->entityFieldManager = $container->get(EntityFieldManagerInterface::class);
+    $instance->sampleEntityGenerator = $container->get(SampleEntityGeneratorInterface::class);
+    $instance->chainContextEntityResolver = $container->get(ChainContextEntityResolverInterface::class);
     return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function defaultSettings() {
-    $settings = parent::defaultSettings();
-    return $settings;
   }
 
   /**
@@ -96,11 +82,15 @@ class SourceFormatter extends FormatterBase {
     $contexts = $this->getComponentSourceContexts($items);
     $contexts['ui_patterns:lang_code'] = new Context(new ContextDefinition('any'), $langcode);
     $contexts['ui_patterns:field:items'] = new Context(new ContextDefinition('any'), $items);
-    for ($field_item_index = 0; $field_item_index < $items->count(); $field_item_index++) {
+    // Read via the list: merged view on synchronized translations. Item
+    // getValue() is intentionally raw (raw = item, merged = list). Call once
+    // before the loop to avoid N redundant merges.
+    $values = $items->getValue();
+    foreach ($values as $field_item_index => $source_with_configuration) {
       $contexts['ui_patterns:field:index'] = new Context(new ContextDefinition('integer'), $field_item_index);
-      $source_with_configuration = $items->get($field_item_index)->getValue();
       $fake_build = $this->componentElementBuilder->buildSource($fake_build, 'content', [], $source_with_configuration, $contexts);
     }
+
     $build = $fake_build['#slots']['content'] ?? [];
     $build['#cache'] = $fake_build['#cache'] ?? [];
     return $build;
@@ -116,12 +106,12 @@ class SourceFormatter extends FormatterBase {
    *   Source contexts.
    */
   protected function getComponentSourceContexts(?FieldItemListInterface $items = NULL): array {
-    $contexts = array_merge($this->context ?? [], $this->getThirdPartySetting('ui_patterns', 'context') ?? []);
+    $contexts = \array_merge($this->context ?? [], $this->getThirdPartySetting('ui_patterns', 'context') ?? []);
     $field_definition = $this->fieldDefinition;
-    $field_name = $field_definition->getName() ?? "";
+    $field_name = $field_definition->getName() ?? '';
     $contexts['field_name'] = new Context(ContextDefinition::create('string'), $field_name);
     $bundle = $field_definition->getTargetBundle();
-    $contexts['bundle'] = new Context(ContextDefinition::create('string'), $bundle ?? "");
+    $contexts['bundle'] = new Context(ContextDefinition::create('string'), $bundle ?? '');
     // Get the entity.
     $entity_type_id = $field_definition->getTargetEntityTypeId();
     // When field items are available, we can get the entity directly.
@@ -136,9 +126,8 @@ class SourceFormatter extends FormatterBase {
       // Generate a default bundle when it is missing,
       // this covers contexts like the display of a field in a view.
       // the bundle selected should have the field in definition...
-      $entity = !empty($bundle) ? $this->sampleEntityGenerator->get($entity_type_id, $bundle) :
-        $this->sampleEntityGenerator->get($entity_type_id, $this->findEntityBundleWithField($entity_type_id, $field_name));
-
+      $entity = !empty($bundle) ? $this->sampleEntityGenerator->get($entity_type_id, $bundle)
+        : $this->sampleEntityGenerator->get($entity_type_id, $this->findEntityBundleWithField($entity_type_id, $field_name));
     }
     $contexts['entity'] = EntityContext::fromEntity($entity);
     return $contexts;
@@ -155,17 +144,19 @@ class SourceFormatter extends FormatterBase {
    * @return string
    *   The bundle.
    */
-  protected function findEntityBundleWithField(string $entity_type_id, string $field_name) : string {
+  protected function findEntityBundleWithField(string $entity_type_id, string $field_name): string {
     // @todo better implementation with service 'entity_type.bundle.info'
     $bundle = $entity_type_id;
-    $bundle_entity_type = $this->entityTypeManager->getDefinition($entity_type_id)->getBundleEntityType();
-    if (NULL !== $bundle_entity_type) {
-      $bundle_list = $this->entityTypeManager->getStorage($bundle_entity_type)->loadMultiple();
-      if (count($bundle_list) > 0) {
+    $bundle_entity_type = $this->entityTypeManager->getDefinition($entity_type_id)
+      ->getBundleEntityType();
+    if ($bundle_entity_type !== NULL) {
+      $bundle_list = $this->entityTypeManager->getStorage($bundle_entity_type)
+        ->loadMultiple();
+      if (\count($bundle_list) > 0) {
         foreach ($bundle_list as $bundle_entity) {
           $bundle_to_test = (string) $bundle_entity->id();
           $definitions = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle_to_test);
-          if (array_key_exists($field_name, $definitions)) {
+          if (\array_key_exists($field_name, $definitions)) {
             $bundle = $bundle_to_test;
             break;
           }
@@ -178,10 +169,10 @@ class SourceFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  protected function checkEntityHasField(EntityInterface $entity, string $entity_type_id, string $field_name) : bool {
+  protected function checkEntityHasField(EntityInterface $entity, string $entity_type_id, string $field_name): bool {
     $field_definitions = $this->entityFieldManager->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
-    return ($entity->getEntityTypeId() === $entity_type_id &&
-      array_key_exists($field_name, $field_definitions));
+    return $entity->getEntityTypeId() === $entity_type_id
+      && \array_key_exists($field_name, $field_definitions);
   }
 
 }

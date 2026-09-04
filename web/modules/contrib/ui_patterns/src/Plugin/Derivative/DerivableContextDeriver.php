@@ -15,30 +15,32 @@ class DerivableContextDeriver extends EntityFieldSourceDeriverBase {
    * {@inheritdoc}
    */
   protected function getDerivativeDefinitionsForEntityBundleField(string $entity_type_id, string $bundle, string $field_name, array $base_plugin_derivative): void {
-    $id = implode(PluginBase::DERIVATIVE_SEPARATOR, [
+    $id = \implode(PluginBase::DERIVATIVE_SEPARATOR, [
       $entity_type_id,
       $bundle,
       $field_name,
     ]);
-    unset($base_plugin_derivative["context_definitions"]["field_name"]);
-    $this->derivatives[$id] = array_merge(
+    unset($base_plugin_derivative['context_definitions']['field_name']);
+    $this->derivatives[$id] = \array_merge(
       $base_plugin_derivative,
-      ["id" => $id]);
+      ['id' => $id]
+    );
   }
 
   /**
    * {@inheritdoc}
    */
   protected function getDerivativeDefinitionsForEntityStorageField(string $entity_type_id, string $field_name, array $base_plugin_derivative): void {
-    $id = implode(PluginBase::DERIVATIVE_SEPARATOR, [
+    $id = \implode(PluginBase::DERIVATIVE_SEPARATOR, [
       $entity_type_id,
-      "",
+      '',
       $field_name,
     ]);
-    unset($base_plugin_derivative["context_definitions"]["field_name"]);
-    $this->derivatives[$id] = array_merge(
+    unset($base_plugin_derivative['context_definitions']['field_name']);
+    $this->derivatives[$id] = \array_merge(
       $base_plugin_derivative,
-      ["id" => $id]);
+      ['id' => $id]
+    );
   }
 
 }

@@ -8,37 +8,30 @@
 declare(strict_types=1);
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\block\BlockInterface;
-use Drupal\ui_styles_block\HookHandler\BlockPresave;
-use Drupal\ui_styles_block\HookHandler\FormBlockFormAlter;
-use Drupal\ui_styles_block\HookHandler\PreprocessBlock;
+use Drupal\ui_styles_block\Hook\UiStylesBlockHooks;
 
 /**
  * Implements hook_ENTITY_TYPE_presave() for 'block'.
  */
+#[LegacyHook]
 function ui_styles_block_block_presave(BlockInterface $entity): void {
-  /** @var \Drupal\ui_styles_block\HookHandler\BlockPresave $instance */
-  $instance = \Drupal::service('class_resolver')
-    ->getInstanceFromDefinition(BlockPresave::class);
-  $instance->setThirdPartySettings($entity);
+  \Drupal::service(UiStylesBlockHooks::class)->blockPresave($entity);
 }
 
 /**
  * Implements hook_form_FORM_ID_alter() for 'block_form'.
  */
+#[LegacyHook]
 function ui_styles_block_form_block_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  /** @var \Drupal\ui_styles_block\HookHandler\FormBlockFormAlter $instance */
-  $instance = \Drupal::service('class_resolver')
-    ->getInstanceFromDefinition(FormBlockFormAlter::class);
-  $instance->blockFormAlter($form, $form_state);
+  \Drupal::service(UiStylesBlockHooks::class)->formBlockFormAlter($form, $form_state, $form_id);
 }
 
 /**
  * Implements hook_preprocess_HOOK() for 'block'.
  */
+#[LegacyHook]
 function ui_styles_block_preprocess_block(array &$variables): void {
-  /** @var \Drupal\ui_styles_block\HookHandler\PreprocessBlock $instance */
-  $instance = \Drupal::service('class_resolver')
-    ->getInstanceFromDefinition(PreprocessBlock::class);
-  $instance->preprocess($variables);
+  \Drupal::service(UiStylesBlockHooks::class)->preprocessBlock($variables);
 }

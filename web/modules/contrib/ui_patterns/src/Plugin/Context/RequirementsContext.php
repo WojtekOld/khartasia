@@ -34,8 +34,8 @@ class RequirementsContext extends Context {
    * @return bool
    *   True if the value is present in the context.
    */
-  public function hasValue(string $value) : bool {
-    return in_array($value, $this->getContextValue() ?? []);
+  public function hasValue(string $value): bool {
+    return \in_array($value, $this->getContextValue() ?? [], TRUE);
   }
 
   /**
@@ -50,11 +50,11 @@ class RequirementsContext extends Context {
    *   The contexts.
    */
   public static function addToContext(array $values, array $contexts): array {
-    if (array_key_exists("context_requirements", $contexts) && $contexts["context_requirements"] instanceof RequirementsContext) {
-      $contexts["context_requirements"] = static::fromValues(array_merge($contexts["context_requirements"]->getContextValue(), $values));
+    if (\array_key_exists('context_requirements', $contexts) && $contexts['context_requirements'] instanceof RequirementsContext) {
+      $contexts['context_requirements'] = static::fromValues(\array_merge($contexts['context_requirements']->getContextValue(), $values));
     }
     else {
-      $contexts["context_requirements"] = static::fromValues($values);
+      $contexts['context_requirements'] = static::fromValues($values);
     }
 
     return $contexts;
@@ -72,9 +72,9 @@ class RequirementsContext extends Context {
    *   The contexts.
    */
   public static function removeFromContext(array $values, array $contexts): array {
-    if (array_key_exists("context_requirements", $contexts) && ($contexts["context_requirements"] instanceof RequirementsContext)) {
-      $contexts["context_requirements"] = static::fromValues(array_filter((array) $contexts["context_requirements"]->getContextValue(), function ($value) use ($values) {
-        return !in_array($value, $values, TRUE);
+    if (\array_key_exists('context_requirements', $contexts) && ($contexts['context_requirements'] instanceof RequirementsContext)) {
+      $contexts['context_requirements'] = static::fromValues(\array_filter((array) $contexts['context_requirements']->getContextValue(), static function ($value) use ($values) {
+        return !\in_array($value, $values, TRUE);
       }));
     }
     return $contexts;

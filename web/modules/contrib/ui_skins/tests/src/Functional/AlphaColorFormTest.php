@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_skins\Functional;
 
 use Drupal\Core\Url;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Alpha color form tests.
- *
- * @group ui_skins
  */
+#[Group('ui_skins')]
+#[RunTestsInSeparateProcesses]
 class AlphaColorFormTest extends UiSkinsFunctionalTestBase {
 
   /**

@@ -24,7 +24,7 @@ final class Foo extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
-    $form["value"] = [
+    $form['value'] = [
       '#type' => 'textfield',
       '#attributes' => [
         'placeholder' => $this->t('Test: FOO'),

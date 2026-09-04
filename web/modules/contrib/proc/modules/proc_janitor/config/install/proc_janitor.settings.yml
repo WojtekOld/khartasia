@@ -1,0 +1,9 @@
+orphan_minimal_age: 0
+orphan_maximal_age: 0
+run_on_cron: true
+max_batch_operations: 50
+max_gui_batch_entities_per_run: 0
+lock_timeout: 86400
+max_cron_entities_per_run: 100
+reporting_max_age_days: 30
+

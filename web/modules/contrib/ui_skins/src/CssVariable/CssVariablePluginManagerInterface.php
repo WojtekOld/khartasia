@@ -36,13 +36,15 @@ interface CssVariablePluginManagerInterface extends PluginManagerInterface, Cate
    * @param \Drupal\ui_skins\Definition\CssVariableDefinition[]|null $definitions
    *   (optional) The plugin definitions to sort. If omitted, all plugin
    *   definitions are used.
+   * @param string $label_key
+   *   (optional) The key to be used as a label for sorting.
    *
    * @return \Drupal\ui_skins\Definition\CssVariableDefinition[]
    *   The sorted definitions.
    *
    * @phpstan-ignore-next-line
    */
-  public function getSortedDefinitions(?array $definitions = NULL): array;
+  public function getSortedDefinitions(?array $definitions = NULL, string $label_key = 'label'): array;
 
   /**
    * {@inheritdoc}
@@ -50,11 +52,13 @@ interface CssVariablePluginManagerInterface extends PluginManagerInterface, Cate
    * @param \Drupal\ui_skins\Definition\CssVariableDefinition[]|null $definitions
    *   (optional) The plugin definitions to group. If omitted, all plugin
    *   definitions are used.
+   * @param string $label_key
+   *   (optional) The key to be used as a label for sorting.
    *
    * @return \Drupal\ui_skins\Definition\CssVariableDefinition[][]
    *   The sorted definitions grouped by category.
    */
-  public function getGroupedDefinitions(?array $definitions = NULL): array;
+  public function getGroupedDefinitions(?array $definitions = NULL, string $label_key = 'label'): array;
 
   /**
    * Filter plugins by the modules and the selected theme and its parents.

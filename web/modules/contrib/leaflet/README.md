@@ -386,7 +386,7 @@ All icon settings support [Token replacement](#token-support).
 ]
 ```
 
-If `iconSize` is omitted, the module detects image dimensions automatically (with caching).
+If `iconSize` is omitted, the module detects the image dimensions automatically. Icons served by the site are read from the file system; an icon hosted elsewhere is requested once, with a short timeout. Either outcome is cached, so an icon whose size cannot be determined is not looked up again for every marker. Setting `iconSize` yourself skips the detection entirely and is worth doing for a map with many markers.
 
 ### HTML / DivIcon (`iconType: 'html'`)
 

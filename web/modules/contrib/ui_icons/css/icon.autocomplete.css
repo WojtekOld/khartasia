@@ -15,26 +15,19 @@ Partial support:
  - UI Suite Daisy UI (no dark mode yet)
  - Bootstrap
 */
-/* cspell:ignore gxleano */
+/* cspell:ignore gxleano grey */
 
 /* Variables, when available are Claro first, Olivero and fallback */
 :root {
   /* Claro .form-element without borders */
   --ui-icons-claro-size: calc((var(--input-padding-vertical) * 2) + var(--input-line-height));
+  --ui-icons-min-height: calc((var(--input-padding-vertical) * 2) + var(--input-line-height) - 0.25rem);
   --ui-icons--wrapper-size: var(--ui-icons-claro-size, var(--sp3, 2.89rem));
   --ui-icons--preview-size: calc(var(--ui-icons--wrapper-size) * 0.95);
-  --ui-icons--result-size: var(
-    --sp3, calc(var(--ui-icons--preview-size, 2.89rem) * 0.8)
-  );
-  --ui-icons--border-radius: var(
-    --input-border-radius-size, var(--border-radius, 0.3rem)
-  );
-  --ui-icons--border-color: var(
-    --input-border-color, var(--color--gray-60, #d3d4d9)
-  );
-  --ui-icons--preview-bg-color: var(
-    --color-gray-050, var(--color--gray-100, var(--background-contrast-grey, #f3f4f9))
-  );
+  --ui-icons--result-size: var(--sp3, calc(var(--ui-icons--preview-size, 2.89rem) * 0.8));
+  --ui-icons--border-radius: var(--admin-radius-m, var(--input-border-radius-size, var(--border-radius, 0.3rem)));
+  --ui-icons--border-color: var(--admin-color-border-input, var(--input-border-color, var(--color--gray-60, #d3d4d9)));
+  --ui-icons--preview-bg-color: var(--color-gray-050, var(--color--gray-100, var(--background-contrast-grey, #f3f4f9)));
   --ui-icons-preview-margin: var(--space-xs, 0.5rem);
   --ui-icons-autocomplete-height: 40rem;
   --ui-icons-picker-size: var(--ui-icons--wrapper-size);
@@ -73,7 +66,7 @@ Partial support:
   justify-content: center;
   min-width: var(--ui-icons--wrapper-size);
   max-width: var(--ui-icons--wrapper-size);
-  height: var(--ui-icons--wrapper-size);
+  height: var(--ui-icons-min-height);
   margin-right: var(--ui-icons-preview-margin);
   border: 1px solid var(--ui-icons--border-color);
   border-radius: var(--ui-icons--border-radius);

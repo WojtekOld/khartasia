@@ -21,11 +21,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @ingroup views_style_plugins
  */
 #[ViewsStyle(
-  id: "ui_patterns",
-  title: new TranslatableMarkup("Component (UI Patterns)"),
-  help: new TranslatableMarkup("Displays views with UI components."),
-  theme: "pattern_views_style",
-  display_types: ["normal"],
+  id: 'ui_patterns',
+  title: new TranslatableMarkup('Component (UI Patterns)'),
+  help: new TranslatableMarkup('Displays views with UI components.'),
+  theme: 'pattern_views_style',
+  display_types: ['normal'],
   register_theme: FALSE,
 )]
 class ComponentStyle extends StylePluginBase {
@@ -67,7 +67,7 @@ class ComponentStyle extends StylePluginBase {
     return parent::defineOptions() + [
       'ui_patterns' => [
         'default' => [
-          "ui_patterns" => self::getComponentFormDefault()['ui_patterns'],
+          'ui_patterns' => self::getComponentFormDefault()['ui_patterns'],
         ],
       ],
     ];
@@ -76,7 +76,7 @@ class ComponentStyle extends StylePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildOptionsForm(&$form, FormStateInterface $form_state) : void {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::buildOptionsForm($form, $form_state);
     // Wrapper ajax id.
     $wrapper_id = '';
@@ -92,9 +92,9 @@ class ComponentStyle extends StylePluginBase {
    * {@inheritdoc}
    */
   public function getComponentSettings(): array {
-    if (is_array($this->configuration) && isset($this->configuration['ui_patterns']) &&
-      is_array($this->configuration['ui_patterns']) && isset($this->configuration['ui_patterns']['component_id']) &&
-      $this->configuration['ui_patterns']['component_id']) {
+    if (\is_array($this->configuration) && isset($this->configuration['ui_patterns'])
+      && \is_array($this->configuration['ui_patterns']) && isset($this->configuration['ui_patterns']['component_id'])
+      && $this->configuration['ui_patterns']['component_id']) {
       return $this->configuration;
     }
     $styleOptions = $this->options['ui_patterns'] ?? [];
@@ -113,10 +113,10 @@ class ComponentStyle extends StylePluginBase {
    */
   public function render(): array {
     $component_configuration = $this->getComponentSettings()['ui_patterns'];
-    $component_id = $component_configuration["component_id"];
+    $component_id = $component_configuration['component_id'];
     $rendered_output = parent::render();
     foreach ($rendered_output as &$rendered_output_item) {
-      $rendered_output_item = ($component_id) ? $this->buildComponentRenderable($component_id, $this->getFullContext($rendered_output_item["#rows"] ?? [])) : [];
+      $rendered_output_item = ($component_id) ? $this->buildComponentRenderable($component_id, $this->getFullContext($rendered_output_item['#rows'] ?? [])) : [];
     }
     unset($rendered_output_item);
     return $rendered_output;
@@ -128,17 +128,17 @@ class ComponentStyle extends StylePluginBase {
    * @param array $rows
    *   Views Rows.
    *
-   * @return array|\Drupal\Core\Plugin\Context\Context[]
-   *   The context.
-   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @return array|\Drupal\Core\Plugin\Context\Context[]
+   *   The context.
    */
   protected function getFullContext(array $rows = []): array {
     $context = $this->getComponentSourceContexts();
     $contextDefinitionRows = new ContextDefinition('any');
-    return array_merge($context, [
-      "ui_patterns_views:rows" => new Context($contextDefinitionRows, $rows),
+    return \array_merge($context, [
+      'ui_patterns_views:rows' => new Context($contextDefinitionRows, $rows),
     ]);
   }
 

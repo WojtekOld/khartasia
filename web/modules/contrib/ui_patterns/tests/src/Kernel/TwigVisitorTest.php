@@ -6,13 +6,19 @@ namespace Drupal\Tests\ui_patterns\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test node visitor.
  *
- * @group ui_patterns
+ * @internal
+ *
+ * @coversNothing
  */
-class TwigVisitorTest extends KernelTestBase {
+#[Group('ui_patterns')]
+#[RunTestsInSeparateProcesses]
+final class TwigVisitorTest extends KernelTestBase {
 
   use TestDataTrait;
 
@@ -45,8 +51,7 @@ class TwigVisitorTest extends KernelTestBase {
   /**
    * Test different twig usages.
    */
-  public function testTwigIntegration() : void {
-
+  public function testTwigIntegration(): void {
     $default_context = [
       'prop_string' => $this->randomMachineName(),
       'attributes' => [],
@@ -88,13 +93,14 @@ class TwigVisitorTest extends KernelTestBase {
       '#type' => 'inline_template',
       '#context' => $default_context,
     ];
+
     foreach ($twig_templates as $twig_template) {
-      $render_array_test = array_merge($render_array, ['#template' => $twig_template]);
+      $render_array_test = \array_merge($render_array, ['#template' => $twig_template]);
       $this->assertExpectedOutput(
         [
-          "rendered_value_plain" => $default_context["prop_string"],
-          "rendered_value" => $default_context["prop_string"],
-          "assert" => "assertStringContainsString",
+          'rendered_value_plain' => $default_context['prop_string'],
+          'rendered_value' => $default_context['prop_string'],
+          'assert' => 'assertStringContainsString',
         ],
         $render_array_test
       );

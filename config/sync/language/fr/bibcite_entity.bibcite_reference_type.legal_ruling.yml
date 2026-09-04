@@ -1,0 +1,12 @@
+label: 'Décision de justice'
+fields:
+  bibcite_section:
+    label: 'Numéro de section'
+  bibcite_number_of_volumes:
+    label: 'Numéro de session'
+  bibcite_number:
+    label: 'Page de début'
+  bibcite_issn:
+    label: 'Numéro de document'
+  bibcite_alternate_title:
+    label: Abrévation

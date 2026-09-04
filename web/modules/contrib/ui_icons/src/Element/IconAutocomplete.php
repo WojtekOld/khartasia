@@ -171,7 +171,7 @@ class IconAutocomplete extends FormElementBase {
     $response = new AjaxResponse();
     $response->setAttachments($form['#attached']);
 
-    return $response->addCommand(new ReplaceCommand(NULL, $output));
+    return $response->addCommand(new ReplaceCommand(NULL, (string) $output));
   }
 
   /**
@@ -348,9 +348,8 @@ class IconAutocomplete extends FormElementBase {
       return;
     }
 
-    /** @var \Drupal\Core\Theme\Icon\IconDefinitionInterface $icon */
     $icon = self::iconPack()->getIcon($input['icon_id']);
-    if (NULL === $icon || !$icon instanceof IconDefinitionInterface) {
+    if (!$icon instanceof IconDefinitionInterface) {
       $form_state->setError($element['icon_id'], new TranslatableMarkup('Icon for %title is invalid: %icon.<br>Please search again and select a result in the list.', [
         '%title' => FormElementHelper::getElementTitle($element),
         '%icon' => $input['icon_id'],
@@ -359,7 +358,7 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $pack_id = $icon->getPackId();
-    if (!empty($element['#allowed_icon_pack']) && !in_array($pack_id, $element['#allowed_icon_pack'])) {
+    if (!static::isPackAllowed($element, $pack_id)) {
       $form_state->setError($element['icon_id'], new TranslatableMarkup('Icon for %title is not valid anymore because it is part of icon pack: %pack_id. This field limit icon pack to: %limit.', [
         '%title' => FormElementHelper::getElementTitle($element),
         '%pack_id' => $pack_id,
@@ -368,18 +367,53 @@ class IconAutocomplete extends FormElementBase {
       return;
     }
 
+    $form_state->setValueForElement($element, static::buildValue($element, $icon, $input['icon_settings'][$pack_id] ?? NULL));
+  }
+
+  /**
+   * Checks an icon pack against the element's `#allowed_icon_pack` limit.
+   *
+   * @param array $element
+   *   The element being validated.
+   * @param string $pack_id
+   *   The icon pack id of the selected icon.
+   *
+   * @return bool
+   *   TRUE when the element sets no limit, or the pack is within it.
+   */
+  protected static function isPackAllowed(array $element, string $pack_id): bool {
+    if (empty($element['#allowed_icon_pack'])) {
+      return TRUE;
+    }
+
+    return in_array($pack_id, $element['#allowed_icon_pack']);
+  }
+
+  /**
+   * Builds the value stored in form state for a validated icon.
+   *
+   * @param array $element
+   *   The element being validated.
+   * @param \Drupal\Core\Theme\Icon\IconDefinitionInterface $icon
+   *   The selected icon.
+   * @param array|null $pack_settings
+   *   Extractor settings submitted for the icon's pack, if any.
+   *
+   * @return array
+   *   Settings are always keyed by pack id, see the class documentation.
+   */
+  protected static function buildValue(array $element, IconDefinitionInterface $icon, ?array $pack_settings): array {
     $settings = [];
-    if (isset($input['icon_settings'][$pack_id])) {
-      $settings[$pack_id] = $input['icon_settings'][$pack_id];
+    if (NULL !== $pack_settings) {
       // @todo validateConfigurationForm from extractor plugin?
+      $settings[$icon->getPackId()] = $pack_settings;
     }
 
     if (isset($element['#return_id']) && TRUE === $element['#return_id']) {
-      $form_state->setValueForElement($element, ['target_id' => $icon->getId(), 'settings' => $settings]);
-      return;
+      return ['target_id' => $icon->getId(), 'settings' => $settings];
     }
 
-    $form_state->setValueForElement($element, ['icon' => $icon, 'settings' => $settings]);
+    return ['icon' => $icon, 'settings' => $settings];
   }
 
   /**

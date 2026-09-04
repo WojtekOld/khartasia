@@ -24,10 +24,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class UnknownPropType extends PropTypePluginBase implements ContainerFactoryPluginInterface {
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, protected Canonicalizer $canonicalizer) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected Canonicalizer $canonicalizer,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -39,7 +41,7 @@ class UnknownPropType extends PropTypePluginBase implements ContainerFactoryPlug
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('ui_patterns.schema_canonicalizer')
+      $container->get(Canonicalizer::class)
     );
   }
 
@@ -49,7 +51,7 @@ class UnknownPropType extends PropTypePluginBase implements ContainerFactoryPlug
   public function getSummary(array $definition): array {
     $canon = $this->canonicalizer->canonicalize($definition);
     return [
-      "⚠️ " . json_encode($canon),
+      '⚠️ ' . \json_encode($canon),
     ];
   }
 

@@ -1,0 +1,21 @@
+uuid: c778d0dc-0396-4746-bb1c-20db02aa5bce
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_nom_type
+    - node.type.common_names
+  module:
+    - options
+id: node.common_names.field_nom_type
+field_name: field_nom_type
+entity_type: node
+bundle: common_names
+label: 'Type de nom'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

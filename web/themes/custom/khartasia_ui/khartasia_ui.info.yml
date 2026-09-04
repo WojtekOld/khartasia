@@ -6,6 +6,12 @@ package: Custom
 core_version_requirement: ^11
 libraries:
   - khartasia_ui/global-styling
+
+libraries-override:
+  olivero/fonts:
+    css:
+      base:
+        core/themes/olivero/fonts/metropolis/metropolis.css: false
 regions:
   header: Header
   primary_menu: "Menu principal"

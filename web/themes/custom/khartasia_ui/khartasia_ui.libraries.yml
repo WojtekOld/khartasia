@@ -1,4 +1,30 @@
+fonts:
+  css:
+    base:
+      'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;500;700&display=swap':
+        { type: external, minified: true }
+
 global-styling:
   css:
     theme:
       css/khartasia.css: {}
+  dependencies:
+    - khartasia_ui/fonts
+
+kh-home:
+  css:
+    theme:
+      css/khartasia-home.css: {}
+  dependencies:
+    - core/drupal
+    - khartasia_ui/fonts
+
+kh-plante:
+  css:
+    theme:
+      css/kh-plante.css: {}
+  js:
+    js/kh-plante.js: {}
+  dependencies:
+    - core/drupal
+    - khartasia_ui/fonts

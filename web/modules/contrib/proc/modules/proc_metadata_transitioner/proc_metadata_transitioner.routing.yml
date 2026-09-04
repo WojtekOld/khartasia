@@ -1,0 +1,14 @@
+proc_metadata_transitioner.settings:
+  path: '/admin/config/system/proc_metadata_transitioner'
+  defaults:
+    _title: 'Re-encryption Metadata Transitioner Settings'
+    _form: 'Drupal\proc_metadata_transitioner\Form\SettingsForm'
+  requirements:
+    _permission: 'administer site configuration'
+proc_metadata_transitioner.form:
+  path: '/admin/proc_metadata_transitioner/update_proc_metadata'
+  defaults:
+    _form: '\Drupal\proc_metadata_transitioner\Form\BatchForm'
+    _title: 'Update PROCs Metadata'
+  requirements:
+    _permission: 'administer site configuration'

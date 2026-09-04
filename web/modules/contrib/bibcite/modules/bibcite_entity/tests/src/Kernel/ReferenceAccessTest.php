@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\bibcite_entity\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\bibcite_entity\Entity\Reference;
 use Drupal\bibcite_entity\Entity\ReferenceInterface;
 use Drupal\Component\Render\FormattableMarkup;
@@ -12,9 +14,9 @@ use Drupal\user\RoleInterface;
 
 /**
  * Tests basic reference_access functionality.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class ReferenceAccessTest extends KernelTestBase {
 
   use UserCreationTrait {
@@ -49,7 +51,6 @@ class ReferenceAccessTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installSchema('system', 'sequences');
     $this->installEntitySchema('user');
     $this->installEntitySchema('bibcite_reference_type');
     $this->installEntitySchema('bibcite_reference');
@@ -213,7 +214,6 @@ class ReferenceAccessTest extends KernelTestBase {
       'delete' => FALSE,
     ], $reference6, $web_user10);
 
-
     $web_user11 = $this->drupalCreateUser([
       'create book bibcite_reference',
       'view bibcite_reference',
@@ -285,8 +285,9 @@ class ReferenceAccessTest extends KernelTestBase {
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The user account for which to check access.
    * @param string|null $langcode
-   *   (optional) The language code indicating which translation of the reference
-   *   to check. If NULL, the untranslated (fallback) access is checked.
+   *   (optional) The language code indicating which translation of the
+   *   reference to check. If NULL, the untranslated (fallback) access is
+   *   checked.
    */
   public function assertReferenceCreateAccess($bundle, $result, AccountInterface $account, $langcode = NULL) {
     $this->assertEquals($result, $this->accessHandler->createAccess($bundle, $account, [
@@ -302,8 +303,9 @@ class ReferenceAccessTest extends KernelTestBase {
    * @param bool $result
    *   Whether access should be granted or not.
    * @param string|null $langcode
-   *   (optional) The language code indicating which translation of the reference
-   *   to check. If NULL, the untranslated (fallback) access is checked.
+   *   (optional) The language code indicating which translation of the
+   *   reference to check. If NULL, the untranslated (fallback) access is
+   *   checked.
    *
    * @return string
    *   An assert message string which contains information in plain English
@@ -325,8 +327,8 @@ class ReferenceAccessTest extends KernelTestBase {
    *
    * @param array $settings
    *   (optional) An associative array of settings for the reference, as used in
-   *   Reference::create(). Override the defaults by specifying the key and value
-   *   in the array.
+   *   Reference::create(). Override the defaults by specifying the key and
+   *   value in the array.
    *
    * @return \Drupal\bibcite_entity\Entity\ReferenceInterface
    *   The created reference entity.

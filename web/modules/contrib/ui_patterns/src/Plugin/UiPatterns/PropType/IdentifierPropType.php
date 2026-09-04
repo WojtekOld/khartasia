@@ -28,9 +28,9 @@ class IdentifierPropType extends PropTypePluginBase {
    * {@inheritdoc}
    */
   public static function normalize(mixed $value, ?array $definition = NULL): mixed {
-    $value = strip_tags(static::normalizer()->convertToString($value));
+    $value = \strip_tags(static::normalizer()->convertToString($value));
     // Clean the value.
-    $value = preg_replace('/[^A-Za-z0-9-_\x{00A0}-\x{10FFFF}\.]/u', '-', $value);
+    $value = \preg_replace('/[^A-Za-z0-9-_\x{00A0}-\x{10FFFF}\.]/u', '-', $value);
     return $value;
   }
 

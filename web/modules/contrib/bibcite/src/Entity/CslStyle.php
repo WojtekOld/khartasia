@@ -4,7 +4,9 @@ namespace Drupal\bibcite\Entity;
 
 use Drupal\bibcite\Csl;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the CSL style entity.
@@ -46,6 +48,42 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'bibcite_csl_style',
+  label: new TranslatableMarkup('CSL style'),
+  handlers: [
+    'list_builder' => 'Drupal\bibcite\CslStyleListBuilder',
+    'form' => [
+      'add' => 'Drupal\bibcite\Form\CslStyleForm',
+      'add-file' => 'Drupal\bibcite\Form\CslStyleFileForm',
+      'edit' => 'Drupal\bibcite\Form\CslStyleForm',
+      'delete' => 'Drupal\bibcite\Form\CslStyleDeleteForm',
+    ],
+  ],
+  config_prefix: 'bibcite_csl_style',
+  admin_permission: 'administer bibcite',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+  ],
+  links: [
+    'add-form' => '/admin/config/bibcite/settings/csl_style/add',
+    'add-form-file' => '/admin/config/bibcite/settings/csl_style/add-file',
+    'edit-form' => '/admin/config/bibcite/settings/csl_style/{bibcite_csl_style}',
+    'delete-form' => '/admin/config/bibcite/settings/csl_style/{bibcite_csl_style}/delete',
+    'collection' => '/admin/config/bibcite/settings/csl_style',
+  ],
+  config_export: [
+    'id',
+    'parent',
+    'label',
+    'csl',
+    'updated',
+    'custom',
+    'url_id',
+  ]
+)]
 class CslStyle extends ConfigEntityBase implements CslStyleInterface {
 
   /**

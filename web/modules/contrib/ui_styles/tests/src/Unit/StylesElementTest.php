@@ -15,6 +15,8 @@ use Drupal\ui_styles\Element\Styles;
 use Drupal\ui_styles\Source\SourcePluginManagerInterface;
 use Drupal\ui_styles_test\DummyStylePluginManager;
 use Drupal\ui_styles_test\Plugin\UiStyles\Source\TestSelect;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -22,6 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  *
  * @group ui_styles
  */
+#[Group('ui_styles')]
 class StylesElementTest extends UnitTestCase {
 
   public const string APPLIED_SUFFIX = ' <sup>(<mark>applied</mark>)</sup>';
@@ -368,6 +371,7 @@ class StylesElementTest extends UnitTestCase {
    *
    * @dataProvider providerTestValueCallback
    */
+  #[DataProvider('providerTestValueCallback')]
   public function testValueCallback($expected, $input): void {
     $element = [];
     $form_state = new FormState();

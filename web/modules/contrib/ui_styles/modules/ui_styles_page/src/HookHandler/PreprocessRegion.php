@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\ui_styles_page\HookHandler;
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\ThemeSettingsProvider;
 use Drupal\Core\Template\AttributeHelper;
 use Drupal\ui_styles_page\UiStylesPageInterface;
 
@@ -16,7 +18,7 @@ class PreprocessRegion {
    * Inject classes.
    */
   public function preprocess(array &$variables): void {
-    $settings = \theme_get_setting(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS);
+    $settings = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.3.0', static fn () => \Drupal::service(ThemeSettingsProvider::class)->getSetting(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS), static fn () => \theme_get_setting(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS));
     if (!\is_array($settings)) {
       return;
     }

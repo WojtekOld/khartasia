@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Contains tmgmt_deepl.module.
+ */
+
+use Drupal\tmgmt_deepl\Hook\TmgmtDeeplHooks;
+use Drupal\tmgmt\JobInterface;
+
+/**
+ * Implements hook_file_download().
+ */
+function tmgmt_deepl_file_download(string $uri): array|null {
+  return \Drupal::service(TmgmtDeeplHooks::class)->fileDownload($uri);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for tmgmt_job.
+ */
+function tmgmt_deepl_tmgmt_job_delete(JobInterface $job): void {
+  \Drupal::service(TmgmtDeeplHooks::class)->tmgmtJobDelete($job);
+}

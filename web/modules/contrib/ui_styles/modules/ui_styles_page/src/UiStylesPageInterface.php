@@ -12,6 +12,6 @@ interface UiStylesPageInterface {
   /**
    * The theme key settings.
    */
-  public const REGION_STYLES_KEY_THEME_SETTINGS = 'ui_styles_regions';
+  public const REGION_STYLES_KEY_THEME_SETTINGS = 'third_party_settings.ui_styles_page.regions';
 
 }

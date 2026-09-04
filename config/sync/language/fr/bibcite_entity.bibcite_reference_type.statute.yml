@@ -1,0 +1,14 @@
+label: Statut
+fields:
+  bibcite_secondary_title:
+    label: Code
+  bibcite_edition:
+    label: Session
+  bibcite_section:
+    label: Sections
+  bibcite_place_published:
+    label: Pays
+  bibcite_alternate_title:
+    label: Abrévation
+  bibcite_original_publication:
+    label: Historique

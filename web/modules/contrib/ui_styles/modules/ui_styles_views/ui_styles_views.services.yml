@@ -1,0 +1,5 @@
+
+services:
+  Drupal\ui_styles_views\Hook\UiStylesViewsHooks:
+    class: Drupal\ui_styles_views\Hook\UiStylesViewsHooks
+    autowire: true

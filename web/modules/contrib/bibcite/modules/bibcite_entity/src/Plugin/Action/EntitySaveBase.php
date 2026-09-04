@@ -21,7 +21,7 @@ class EntitySaveBase extends ActionBase {
   /**
    * {@inheritdoc}
    */
-  public function execute($entity = NULL) {
+  public function execute(?object $entity = NULL) {
     /** @var \Drupal\Core\Entity\EntityInterface $entity */
     $entity->changed = 0;
     $entity->save();

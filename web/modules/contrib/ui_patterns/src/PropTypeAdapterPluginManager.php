@@ -15,19 +15,6 @@ use Drupal\ui_patterns\SchemaManager\CompatibilityChecker;
  */
 final class PropTypeAdapterPluginManager extends DefaultPluginManager implements SchemaGuesserInterface {
 
-  /**
-   * Constructs PropTypeAdapterPluginManager object.
-   *
-   * @param \Traversable $namespaces
-   *   An object that implements \Traversable which contains the root paths
-   *   keyed by the corresponding namespace to look for plugin implementations.
-   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
-   *   Cache backend instance to use.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler to invoke the alter hook with.
-   * @param \Drupal\ui_patterns\SchemaManager\CompatibilityChecker $compatibilityChecker
-   *   The compatibility checker.
-   */
   public function __construct(
     \Traversable $namespaces,
     CacheBackendInterface $cache_backend,

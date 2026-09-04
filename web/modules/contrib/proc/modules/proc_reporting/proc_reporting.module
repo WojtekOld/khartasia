@@ -1,0 +1,160 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for the proc_reporting module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function proc_reporting_theme(): array {
+  return [
+    'proc_reporting_daily_operations_filter' => [
+      'variables' => [
+        'label_date'   => NULL,
+        'label_uid'    => NULL,
+        'label_filter' => NULL,
+        'label_reset'  => NULL,
+        'date_filter'  => '',
+        'uid_filter'   => '',
+        'reset_url'    => '',
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Runs at most once per hour to snapshot pending update-task counts per user.
+ */
+function proc_reporting_cron(): void {
+  $state = \Drupal::state();
+  $last_run = (int) $state->get('proc_reporting.last_snapshot_run', 0);
+  $now = (int) \Drupal::time()->getRequestTime();
+
+  // Throttle to one run per hour.
+  if (($now - $last_run) < 3600) {
+    return;
+  }
+
+  try {
+    \Drupal::service('proc_reporting.service')->snapshotUpdateTasks($now);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('proc_reporting')->error(
+      'Error running update-tasks snapshot: @msg',
+      ['@msg' => $e->getMessage()]
+    );
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ *
+ * Records an encrypt operation whenever a new cipher proc entity is created.
+ */
+function proc_reporting_entity_insert(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() !== 'proc') {
+    return;
+  }
+  try {
+    $proc_type = $entity->getType();
+  }
+  catch (\Exception $e) {
+    // Log error:
+    \Drupal::logger('proc_reporting')->error(
+      'Error determining proc type for new entity ID @id: @msg',
+      ['@id' => $entity->id(), '@msg' => $e->getMessage()]
+    );
+    return;
+  }
+
+  if ($proc_type !== 'cipher') {
+    return;
+  }
+
+  // The cipher owner is the encryptor (set by Proc::preCreate).
+  $uid = (int) ($entity->get('user_id')->target_id ?? \Drupal::currentUser()->id());
+  if ($uid <= 0) {
+    return;
+  }
+
+  _proc_reporting_record_operation($uid, 'encrypt_count');
+}
+
+/**
+ * Implements hook_entity_update().
+ *
+ * Records a re-encrypt operation when the cipher file of a cipher proc entity
+ * changes (i.e. the content was re-encrypted and a new cipher file was saved).
+ */
+function proc_reporting_entity_update(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() !== 'proc') {
+    return;
+  }
+
+  try {
+    $proc_type = $entity->getType();
+  }
+  catch (\Exception $e) {
+    return;
+  }
+
+  if ($proc_type !== 'cipher') {
+    return;
+  }
+
+  // Only count as a re-encrypt if the armored cipher file ID actually changed.
+  $original = $entity->original;
+  if (!$original) {
+    return;
+  }
+
+  $new_fid = $entity->get('armored')->getValue()[0]['cipher_fid'] ?? NULL;
+  $old_fid = $original->get('armored')->getValue()[0]['cipher_fid'] ?? NULL;
+
+  if ($new_fid === $old_fid) {
+    return;
+  }
+
+  // Use the current user as the actor for re-encryption.
+  $uid = (int) \Drupal::currentUser()->id();
+  if ($uid <= 0) {
+    $uid = (int) ($entity->get('user_id')->target_id ?? 0);
+  }
+  if ($uid <= 0) {
+    return;
+  }
+
+  _proc_reporting_record_operation($uid, 'reencrypt_count');
+}
+
+/**
+ * Internal helper: record one operation for the given user in today's row.
+ *
+ * @param int $uid
+ *   The Drupal user ID.
+ * @param string $column
+ *   The 'encrypt_count', 'cipher_text_download_count', or 'reencrypt_count'.
+ */
+function _proc_reporting_record_operation(int $uid, string $column): void {
+  if ($uid <= 0) {
+    return;
+  }
+
+  try {
+    $user = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+    $user_name = $user ? $user->getAccountName() : "uid:{$uid}";
+    \Drupal::service('proc_reporting.service')->recordOperation($uid, $user_name, $column);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('proc_reporting')->error(
+      'Error recording @op for uid @uid: @msg',
+      ['@op' => $column, '@uid' => $uid, '@msg' => $e->getMessage()]
+    );
+  }
+}

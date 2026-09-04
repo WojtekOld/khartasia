@@ -2,8 +2,10 @@
 
 namespace Drupal\bibcite_entity\Plugin\bibcite\link;
 
+use Drupal\bibcite_entity\Attribute\BibciteLink;
 use Drupal\bibcite_entity\Entity\ReferenceInterface;
 use Drupal\bibcite_entity\Plugin\BibciteLinkPluginBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
 /**
@@ -14,6 +16,12 @@ use Drupal\Core\Url;
  *   label = @Translation("DOI"),
  * )
  */
+#[
+  BibciteLink(
+    id: "doi",
+    label: new TranslatableMarkup("DOI"),
+  )
+]
 class DOI extends BibciteLinkPluginBase {
 
   /**

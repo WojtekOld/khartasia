@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Plugin\UiPatterns\PropType;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
@@ -32,6 +32,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
       'properties' => [
         'title' => ['type' => 'string'],
         'url' => ['$ref' => 'ui-patterns://url'],
+        'is_button' => ['type' => 'boolean'],
+        'in_active_trail' => ['type' => 'boolean'],
         'attributes' => ['$ref' => 'ui-patterns://attributes'],
         'link_attributes' => ['$ref' => 'ui-patterns://attributes'],
         'below' => [
@@ -47,10 +49,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class LinksPropType extends PropTypePluginBase implements ContainerFactoryPluginInterface {
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, protected ReferencesResolver $referenceResolver) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected ReferencesResolver $referenceResolver,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -62,7 +66,7 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('ui_patterns.schema_reference_solver')
+      $container->get(ReferencesResolver::class)
     );
   }
 
@@ -83,7 +87,7 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
    * {@inheritdoc}
    */
   public static function normalize(mixed $value, ?array $definition = NULL): array {
-    if (!is_array($value)) {
+    if (!\is_array($value)) {
       return [];
     }
     return static::normalizeLinks($value);
@@ -96,19 +100,19 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
     // Don't inject URL object into patterns templates, use "title" as item
     // label and "url" as item target.
     foreach ($value as $index => $item) {
-      if (!is_array($item)) {
+      if (!\is_array($item)) {
         unset($value[$index]);
         continue;
       }
       if (empty($item)) {
         continue;
       }
-      if (!isset($item["title"])) {
-        $item["title"] = (string) $index;
+      if (!isset($item['title'])) {
+        $item['title'] = (string) $index;
       }
       $value[$index] = static::normalizeLink($item);
     }
-    return array_values($value);
+    return \array_values($value);
   }
 
   /**
@@ -117,24 +121,39 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
   protected static function normalizeLink(array $item): array {
     $item = static::normalizeAttributes($item);
     // Do not normalize title as it can be a string or a renderable array.
-    if (array_key_exists("text", $item)) {
+    if (\array_key_exists('text', $item)) {
       // Examples: links.html.twig, breadcrumb.html.twig, pager.html.twig,
       // views_mini_pager.html.twig.
-      $item["title"] = $item["text"];
-      unset($item["text"]);
+      $item['title'] = $item['text'];
+      unset($item['text']);
     }
-    $item["title"] = static::normalizer()->convertToString($item["title"]);
+    // A link title is trusted by type. A MarkupInterface value
+    // (TranslatableMarkup, FormattableMarkup, Markup::create()) is kept so
+    // Twig does not escape it. A plain string is untrusted: leave it as-is
+    // so Twig autoescapes it at render.
+    if (!($item['title'] instanceof MarkupInterface)) {
+      $item['title'] = static::normalizer()->convertToString($item['title']);
+    }
 
-    if (array_key_exists("href", $item)) {
+    if (\array_key_exists('href', $item)) {
       // Examples: pager.html.twig, views_mini_pager.html.twig.
-      $item["url"] = $item["href"];
-      unset($item["href"]);
+      $item['url'] = $item['href'];
+      unset($item['href']);
+    }
+    // Only kept when TRUE: a missing key means not in the active trail.
+    if (\array_key_exists('in_active_trail', $item)) {
+      if (empty($item['in_active_trail'])) {
+        unset($item['in_active_trail']);
+      }
+      else {
+        $item['in_active_trail'] = TRUE;
+      }
     }
     $item = self::extractLinkData($item);
     $item = self::normalizeUrl($item);
-    $item = static::normalizeAttributes($item, "link_attributes");
-    if (array_key_exists("below", $item)) {
-      $item["below"] = static::normalize($item["below"]);
+    $item = static::normalizeAttributes($item, 'link_attributes');
+    if (\array_key_exists('below', $item)) {
+      $item['below'] = static::normalize($item['below']);
     }
     return $item;
   }
@@ -142,8 +161,8 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
   /**
    * Normalize attributes in an item.
    */
-  protected static function normalizeAttributes(array $item, string $property = "attributes"): array {
-    if (!array_key_exists($property, $item)) {
+  protected static function normalizeAttributes(array $item, string $property = 'attributes'): array {
+    if (!\array_key_exists($property, $item)) {
       return $item;
     }
 
@@ -162,17 +181,17 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
    * Useful for: links.html.twig.
    */
   protected static function extractLinkData(array $item): array {
-    if (isset($item["url"])) {
+    if (isset($item['url'])) {
       return $item;
     }
-    if (!isset($item["link"])) {
+    if (!isset($item['link'])) {
       return $item;
     }
-    $item["url"] = $item["link"]["#url"];
-    if (isset($item["link"]["#options"])) {
-      $item["url"]->mergeOptions($item["link"]["#options"]);
+    $item['url'] = $item['link']['#url'];
+    if (isset($item['link']['#options'])) {
+      $item['url']->mergeOptions($item['link']['#options']);
     }
-    unset($item["link"]);
+    unset($item['link']);
     return $item;
   }
 
@@ -182,24 +201,28 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
    * Useful for: menu.html.twig, links.html.twig.
    */
   private static function normalizeUrl(array $item): array {
-    if (!array_key_exists("url", $item)) {
+    if (!\array_key_exists('url', $item)) {
       return $item;
     }
-    $url = $item["url"];
+    $url = $item['url'];
+    if (($url === '<nolink>') || ($url === '<button>')) {
+      // Bare tokens, as accepted by core's LinkWidget.
+      $url = Url::fromRoute($url);
+    }
     if (!($url instanceof Url)) {
       return $item;
     }
     if ($url->isRouted() && ($url->getRouteName() === '<nolink>')) {
-      unset($item["url"]);
+      unset($item['url']);
     }
     elseif ($url->isRouted() && ($url->getRouteName() === '<button>')) {
-      unset($item["url"]);
+      unset($item['url']);
+      $item['is_button'] = TRUE;
     }
     else {
-      $item["url"] = $url->toString();
+      $item['url'] = $url->toString();
     }
-    $item = self::extractUrlOptions($url, $item);
-    return $item;
+    return self::extractUrlOptions($url, $item);
   }
 
   /**
@@ -214,8 +237,8 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
       $options['attributes']['data-drupal-active-trail'] = $item['in_active_trail'] ? 'true' : 'false';
     }
 
-    if (isset($options["attributes"])) {
-      $item = self::mergeUrlAttributes($options["attributes"], $item);
+    if (isset($options['attributes'])) {
+      $item = self::mergeUrlAttributes($options['attributes'], $item);
     }
     return $item;
   }
@@ -227,16 +250,16 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
    * But $item["link_attributes"] can vary.
    */
   private static function mergeUrlAttributes(array $url_attributes, array $item): array {
-    if (!isset($item["link_attributes"])) {
-      $item["link_attributes"] = $url_attributes;
+    if (!isset($item['link_attributes'])) {
+      $item['link_attributes'] = $url_attributes;
       return $item;
     }
-    if (is_a($item["link_attributes"], '\Drupal\Core\Template\Attribute')) {
-      $item["link_attributes"] = $item["link_attributes"]->toArray();
+    if (\is_a($item['link_attributes'], '\Drupal\Core\Template\Attribute')) {
+      $item['link_attributes'] = $item['link_attributes']->toArray();
     }
-    if (is_array($item["link_attributes"])) {
-      $item["link_attributes"] = array_merge(
-        $item["link_attributes"],
+    if (\is_array($item['link_attributes'])) {
+      $item['link_attributes'] = \array_merge(
+        $item['link_attributes'],
         $url_attributes,
       );
       return $item;
@@ -281,7 +304,7 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
       // drupal.active-link library know the query in a standardized manner.
       if (!empty($options['query'])) {
         $query = $options['query'];
-        ksort($query);
+        \ksort($query);
         $options['attributes']['data-drupal-link-query'] = Json::encode($query);
       }
 
@@ -308,13 +331,8 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
    */
   public static function preprocess(mixed $value, ?array $definition = NULL): mixed {
     foreach ($value as $index => &$item) {
-      if (!is_array($item)) {
+      if (!\is_array($item)) {
         continue;
-      }
-      if (isset($item['title']) && is_string($item['title'])) {
-        // This is useful when the title is containing HTML.
-        // For example, you set an icon in a menu item (svg).
-        $item["title"] = Markup::create($item["title"]);
       }
       if (isset($item['attributes'])) {
         static::preprocessAttributes($item['attributes']);
@@ -323,7 +341,7 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
         static::preprocessAttributes($item['link_attributes']);
       }
       if (isset($item['below'])) {
-        $item["below"] = self::preprocess($item["below"]);
+        $item['below'] = self::preprocess($item['below']);
       }
       $value[$index] = $item;
     }
@@ -336,8 +354,8 @@ class LinksPropType extends PropTypePluginBase implements ContainerFactoryPlugin
    * @param mixed $item
    *   The item to preprocess.
    */
-  protected static function preprocessAttributes(mixed &$item) : void {
-    if (is_array($item)) {
+  protected static function preprocessAttributes(mixed &$item): void {
+    if (\is_array($item)) {
       $item = new Attribute($item);
     }
   }

@@ -1,0 +1,1 @@
+DELETE FROM config WHERE name IN ('views.view.plante_papers', 'views.view.plante_noms_communs');

@@ -1,0 +1,5 @@
+fields:
+  bibcite_number_of_volumes:
+    label: 周期的
+  bibcite_place_published:
+    label: 市区町村

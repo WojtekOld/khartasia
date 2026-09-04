@@ -2,16 +2,21 @@
 
 namespace Drupal\Tests\bibcite_entity\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\bibcite_entity\Entity\Contributor;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Test contributor entity.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class ContributorTest extends KernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'system',
     'field',

@@ -6,12 +6,16 @@ namespace Drupal\Tests\ui_styles\Kernel;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the UI Styles plugin manager.
  *
  * @group ui_styles
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class PluginTest extends KernelTestBase {
 
   use StringTranslationTrait;

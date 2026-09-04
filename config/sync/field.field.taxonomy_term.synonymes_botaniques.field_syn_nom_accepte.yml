@@ -1,0 +1,29 @@
+uuid: 8c770ff2-02f3-4369-9392-fc9b9d73e4ed
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_syn_nom_accepte
+    - taxonomy.vocabulary.classification_botanique
+    - taxonomy.vocabulary.synonymes_botaniques
+id: taxonomy_term.synonymes_botaniques.field_syn_nom_accepte
+field_name: field_syn_nom_accepte
+entity_type: taxonomy_term
+bundle: synonymes_botaniques
+label: 'Nom accepté'
+description: 'Nom accepté'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      classification_botanique: classification_botanique
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

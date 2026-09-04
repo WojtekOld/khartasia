@@ -1,0 +1,69 @@
+
+==================================================
+  COMMON NAMES ÔÇö 765 noeuds
+==================================================
+Total : 765
+
+--- DOUBLONS EXACTS (bruit) : 5 (1%) ---
+  'rice paper plant' : 2x [Anglais, Anglais]
+  'anpi' : 2x [Cor├®en, Cor├®en]
+  'mercurialis' : 2x [Fran├ºais, Fran├ºais]
+  'yamaai' : 2x [Japonais, Japonais]
+  'indian madder' : 2x [Anglais, Anglais]
+
+--- MEME NOM / LANGUES DIFF (informatif) : 12 (2%) ---
+  'ramie' : [Anglais, Fran├ºais] ÔåÆ Boehmeria nivea (L.) Gaudich.
+  'ama' : [Japonais, Cor├®en] ÔåÆ Linum usitatissimum L.
+  'rum' : [Anglais, Fran├ºais] ÔåÆ Strobilanthes flaccidifolia Nees
+  'honghua' : [Chinois, Japonais] ÔåÆ Carthamus tinctorius L.
+  'yanzhi' : [Chinois, Japonais] ÔåÆ Carthamus tinctorius L.
+  'jute' : [Anglais, Fran├ºais] ÔåÆ Corchorus capsularis L.
+  'curcuma' : [Anglais, Fran├ºais] ÔåÆ Curcuma longa L., Curcuma aromatica Salisb.
+  'indigo' : [Anglais, Cor├®en] ÔåÆ Indigofera tinctoria L.
+  'abaca' : [Anglais, Fran├ºais] ÔåÆ Musa textilis N├®e
+  'rongkui' : [Chinois, Japonais] ÔåÆ Alcea rosea L.
+  'kenaf' : [Anglais, Cor├®en] ÔåÆ Hibiscus cannabinus L.
+  'roselle' : [Anglais, Fran├ºais] ÔåÆ Hibiscus cannabinus L.
+
+--- NOMS TROP GENERIQUES (bruit) : 4 (1%) ---
+  NID 256 [Anglais]: Mulberry ÔåÆ Morus alba L.
+  NID 262 [Fran├ºais]: M├╗rier ÔåÆ Morus alba L.
+  NID 101 [Anglais]: Paper mulberry ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent.
+  NID 105 [Japonais]: Kozo ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent.
+
+--- NOMS DE LIEU (a qualifier) : 2 (0%) ---
+  NID 2352 [Japonais]: Kaminoki
+  NID 2499 [Fran├ºais]: Phellodendron du Sichuan
+
+
+==================================================
+  PAPERS ÔÇö 238 noeuds
+==================================================
+Total : 238
+
+--- MULTI-ESPECES (a documenter) : 77 (32%) ---
+  NID 115: Acheongji ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Mercurialis leiocarpa Siebold & Zucc. + Isatis tinctoria L. + Polygonum tinctorium Aiton
+  NID 292: Manzhai ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Dendrocalamus affinis Rendle + Phyllostachys edulis (Carri├¿re) J. Houz. + Phyllostachys heteroclada Oliv. + Pleioblastus amarus (Keng) Keng f.
+  NID 301: Dakji ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Broussonetia kazinoki Siebold & Zucc.
+  NID 304: Gojeongji ÔåÆ Morus alba L. + Broussonetia kazinoki Siebold & Zucc. + Cannabis sativa Linnaeus + Oryza sativa L. + Triticum aestivum L. + Avena sativa L. + Hordeum vulgare L.
+  NID 307: Hwangmaji ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Corchorus capsularis L. + Phellodendron amurense Rupr.
+  NID 310: Japchoji ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Oryza sativa L. + Triticum aestivum L. + Hordeum vulgare L. + Avena sativa L.
+  NID 318: Piji ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Broussonetia kazinoki Siebold & Zucc.
+  NID 322: Taeji ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Sphagnum palustre  L. + Spirogyra turfosa F. Gray
+  NID 327: Danshi ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Broussonetia kazinoki Siebold & Zucc. + Euonymus sieboldianus Blume
+  NID 329: Gasenshi ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Edgeworthia chrysantha Lindl. + Phyllostachys edulis (Carri├¿re) J. Houz. + Wikstroemia sikokiania Franc. & Sav. + Miscanthus sinensis Anders.
+  NID 338: Kairyo hanshi ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Edgeworthia chrysantha Lindl. + Oryza sativa L. + Musa textilis N├®e + Triticum aestivum L.
+  NID 344: Kigami ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Phellodendron amurense Rupr.
+  NID 347: Mingeishi ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Wikstroemia sikokiania Franc. & Sav. + Edgeworthia chrysantha Lindl.
+  NID 351: Mizutamashi ÔåÆ Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. + Wikstroemia sikokiania Franc. & Sav.
+  NID 383: Jinsujian ÔåÆ Cannabis sativa Linnaeus + Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent.
+  ... et 62 autres
+
+
+=== SYNTHESE BRUIT INFORMATIQUE ===
+Common names : 9 entr├®es bruit├®es sur 765
+Papers : 0 entr├®es bruit├®es sur 238
+Sans espece liee : 0 common_names, 0 papers
+Multi-especes a documenter : 77 papers
+
+Done

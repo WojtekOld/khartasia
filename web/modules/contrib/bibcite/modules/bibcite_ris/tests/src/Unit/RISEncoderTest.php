@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\bibcite_ris\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Drupal\bibcite_ris\Encoder\RISEncoder;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
@@ -12,8 +14,8 @@ use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\bibcite_ris\Encoder\RISEncoder
- * @group bibcite_ris
  */
+#[Group('bibcite_ris')]
 final class RISEncoderTest extends UnitTestCase {
 
   /**
@@ -71,12 +73,12 @@ final class RISEncoderTest extends UnitTestCase {
     ];
 
     // Set up the Drupal container with a mock config factory.
-    $config = $this->createMock(ImmutableConfig::class);
+    $config = $this->createStub(ImmutableConfig::class);
     $config->method('get')
       ->with('fields')
       ->willReturn($this->fields);
 
-    $config_factory = $this->createMock(ConfigFactoryInterface::class);
+    $config_factory = $this->createStub(ConfigFactoryInterface::class);
     $config_factory->method('get')
       ->with('bibcite_entity.mapping.ris')
       ->willReturn($config);
@@ -114,8 +116,8 @@ final class RISEncoderTest extends UnitTestCase {
    *   Keys that should NOT be in the decoded record.
    *
    * @covers ::decode
-   * @dataProvider aliasProvider
    */
+  #[DataProvider('aliasProvider')]
   public function testHandleAliases(array $lines, array $expected, array $absent): void {
     $ris = $this->buildRis($lines);
     $record = $this->encoder->decode($ris, 'ris')[0];

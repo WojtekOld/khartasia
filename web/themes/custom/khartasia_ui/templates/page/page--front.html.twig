@@ -1,0 +1,142 @@
+{#
+  page--front.html.twig — Khartasia
+  Page d'accueil
+#}
+<!DOCTYPE html>
+<html{{ html_attributes }}>
+<head>
+  <head-placeholder token="{{ placeholder_token }}">
+  <title>{{ head_title|safe_join(' | ') }}</title>
+  <css-placeholder token="{{ placeholder_token }}">
+  <js-placeholder token="{{ placeholder_token }}">
+</head>
+<body{{ attributes.addClass('kh-home') }}>
+<a href="#main-content" class="visually-hidden focusable">{{ 'Skip to main content'|t }}</a>
+{{ page_top }}
+{{ attach_library('khartasia_ui/kh-home') }}
+
+<div class="kh-wrapper"><nav class="kh-nav">
+  <a href="{{ path('<front>') }}" class="kh-nav__logo">
+    Khartasia
+  </a>
+  <div class="kh-nav__links">
+    <a href="/catalogue" class="kh-nav__link">{{ 'Catalogue'|t }}</a>
+    <a href="/plantes"   class="kh-nav__link">{{ 'Plantes'|t }}</a>
+    <a href="/papers"    class="kh-nav__link">{{ 'Papers'|t }}</a>
+    <a href="/methode"   class="kh-nav__link">{{ 'Methode'|t }}</a>
+    <a href="/bibliographie" class="kh-nav__link">{{ 'Bibliographie'|t }}</a>
+  </div>
+  <div class="kh-nav__lang">
+    <a href="/fr" class="kh-nav__lng kh-nav__lng--active">FR</a>
+    <a href="/en" class="kh-nav__lng">EN</a>
+  </div>
+</nav>
+
+<main id="main-content" tabindex="-1">
+
+  <div class="kh-hero">
+    <span class="kh-hero__eyebrow">{{ 'Repertoire scientifique · Papiers artisanaux'|t }}</span>
+    <h1 class="kh-hero__title">Khartasia</h1>
+    <span class="kh-hero__title-sub">Papiers asiatiques</span>
+    <p class="kh-hero__sub">
+      {{ 'Ce repertoire des papiers asiatiques de fabrication artisanale destines a la restauration et conservation : Plantes, fibres, techniques de fabrication est en cours de remaniement'|t }}
+    </p>
+    <a href="/catalogue" class="kh-hero__cta">{{ 'Explorer le catalogue'|t }} →</a>
+  </div>
+
+  <div class="kh-banner" style="background-image:url('/sites/default/files/banner/fab-pap-en-tamis.jpg');">
+    <div class="kh-banner__overlay"></div>
+    <div class="kh-banner__caption">
+      <span class="kh-banner__label">{{ 'Technique · Japon / Coree'|t }}</span>
+      <span class="kh-banner__text">{{ 'Fabrication sur tamis flottant — Chine'|t }}</span>
+    </div>
+  </div>
+
+  <div class="kh-stats">
+    <div class="kh-stat">
+      <span class="kh-stat__label">{{ 'Plantes'|t }}</span>
+      <span class="kh-stat__num">{{ kh_count_plantes }}</span>
+      <span class="kh-stat__sub">{{ 'Documentees'|t }}</span>
+    </div>
+    <div class="kh-stat">
+      <span class="kh-stat__label">{{ 'Papers'|t }}</span>
+      <span class="kh-stat__num">{{ kh_count_papers }}</span>
+      <span class="kh-stat__sub">{{ 'References'|t }}</span>
+    </div>
+    <div class="kh-stat">
+      <span class="kh-stat__label">{{ 'Pays'|t }}</span>
+      <span class="kh-stat__num">4</span>
+      <span class="kh-stat__sub">Chine · Japon · Coree · Thailande</span>
+    </div>
+  </div>
+
+  <div class="kh-blocks">
+    <a href="/plantes" class="kh-block">
+      <div>
+        <span class="kh-block__eyebrow">{{ 'Botanique et fibres'|t }}</span>
+        <div class="kh-block__title">{{ 'Plantes a papier'|t }}</div>
+        <p class="kh-block__desc">{{ 'Classification botanique, aires de croissance, modes de preparation par pays. Identification microscopique des fibres.'|t }}</p>
+      </div>
+      <span class="kh-block__arrow">{{ 'Consulter'|t }} →</span>
+    </a>
+    <a href="/papers" class="kh-block">
+      <div>
+        <span class="kh-block__eyebrow">{{ 'Collections et specimens'|t }}</span>
+        <div class="kh-block__title">{{ 'Catalogue Papiers'|t }}</div>
+        <p class="kh-block__desc">{{ 'Repertoire des papiers artisanaux identifies. Origine, plante source, caracteristiques physiques, usage en restauration.'|t }}</p>
+      </div>
+      <span class="kh-block__arrow">{{ 'Explorer'|t }} →</span>
+    </a>
+    <a href="/methode/identification" class="kh-block">
+      <div>
+        <span class="kh-block__eyebrow">{{ 'Methode scientifique'|t }}</span>
+        <div class="kh-block__title">{{ 'Identification'|t }}</div>
+        <p class="kh-block__desc">{{ 'Protocoles d analyse microscopique, colorations Herzberg et Graff C, criteres d identification des fibres.'|t }}</p>
+      </div>
+      <span class="kh-block__arrow">{{ 'Lire'|t }} →</span>
+    </a>
+    <a href="/methode/fabrication" class="kh-block">
+      <div>
+        <span class="kh-block__eyebrow">{{ 'Fabrication artisanale'|t }}</span>
+        <div class="kh-block__title">{{ 'Techniques'|t }}</div>
+        <p class="kh-block__desc">{{ 'Procedes traditionnels par pays.'|t }}</p>
+      </div>
+      <span class="kh-block__arrow">{{ 'Decouvrir'|t }} →</span>
+    </a>
+  </div>
+
+  <div class="kh-secondary">
+    <a href="/bibliographie" class="kh-sec">
+      <span class="kh-sec__eyebrow">{{ 'Sources et references'|t }}</span>
+      <div class="kh-sec__title">{{ 'Bibliographie'|t }}</div>
+      <p class="kh-sec__desc">{{ 'Publications de reference, catalogues de musees, recherches academiques.'|t }}</p>
+      <span class="kh-sec__arrow">{{ 'Consulter'|t }} →</span>
+    </a>
+    <a href="/partenaires" class="kh-sec">
+      <span class="kh-sec__eyebrow">{{ 'Reseau scientifique'|t }}</span>
+      <div class="kh-sec__title">{{ 'Partenaires'|t }}</div>
+      <p class="kh-sec__desc">{{ 'Institutions, laboratoires et chercheurs associes au projet.'|t }}</p>
+      <span class="kh-sec__arrow">{{ 'Voir'|t }} →</span>
+    </a>
+    <a href="/evenements" class="kh-sec">
+      <span class="kh-sec__eyebrow">{{ 'Actualites'|t }}</span>
+      <div class="kh-sec__title">{{ 'Evenements'|t }}</div>
+      <p class="kh-sec__desc">{{ 'Congres, publications recentes, mises a jour du repertoire.'|t }}</p>
+      <span class="kh-sec__arrow">{{ 'Voir'|t }} →</span>
+    </a>
+  </div>
+
+  <div class="kh-cta">
+    <div>
+      <h2>{{ 'Explorer le catalogue complet'|t }}</h2>
+      <p>{{ 'Acces aux fiches plantes, papers et techniques. Recherche par pays, famille botanique et usage en restauration.'|t }}</p>
+    </div>
+    <a href="/catalogue" class="kh-cta__btn">{{ 'Acceder au catalogue'|t }} →</a>
+  </div>
+
+</main></div>
+
+{{ page_bottom }}
+<js-bottom-placeholder token="{{ placeholder_token }}">
+</body>
+</html>

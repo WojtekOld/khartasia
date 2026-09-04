@@ -17,7 +17,7 @@ interface UiPatternsNormalizerInterface {
    * @param bool $strip_tags_from_render_arrays
    *   Whether to strip tags from render arrays.
    */
-  public function convertToScalar(mixed &$value, bool $strip_tags_from_render_arrays = TRUE) : void;
+  public function convertToScalar(mixed &$value, bool $strip_tags_from_render_arrays = TRUE): void;
 
   /**
    * Convert a value to a string.
@@ -28,7 +28,7 @@ interface UiPatternsNormalizerInterface {
    * @return string
    *   The converted value.
    */
-  public function convertToString(mixed $value) : string;
+  public function convertToString(mixed $value): string;
 
   /**
    * Normalize enum values.
@@ -67,6 +67,6 @@ interface UiPatternsNormalizerInterface {
    * @return float|int|mixed
    *   The converted value.
    */
-  public function convertValueToEnumType(mixed $value, array $enum) : mixed;
+  public function convertValueToEnumType(mixed $value, array $enum): mixed;
 
 }

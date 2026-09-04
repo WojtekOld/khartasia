@@ -6,6 +6,7 @@ namespace Drupal\ui_patterns\Element;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 
 /**
  * Component to render slots for a component.
@@ -20,6 +21,7 @@ use Drupal\Core\Form\FormStateInterface;
  *     'slots' => [],
  *   ],
  * ];
+ *
  * @endcode
  *
  * Value example:
@@ -34,17 +36,17 @@ use Drupal\Core\Form\FormStateInterface;
  *       ],
  *     ],
  *   ]
- * @endcode
  *
- * @FormElement("component_slots_form")
+ * @endcode
  */
+#[FormElement('component_slots_form')]
 class ComponentSlotsForm extends ComponentFormBase {
 
   /**
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = get_class($this);
+    $class = static::class;
     return [
       '#input' => TRUE,
       '#multiple' => FALSE,
@@ -77,7 +79,7 @@ class ComponentSlotsForm extends ComponentFormBase {
    * @return array
    *   The altered element.
    */
-  public static function afterBuild(array $element, FormStateInterface $form_state) : array {
+  public static function afterBuild(array $element, FormStateInterface $form_state): array {
     if ($form_state->isProcessingInput()) {
       static::elementValidate($element, $form_state);
     }
@@ -92,15 +94,15 @@ class ComponentSlotsForm extends ComponentFormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public static function elementValidate(array &$element, FormStateInterface $form_state) : void {
-    if (isset($element['#value']) && is_array($element['#value'])) {
+  public static function elementValidate(array &$element, FormStateInterface $form_state): void {
+    if (isset($element['#value']) && \is_array($element['#value'])) {
       // For browser-submitted forms, the submitted values do not contain
       // values for certain elements (empty multiple select, unchecked
       // checkbox). Child elements are processed after the parent element,
       // The processed values, stored in '#value', are bubbled up to the
       // parent element here.
       foreach ($element['#value'] as $slot => &$slot_value) {
-        if (isset($element[$slot]) && isset($element[$slot]['#value'])) {
+        if (isset($element[$slot], $element[$slot]['#value'])) {
           $slot_value = $element[$slot]['#value'];
         }
       }
@@ -113,18 +115,17 @@ class ComponentSlotsForm extends ComponentFormBase {
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
   public static function buildForm(array &$element, FormStateInterface $form_state): array {
-
     $component = static::getComponent($element);
-    if (!isset($component->metadata->slots) || count(
-        $component->metadata->slots
-      ) === 0) {
+    if (!isset($component->metadata->slots) || \count(
+      $component->metadata->slots
+    ) === 0) {
       $element['#access'] = FALSE;
       return $element;
     }
     $contexts = $element['#source_contexts'] ?? [];
     $configuration = $element['#default_value'] ?? [];
     if ($element['#render_headings']) {
-      $slot_heading = new FormattableMarkup("<p><strong>@title</strong></p>", ["@title" => t("Slots")]);
+      $slot_heading = new FormattableMarkup('<p><strong>@title</strong></p>', ['@title' => \t('Slots')]);
       $element[] = [
         '#markup' => $slot_heading,
       ];
@@ -133,7 +134,7 @@ class ComponentSlotsForm extends ComponentFormBase {
       $element[$slot_id] = [
         '#title' => $slot['title'] ?? '',
         '#type' => 'component_slot_form',
-        '#description' => $slot["description"] ?? NULL,
+        '#description' => $slot['description'] ?? NULL,
         '#default_value' => $configuration[$slot_id] ?? [],
         '#component_id' => $component->getPluginId(),
         '#slot_id' => $slot_id,
@@ -141,7 +142,7 @@ class ComponentSlotsForm extends ComponentFormBase {
         '#wrap' => $element['#wrap'] ?? TRUE,
         '#tag_filter' => $element['#tag_filter'],
         '#prefix' => "<div class='component-form-slot'>",
-        '#suffix' => "</div>",
+        '#suffix' => '</div>',
       ];
     }
     return $element;

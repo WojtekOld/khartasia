@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ * Contains tmgmt_deepl_glossary.module.
+ */
+
+use Drupal\tmgmt_deepl_glossary\Hook\TmgmtDeeplGlossaryHooks;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\JobInterface;
+
+/**
+ * Implements hook_tmgmt_deepl_checkout_settings_form_alter().
+ */
+function tmgmt_deepl_glossary_tmgmt_deepl_checkout_settings_form_alter(array &$form, JobInterface $job): void {
+  \Drupal::service(TmgmtDeeplGlossaryHooks::class)->tmgmtDeeplCheckoutSettingsFormAlter($form, $job);
+}
+
+/**
+ * Implements hook_tmgmt_deepl_has_checkout_settings_alter().
+ */
+function tmgmt_deepl_glossary_tmgmt_deepl_has_checkout_settings_alter(bool &$has_checkout_settings, JobInterface $job): void {
+  \Drupal::service(TmgmtDeeplGlossaryHooks::class)->tmgmtDeeplHasCheckoutSettingsAlter($has_checkout_settings, $job);
+}
+
+/**
+ * Implements hook_tmgmt_deepl_translate_options_alter().
+ */
+function tmgmt_deepl_glossary_tmgmt_deepl_translate_options_alter(Job $job, array &$options): void {
+  \Drupal::service(TmgmtDeeplGlossaryHooks::class)->tmgmtDeeplTranslateOptionsAlter($job, $options);
+}
+
+/**
+ * Overwrite menu_local_action styling for "Sync DeepL glossaries" link.
+ */
+function tmgmt_deepl_glossary_preprocess_menu_local_action(array &$variables): void {
+  assert(is_array($variables['link']));
+
+  // Get url object from link.
+  $url = $variables['link']['#url'] ?? NULL;
+  if ($url instanceof Url && $url->getRouteName() === 'tmgmt_deepl_glossary.sync_form') {
+    assert(is_array($variables['link']['#options']));
+    assert(is_array($variables['link']['#options']['attributes']));
+    $variables['link']['#options']['attributes']['class'] = ['button'];
+  }
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function tmgmt_deepl_glossary_entity_operation(EntityInterface $entity): array {
+  return \Drupal::service(TmgmtDeeplGlossaryHooks::class)->entityOperation($entity);
+}

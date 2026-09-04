@@ -5,6 +5,8 @@ namespace Drupal\bibcite_entity\Plugin\views\field;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,7 +18,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ViewsField("bibcite_links")
  */
+#[ViewsField("bibcite_links")]
 class Links extends FieldPluginBase {
+
+  use StringTranslationTrait;
 
   /**
    * Link plugin manager.
@@ -120,7 +125,7 @@ class Links extends FieldPluginBase {
 
     $overrides_table = &$form['links']['overrides'];
 
-    $links = isset($this->options['links']['overrides']) ? $this->options['links']['overrides'] : [];
+    $links = $this->options['links']['overrides'] ?? [];
 
     foreach ($this->linkPluginManager->getDefinitions() as $plugin_id => $definition) {
       $weight = !empty($links[$plugin_id]['weight']) ? (int) $links[$plugin_id]['weight'] : NULL;
@@ -133,11 +138,11 @@ class Links extends FieldPluginBase {
       ];
       $overrides_table[$plugin_id]['enabled'] = [
         '#type' => 'checkbox',
-        '#default_value' => isset($links[$plugin_id]['enabled']) ? $links[$plugin_id]['enabled'] : TRUE,
+        '#default_value' => $links[$plugin_id]['enabled'] ?? TRUE,
       ];
       $overrides_table[$plugin_id]['weight'] = [
         '#type' => 'weight',
-        '#title' => t('Weight for @title', ['@title' => $definition['label']]),
+        '#title' => $this->t('Weight for @title', ['@title' => $definition['label']]),
         '#title_display' => 'invisible',
         '#default_value' => $weight,
         '#attributes' => [
@@ -154,7 +159,6 @@ class Links extends FieldPluginBase {
    */
   public function render(ResultRow $values) {
     // @todo Find a way to combine view handler code with extra field.
-
     $build['bibcite_links'] = [
       '#type' => 'container',
       '#attributes' => [
@@ -187,7 +191,7 @@ class Links extends FieldPluginBase {
     $links_config = $config->get('links');
 
     foreach ($this->linkPluginManager->getDefinitions() as $plugin_id => $definition) {
-      $plugin_config = isset($links_config[$plugin_id]) ? $links_config[$plugin_id] : [];
+      $plugin_config = $links_config[$plugin_id] ?? [];
       $plugin_config = $plugin_config + $default_link_attributes;
 
       if ($plugin_config['enabled']) {

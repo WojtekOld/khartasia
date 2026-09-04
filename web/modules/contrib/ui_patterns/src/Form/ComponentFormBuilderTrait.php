@@ -7,9 +7,10 @@ namespace Drupal\ui_patterns\Form;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
-use Drupal\Core\Plugin\Context\ContextHandler;
+use Drupal\Core\Plugin\Context\ContextHandlerInterface;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Url;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
 
 /**
  * Component form builder trait.
@@ -31,9 +32,9 @@ trait ComponentFormBuilderTrait {
    *   The adjusted element.
    */
   protected function componentsAdjustContextEntitySelection(array $element, string $context_mapping_value): array {
-    if (is_array($element) && isset($element['entity']) && isset($element['entity']['#options'][$context_mapping_value])) {
-      $element["entity"]['#access'] = FALSE;
-      $element["entity"]['#value'] = $context_mapping_value;
+    if (\is_array($element) && isset($element['entity'], $element['entity']['#options'][$context_mapping_value])) {
+      $element['entity']['#access'] = FALSE;
+      $element['entity']['#value'] = $context_mapping_value;
     }
     return $element;
   }
@@ -81,13 +82,13 @@ trait ComponentFormBuilderTrait {
    * @return array<string, array<string, mixed> >
    *   The default settings.
    */
-  public static function getComponentFormDefault() : array {
+  public static function getComponentFormDefault(): array {
     return [
-      "ui_patterns" => [
-        "component_id" => NULL,
-        "variant_id" => NULL,
-        "slots" => [],
-        "props" => [],
+      'ui_patterns' => [
+        'component_id' => NULL,
+        'variant_id' => NULL,
+        'slots' => [],
+        'props' => [],
       ],
     ];
   }
@@ -141,7 +142,7 @@ trait ComponentFormBuilderTrait {
     array $form_element_overrides = [],
   ): array {
     $form_state = $form_state instanceof SubformState ? $form_state->getCompleteFormState() : $form_state;
-    $form = array_merge([
+    $form = \array_merge([
       '#type' => 'component_form',
       '#component_id' => $initial_component_id,
       '#ajax_url' => $this->getAjaxUrl($form_state),
@@ -200,7 +201,7 @@ trait ComponentFormBuilderTrait {
    *   The component element builder.
    */
   protected function componentElementBuilder() {
-    return \Drupal::service("ui_patterns.component_element_builder");
+    return \Drupal::service(ComponentElementBuilder::class);
   }
 
   /**
@@ -210,7 +211,7 @@ trait ComponentFormBuilderTrait {
    *   The context repository.
    */
   protected function contextRepository(): ContextRepositoryInterface {
-    return \Drupal::service('context.repository');
+    return \Drupal::service(ContextRepositoryInterface::class);
   }
 
   /**
@@ -223,11 +224,11 @@ trait ComponentFormBuilderTrait {
   /**
    * Wraps the context handler.
    *
-   * @return \Drupal\Core\Plugin\Context\ContextHandler
+   * @return \Drupal\Core\Plugin\Context\ContextHandlerInterface
    *   The context handler.
    */
-  protected function contextHandler(): ContextHandler {
-    return \Drupal::service('context.handler');
+  protected function contextHandler(): ContextHandlerInterface {
+    return \Drupal::service(ContextHandlerInterface::class);
   }
 
   /**

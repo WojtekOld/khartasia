@@ -2,13 +2,17 @@
 
 namespace Drupal\bibcite_entity\Entity;
 
-use Drupal\Core\Entity\EntityPublishedTrait;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\EditorialContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityPublishedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\user\EntityOwnerTrait;
 use Drupal\user\UserInterface;
 
@@ -85,6 +89,71 @@ use Drupal\user\UserInterface;
  *   field_ui_base_route = "entity.bibcite_reference_type.edit_form",
  * )
  */
+#[ContentEntityType(
+  id: 'bibcite_reference',
+  label: new TranslatableMarkup('Reference'),
+  label_singular: new TranslatableMarkup('Reference'),
+  label_plural: new TranslatableMarkup('References'),
+  label_collection: new TranslatableMarkup('Reference entities'),
+  bundle_label: new TranslatableMarkup('Reference type'),
+  handlers: [
+    'storage_schema' => 'Drupal\bibcite_entity\ReferenceStorageSchema',
+    'storage' => 'Drupal\bibcite_entity\ReferenceStorage',
+    'view_builder' => 'Drupal\bibcite_entity\ReferenceViewBuilder',
+    'list_builder' => 'Drupal\bibcite_entity\ReferenceListBuilder',
+    'views_data' => 'Drupal\bibcite_entity\ReferenceViewsData',
+    'form' => [
+      'default' => 'Drupal\bibcite_entity\Form\ReferenceForm',
+      'add' => 'Drupal\bibcite_entity\Form\ReferenceForm',
+      'edit' => 'Drupal\bibcite_entity\Form\ReferenceForm',
+      'delete' => 'Drupal\Core\Entity\ContentEntityDeleteForm',
+    ],
+    'access' => 'Drupal\bibcite_entity\ReferenceAccessControlHandler',
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+      'revision' => 'Drupal\entity\Routing\RevisionRouteProvider',
+    ],
+    'local_task_provider' => [
+      'default' => 'Drupal\entity\Menu\DefaultEntityLocalTaskProvider',
+    ],
+  ],
+  show_revision_ui: TRUE,
+  base_table: 'bibcite_reference',
+  revision_table: 'bibcite_reference_revision',
+  admin_permission: 'administer bibcite_reference',
+  permission_granularity: 'bundle',
+  entity_keys: [
+    'id' => 'id',
+    'revision' => 'revision_id',
+    'status' => 'status',
+    'published' => 'status',
+    'bundle' => 'type',
+    'label' => 'title',
+    'uuid' => 'uuid',
+    'langcode' => 'langcode',
+    'uid' => 'uid',
+  ],
+  revision_metadata_keys: [
+    'revision_user' => 'revision_user',
+    'revision_created' => 'revision_created',
+    'revision_log_message' => 'revision_log_message',
+  ],
+  common_reference_target: TRUE,
+  bundle_entity_type: 'bibcite_reference_type',
+  links: [
+    'canonical' => '/bibcite/reference/{bibcite_reference}',
+    'version-history' => '/bibcite/reference/{bibcite_reference}/revisions',
+    'revision' => '/bibcite/reference/{bibcite_reference}/revisions/{bibcite_reference_revision}/view',
+    'revision-revert-form' => '/bibcite/reference/{bibcite_reference}/revisions/{bibcite_reference_revision}/revert',
+    'revision-delete-form' => '/bibcite/reference/{bibcite_reference}/revisions/{bibcite_reference_revision}/delete',
+    'edit-form' => '/bibcite/reference/{bibcite_reference}/edit',
+    'delete-form' => '/bibcite/reference/{bibcite_reference}/delete',
+    'add-page' => '/bibcite/reference/add',
+    'delete-multiple-form' => '/admin/content/bibcite/reference/delete',
+    'collection' => '/admin/content/bibcite/reference',
+  ],
+  field_ui_base_route: 'entity.bibcite_reference_type.edit_form'
+)]
 class Reference extends EditorialContentEntityBase implements ReferenceInterface {
 
   use EntityChangedTrait;
@@ -370,7 +439,7 @@ class Reference extends EditorialContentEntityBase implements ReferenceInterface
     $fields['bibcite_number_of_volumes'] = $default_string(t('Number of Volumes'));
     $fields['bibcite_number'] = $default_string(t('Number'));
     $fields['bibcite_pages'] = $default_string(t('Number of Pages'));
-    $fields['bibcite_date'] = $default_string(t('Date Published'), t('Format: mm/yyyy'));
+    $fields['bibcite_date'] = $default_string(t('Date Published'), t('Allowed formats: MM/DD/YYYY, MM/YYYY, YYYY'));
     $fields['bibcite_type_of_work'] = $default_string(t('Type of Work'), t('Masters Thesis'));
     $fields['bibcite_lang'] = $default_string(t('Publication Language'));
     $fields['bibcite_reprint_edition'] = $default_string(t('Reprint Edition'));
@@ -435,11 +504,17 @@ class Reference extends EditorialContentEntityBase implements ReferenceInterface
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
 
+    $formats = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.4',
+      currentCallable: fn() => array_keys(\Drupal::service(FilterFormatRepositoryInterface::class)->getAllFormats()),
+      deprecatedCallable: fn() => array_keys(filter_formats()),
+    );
+
     // If the abstract value does not have a format (in the case of imports),
     // use the text format with highest weight.
     $abst_e = $this->get('bibcite_abst_e')->value;
     if (!empty($abst_e[0]['value']) && !isset($abst_e[0]['format'])) {
-      $formats = array_keys(filter_formats());
       $this->set('bibcite_abst_e', [
         'value' => $abst_e,
         'format' => $formats[0],
@@ -447,7 +522,6 @@ class Reference extends EditorialContentEntityBase implements ReferenceInterface
     }
     $abst_f = $this->get('bibcite_abst_f')->value;
     if (!empty($abst_f[0]['value']) && !isset($abst_f[0]['format'])) {
-      $formats = array_keys(filter_formats());
       $this->set('bibcite_abst_f', [
         'value' => $abst_f,
         'format' => $formats[0],

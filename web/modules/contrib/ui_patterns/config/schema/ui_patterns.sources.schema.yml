@@ -28,6 +28,7 @@ ui_patterns_source.url:
   mapping:
     value:
       type: uri
+      nullable: true
       label: 'URL value'
 
 ui_patterns_source.textfield:
@@ -35,7 +36,7 @@ ui_patterns_source.textfield:
   label: 'Source: Textfield'
   mapping:
     value:
-      type: string
+      type: label
       label: 'String value'
 
 ui_patterns_source.select:
@@ -62,7 +63,7 @@ ui_patterns_source.attributes:
   label: 'Source: Attributes'
   mapping:
     value:
-      type: string
+      type: label
       label: 'Attribute value'
 
 ui_patterns_source.attributes_class:
@@ -135,13 +136,19 @@ ui_patterns_source.menu:
     depth:
       type: string
       label: 'Menu depth'
+    set_active_trail:
+      type: boolean
+      label: 'Set active trail'
+    expand_all_items:
+      type: boolean
+      label: 'Expand all items'
 
 ui_patterns_source.token:
   type: mapping
   label: 'Source: Token'
   mapping:
     value:
-      type: string
+      type: label
       label: 'Token value'
 
 ui_patterns_source.field_property:*:*:*:
@@ -151,6 +158,25 @@ ui_patterns_source.field_property:*:*:*:
     type:
       type: string
       label: 'Field Property type'
+
+ui_patterns_source.field_formatter:*:*:*:
+  type: mapping
+  label: 'Source: field_formatter'
+  mapping:
+    type:
+      type: string
+      label: 'Field formatter type'
+    settings:
+      type: field.formatter.settings.[%parent.type]
+      label: 'Field formatter settings'
+    third_party_settings:
+      # Third party settings are always optional: they're an optional extension
+      # point.
+      requiredKey: false
+      type: sequence
+      label: 'Third party settings'
+      sequence:
+        type: field.formatter.third_party.[%key]
 
 # block uses dynamic subkeys not under a specific key.
 # The configuration looks like:
@@ -173,4 +199,8 @@ ui_patterns_source.entity_field:
 #   derivable_context: 'context:id'
 #   'context:id':
 ui_patterns_source.entity_reference:
+  type: ignore
+
+# Same dynamic subkey as ui_patterns_source.entity_reference.
+ui_patterns_source.entity:field_property:*:*:*:
   type: ignore

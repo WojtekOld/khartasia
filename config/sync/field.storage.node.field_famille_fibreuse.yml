@@ -1,0 +1,39 @@
+uuid: e20b7b76-232f-4cfe-8614-e04e34f5c796
+langcode: fr
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_famille_fibreuse
+field_name: field_famille_fibreuse
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: kozo_group
+      label: 'Kozo-group fibres longues'
+    -
+      value: bambou_group
+      label: 'Bambou-group fibres vasculaires'
+    -
+      value: grass_group
+      label: 'Grass-group fibres courtes'
+    -
+      value: bast_other
+      label: 'Autres liberiennes'
+    -
+      value: mixte
+      label: 'Mixte documente'
+    -
+      value: inconnu
+      label: Inconnu
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -18,13 +18,11 @@ use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\ui_patterns\ComponentPluginManager as UIPatternsComponentPluginManager;
 use Drupal\ui_patterns\Form\ComponentFormBuilderTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\ui_patterns\SourceTags;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * A widget to display the UI Patterns configuration form.
- *
- * @internal
- *   Plugin classes are internal.
  */
 #[FieldWidget(
   id: 'ui_patterns_source_component',
@@ -38,8 +36,6 @@ class SourceComponentWidget extends WidgetBase {
 
   /**
    * The component plugin manager.
-   *
-   * @var \Drupal\Core\Theme\ComponentPluginManager
    */
   protected ComponentPluginManager $componentPluginManager;
 
@@ -48,7 +44,7 @@ class SourceComponentWidget extends WidgetBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->componentPluginManager = $container->get('plugin.manager.sdc');
+    $instance->componentPluginManager = $container->get(ComponentPluginManager::class);
     return $instance;
   }
 
@@ -75,12 +71,12 @@ class SourceComponentWidget extends WidgetBase {
    * @return array
    *   Widget settings.
    */
-  protected function getWidgetSettings(FormStateInterface $form_state) : array {
+  protected function getWidgetSettings(FormStateInterface $form_state): array {
     $field_name = $this->fieldDefinition->getName();
-    $array_parents = ["fields", $field_name, "settings_edit_form", "settings"];
+    $array_parents = ['fields', $field_name, 'settings_edit_form', 'settings'];
     $full_form_state_values = $form_state->getValues();
     $current_settings = &NestedArray::getValue($full_form_state_values, $array_parents);
-    return array_merge($this->getSettings(), $current_settings ?? []);
+    return \array_merge($this->getSettings(), $current_settings ?? []);
   }
 
   /**
@@ -89,7 +85,7 @@ class SourceComponentWidget extends WidgetBase {
    * @return array
    *   Component options.
    */
-  protected function getComponentOptions() : array {
+  protected function getComponentOptions(): array {
     $definitions = [];
     if ($this->componentPluginManager instanceof UIPatternsComponentPluginManager) {
       $definitions = $this->componentPluginManager->getGroupedDefinitions();
@@ -126,7 +122,7 @@ class SourceComponentWidget extends WidgetBase {
       ],
       '#executes_submit_callback' => FALSE,
       '#empty_value' => '',
-      '#empty_option' => t('- None -'),
+      '#empty_option' => $this->t('- None -'),
     ];
     $element['allow_override'] = [
       '#type' => 'checkbox',
@@ -169,21 +165,20 @@ class SourceComponentWidget extends WidgetBase {
       ],
     ];
 
-    $element["selection"] = [
-      "#type" => "container",
-      "#attributes" => [
-        "id" => $wrapper_id,
+    $element['selection'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => $wrapper_id,
       ],
-      "#tree" => TRUE,
-
+      '#tree' => TRUE,
     ];
-    $component_id_selected = $settings["component_id"] ?? '';
+    $component_id_selected = $settings['component_id'] ?? '';
     if (!empty($component_id_selected)) {
-      $selection = $settings["selection"] ?? [];
+      $selection = $settings['selection'] ?? [];
       try {
         $component_selected = $this->componentPluginManager->find($component_id_selected);
         $props = $component_selected->metadata->schema['properties'];
-        $options = ["variant" => t("Variant")];
+        $options = ['variant' => $this->t('Variant')];
         foreach ($props as $prop_id => $prop) {
           if ($prop_id === 'variant') {
             continue;
@@ -191,12 +186,12 @@ class SourceComponentWidget extends WidgetBase {
           $propTitle = $prop['title'] ?? '';
           $options[$prop_id] = empty($propTitle) ? $prop_id : $propTitle;
         }
-        $element["selection"]['prop_filter'] = [
-          "#type" => "select",
+        $element['selection']['prop_filter'] = [
+          '#type' => 'select',
           '#limit_validation_errors' => [],
-          "#multiple" => TRUE,
-          "#options" => $options,
-          "#default_value" => $selection['prop_filter'] ?? [],
+          '#multiple' => TRUE,
+          '#options' => $options,
+          '#default_value' => $selection['prop_filter'] ?? [],
           '#states' => [
             'visible' => [
               [
@@ -208,7 +203,6 @@ class SourceComponentWidget extends WidgetBase {
         ];
       }
       catch (ComponentNotFoundException $e) {
-
       }
     }
     return $element;
@@ -220,9 +214,9 @@ class SourceComponentWidget extends WidgetBase {
   public static function changeSelectorFormChangeAjax(
     array $form,
     FormStateInterface $form_state,
-  ) : array {
+  ): array {
     $parents = $form_state->getTriggeringElement()['#array_parents'];
-    $sub_form_parents = array_merge(array_slice($parents, 0, -1), ["selection"]);
+    $sub_form_parents = \array_merge(\array_slice($parents, 0, -1), ['selection']);
     $sub_form = NestedArray::getValue($form, $sub_form_parents);
     $form_state->setRebuild();
     return $sub_form;
@@ -241,8 +235,8 @@ class SourceComponentWidget extends WidgetBase {
     }
     $selection = $this->getSetting('prop_filter_enable') ?? [];
     $props_selection = $selection['props'] ?? NULL;
-    if (is_array($props_selection)) {
-      $summary[] = $this->t('Only selected props: @props', ['@props' => implode(",", $props_selection)]);
+    if (\is_array($props_selection)) {
+      $summary[] = $this->t('Only selected props: @props', ['@props' => \implode(',', $props_selection)]);
     }
 
     return $summary;
@@ -254,12 +248,12 @@ class SourceComponentWidget extends WidgetBase {
   public function form(FieldItemListInterface $items, array &$form, FormStateInterface $form_state, $get_delta = NULL) {
     $field_name = $this->fieldDefinition->getName();
     $parents = $form['#parents'];
-    if (!static::getWidgetState($parents, $field_name, $form_state)) {
+    if (!self::getWidgetState($parents, $field_name, $form_state)) {
       $field_state = [
-        'items_count' => count($items) - 1,
+        'items_count' => \count($items) - 1,
         'array_parents' => [],
       ];
-      static::setWidgetState($parents, $field_name, $form_state, $field_state);
+      self::setWidgetState($parents, $field_name, $form_state, $field_state);
     }
     return parent::form($items, $form, $form_state, $get_delta);
   }
@@ -268,10 +262,11 @@ class SourceComponentWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $item_delta_value = $items[$delta]->getValue() ?? [];
+    // Read via the list: merged view on synchronized translations.
+    $item_delta_value = $items->getValue()[$delta] ?? [];
     $source_id = $item_delta_value['source_id'] ?? 'component';
     $field_name = $this->fieldDefinition->getName();
-    $element['#parents'] = array_merge($element['#field_parents'] ?? [], [$field_name, $delta]);
+    $element['#parents'] = \array_merge($element['#field_parents'] ?? [], [$field_name, $delta]);
     $settings = $this->getSettings() ?? [];
     $component_id = $settings['component_id'] ?? NULL;
     if (empty($component_id)) {
@@ -283,7 +278,7 @@ class SourceComponentWidget extends WidgetBase {
       $element['#access'] = FALSE;
       return $element;
     }
-    $source_data = $item_delta_value["source"] ?? [];
+    $source_data = $item_delta_value['source'] ?? [];
     $component_default_value = $source_data['component'] ?? [];
     $component_in_data = $component_default_value['component_id'] ?? NULL;
     if (!isset($component_default_value['component_id'])) {
@@ -298,20 +293,20 @@ class SourceComponentWidget extends WidgetBase {
       '#type' => 'container',
       '#tree' => TRUE,
     ];
-    $selection = $settings["selection"] ?? [];
+    $selection = $settings['selection'] ?? [];
     $prop_sources = $settings['prop_sources'] ?? '';
     $wrap = ($prop_sources !== 'default');
     $hide_slots = $settings['hide_slots'] ?? TRUE;
     $form_element_overrides = [
       '#allow_override' => $settings['allow_override'] ?? FALSE,
-      '#tag_filter' => ((bool) ($settings['only_widgets'] ?? TRUE)) ? ["widget" => TRUE] : [],
+      '#tag_filter' => ((bool) ($settings['only_widgets'] ?? TRUE)) ? [SourceTags::Widget->value => TRUE] : [],
       '#default_value' => $component_default_value,
       '#wrap' => $wrap,
       '#render_headings' => !$hide_slots,
       '#render_sources' => $wrap,
       '#prop_filter' => ($this->getSetting('prop_filter_enable') ?? FALSE) ? $selection['prop_filter'] ?? NULL : NULL,
     ];
-    $element['source']["component"] = $this->buildComponentsForm($form_state, $contexts, $component_id, !$hide_slots, TRUE, 'ui_patterns', $form_element_overrides);
+    $element['source']['component'] = $this->buildComponentsForm($form_state, $contexts, $component_id, !$hide_slots, TRUE, 'ui_patterns', $form_element_overrides);
     $element['source_id'] = ['#type' => 'hidden', '#value' => $source_id];
     // Add hidden fields for optional columns.
     $element['node_id'] = [
@@ -341,10 +336,9 @@ class SourceComponentWidget extends WidgetBase {
     $contexts = [];
     if ($entity = $items?->getEntity()) {
       $contexts['entity'] = EntityContext::fromEntity($entity);
-      $contexts['bundle'] = new Context(ContextDefinition::create('string'), $contexts["entity"]->getContextValue()->bundle() ?? "");
+      $contexts['bundle'] = new Context(ContextDefinition::create('string'), $contexts['entity']->getContextValue()->bundle() ?? '');
     }
-    $contexts = RequirementsContext::addToContext(["field_granularity:item"], $contexts);
-    return $contexts;
+    return RequirementsContext::addToContext(['field_granularity:item'], $contexts);
   }
 
 }

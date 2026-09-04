@@ -9,6 +9,8 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\Plugin\Derivative\EntityReferenceFieldPropertyDerivableContextDeriver;
+use Drupal\ui_patterns\SourceMetadataKey;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -29,21 +31,21 @@ class EntityReferenceFieldPropertySource extends DerivableContextSourceBase {
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
-    $form["derivable_context"]["#type"] = "hidden";
-    $form["derivable_context"]["#value"] = $form["derivable_context"]["#default_value"];
+    $form['derivable_context']['#type'] = 'hidden';
+    $form['derivable_context']['#value'] = $form['derivable_context']['#default_value'];
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function listDerivableContexts() : array {
+  protected function listDerivableContexts(): array {
     $derivable_contexts = parent::listDerivableContexts();
     $field_name = $this->context['field_name']->getContextValue();
-    return array_filter($derivable_contexts, function ($derivable_context, $derivable_context_id) use ($field_name) {
-          return isset($derivable_context['metadata']) && is_array($derivable_context['metadata'])
-            && isset($derivable_context['metadata']['field_name']) && $derivable_context['metadata']['field_name'] === $field_name;
-    }, ARRAY_FILTER_USE_BOTH);
+    return \array_filter($derivable_contexts, static function ($derivable_context, $derivable_context_id) use ($field_name) {
+      return isset($derivable_context['metadata']) && \is_array($derivable_context['metadata'])
+        && isset($derivable_context['metadata'][SourceMetadataKey::FieldName->value]) && $derivable_context['metadata'][SourceMetadataKey::FieldName->value] === $field_name;
+    }, \ARRAY_FILTER_USE_BOTH);
   }
 
   /**
@@ -51,8 +53,8 @@ class EntityReferenceFieldPropertySource extends DerivableContextSourceBase {
    */
   protected function getSourcesTagFilter(): array {
     return [
-      "widget:dismissible" => FALSE,
-      "widget" => FALSE,
+      SourceTags::WidgetDismissible->value => FALSE,
+      SourceTags::Widget->value => FALSE,
     ];
   }
 
@@ -61,8 +63,7 @@ class EntityReferenceFieldPropertySource extends DerivableContextSourceBase {
    */
   protected function getDerivationTagFilter(): ?array {
     return [
-      // "entity" => TRUE,
-      "entity_referenced" => TRUE,
+      SourceTags::EntityReferenced->value => TRUE,
     ];
   }
 

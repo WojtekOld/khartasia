@@ -1,0 +1,208 @@
+<?php
+
+/**
+ * @file
+ * Content lock: Main functions of the module.
+ */
+
+use Drupal\Core\Hook\Attribute\LegacyModuleImplementsAlter;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\content_lock\Hook\ContentLockHooks;
+use Drupal\content_lock\Hook\InfoHooks;
+use Drupal\content_lock\Hook\FormAlter;
+use Drupal\content_lock\Hook\ThemeHooks;
+use Drupal\content_lock\Hook\ViewsData;
+use Drupal\user\UserInterface;
+use Drupal\views\ViewEntityInterface;
+
+/**
+ * Implements hook_help().
+ */
+#[LegacyHook]
+function content_lock_help($route_name, RouteMatchInterface $route_match) {
+  return (new InfoHooks())->help($route_name, $route_match);
+}
+
+/**
+ * Implements hook_cron().
+ */
+#[LegacyHook]
+function content_lock_cron(): void {
+  \Drupal::service(ContentLockHooks::class)->cron();
+}
+
+/**
+ * Implements hook_entity_type_build().
+ */
+#[LegacyHook]
+function content_lock_entity_type_build(array &$entity_types): void {
+  (new InfoHooks())->entityTypeBuild($entity_types);
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function content_lock_hook_info(): array {
+  return array_fill_keys(['content_lock_entity_lockable'], ['group' => 'content_lock']);
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+#[LegacyHook]
+function content_lock_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  return \Drupal::service(ContentLockHooks::class)->entityAccess($entity, $operation, $account);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+#[LegacyHook]
+function content_lock_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
+  (new FormAlter(
+    \Drupal::service('content_lock'),
+    \Drupal::messenger(),
+    \Drupal::configFactory(),
+    \Drupal::currentUser(),
+    \Drupal::requestStack()
+  ))->formAlter($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+#[LegacyHook]
+function content_lock_form_content_moderation_entity_moderation_form_alter(&$form, FormStateInterface $form_state): void {
+  (new FormAlter(
+    \Drupal::service('content_lock'),
+    \Drupal::messenger(),
+    \Drupal::configFactory(),
+    \Drupal::currentUser(),
+    \Drupal::requestStack()
+  ))->contentModerationEntityFormAlter($form, $form_state);
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * Releases locks when an entity is deleted. Note that users are prevented from
+ * deleting locked content by content_lock_entity_access() if they do not have
+ * the break lock permission.
+ */
+#[LegacyHook]
+function content_lock_entity_delete(EntityInterface $entity): void {
+  \Drupal::service(ContentLockHooks::class)->entityDelete($entity);
+}
+
+/**
+ * Implements hook_user_predelete().
+ *
+ * Delete content locks entries when a user gets deleted. If a user has
+ * permission to cancel or delete a user then it is not necessary to check
+ * whether they can break locks.
+ */
+#[LegacyHook]
+function content_lock_user_predelete($account): void {
+  \Drupal::service(ContentLockHooks::class)->userPredelete($account);
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+#[LegacyHook]
+function content_lock_user_logout($account): void {
+  \Drupal::service(ContentLockHooks::class)->userLogout($account);
+}
+
+/**
+ * Implements hook_views_data().
+ */
+#[LegacyHook]
+function content_lock_views_data(): array {
+  return (new ViewsData(\Drupal::service('content_lock'), \Drupal::configFactory(), \Drupal::entityTypeManager()))->viewsData();
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+#[LegacyHook]
+function content_lock_entity_operation(EntityInterface $entity): array {
+  return \Drupal::service(ContentLockHooks::class)->entityOperation($entity);
+}
+
+/**
+ * Implements hook_theme().
+ */
+#[LegacyHook]
+function content_lock_theme(): array {
+  return (new ThemeHooks())->theme();
+}
+
+/**
+ * Prepares variables for content lock entity settings templates.
+ *
+ * Default template: content-lock-settings-entities.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #title.
+ */
+function template_preprocess_content_lock_settings_entities(array &$variables): void {
+  (new ThemeHooks())->preprocessContentLockSettingsEntities($variables);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for views.
+ *
+ * When a view is saved, prevent using a cache if the content_lock data is
+ * displayed.
+ */
+#[LegacyHook]
+function content_lock_view_presave(ViewEntityInterface $view): void {
+  \Drupal::service(ContentLockHooks::class)->viewPresave($view);
+}
+
+/**
+ * Implements hook_user_cancel().
+ */
+#[LegacyHook]
+function content_lock_user_cancel($edit, UserInterface $account, $method) {
+  \Drupal::service(ContentLockHooks::class)->userCancel($edit, $account, $method);
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+#[LegacyModuleImplementsAlter]
+function content_lock_module_implements_alter(&$implementations, $hook): void {
+  if ($hook === 'user_predelete') {
+    // Move our hook_user_predelete() implementation to the top of the list, so
+    // that any other hook implementation can rely on entities being unlocked.
+    $group = $implementations['content_lock'];
+    $implementations = ['content_lock' => $group] + $implementations;
+  }
+}
+
+/**
+ * Implements hook_content_lock_entity_lockable().
+ */
+#[LegacyHook]
+function content_lock_content_lock_entity_lockable(EntityInterface $entity, array $config, ?string $form_op = NULL): bool {
+  // Locking content in the trash is unnecessary because the Trash module
+  // changes entity queries and access to prevent any user from being able to
+  // edit entities in the trash.
+  return !(\Drupal::moduleHandler()->moduleExists('trash') && trash_entity_is_deleted($entity));
+}
+
+/**
+ * Implements hook_entity_bundle_delete().
+ */
+#[LegacyHook]
+function content_lock_entity_bundle_delete($entity_type_id, $bundle_id): void {
+  \Drupal::service(ContentLockHooks::class)->entityBundleDelete($entity_type_id, $bundle_id);
+}

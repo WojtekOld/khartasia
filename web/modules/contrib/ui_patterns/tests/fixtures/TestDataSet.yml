@@ -82,6 +82,88 @@ field_property_default:
     elementExists:
       - [ 'css', '.ui-patterns-test-component' ]
       - [ 'xpath', "//div[contains(@class, 'ui-patterns-test-component')]//div[contains(@class, 'ui-patterns-slots-slot') and contains(text(), 'value_text_1')]" ]
+
+# A raw string field property (no text format) feeding a string prop must
+# reach the prop fully escaped. Payload: <script>, a phishing <a>, an
+# <img onerror>.
+# A raw string property is returned untouched and untrusted: Twig
+# autoescapes it at render, so no live element reaches the DOM (see
+# FieldPropertySourceTest for the rendered assertion).
+field_property_string_prop_raw_untrusted:
+  component:
+    component_id: ui_patterns_test:test-component
+    props:
+      string:
+        source_id: field_property:node:field_string_1:value
+        source: { }
+  entity:
+    field_string_1:
+      value: '<script>alert("xss")</script><a href="https://attacker.example/" onclick="alert(1)">click</a><img src="x" onerror="alert(1)">'
+  contexts:
+    field_name: 'field_string_1'
+    bundle: 'page'
+  output:
+    props:
+      string:
+        # Kernel: the source returns the raw string untouched.
+        same: '<script>alert("xss")</script><a href="https://attacker.example/" onclick="alert(1)">click</a><img src="x" onerror="alert(1)">'
+        # Functional: substring present in both the raw source output and
+        # the escaped DOM text; the security check is elementNotExists.
+        normalized_value: 'https://attacker.example/'
+  assertSession:
+    elementNotExists:
+      - [ 'css', '.ui-patterns-props-string script' ]
+      - [ 'css', '.ui-patterns-props-string a' ]
+      - [ 'css', '.ui-patterns-props-string img' ]
+
+# A text field's raw `value` property is untrusted (no text format ran):
+# returned as a plain string, escaped by Twig at render. Use the
+# `processed` property (next fixture) for filtered HTML.
+field_property_string_prop_text_value_raw:
+  component:
+    component_id: ui_patterns_test:test-component
+    props:
+      string:
+        source_id: field_property:node:field_text_1:value
+        source: { }
+  entity:
+    field_text_1:
+      value: '<b onclick="x">hi</b>'
+      format: plain_text
+  contexts:
+    field_name: 'field_text_1'
+    bundle: 'page'
+  output:
+    props:
+      string:
+        same: '<b onclick="x">hi</b>'
+        normalized_value: 'hi'
+  assertSession:
+    elementNotExists:
+      - [ 'css', '.ui-patterns-props-string b' ]
+
+# A `processed` property has already been through a text format, so the
+# source passes it through untouched. plain_text escapes <b> to &lt;b&gt;;
+# a double-escape (&amp;lt;) would fail this test.
+field_property_string_prop_text_processed_passthrough:
+  component:
+    component_id: ui_patterns_test:test-component
+    props:
+      string:
+        source_id: field_property:node:field_text_1:processed
+        source: { }
+  entity:
+    field_text_1:
+      value: '<b>hi</b>'
+      format: plain_text
+  contexts:
+    field_name: 'field_text_1'
+    bundle: 'page'
+  output:
+    props:
+      string:
+        value: '&lt;b&gt;hi&lt;/b&gt;'
+
 select_integer:
   component:
     component_id: ui_patterns_test:test-component
@@ -399,6 +481,58 @@ token_3:
     elementTextEquals:
       - [ 'xpath', "//div[@class='ui-patterns-props-url']/text()",'http://localhost/value_text_token_2']
 
+# Admin-typed HTML in a token template, targeting a string prop. The
+# source returns the raw substituted string, untrusted: Twig autoescapes
+# it at render, so the <a> cannot reach the DOM as a live element (see
+# TokenSourceTest for the rendered assertion).
+token_admin_html_string_prop_raw:
+  component:
+    component_id: ui_patterns_test:test-component
+    props:
+      string:
+        source_id: token
+        source:
+          value: '<a href="https://phishing.example/">[node:title]</a>'
+  entity:
+    title:
+      value: 'Hello'
+  output:
+    props:
+      string:
+        same: '<a href="https://phishing.example/">Hello</a>'
+        normalized_value: 'https://phishing.example/'
+  assertSession:
+    elementNotExists:
+      - [ 'css', '.ui-patterns-props-string a' ]
+
+# Admin-typed HTML in a token template, targeting a slot prop. The slot
+# branch escapes the template before substitution, so admin-typed HTML is
+# neutralised while token placeholders (no special chars) survive.
+token_admin_html_slot_escaped:
+  component:
+    component_id: ui_patterns_test:test-component
+    slots:
+      slot:
+        sources:
+          -
+            source_id: token
+            source:
+              value: '<a href="https://phishing.example/">[node:title]</a>'
+  entity:
+    title:
+      value: 'Hello'
+  output:
+    slots:
+      slot:
+        -
+          # The rendered DOM shows the entity-encoded anchor; a regression
+          # would emit a live <a href=.
+          rendered_value: '&lt;a href='
+          assert: assertStringContainsString
+  assertSession:
+    elementExists:
+      - [ 'css', '.ui-patterns-test-component' ]
+
 context_exists_default:
   component:
     component_id: ui_patterns_test:test-component
@@ -417,6 +551,72 @@ context_exists_default:
       - [ 'css', '.ui-patterns-test-component' ]
     elementTextEquals:
       - [ 'xpath', "//div[@class='ui-patterns-props-string']/text()",'entity exists: 1' ]
+
+# The component source defines no context, but the sources of the component
+# it embeds still get the contexts it received.
+component_context_exists:
+  component:
+    component_id: ui_patterns_test:test-component
+    slots:
+      slot:
+        sources:
+          -
+            source_id: component
+            source:
+              component:
+                component_id: ui_patterns_test:test-wrapper-component
+                slots:
+                  wrapper:
+                    sources:
+                      -
+                        source_id: context_exists
+  entity:
+    body:
+      value: 'value_something'
+  output:
+    slots:
+      slot:
+        -
+          rendered_value: 'entity exists: 1'
+          assert: assertStringContainsString
+  assertSession:
+    elementExists:
+      - [ 'xpath', "//div[contains(@class, 'ui-patterns-slots-slot')]//div[@class='ui-patterns-slots-wrapper'][normalize-space(text())='entity exists: 1']" ]
+
+# Same chain with a field source, which needs the field contexts of the
+# formatter (entity, field_name, bundle, item granularity, item index).
+field_property_nested:
+  component:
+    component_id: ui_patterns_test:test-component
+    slots:
+      slot:
+        sources:
+          -
+            source_id: component
+            source:
+              component:
+                component_id: ui_patterns_test:test-wrapper-component
+                slots:
+                  wrapper:
+                    sources:
+                      -
+                        source_id: field_property:node:field_text_1:value
+                        source: { }
+  entity:
+    field_text_1:
+      value: 'value_text_1'
+  contexts:
+    field_name: 'field_text_1'
+    bundle: 'page'
+  output:
+    slots:
+      slot:
+        -
+          rendered_value: 'value_text_1'
+          assert: assertStringContainsString
+  assertSession:
+    elementExists:
+      - [ 'xpath', "//div[contains(@class, 'ui-patterns-slots-slot')]//div[@class='ui-patterns-slots-wrapper'][normalize-space(text())='value_text_1']" ]
 
 checkboxes_1:
   component:

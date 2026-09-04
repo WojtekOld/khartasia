@@ -1,0 +1,12 @@
+name: Color Field Widget Grid
+type: module
+description: 'Provides the jQuery Simple Color grid widget for Color Field.'
+core_version_requirement: ^9 || ^10 || ^11
+package: Field types
+dependencies:
+  - color_field:color_field
+
+# Information added by Drupal.org packaging script on 2026-06-30
+version: '3.1.0-beta1'
+project: 'color_field'
+datestamp: 1782779177

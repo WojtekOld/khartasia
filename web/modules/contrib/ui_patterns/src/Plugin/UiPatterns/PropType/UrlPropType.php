@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns\Plugin\UiPatterns\PropType;
 
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Render\RenderableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -28,22 +29,26 @@ class UrlPropType extends PropTypePluginBase {
    * {@inheritdoc}
    */
   public static function normalize(mixed $value, ?array $definition = NULL): string {
-    if (is_object($value)) {
+    if (\is_object($value)) {
       $value = self::convertObject($value);
     }
-    if (!is_string($value)) {
-      return "";
+    if (!\is_string($value)) {
+      return '';
     }
 
-    if ($value == "<front>") {
-      $value = "internal:/";
+    if ($value === '<front>') {
+      $value = 'internal:/';
     }
-    elseif ($value == "<none>") {
-      $value = "internal:";
+    elseif ($value === '<none>') {
+      $value = 'internal:';
+    }
+    elseif (($value === '<nolink>') || ($value === '<button>')) {
+      // No-path routes: same result as Url::fromRoute()->toString().
+      return '';
     }
     // We don't use filter_var($value, FILTER_VALIDATE_URL) because too
     // restrictive: catch only "scheme://foo".
-    if (preg_match("/^[a-z]+\:/", $value)) {
+    if (\preg_match('/^[a-z]+\:/', $value)) {
       return self::resolveUrl($value);
     }
     // Any other string is considered as a valid path.
@@ -56,14 +61,13 @@ class UrlPropType extends PropTypePluginBase {
    */
   protected static function resolveUrl(string $value): string {
     // PHP_URL_SCHEME works with "scheme://foo" and "scheme:foo".
-    $scheme = parse_url($value, PHP_URL_SCHEME);
-    if (in_array($scheme, ['public', 'private', 'temp'])) {
-      /** @var \Drupal\Core\File\FileUrlGeneratorInterface $generator */
-      $generator = \Drupal::service('file_url_generator');
+    $scheme = \parse_url($value, \PHP_URL_SCHEME);
+    if (\in_array($scheme, ['public', 'private', 'temp'], TRUE)) {
+      $generator = \Drupal::service(FileUrlGeneratorInterface::class);
       $value = $generator->generateAbsoluteString($value);
       return Url::fromUri($value)->toString();
     }
-    if (in_array($scheme, ['internal', 'entity', 'route'])) {
+    if (\in_array($scheme, ['internal', 'entity', 'route'], TRUE)) {
       return Url::fromUri($value)->toString();
     }
     return $value;
@@ -73,13 +77,13 @@ class UrlPropType extends PropTypePluginBase {
    * Convert PHP objects to render array.
    */
   protected static function convertObject(object $value): mixed {
-    if (is_a($value, '\Drupal\Core\Url')) {
+    if (\is_a($value, '\Drupal\Core\Url')) {
       return $value->toString();
     }
     if ($value instanceof RenderableInterface) {
       $value = $value->toRenderable();
     }
-    if (is_array($value) && isset($value['#url'])) {
+    if (\is_array($value) && isset($value['#url'])) {
       $value = $value['#url']->toString();
     }
     static::normalizer()->convertToScalar($value, TRUE);

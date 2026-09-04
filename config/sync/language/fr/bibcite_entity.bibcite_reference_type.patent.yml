@@ -1,0 +1,30 @@
+label: Brevet
+fields:
+  bibcite_custom2:
+    label: 'Date de parution'
+  bibcite_custom3:
+    label: 'États désignés'
+  bibcite_custom4:
+    label: Avocat/Agent
+  bibcite_custom5:
+    label: Références
+  bibcite_custom6:
+    label: 'Statut légal'
+  bibcite_volume:
+    label: 'Numéro de version du brevet'
+  bibcite_edition:
+    label: 'Classification internationale de brevet'
+  bibcite_section:
+    label: 'Numéro international de brevet'
+  bibcite_number:
+    label: 'Numéro de la demande'
+  bibcite_type_of_work:
+    label: 'Type de brevet'
+  bibcite_publisher:
+    label: Cessionnaire
+  bibcite_place_published:
+    label: Pays
+  bibcite_issn:
+    label: 'Numéro de brevet'
+  bibcite_tertiary_title:
+    label: 'Titre international'

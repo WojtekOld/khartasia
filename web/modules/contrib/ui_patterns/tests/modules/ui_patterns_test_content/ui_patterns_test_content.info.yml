@@ -1,0 +1,14 @@
+name: UI Patterns Test Content
+type: module
+description: 'A content model for end-to-end tests: articles with tags and a related article.'
+package: Testing
+dependencies:
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:field
+  - drupal:text
+
+# Information added by Drupal.org packaging script on 2026-08-28
+version: '2.0.20'
+project: 'ui_patterns'
+datestamp: 1787936640

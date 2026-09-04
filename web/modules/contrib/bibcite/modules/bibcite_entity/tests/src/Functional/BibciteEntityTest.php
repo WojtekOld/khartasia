@@ -2,14 +2,16 @@
 
 namespace Drupal\Tests\bibcite_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\BrowserTestBase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Test for entity functions.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class BibciteEntityTest extends BrowserTestBase {
 
   /**

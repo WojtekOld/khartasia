@@ -2,6 +2,7 @@
 
 namespace Drupal\bibcite_entity\Plugin\views\argument;
 
+use Drupal\views\Attribute\ViewsArgument;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -9,6 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ViewsArgument("bibcite_keyword")
  */
+#[ViewsArgument('bibcite_keyword')]
 class BibciteKeyword extends IdArgumentBase {
 
   /**

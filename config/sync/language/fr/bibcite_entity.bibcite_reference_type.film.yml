@@ -1,0 +1,24 @@
+label: Film
+fields:
+  bibcite_abst_e:
+    label: Synopsis
+  bibcite_custom1:
+    label: Acteurs
+  bibcite_custom2:
+    label: Crédits
+  bibcite_custom4:
+    label: Genre
+  bibcite_custom5:
+    label: Format
+  bibcite_year:
+    label: 'Année de parution'
+  bibcite_secondary_title:
+    label: 'Titre de la série'
+  bibcite_pages:
+    label: Durée
+  bibcite_date:
+    label: 'Date de parution'
+  bibcite_type_of_work:
+    label: Moyen
+  bibcite_place_published:
+    label: Pays

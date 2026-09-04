@@ -1,0 +1,28 @@
+proc_janitor.settings:
+  type: config_object
+  label: 'PROC Janitor settings'
+  mapping:
+    orphan_minimal_age:
+      type: integer
+      label: 'Minimum orphan age in seconds'
+    orphan_maximal_age:
+      type: integer
+      label: 'Maximum orphan age in seconds (0 means no restriction)'
+    run_on_cron:
+      type: boolean
+      label: 'Run maintenance task on cron'
+    max_batch_operations:
+      type: integer
+      label: 'Maximum batch operations for manual batch cleanup'
+    max_gui_batch_entities_per_run:
+      type: integer
+      label: 'Maximum orphan entities processed per manual GUI batch run (0 means no limit)'
+    lock_timeout:
+      type: integer
+      label: 'Cron cleanup lock timeout in seconds (crash-recovery TTL)'
+    max_cron_entities_per_run:
+      type: integer
+      label: 'Maximum number of orphan entities processed per cron run'
+    reporting_max_age_days:
+      type: integer
+      label: 'Maximum age in days for proc_reporting data (0 means no cleanup)'

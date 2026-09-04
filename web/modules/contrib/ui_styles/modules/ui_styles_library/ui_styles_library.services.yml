@@ -1,0 +1,5 @@
+
+services:
+  Drupal\ui_styles_library\Hook\UiStylesLibraryHooks:
+    class: Drupal\ui_styles_library\Hook\UiStylesLibraryHooks
+    autowire: true

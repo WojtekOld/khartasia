@@ -1,0 +1,7 @@
+# Proc global settings form.
+proc.settings_form:
+  title: 'Protected Content'
+  description: 'Configure Protected Content.'
+  parent: system.admin_config_system
+  route_name: proc.settings_form
+  weight: 10

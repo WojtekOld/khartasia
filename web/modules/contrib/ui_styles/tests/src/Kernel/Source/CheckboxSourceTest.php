@@ -6,12 +6,16 @@ namespace Drupal\Tests\ui_styles\Kernel\Source;
 
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\ui_styles\Definition\StyleDefinition;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\ui_styles\Plugin\UiStyles\Source\Checkbox
  *
  * @group ui_styles
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class CheckboxSourceTest extends SourceTestBase {
 
   /**

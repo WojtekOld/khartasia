@@ -6,12 +6,13 @@ namespace Drupal\Tests\ui_skins\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_skins\Definition\ThemeDefinition;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_skins\Definition\ThemeDefinition
- *
- * @group ui_skins
+ * Tests ThemeDefinition.
  */
+#[Group('ui_skins')]
 class ThemeDefinitionTest extends UnitTestCase {
 
   /**
@@ -23,19 +24,8 @@ class ThemeDefinitionTest extends UnitTestCase {
    *   The name of the plugin attributes.
    * @param mixed $value
    *   The attribute's value.
-   *
-   * @covers ::getDescription
-   * @covers ::getKey
-   * @covers ::getLabel
-   * @covers ::getLibrary
-   * @covers ::getProvider
-   * @covers ::getTarget
-   * @covers ::getValue
-   * @covers ::id
-   * @covers ::isEnabled
-   *
-   * @dataProvider definitionGettersProvider
    */
+  #[DataProvider('definitionGettersProvider')]
   public function testGetters(string $getter, string $name, $value): void {
     $definition = new ThemeDefinition([$name => $value]);
     // @phpstan-ignore-next-line
@@ -70,11 +60,8 @@ class ThemeDefinitionTest extends UnitTestCase {
    *   The value.
    * @param string $expected
    *   The expected result.
-   *
-   * @covers ::getComputedTarget
-   *
-   * @dataProvider definitionComputedTargetProvider
    */
+  #[DataProvider('definitionComputedTargetProvider')]
   public function testGetComputedTarget(string $value, string $expected): void {
     $definition = new ThemeDefinition([
       'target' => $value,

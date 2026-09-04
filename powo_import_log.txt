@@ -1,0 +1,425 @@
+Especes a traiter: 98
+
+Abelmoschus moschatus Medik. ÔåÆ 5 synonymes
+NO SYN: Actinidia chinensis Planch.
+Alcea rosea L. ÔåÆ 26 synonymes
+Amorphophallus konjac K. Koch ÔåÆ 11 synonymes
+Areca catechu L. ÔåÆ 14 synonymes
+Avena sativa L. ÔåÆ 125 synonymes
+Berberis thunbergii  DC. ÔåÆ 17 synonymes
+Boehmeria nivea (L.) Gaudich. ÔåÆ 33 synonymes
+Broussonetia kazinoki Siebold & Zucc. ÔåÆ 4 synonymes
+Broussonetia papyrifera (L.) LÔÇÖH├®r. ex Vent. ÔåÆ 37 synonymes
+NOT FOUND: Caesalpinia sappan L.
+Calamus rotang L. ÔåÆ 7 synonymes
+NOT FOUND: Cannabis chinensis Delile
+NOT FOUND: Cannabis indica Lam.
+Cannabis sativa Linnaeus ÔåÆ 36 synonymes
+Cannabis sativa var. indica (Lam.) E. Small & Cronquist ÔåÆ 36 synonymes
+Carthamus tinctorius L. ÔåÆ 5 synonymes
+NOT FOUND: Cinnamomum camphora (L.) J. Presl
+NOT FOUND: Cinnamomum Loureirii Nees
+Coix lacryma-jobi L. ÔåÆ 5 synonymes
+Corchorus capsularis L. ÔåÆ 3 synonymes
+Curcuma aromatica Salisb. ÔåÆ 2 synonymes
+Curcuma longa L. ÔåÆ 10 synonymes
+NO SYN: Cyperus exaltatus Retz
+Dalbergia hupeana Hance ÔåÆ 2 synonymes
+Daphne odora Thunb. ÔåÆ 21 synonymes
+NO SYN: Daphne pseudomezereum A. Gray
+NOT FOUND: Deinanthe Bifida Maxim.
+NOT FOUND: Dendrocalamus affinis Rendle
+Edgeworthia chrysantha Lindl. ÔåÆ 7 synonymes
+NOT FOUND: Euonymus sieboldianus Blume
+Firmiana simplex (L.) W. Wight ÔåÆ 19 synonymes
+Gardenia jasminoides J. Ellis ÔåÆ 56 synonymes
+Gleditsia sinensis Lam. ÔåÆ 17 synonymes
+Gossypium arboreum L. ÔåÆ 52 synonymes
+NOT FOUND: Hibiscus cannabinus L.
+NOT FOUND: Hibiscus manihot L. var. manihot
+ERREUR Hibiscus simplex L. W. Wight: Client error: `GET https://powo.science.kew.org/api/2/search?q=Hibiscus+simplex&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Hibiscus syriacus L.: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A560890-1` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Hordeum vulgare L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Hordeum+vulgare&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Hydrangea paniculata Siebold: Client error: `GET https://powo.science.kew.org/api/2/search?q=Hydrangea+paniculata&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Indigofera tinctoria L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Indigofera+tinctoria&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Isatis tinctoria L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Isatis+tinctoria&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Juncus effusus var. decipiens Buchenau: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A442917-1` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Juncus setchuensis Buchenau: Client error: `GET https://powo.science.kew.org/api/2/search?q=Juncus+setchuensis&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Kadsura japonica (L.) Dunal: Client error: `GET https://powo.science.kew.org/api/2/search?q=Kadsura+japonica&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Linum usitatissimum L.: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A544772-1` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Lithospermum erythrorhizon Siebold & Zucc.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Lithospermum+erythrorhizon&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Lycoris radiata (LÔÇÖH├®r.) Herb.: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A60455959-2` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Mercurialis leiocarpa Siebold & Zucc.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Mercurialis+leiocarpa&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Miscanthus sinensis Anders.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Miscanthus+sinensis&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Miscanthus tinctorius (Steud.) Hack: Client error: `GET https://powo.science.kew.org/api/2/search?q=Miscanthus+tinctorius&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Morus alba L.: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A30051955-2` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+NOT FOUND: Morus australis Poir.
+ERREUR Morus mongolica (Bureau) Schneid.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Morus+mongolica&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Morus papyrifera L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Morus+papyrifera&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Musa textilis N├®e: Client error: `GET https://powo.science.kew.org/api/2/search?q=Musa+textilis&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Myrica rubra (Lour.) Siebold & Zucc.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Myrica+rubra&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+NOT FOUND: Opuntia dillenii (Ker Gawl.) Haw.
+ERREUR Oryza sativa L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Oryza+sativa&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Phellodendron amurense Rupr.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Phellodendron+amurense&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Phellodendron sachalinense (F. Schmidt) Sarg.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Phellodendron+sachalinense&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Phragmites communis Trin.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Phragmites+communis&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+Phyllostachys edulis (Carri├¿re) J. Houz. ÔåÆ 80 synonymes
+Phyllostachys heteroclada Oliv. ÔåÆ 14 synonymes
+Pinus densiflora Sieb. & Zucc. ÔåÆ 35 synonymes
+Pleioblastus amarus (Keng) Keng f. ÔåÆ 13 synonymes
+NOT FOUND: Polygonum tinctorium Aiton
+ERREUR Prunus mume (Siebold) Siebold & Zucc.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Prunus+mume&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+Pteroceltis tatarinowii Maxim. ÔåÆ 2 synonymes
+ERREUR Pueraria montana var. lobata (Willd) Maesen & S.M . Almeida ex Sanjappa & Predeep: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A516708-1` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Quercus acutissima Carruth.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Quercus+acutissima&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Quercus serrata Murray: Client error: `GET https://powo.science.kew.org/api/2/search?q=Quercus+serrata&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Rubia cordifolia L.: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A765218-1` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Rubia tinctorum L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Rubia+tinctorum&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Salix koreensis Andersson: Client error: `GET https://powo.science.kew.org/api/2/search?q=Salix+koreensis&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Salix purpurea L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Salix+purpurea&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+NOT FOUND: Smithiodendron artocarpioideum Hu
+ERREUR Sophora flavescens Aiton: Client error: `GET https://powo.science.kew.org/api/2/search?q=Sophora+flavescens&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Sophora japonica L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Sophora+japonica&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Sphagnum palustre  L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Sphagnum+palustre&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Spirogyra turfosa F. Gray: Client error: `GET https://powo.science.kew.org/api/2/search?q=Spirogyra+turfosa&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Stellera Chamaejasme L.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Stellera+Chamaejasme&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+NOT FOUND: Sterculiaceae
+ERREUR Strobilanthes flaccidifolia Nees: Client error: `GET https://powo.science.kew.org/api/2/search?q=Strobilanthes+flaccidifolia&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Symplocos paniculata  Miq.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Symplocos+paniculata&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Tilia amurensis Rupr.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Tilia+amurensis&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Triticum aestivum L.: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A332110-2` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Typha orientalis C. Presl: Client error: `GET https://powo.science.kew.org/api/2/search?q=Typha+orientalis&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Ulmus cavaleriei H.Lev.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Ulmus+cavaleriei&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Ulmus davidiana var. japonica (Rehder) Nakai: Client error: `GET https://powo.science.kew.org/api/2/search?q=Ulmus+davidiana&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Ulmus parvifolia Jacq.: Client error: `GET https://powo.science.kew.org/api/2/taxon/urn%3Alsid%3Aipni.org%3Anames%3A302296-2` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Wikstroemia canescens Wall. ex Meisn.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Wikstroemia+canescens&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Wikstroemia chamaedaphne (Bunge) Meisn.: Client error: `GET https://powo.science.kew.org/api/2/search?q=Wikstroemia+chamaedaphne&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Wikstroemia retusa A. Gray: Client error: `GET https://powo.science.kew.org/api/2/search?q=Wikstroemia+retusa&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+NOT FOUND: Wikstroemia sikokiania Franc. & Sav.
+ERREUR Wikstroemia trichotoma (Thunb.) Makino: Client error: `GET https://powo.science.kew.org/api/2/search?q=Wikstroemia+trichotoma&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+ERREUR Wisteria floribunda (willd.) DC: Client error: `GET https://powo.science.kew.org/api/2/search?q=Wisteria+floribunda&f=accepted_names` resulted in a `429 Too Many Requests` response:
+<html>
+<head><title>429 Too Many Requests</title></head>
+<body>
+<center><h1>429 Too Many Requests</h1></center>
+<hr> (truncated...)
+
+
+=== BILAN ===
+Synonymes crees : 658
+Erreurs         : 50
+Non trouves     : 16
+
+Non trouv├®s:
+  - Caesalpinia sappan L.
+  - Cannabis chinensis Delile
+  - Cannabis indica Lam.
+  - Cinnamomum camphora (L.) J. Presl
+  - Cinnamomum Loureirii Nees
+  - Deinanthe Bifida Maxim.
+  - Dendrocalamus affinis Rendle
+  - Euonymus sieboldianus Blume
+  - Hibiscus cannabinus L.
+  - Hibiscus manihot L. var. manihot
+  - Morus australis Poir.
+  - Opuntia dillenii (Ker Gawl.) Haw.
+  - Polygonum tinctorium Aiton
+  - Smithiodendron artocarpioideum Hu
+  - Sterculiaceae
+  - Wikstroemia sikokiania Franc. & Sav.
+
+Done

@@ -5,6 +5,7 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.papers.body
+    - field.field.node.papers.field_famille_fibreuse
     - field.field.node.papers.field_genus_pap_entity
     - field.field.node.papers.field_genus_taxo_pap
     - field.field.node.papers.field_origin_taxo
@@ -33,9 +34,11 @@ content:
     weight: 100
     region: content
 hidden:
+  field_famille_fibreuse: true
   field_genus_pap_entity: true
   field_genus_taxo_pap: true
   field_origin_taxo: true
   field_pap_local_scripture: true
   field_pap_synonyme: true
   langcode: true
+  search_api_excerpt: true

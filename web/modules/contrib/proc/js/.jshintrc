@@ -1,0 +1,18 @@
+{
+  "browser": true,
+  "jquery": true,
+  "esversion": 11,
+  "module": true,
+  "worker": true,
+  "undef": true,
+  "globals": {
+    "openpgp": false,
+    "once": false,
+    "drupalSettings": false,
+    "Drupal": false,
+    "jQuery": false,
+    "self": false,
+    "caches": false,
+    "console": false
+  }
+}

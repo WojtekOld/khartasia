@@ -11,22 +11,9 @@ use Drupal\Core\Entity\EntityInterface;
  */
 class ChainContextEntityResolver implements ChainContextEntityResolverInterface {
 
-  /**
-   * The resolvers.
-   *
-   * @var \Drupal\ui_patterns\Resolver\ContextEntityResolverInterface[]
-   */
-  protected $resolvers = [];
-
-  /**
-   * Constructs a new ChainBasePriceResolver object.
-   *
-   * @param \Drupal\ui_patterns\Resolver\ContextEntityResolverInterface[] $resolvers
-   *   The resolvers.
-   */
-  public function __construct(array $resolvers = []) {
-    $this->resolvers = $resolvers;
-  }
+  public function __construct(
+    protected array $resolvers = [],
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -38,7 +25,7 @@ class ChainContextEntityResolver implements ChainContextEntityResolverInterface 
   /**
    * {@inheritdoc}
    */
-  public function getResolvers():array {
+  public function getResolvers(): array {
     return $this->resolvers;
   }
 

@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginPropValueWidget;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -17,7 +18,7 @@ use Drupal\ui_patterns\SourcePluginPropValueWidget;
   label: new TranslatableMarkup('Checkbox'),
   description: new TranslatableMarkup('Single checkbox'),
   prop_types: ['boolean'],
-  tags: ['widget']
+  tags: [SourceTags::Widget->value]
 )]
 class CheckboxWidget extends SourcePluginPropValueWidget {
 

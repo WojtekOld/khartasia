@@ -6,27 +6,6 @@
  */
 
 /**
- * Implements hook_requirements().
- */
-function bibcite_bibtex_requirements($phase) {
-  $requirements = [];
-
-  switch ($phase) {
-    case 'runtime':
-    case 'install':
-      if (!class_exists('\RenanBr\BibTexParser\Parser')) {
-        $requirements['bibcite_bibtex_dependencies'] = [
-          'title' => t('BibTeX dependencies'),
-          'description' => t("Bibliography &amp; Citation - BibTeX requires the renanbr/bibtex-parser library. See the module's README.md file for more information."),
-          'severity' => REQUIREMENT_ERROR,
-        ];
-      }
-  }
-
-  return $requirements;
-}
-
-/**
  * Set mapping of bibtex language field.
  */
 function bibcite_bibtex_update_8001() {
@@ -35,7 +14,7 @@ function bibcite_bibtex_update_8001() {
   $fields = $config->get('fields');
   $fields['language'] = 'bibcite_lang';
   $config->set('fields', $fields);
-  $config->save(TRUE);
+  $config->save();
 }
 
 /**

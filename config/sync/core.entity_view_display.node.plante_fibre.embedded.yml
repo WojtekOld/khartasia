@@ -1,0 +1,142 @@
+uuid: dc5408ee-6f1d-4b01-b687-c12b0296add4
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.embedded
+    - field.field.node.plante_fibre.field_pf_cellules
+    - field.field.node.plante_fibre.field_pf_extremites
+    - field.field.node.plante_fibre.field_pf_graff_c
+    - field.field.node.plante_fibre.field_pf_herzberg
+    - field.field.node.plante_fibre.field_pf_larg_max
+    - field.field.node.plante_fibre.field_pf_larg_min
+    - field.field.node.plante_fibre.field_pf_long_max
+    - field.field.node.plante_fibre.field_pf_long_min
+    - field.field.node.plante_fibre.field_pf_notes
+    - field.field.node.plante_fibre.field_pf_particularites
+    - field.field.node.plante_fibre.field_pf_source
+    - field.field.node.plante_fibre.field_pf_striations
+    - field.field.node.plante_fibre.field_pf_type
+    - node.type.plante_fibre
+  module:
+    - options
+    - text
+    - user
+id: node.plante_fibre.embedded
+targetEntityType: node
+bundle: plante_fibre
+mode: embedded
+content:
+  field_pf_cellules:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_pf_extremites:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_pf_graff_c:
+    type: list_default
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_pf_herzberg:
+    type: list_default
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
+    region: content
+  field_pf_larg_max:
+    type: number_decimal
+    label: inline
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_pf_larg_min:
+    type: number_decimal
+    label: inline
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_pf_long_max:
+    type: number_decimal
+    label: inline
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_pf_long_min:
+    type: number_decimal
+    label: inline
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_pf_notes:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  field_pf_particularites:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_pf_source:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  field_pf_striations:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_pf_type:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  langcode: true
+  links: true
+  search_api_excerpt: true

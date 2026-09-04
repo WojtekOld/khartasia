@@ -30,7 +30,7 @@ function bibcite_entity_update_8001() {
   foreach ($config_factory->listAll('bibcite_entity.bibliography_type') as $config_name) {
     $config = $config_factory->getEditable($config_name);
     $config->setName("bibcite_entity.bibcite_reference_type.{$config->get('id')}");
-    $config->save(TRUE);
+    $config->save();
   }
 }
 
@@ -92,7 +92,7 @@ function bibcite_entity_update_8004() {
   foreach ($config_factory->listAll('bibcite_entity.bibcite_reference_type') as $config_name) {
     $config = $config_factory->getEditable($config_name);
     $config->set('override', TRUE);
-    $config->save(TRUE);
+    $config->save();
   }
 
   $config = $config_factory->getEditable('bibcite_entity.reference.settings');
@@ -116,7 +116,7 @@ function bibcite_entity_update_8005() {
       $value = $yaml['description'];
 
       $config->set('description', $value);
-      $config->save(TRUE);
+      $config->save();
     }
   }
 }
@@ -138,7 +138,7 @@ function bibcite_entity_update_8006() {
       foreach ($yaml as $key => $value) {
         $config->set($key, $value);
       }
-      $config->save(TRUE);
+      $config->save();
     }
   }
 
@@ -151,7 +151,7 @@ function bibcite_entity_update_8006() {
       foreach ($yaml as $key => $value) {
         $config->set($key, $value);
       }
-      $config->save(TRUE);
+      $config->save();
     }
   }
 
@@ -170,7 +170,7 @@ function bibcite_entity_update_8006() {
       foreach ($yaml as $key => $value) {
         $config->set($key, $value);
       }
-      $config->save(TRUE);
+      $config->save();
     }
   }
 
@@ -194,7 +194,7 @@ function bibcite_entity_update_8006() {
           foreach ($yaml as $key => $value) {
             $config->set($key, $value);
           }
-          $config->save(TRUE);
+          $config->save();
         }
       }
     }
@@ -214,7 +214,7 @@ function bibcite_entity_update_8006() {
         foreach ($yaml as $key => $value) {
           $default_config->set($key, $value);
         }
-        $default_config->save(TRUE);
+        $default_config->save();
       }
       else {
         // If user change default view mode set it to table view mode.
@@ -222,7 +222,7 @@ function bibcite_entity_update_8006() {
         foreach ($yaml as $key => $value) {
           $table_config->set($key, $default_config[$key]);
         }
-        $table_config->save(TRUE);
+        $table_config->save();
       }
     }
 
@@ -248,7 +248,7 @@ function bibcite_entity_update_8006() {
   $override = $config->get('display_override.enable_display_override');
   $config->clear('display_override.enable_display_override');
   $config->set('display_override.reference_page_view_mode', $override ? 'table' : 'default');
-  $config->save(TRUE);
+  $config->save();
 }
 
 /**
@@ -272,7 +272,7 @@ function bibcite_entity_update_8007() {
         foreach ($yaml as $key => $value) {
           $config->set($key, $value);
         }
-        $config->save(TRUE);
+        $config->save();
       }
     }
   }
@@ -292,7 +292,7 @@ function bibcite_entity_update_8008() {
     $hidden = $config->get('hidden');
     $hidden['bibcite_type'] = TRUE;
     $config->set('hidden', $hidden);
-    $config->save(TRUE);
+    $config->save();
   }
 }
 
@@ -376,7 +376,7 @@ function bibcite_entity_update_8010() {
       }
     }
     $config->set('display', $displays);
-    $config->save(TRUE);
+    $config->save();
   }
 
   // Update keyword admin view.
@@ -389,7 +389,7 @@ function bibcite_entity_update_8010() {
       }
     }
     $config->set('display', $displays);
-    $config->save(TRUE);
+    $config->save();
   }
 
   // Update reference admin view.
@@ -402,7 +402,7 @@ function bibcite_entity_update_8010() {
       }
     }
     $config->set('display', $displays);
-    $config->save(TRUE);
+    $config->save();
   }
 }
 
@@ -650,8 +650,8 @@ function bibcite_entity_update_8015(&$sandbox) {
 
   if ($rows) {
     foreach ($rows as $row) {
-      $revision_created = isset($row->revision_created) ? $row->revision_created : $row->created;
-      $revision_user = isset($row->revision_user) ? $row->revision_user : $row->uid;
+      $revision_created = $row->revision_created ?? $row->created;
+      $revision_user = $row->revision_user ?? $row->uid;
       $database->update($table_name)
         ->fields(['revision_created' => $revision_created, 'revision_user' => $revision_user])
         ->condition('revision_id', $row->revision_id)
@@ -731,7 +731,7 @@ function bibcite_entity_update_8019() {
   $data = ['uuid' => \Drupal::service('uuid')->generate()]
     + $file_storage->read($config_name);
   $config->setData($data);
-  $config->save(TRUE);
+  $config->save();
 
   return t('%view_name view has been created.', ['%view_name' => 'Keyword']);
 }
@@ -759,7 +759,7 @@ function bibcite_entity_update_8020() {
   $data = ['uuid' => \Drupal::service('uuid')->generate()]
     + $file_storage->read($config_name);
   $config->setData($data);
-  $config->save(TRUE);
+  $config->save();
 
   return t('%view_name view has been created.', ['%view_name' => 'Contributor']);
 }
@@ -786,7 +786,7 @@ function bibcite_entity_update_8021() {
       $data = ['uuid' => $config->get('uuid')]
         + $file_storage->read($config_name);
       $config->setData($data);
-      $config->save(TRUE);
+      $config->save();
     }
   }
 }
@@ -807,7 +807,7 @@ function bibcite_entity_update_8022() {
     'suffix',
   ];
   foreach ($fields_to_update as $field_name) {
-    /** @var BaseFieldDefinition $field_storage_definition */
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field_storage_definition */
     $field_storage_definition = $definition_update_manager->getFieldStorageDefinition($field_name, 'bibcite_contributor');
     $field_storage_definition->setDisplayConfigurable('view', TRUE);
     $field_storage_definition->setDisplayConfigurable('form', TRUE);
@@ -1115,7 +1115,7 @@ function bibcite_entity_update_8024() {
   if ($config->isNew()) {
     $data = $file_storage->read($config_name);
     $config->setData($data);
-    $config->save(TRUE);
+    $config->save();
   }
 }
 
@@ -1178,7 +1178,7 @@ function bibcite_entity_update_8025() {
           $data = ['uuid' => \Drupal::service('uuid')->generate()]
             + $file_storage->read($config_name);
           $config->setData($data);
-          $config->save(TRUE);
+          $config->save();
         }
       }
     }
@@ -1194,7 +1194,7 @@ function bibcite_entity_update_8025() {
         unset($fields[$field_name]['visible']);
       }
       $config->set('fields', $fields);
-      $config->save(TRUE);
+      $config->save();
     }
   }
 }
@@ -1243,7 +1243,7 @@ function bibcite_entity_update_8027(&$sandbox) {
 
   $bibcite_reference = $definition_update_manager->getEntityType('bibcite_reference');
   $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('bibcite_reference');
-  /** @var BaseFieldDefinition $keywords */
+  /** @var \Drupal\Core\Field\BaseFieldDefinition $keywords */
   $keywords = $field_storage_definitions['keywords'];
   $keywords_settings = $keywords->getSettings();
   $keywords_settings += [
@@ -1389,7 +1389,7 @@ function bibcite_entity_update_8030() {
   $fields['PMCID'] = 'bibcite_pmcid';
   $fields['PMID'] = 'bibcite_pmid';
   $config->set('fields', $fields);
-  $config->save(TRUE);
+  $config->save();
 
   // Add PMCID field to Edit forms.
   $config_factory = \Drupal::configFactory();
@@ -1409,7 +1409,7 @@ function bibcite_entity_update_8030() {
         foreach ($yaml as $key => $value) {
           $config->set($key, $value);
         }
-        $config->save(TRUE);
+        $config->save();
       }
     }
   }
@@ -1430,7 +1430,7 @@ function bibcite_entity_update_8030() {
         foreach ($yaml as $key => $value) {
           $config->set($key, $value);
         }
-        $config->save(TRUE);
+        $config->save();
       }
     }
   }

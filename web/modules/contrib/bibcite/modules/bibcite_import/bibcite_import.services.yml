@@ -1,0 +1,5 @@
+
+services:
+  Drupal\bibcite_import\Hook\BibciteImportHooks:
+    class: Drupal\bibcite_import\Hook\BibciteImportHooks
+    autowire: true

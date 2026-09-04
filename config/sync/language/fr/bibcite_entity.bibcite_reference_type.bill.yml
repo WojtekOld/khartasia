@@ -1,0 +1,12 @@
+label: Loi
+fields:
+  bibcite_secondary_title:
+    label: Code
+  bibcite_edition:
+    label: Session
+  bibcite_number:
+    label: 'Numéro de facture'
+  bibcite_pages:
+    label: 'Pages de code'
+  bibcite_original_publication:
+    label: Historique

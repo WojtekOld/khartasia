@@ -7,10 +7,17 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Update\UpdateHookRegistry;
+
 /**
  * Implements hook_update_last_removed().
  */
 function ui_patterns_layouts_update_last_removed(): int {
-  // The update in 1.x which replaced layout_plugin with layout_discovery.
-  return 8101;
+  $currentInstalledVersion = Drupal::service(UpdateHookRegistry::class)
+    ->getInstalledVersion('ui_patterns_layout');
+  if ($currentInstalledVersion >= 8101) {
+    // The update in 1.x which replaced layout_plugin with layout_discovery.
+    return 8101;
+  }
+  return 0;
 }

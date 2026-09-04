@@ -6,6 +6,7 @@ namespace Drupal\Tests\ui_patterns\Traits;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\Schema\SchemaCheckTrait;
+use Drupal\Core\Config\StorageCacheInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
 
 /**
@@ -25,7 +26,10 @@ trait ConfigImporterTrait {
    */
   private function initializeConfig() {
     if ($this->configInitialize === FALSE) {
-      $this->copyConfig(\Drupal::service('config.storage'), \Drupal::service('config.storage.sync'));
+      $this->copyConfig(
+        \Drupal::service(StorageCacheInterface::class),
+        \Drupal::service('config.storage.sync'),
+      );
     }
     $this->configInitialize = TRUE;
   }
@@ -39,8 +43,8 @@ trait ConfigImporterTrait {
    * @return array
    *   The fixture.
    */
-  public function loadConfigFixture(string $path):array {
-    $yaml = file_get_contents($path);
+  public function loadConfigFixture(string $path): array {
+    $yaml = \file_get_contents($path);
     if ($yaml === FALSE) {
       throw new \InvalidArgumentException($path . ' not found.');
     }
@@ -56,7 +60,7 @@ trait ConfigImporterTrait {
    * @return array
    *   The builded configuration.
    */
-  protected function buildUiPatternsConfig(array $test_set):array {
+  protected function buildUiPatternsConfig(array $test_set): array {
     if (!isset($test_set['component']['slots'])) {
       $test_set['component']['slots'] = [];
     }
@@ -73,7 +77,7 @@ trait ConfigImporterTrait {
    */
   public function importConfigFixture(string $config_id, array $config) {
     $this->initializeConfig();
-    $type_data = \Drupal::service('Drupal\Core\Config\TypedConfigManagerInterface');
+    $type_data = \Drupal::service(TypedConfigManagerInterface::class);
     $this->assertConfigSchema($type_data, $config_id, $config);
     \Drupal::service('config.storage.sync')->write($config_id, $config);
     $config_importer = $this->configImporter();
@@ -97,14 +101,14 @@ trait ConfigImporterTrait {
       $message = 'Error: No schema exists.';
     }
     elseif ($check !== TRUE) {
-      $this->assertIsArray($check, "The config schema check errors should be in the form of an array.");
+      $this->assertIsArray($check, 'The config schema check errors should be in the form of an array.');
       $message = "Errors:\n";
       foreach ($check as $key => $error) {
-        $message .= "Schema key $key failed with: $error\n";
+        $message .= "Schema key {$key} failed with: {$error}\n";
       }
-      $message .= print_r($config_data, TRUE);
+      $message .= \print_r($config_data, TRUE);
     }
-    $this->assertTrue($check, "There should be no errors in configuration '$config_name'. $message");
+    $this->assertTrue($check, "There should be no errors in configuration '{$config_name}'. {$message}");
   }
 
 }

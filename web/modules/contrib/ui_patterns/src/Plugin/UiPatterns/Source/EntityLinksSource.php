@@ -21,9 +21,12 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
   id: 'entity_link',
   label: new TranslatableMarkup('[Entity] Link'),
   description: new TranslatableMarkup('Url from an entity link.'),
-  prop_types: ['url'], tags: ['entity'],
+  prop_types: ['url'],
   context_definitions: [
-    'entity' => new ContextDefinition('entity', label: new TranslatableMarkup('Entity'), required: TRUE
+    'entity' => new ContextDefinition(
+      'entity',
+      label: new TranslatableMarkup('Entity'),
+      required: TRUE
     ),
   ]
 )]
@@ -44,7 +47,7 @@ class EntityLinksSource extends SourcePluginBase {
    */
   public function getPropValue(): mixed {
     $urls = $this->getPropValueUrlAndString();
-    return $urls["url_string"] ?? '';
+    return $urls['url_string'] ?? '';
   }
 
   /**
@@ -61,46 +64,51 @@ class EntityLinksSource extends SourcePluginBase {
   /**
    * Returns the url from context and configuration.
    *
-   * @return array<string, NULL|string|Url>
-   *   url and url as string in an array
-   *
    * @throws \Drupal\Component\Plugin\Exception\ContextException
    * @throws \Drupal\Core\Entity\EntityMalformedException
+   *
+   * @return array<string, null|string|Url>
+   *   url and url as string in an array
    */
-  protected function getPropValueUrlAndString() : array {
+  protected function getPropValueUrlAndString(): array {
     $is_absolute = $this->isAbsoluteUrl();
     $empty_return = [
-      "url" => NULL,
-      "url_string" => "",
+      'url' => NULL,
+      'url_string' => '',
     ];
     $template = $this->getSetting('template');
     if (!$template) {
       return $empty_return;
     }
     $link_templates = $this->getEntityLinkTemplates();
-    if (!array_key_exists($template, $link_templates)) {
+    if (!\array_key_exists($template, $link_templates)) {
       return $empty_return;
     }
-    $entity = $this->getContextValue("entity");
+    $entity = $this->getContextValue('entity');
     $link_templates = [];
     if (($entity instanceof EntityInterface) && $entity->id()) {
       try {
-        $url = $entity->toUrl($template, ["absolute" => $is_absolute]);
-        $url_string = $url->toString();
+        $url = $entity->toUrl($template, ['absolute' => $is_absolute]);
+        // Same gate as a link element: no URL to a page the user cannot
+        // open. The access cacheability is kept either way.
+        $access = $url->access(NULL, TRUE);
+        $this->addCacheableDependency($access);
+        if (!$access->isAllowed()) {
+          return $empty_return;
+        }
         return [
-          "url" => $url,
-          "url_string" => $url_string,
+          'url' => $url,
+          'url_string' => $url->toString(),
         ];
       }
       catch (RouteNotFoundException $e) {
         $link_template_entity_type = $entity->getEntityType()->getLinkTemplate($template);
-        $link_template_entity_type_url = Url::fromUri("internal:" . $link_template_entity_type, ["absolute" => $is_absolute]);
+        $link_template_entity_type_url = Url::fromUri('internal:' . $link_template_entity_type, ['absolute' => $is_absolute]);
         return [
-          "url" => $link_template_entity_type_url,
-          "url_string" => $link_template_entity_type_url->toString(),
+          'url' => $link_template_entity_type_url,
+          'url_string' => $link_template_entity_type_url->toString(),
         ];
       }
-
     }
     return $empty_return;
   }
@@ -111,15 +119,15 @@ class EntityLinksSource extends SourcePluginBase {
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
     $entity_links = $this->getEntityLinkTemplates();
-    $link_templates_options = array_keys($entity_links);
-    $link_templates_options = array_combine($link_templates_options, $link_templates_options);
-    asort($link_templates_options);
-    $form["template"] = [
+    $link_templates_options = \array_keys($entity_links);
+    $link_templates_options = \array_combine($link_templates_options, $link_templates_options);
+    \asort($link_templates_options);
+    $form['template'] = [
       '#type' => 'select',
-      '#title' => $this->t("Select"),
+      '#title' => $this->t('Select'),
       '#options' => $link_templates_options,
       '#default_value' => $this->getSetting('template') ?? '',
-      "#empty_option" => $this->t("- Select -"),
+      '#empty_option' => $this->t('- Select -'),
       '#empty_value' => '',
     ];
     $form['absolute'] = [
@@ -146,7 +154,7 @@ class EntityLinksSource extends SourcePluginBase {
    *   List of menus.
    */
   protected function getEntityLinkTemplates(): array {
-    $entity = $this->getContextValue("entity");
+    $entity = $this->getContextValue('entity');
     $link_templates = [];
     if ($entity instanceof EntityInterface) {
       $link_templates = $entity->getEntityType()->getLinkTemplates();
@@ -158,7 +166,7 @@ class EntityLinksSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function alterComponent(array $element): array {
-    $entity = $this->getContextValue("entity");
+    $entity = $this->getContextValue('entity');
     if (!($entity instanceof EntityInterface)) {
       return $element;
     }

@@ -5,12 +5,15 @@
  * UI Patterns tests module.
  */
 
-/**
- * Implements hook_component_definition_alter().
- */
-function ui_patterns_test_component_info_alter(array &$definitions): void {
-  if (isset($definitions['ui_patterns_test:test-component'])) {
-    $definitions['ui_patterns_test:test-component']['variants']['hook'] = ['title' => 'Hook altered'];
-  }
+declare(strict_types=1);
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\ui_patterns_test\Hook\UiPatternsTestTokensHooks;
+
+/**
+ * Implements hook_component_info_alter().
+ */
+#[LegacyHook]
+function ui_patterns_test_component_info_alter(array &$definitions): void {
+  Drupal::service(UiPatternsTestTokensHooks::class)->componentInfoAlter($definitions);
 }

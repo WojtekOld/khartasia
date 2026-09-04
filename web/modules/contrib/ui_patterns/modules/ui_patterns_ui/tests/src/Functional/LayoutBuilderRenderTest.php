@@ -1,17 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ui_patterns_ui\Functional;
 
 use Drupal\Tests\ui_patterns\Functional\UiPatternsFunctionalTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test components rendering as layouts.
  *
- * @group ui_patterns_layouts
+ * @internal
+ *
+ * @coversNothing
  */
-class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
-
+#[Group('ui_patterns')]
+#[Group('ui_patterns_layouts')]
+#[RunTestsInSeparateProcesses]
+final class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
 
   use TestDataTrait;
 
@@ -37,7 +45,7 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
 
     $config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/core.entity_view_display.node.page.full.yml');
     $ui_patterns_config = &$config_import['third_party_settings']['layout_builder']['sections'][0]['layout_settings']['ui_patterns'];
-    $test_data = $this->loadTestDataFixture(__DIR__ . "/../../fixtures/TestDataSet.yml");
+    $test_data = $this->loadTestDataFixture(__DIR__ . '/../../fixtures/TestDataSet.yml');
     $test_set = $test_data->getTestSet('display_test_1');
     $this->createTestContentContentType();
     $ui_patterns_config = $this->buildUiPatternsConfig($test_set);
@@ -68,14 +76,14 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
       $display_config_import
     );
     $ui_patterns_config = &$config_import['third_party_settings']['layout_builder']['sections'][0]['layout_settings']['ui_patterns'];
-    $test_data = $this->loadTestDataFixture(__DIR__ . "/../../fixtures/TestDataSet.yml");
+    $test_data = $this->loadTestDataFixture(__DIR__ . '/../../fixtures/TestDataSet.yml');
     $tests = [
       $test_data->getTestSet('display_test_1'),
     ];
 
     foreach ($tests as $test_set) {
       $ui_patterns_config = $this->buildUiPatternsConfig($test_set);
-      $config_import['third_party_settings']['layout_builder']['sections'][0]['layout_id'] = 'ui_patterns:' . str_replace('-', '_', $test_set['component']['component_id']);
+      $config_import['third_party_settings']['layout_builder']['sections'][0]['layout_id'] = 'ui_patterns:' . \str_replace('-', '_', $test_set['component']['component_id']);
       $this->importConfigFixture(
         'core.entity_view_display.node.page.full',
         $config_import
@@ -84,7 +92,7 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
 
       $this->drupalGet('admin/structure/types/manage/page/display/full/layout');
       $assert_session->statusCodeEquals(200);
-      $component_id = str_replace('_', '-', explode(':', $test_set['component']['component_id'])[1]);
+      $component_id = \str_replace('_', '-', \explode(':', $test_set['component']['component_id'])[1]);
       $assert_session->elementExists('css', '.ui-patterns-' . $component_id);
       $this->drupalGet('node/' . $node->id());
       $assert_session->statusCodeEquals(200);

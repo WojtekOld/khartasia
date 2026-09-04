@@ -6,7 +6,7 @@ package: 'Testing'
 libraries:
   - ui_styles_stylesheet_generator_test/bar
 
-# Information added by Drupal.org packaging script on 2025-11-12
-version: '8.x-1.19'
+# Information added by Drupal.org packaging script on 2026-07-25
+version: '8.x-1.21'
 project: 'ui_styles'
-datestamp: 1762942727
+datestamp: 1784988870

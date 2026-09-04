@@ -1,0 +1,5 @@
+# This file contains patterns to be ignored while testing for use of
+# deprecated code.
+# See https://www.drupal.org/node/3285162 for more details.
+
+%sophron_requirements without a #\[LegacyRequirementsHook\] attribute is deprecated%

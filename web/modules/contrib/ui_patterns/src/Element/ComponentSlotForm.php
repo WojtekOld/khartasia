@@ -10,7 +10,9 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
+use Drupal\ui_patterns\PropTypePluginManager;
 
 /**
  * Component to render a single slot.
@@ -26,6 +28,7 @@ use Drupal\Core\Render\Element;
  *     'sources' => [],
  *   ],
  * ];
+ *
  * @endcode
  *
  * Value example:
@@ -36,6 +39,7 @@ use Drupal\Core\Render\Element;
  *        ['source_id' => 'id', 'value' => []]
  *      ]
  *    ]
+ *
  * @endcode
  *
  * Configuration:
@@ -47,23 +51,24 @@ use Drupal\Core\Render\Element;
  * '#tag_filter' =>Filter sources based on these tags.
  * '#display_remove' =>Display or hide the remove button. Default = true
  * '#cardinality_multiple' =>Allow or disallow multiple slot items
- *
- * @FormElement("component_slot_form")
+ * '#max_items' => Sources the slot accepts. NULL reads maxItems from the slot
+ *   definition; the add select is disabled once the count is reached.
  */
+#[FormElement('component_slot_form')]
 class ComponentSlotForm extends ComponentFormBase {
 
   /**
    * {@inheritdoc}
    */
   public static function trustedCallbacks() {
-    return array_merge(parent::trustedCallbacks(), ['postRenderSlotTable']);
+    return \array_merge(parent::trustedCallbacks(), ['postRenderSlotTable']);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = get_class($this);
+    $class = static::class;
     return [
       '#input' => TRUE,
       '#multiple' => FALSE,
@@ -75,6 +80,7 @@ class ComponentSlotForm extends ComponentFormBase {
       '#component_id' => NULL,
       '#slot_id' => NULL,
       '#cardinality_multiple' => TRUE,
+      '#max_items' => NULL,
       '#process' => [
         [$class, 'buildForm'],
         [$class, 'processPropOrSlot'],
@@ -82,13 +88,13 @@ class ComponentSlotForm extends ComponentFormBase {
       '#pre_render' => [
         [$class, 'preRenderPropOrSlot'],
       ],
-      "#wrap" => TRUE,
-      "#title_in_component" => NULL,
+      '#wrap' => TRUE,
+      '#title_in_component' => NULL,
       '#after_build' => [
         [$class, 'afterBuild'],
       ],
       '#element_validate' => [
-          [$class, 'elementValidate'],
+        [$class, 'elementValidate'],
       ],
     ];
   }
@@ -96,7 +102,7 @@ class ComponentSlotForm extends ComponentFormBase {
   /**
    * {@inheritdoc}
    */
-  protected static function cleanValues(array &$value) : void {
+  protected static function cleanValues(array &$value): void {
     if (isset($value['add_more_button'])) {
       unset($value['add_more_button']);
     }
@@ -113,42 +119,65 @@ class ComponentSlotForm extends ComponentFormBase {
   /**
    * {@inheritdoc}
    */
-  public static function afterBuild(array $element, FormStateInterface $form_state) : array {
+  public static function afterBuild(array $element, FormStateInterface $form_state): array {
     $trigger_element = $form_state->getTriggeringElement();
-    if (isset($trigger_element['#ui_patterns_slot']) && ($trigger_element['#ui_patterns_slot_parents'] == $element['#parents'])) {
+    if (isset($trigger_element['#ui_patterns_slot']) && ($trigger_element['#ui_patterns_slot_parents'] === $element['#parents'])) {
       $value = $form_state->getValue($trigger_element['#ui_patterns_slot_parents']);
       if (isset($trigger_element['#ui_patterns_slot_operation']) && $slot_operation = $trigger_element['#ui_patterns_slot_operation']) {
         switch ($slot_operation) {
           case 'remove':
             $delta_to_remove = $trigger_element['#delta'];
-            $value['sources'] = array_filter($value['sources'], function ($key) use ($delta_to_remove) {
+            $value['sources'] = \array_filter($value['sources'], static function ($key) use ($delta_to_remove) {
               return $key !== $delta_to_remove;
-            }, ARRAY_FILTER_USE_KEY);
-            $element["sources"] = array_filter($element["sources"], function ($key) use ($delta_to_remove) {
+            }, \ARRAY_FILTER_USE_KEY);
+            $element['sources'] = \array_filter($element['sources'], static function ($key) use ($delta_to_remove) {
               return $key !== $delta_to_remove;
-            }, ARRAY_FILTER_USE_KEY);
+            }, \ARRAY_FILTER_USE_KEY);
             break;
         }
       }
       $element['#default_value'] = $value;
+      static::applyMaxItems($element);
     }
-    parent::afterBuild($element, $form_state);
-    return $element;
+
+    return parent::afterBuild($element, $form_state);
+  }
+
+  /**
+   * Disables the add select once the slot holds #max_items sources.
+   *
+   * Called again from afterBuild(): a remove drops its row there, with no
+   * rebuild when the form has validation errors, so the build-time state
+   * (and the attribute FormBuilder derived from it) must follow.
+   */
+  protected static function applyMaxItems(array &$element): void {
+    if (!isset($element['add_more_button']) || $element['#max_items'] === NULL) {
+      return;
+    }
+    $reached = \count($element['#default_value']['sources'] ?? []) >= $element['#max_items'];
+    $element['add_more_button']['#disabled'] = $reached;
+    if ($reached) {
+      $element['add_more_button']['#attributes']['disabled'] = 'disabled';
+      $element['add_more_button']['#description'] = \t('This slot accepts @count items at most.', ['@count' => $element['#max_items']]);
+    }
+    else {
+      unset($element['add_more_button']['#attributes']['disabled'], $element['add_more_button']['#description']);
+    }
   }
 
   /**
    * Handle the rebuild of the form and operations.
    */
-  protected static function handleFormRebuild(array &$element, FormStateInterface $form_state) : void {
+  protected static function handleFormRebuild(array &$element, FormStateInterface $form_state): void {
     $trigger_element = $form_state->getTriggeringElement();
     if ($form_state->isRebuilding() && isset($trigger_element['#ui_patterns_slot'])) {
-      if ($trigger_element['#ui_patterns_slot_parents'] == $element['#parents']) {
+      if ($trigger_element['#ui_patterns_slot_parents'] === $element['#parents']) {
         $value = $form_state->getValue($trigger_element['#ui_patterns_slot_parents']);
         if (isset($trigger_element['#ui_patterns_slot_operation']) && $slot_operation = $trigger_element['#ui_patterns_slot_operation']) {
           switch ($slot_operation) {
             case 'add':
               $value['sources'][] = [
-                'source_id' => $trigger_element['#source_id'] ?? ($trigger_element["#value"] ?? NULL),
+                'source_id' => $trigger_element['#source_id'] ?? ($trigger_element['#value'] ?? NULL),
                 'source' => [],
               ];
               break;
@@ -171,11 +200,10 @@ class ComponentSlotForm extends ComponentFormBase {
       $definition = $slots[$slot_id];
     }
     else {
-      /** @var \Drupal\ui_patterns\PropTypePluginManager $prop_type_manager */
-      $prop_type_manager = \Drupal::service("plugin.manager.ui_patterns_prop_type");
+      $prop_type_manager = \Drupal::service(PropTypePluginManager::class);
       $definition = [
         'ui_patterns' => [
-          "type_definition" => $prop_type_manager->createInstance('slot', []),
+          'type_definition' => $prop_type_manager->createInstance('slot', []),
         ],
       ];
     }
@@ -185,10 +213,11 @@ class ComponentSlotForm extends ComponentFormBase {
     $element['#title_in_component'] = $element['#title'];
     $element['#title'] = '';
     $element['sources'] = static::buildSourcesForm($element, $form_state, $definition, $wrapper_id);
-    if ($element['#cardinality_multiple'] === TRUE ||
-      (!isset($element['#default_value']['sources']) || count($element['#default_value']['sources']) === 0)) {
+    if ($element['#cardinality_multiple'] === TRUE || \count($element['#default_value']['sources'] ?? []) === 0) {
       $element['add_more_button'] = static::buildAddSourceButton($element, $definition, $wrapper_id);
     }
+    $element['#max_items'] ??= $definition['maxItems'] ?? NULL;
+    static::applyMaxItems($element);
     $element['#prefix'] = '<div id="' . $wrapper_id . '">';
     $element['#suffix'] = '</div>';
     return $element;
@@ -252,18 +281,22 @@ class ComponentSlotForm extends ComponentFormBase {
     ];
     // Add fake #field_name to avoid errors from
     // template_preprocess_field_multiple_value_form.
-    $form['#field_name'] = "foo";
+    $form['#field_name'] = 'foo';
     if (!isset($configuration['sources'])) {
       return $form;
     }
     $slot_id = self::getSlotId($element);
-    $n_sources = count($configuration['sources']);
+    $n_sources = \count($configuration['sources']);
     foreach ($configuration['sources'] as $delta => $source_configuration) {
       $form[$delta] = static::buildSourceForm(
-            array_merge($element, [
-              "#default_value" => $source_configuration,
-              "#array_parents" => array_merge($element["#array_parents"], [$delta]),
-            ]), $form_state, $definition, $source_configuration);
+        \array_merge($element, [
+          '#default_value' => $source_configuration,
+          '#array_parents' => \array_merge($element['#array_parents'], [$delta]),
+        ]),
+        $form_state,
+        $definition,
+        $source_configuration
+      );
       if ($element['#display_remove'] ?? TRUE) {
         $form[$delta]['_remove'] = static::buildRemoveSourceButton($element, $slot_id, $wrapper_id, $delta);
       }
@@ -280,7 +313,7 @@ class ComponentSlotForm extends ComponentFormBase {
   protected static function buildSlotWeight(array $configuration, int $delta, int $weight_delta): array {
     return [
       '#type' => 'weight',
-      '#title' => t(
+      '#title' => \t(
         'Weight for row @number',
         ['@number' => $delta + 1]
       ),
@@ -294,14 +327,14 @@ class ComponentSlotForm extends ComponentFormBase {
   /**
    * Build single source form.
    */
-  public static function buildSourceForm(array $element, FormStateInterface $form_state, array $definition, array $configuration): array {
+  public static function buildSourceForm(array $element, FormStateInterface $form_state, array $definition, array $configuration, bool $select_default = TRUE): array {
     $slot_id = self::getSlotId($element);
     if (!isset($element['#default_value'])) {
       $element['#default_value'] = $configuration;
     }
     $wrapper_id = static::getElementId($element, 'ui-patterns-slot-item-' . $slot_id);
     $sources = static::getSources($slot_id, $definition, $element);
-    $selected_source = static::getSelectedSource($configuration, $sources);
+    $selected_source = static::getSelectedSource($configuration, $sources, $select_default);
     $source_selector = static::buildSourceSelector($sources, $selected_source, $wrapper_id);
     $form = [
       'source_id' => $source_selector,
@@ -312,7 +345,9 @@ class ComponentSlotForm extends ComponentFormBase {
         ],
       ],
       'node_id' => ['#type' => 'hidden', '#default_value' => $configuration['node_id'] ?? ''],
-      'third_party_settings' => ['#type' => 'hidden', '#default_value' => $configuration['third_party_settings'] ?? []],
+      // A value element, not a hidden input: an input posts a string, and the
+      // config schema expects a sequence.
+      'third_party_settings' => ['#type' => 'value', '#value' => $configuration['third_party_settings'] ?? []],
     ];
 
     if (empty($slot_id)) {
@@ -329,11 +364,11 @@ class ComponentSlotForm extends ComponentFormBase {
    * Build widget to remove source.
    */
   protected static function buildRemoveSourceButton(array $element, string $slot_id, string $wrapper_id, int $delta): array {
-    $id = implode('-', $element['#array_parents']);
+    $id = \implode('-', $element['#array_parents']);
     $remove_action = [
       '#type' => 'submit',
-      '#name' => strtr($slot_id, '-', '_') . $id . '_' . $delta . '_remove',
-      '#value' => t('Remove'),
+      '#name' => \strtr($slot_id, '-', '_') . $id . '_' . $delta . '_remove',
+      '#value' => \t('Remove'),
       '#submit' => [
         static::class . '::rebuildForm',
       ],
@@ -368,9 +403,9 @@ class ComponentSlotForm extends ComponentFormBase {
     $sources = static::getSources($slot_id, $definition, $element);
     $options = static::sourcesToOptions($sources);
     return [
-      "#type" => "select",
-      "#empty_option" => t("- Select a source to add -"),
-      "#options" => $options,
+      '#type' => 'select',
+      '#empty_option' => \t('- Select a source to add -'),
+      '#options' => $options,
       '#submit' => [
         static::class . '::rebuildForm',
       ],
@@ -413,7 +448,7 @@ class ComponentSlotForm extends ComponentFormBase {
 
     // Html::getId will give us '-' char in name but we want '_' for now so
     // we use strtr to search&replace '-' to '_'.
-    $button['#name'] = strtr(Html::getId($button_base['#name']), '-', '_');
+    $button['#name'] = \strtr(Html::getId($button_base['#name']), '-', '_');
     $button['#id'] = static::getElementId($element, $button['#name']);
 
     if (isset($button['#ajax'])) {
@@ -434,27 +469,27 @@ class ComponentSlotForm extends ComponentFormBase {
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  public static function rebuildForm(array $form, FormStateInterface $form_state) : void {
+  public static function rebuildForm(array $form, FormStateInterface $form_state): void {
     $form_state->setRebuild();
   }
 
   /**
    * Ajax handler: Refresh sources form.
    */
-  public static function refreshForm(array $form, FormStateInterface $form_state) : mixed {
+  public static function refreshForm(array $form, FormStateInterface $form_state): mixed {
     $triggering_element = $form_state->getTriggeringElement();
     $wrapper_id = $triggering_element['#ajax']['wrapper'];
     $parents = $triggering_element['#ui_patterns_slot_array_parents'];
     $form_state->setRebuild(TRUE);
     $returned = NestedArray::getValue($form, $parents);
     $response = new AjaxResponse();
-    $returned["#prefix"] = "";
-    $returned["#suffix"] = "";
+    $returned['#prefix'] = '';
+    $returned['#suffix'] = '';
     $response->addCommand(new HtmlCommand('#' . $wrapper_id, $returned));
-    if (isset($triggering_element["#ui_patterns_slot_operation"]) && $triggering_element["#ui_patterns_slot_operation"] === "add") {
-      $selector = "#" . $triggering_element["#id"];
+    if (isset($triggering_element['#ui_patterns_slot_operation']) && $triggering_element['#ui_patterns_slot_operation'] === 'add') {
+      $selector = '#' . $triggering_element['#id'];
       if (!isset($returned['#cardinality_multiple']) || $returned['#cardinality_multiple'] !== FALSE) {
-        $response->addCommand(new InvokeCommand($selector, "val", [""]));
+        $response->addCommand(new InvokeCommand($selector, 'val', ['']));
       }
     }
     return $response;

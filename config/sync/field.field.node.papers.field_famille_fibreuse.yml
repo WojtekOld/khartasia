@@ -1,0 +1,21 @@
+uuid: 91bff6de-d7f7-4f71-93d1-9906f7017667
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_famille_fibreuse
+    - node.type.papers
+  module:
+    - options
+id: node.papers.field_famille_fibreuse
+field_name: field_famille_fibreuse
+entity_type: node
+bundle: papers
+label: 'Famille fibreuse'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\ui_patterns\SourceInterface;
+use Drupal\ui_patterns\SourceMetadataKey;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -20,10 +23,8 @@ abstract class FieldValueSourceBase extends FieldSourceBase implements SourceInt
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * {@inheritdoc}
@@ -42,8 +43,8 @@ abstract class FieldValueSourceBase extends FieldSourceBase implements SourceInt
       $plugin_definition
     );
     // Defined in parent class FieldSourceBase.
-    $instance->entityFieldManager = $container->get('entity_field.manager');
-    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->entityFieldManager = $container->get(EntityFieldManagerInterface::class);
+    $instance->entityTypeManager = $container->get(EntityTypeManagerInterface::class);
     return $instance;
   }
 
@@ -58,9 +59,9 @@ abstract class FieldValueSourceBase extends FieldSourceBase implements SourceInt
     if ($entity instanceof EntityInterface) {
       return $entity;
     }
-    if (isset($this->context["ui_patterns:field:items"])) {
+    if (isset($this->context['ui_patterns:field:items'])) {
       // Useful in the context of views.
-      $field_items = $this->getContextValue("ui_patterns:field:items");
+      $field_items = $this->getContextValue('ui_patterns:field:items');
       if ($field_items instanceof FieldItemListInterface) {
         return $field_items->getEntity();
       }
@@ -74,18 +75,18 @@ abstract class FieldValueSourceBase extends FieldSourceBase implements SourceInt
    * @return \Drupal\Core\Field\FieldItemListInterface|mixed|null
    *   Return the field items of entity.
    */
-  protected function getEntityFieldItemList():mixed {
-    $field_name = $this->getCustomPluginMetadata('field_name');
+  protected function getEntityFieldItemList(): mixed {
+    $field_name = $this->getMetadata(SourceMetadataKey::FieldName);
     if (empty($field_name)) {
       return NULL;
     }
-    /** @var  \Drupal\Core\Entity\ContentEntityBase $entity */
+    /** @var \Drupal\Core\Entity\ContentEntityBase $entity */
     $entity = $this->getEntity();
-    if (!$entity && isset($this->context["ui_patterns:field:items"])) {
+    if (!$entity && isset($this->context['ui_patterns:field:items'])) {
       $field_items = $this->getContextValue('ui_patterns:field:items');
       if ($field_items instanceof FieldItemListInterface) {
-        if ($field_items->getFieldDefinition()->getName() == $field_name) {
-          return $field_items;
+        if ($field_items->getFieldDefinition()->getName() === $field_name) {
+          return $this->getViewableFieldItemList($field_items);
         }
         $entity = $field_items->getEntity();
       }
@@ -100,12 +101,24 @@ abstract class FieldValueSourceBase extends FieldSourceBase implements SourceInt
       $this->getLogger('ui_patterns')
         ->error('Entity %entity_type %bundle has no field %field_name', [
           '%entity_type' => $entity->getEntityTypeId(),
-          '%bundle' => $entity->bundle() ?? "",
+          '%bundle' => $entity->bundle() ?? '',
           '%field_name' => $field_name,
         ]);
       return NULL;
     }
-    return $entity->get($field_name);
+    return $this->getViewableFieldItemList($entity->get($field_name));
+  }
+
+  /**
+   * The field items when the user may view the field, NULL otherwise.
+   *
+   * Same gate as core before a formatter runs: seeing the entity does not
+   * mean seeing every field. The access cacheability is kept either way.
+   */
+  protected function getViewableFieldItemList(FieldItemListInterface $items): ?FieldItemListInterface {
+    $access = $items->access('view', NULL, TRUE);
+    $this->addCacheableDependency($access);
+    return $access->isAllowed() ? $items : NULL;
   }
 
   /**

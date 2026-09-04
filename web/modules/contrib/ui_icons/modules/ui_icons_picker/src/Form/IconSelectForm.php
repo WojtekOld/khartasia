@@ -33,14 +33,14 @@ final class IconSelectForm extends FormBase {
    *
    * @var \Drupal\ui_icons\IconSearch
    */
-  private IconSearch $iconSearch;
+  protected IconSearch $iconSearch;
 
   /**
    * Plugin manager for icons pack discovery and definitions.
    *
    * @var \Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface
    */
-  private ?IconPackManagerInterface $pluginManagerIconPack = NULL;
+  protected IconPackManagerInterface $pluginManagerIconPack;
 
   public function __construct(
     IconPackManagerInterface $pluginManagerIconPack,
@@ -71,33 +71,13 @@ final class IconSelectForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?array $options = NULL): array {
-    $request = $this->getRequest();
-
-    if (!$request->query->has('dialogOptions')) {
-      $redirect = $this->redirect('<front>');
-      $redirect->send();
+    if (!$dialog_options = $this->resolveDialogOptions()) {
       return [];
     }
-
-    $options = $request->query->all('dialogOptions');
-    $wrapper_id = $options['query']['wrapper_id'] ?? NULL;
-
-    if (NULL === $wrapper_id) {
-      $redirect = $this->redirect('<front>');
-      $redirect->send();
-      return [];
-    }
-
-    $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? [];
-    if (!empty($allowed_icon_pack)) {
-      $allowed_icon_pack = explode('+', $allowed_icon_pack);
-    }
-    else {
-      $allowed_icon_pack = [];
-    }
+    ['wrapper_id' => $wrapper_id, 'allowed_icon_pack' => $allowed_icon_pack] = $dialog_options;
 
     if (!$modal_state = static::getModalState($form_state)) {
-      $icon_list = $this->getIconPackManager()->getIcons($allowed_icon_pack);
+      $icon_list = $this->pluginManagerIconPack->getIcons($allowed_icon_pack);
       $modal_state = [
         'page' => 0,
         'icon_list' => $icon_list,
@@ -116,7 +96,7 @@ final class IconSelectForm extends FormBase {
       $pager = $this->createPager($modal_state['page'], $total_available);
     }
     else {
-      $icons = $this->getIconSearch()->search($query, $allowed_icon_pack, $total_available);
+      $icons = $this->iconSearch->search($query, $allowed_icon_pack, $total_available);
       $pager = $this->createPager($modal_state['page'], count($icons));
     }
 
@@ -139,38 +119,7 @@ final class IconSelectForm extends FormBase {
       ],
     ];
 
-    $form['filters'] = [
-      '#type' => 'container',
-      '#attributes' => [
-        'class' => ['container-inline'],
-      ],
-    ];
-
-    $form['filters']['filter'] = [
-      '#type' => 'search',
-      '#title' => $this->t('Filter'),
-      '#placeholder' => $this->t('Filter by name'),
-      '#title_display' => 'invisible',
-      '#default_value' => !empty($input['filter']) ? $input['filter'] : '',
-      '#attributes' => [
-        'class' => [
-          'icon-filter-input',
-        ],
-      ],
-    ];
-
-    $form['filters']['search'] = [
-      '#type' => 'submit',
-      '#submit' => [[$this, 'searchSubmit']],
-      '#ajax' => $ajax_settings,
-      '#value' => $this->t('Search'),
-      '#attributes' => [
-        'class' => [
-          'icon-ajax-search-submit',
-          'hidden',
-        ],
-      ],
-    ];
+    $form['filters'] = $this->buildFilters($input['filter'] ?? '', $ajax_settings);
 
     if (empty($icons)) {
       $form['list'] = [
@@ -180,55 +129,7 @@ final class IconSelectForm extends FormBase {
       return $form;
     }
 
-    // Add the generic mass preview library.
-    // Set a specific key to have the list of icons to load for preview.
-    $form['list'] = [
-      '#type' => 'container',
-      '#attributes' => [
-        'class' => ['icon-picker-modal__content'],
-      ],
-      '#attached' => [
-        'library' => [
-          'ui_icons_picker/library',
-          'ui_icons/ui_icons.preview',
-        ],
-        'drupalSettings' => [
-          'ui_icons_preview_data' => [
-            'icon_full_ids' => $icons,
-            'settings' => ['size' => self::PREVIEW_ICON_SIZE],
-            'target_input_label' => TRUE,
-          ],
-        ],
-      ],
-    ];
-
-    foreach ($this->getIconPackManager()->getDefinitions() as $pack_definition) {
-      if (isset($pack_definition['library']) && isset($form['list']['#attached']['library'])) {
-        $form['list']['#attached']['library'][] = $pack_definition['library'];
-      }
-    }
-
-    // Build a list of radio for each icon, without preview for performance. So
-    // the modal is displayed as fast as possible.
-    // Script js/library.js will handle lazy preview.
-    $options = [];
-    // Empty icon to allow deletion of selection.
-    $options['_none_'] = '<img src="/core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">';
-    foreach ($icons as $icon_data) {
-      if (is_array($icon_data)) {
-        $options[$icon_data['value']] = $icon_data['label'];
-        continue;
-      }
-      $options[$icon_data] = '<img src="' . IconPreview::SPINNER_ICON . '" title="' . $icon_data . '" width="32" height="32">';
-    }
-
-    $form['list']['icon_full_id'] = [
-      '#type' => 'radios',
-      '#options' => $options,
-      '#attributes' => [
-        'class' => ['icon-preview-load'],
-      ],
-    ];
+    $form['list'] = $this->buildIconList($icons);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -264,6 +165,138 @@ final class IconSelectForm extends FormBase {
     $form['pagination']['page_info'] = $pager['page_info'];
 
     return $form;
+  }
+
+  /**
+   * Reads the modal dialog options the picker was opened with.
+   *
+   * @return array{wrapper_id: string, allowed_icon_pack: array}|null
+   *   The options, or NULL when they are missing, in which case a redirect to
+   *   the front page has already been sent.
+   */
+  private function resolveDialogOptions(): ?array {
+    $request = $this->getRequest();
+    $wrapper_id = NULL;
+
+    if ($request->query->has('dialogOptions')) {
+      $options = $request->query->all('dialogOptions');
+      $wrapper_id = $options['query']['wrapper_id'] ?? NULL;
+    }
+
+    if (NULL === $wrapper_id) {
+      $this->redirect('<front>')->send();
+      return NULL;
+    }
+
+    $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? '';
+
+    return [
+      'wrapper_id' => $wrapper_id,
+      'allowed_icon_pack' => empty($allowed_icon_pack) ? [] : explode('+', $allowed_icon_pack),
+    ];
+  }
+
+  /**
+   * Builds the search filter elements.
+   *
+   * @param string $default_value
+   *   Current filter query.
+   * @param array $ajax_settings
+   *   Ajax settings shared with the pager.
+   *
+   * @return array
+   *   The filters container render array.
+   */
+  private function buildFilters(string $default_value, array $ajax_settings): array {
+    return [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['container-inline'],
+      ],
+      'filter' => [
+        '#type' => 'search',
+        '#title' => $this->t('Filter'),
+        '#placeholder' => $this->t('Filter by name'),
+        '#title_display' => 'invisible',
+        '#default_value' => $default_value,
+        '#attributes' => [
+          'class' => ['icon-filter-input'],
+        ],
+      ],
+      'search' => [
+        '#type' => 'submit',
+        '#submit' => [[$this, 'searchSubmit']],
+        '#ajax' => $ajax_settings,
+        '#value' => $this->t('Search'),
+        '#attributes' => [
+          'class' => ['icon-ajax-search-submit', 'hidden'],
+        ],
+      ],
+    ];
+  }
+
+  /**
+   * Builds the radio grid of icons.
+   *
+   * Radios carry no preview so the modal opens as fast as possible, js
+   * library.js fills them in lazily.
+   *
+   * @param array $icons
+   *   Icon full ids, or `value`/`label` pairs when they come from a search.
+   *
+   * @return array
+   *   The list container render array.
+   */
+  private function buildIconList(array $icons): array {
+    // Add the generic mass preview library.
+    // Set a specific key to have the list of icons to load for preview.
+    $list = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['icon-picker-modal__content'],
+      ],
+      '#attached' => [
+        'library' => [
+          'ui_icons_picker/library',
+          'ui_icons/ui_icons.preview',
+        ],
+        'drupalSettings' => [
+          'ui_icons_preview_data' => [
+            'icon_full_ids' => $icons,
+            'settings' => ['size' => self::PREVIEW_ICON_SIZE],
+            'target_input_label' => TRUE,
+          ],
+        ],
+      ],
+    ];
+
+    foreach ($this->pluginManagerIconPack->getDefinitions() as $pack_definition) {
+      if (isset($pack_definition['library'])) {
+        $list['#attached']['library'][] = $pack_definition['library'];
+      }
+    }
+
+    // Empty icon to allow deletion of selection.
+    $options = [
+      '_none_' => '<img src="/core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">',
+    ];
+    foreach ($icons as $icon_data) {
+      if (is_array($icon_data)) {
+        $options[$icon_data['value']] = $icon_data['label'];
+        continue;
+      }
+      $options[$icon_data] = '<img src="' . IconPreview::SPINNER_ICON . '" title="' . $icon_data . '" width="32" height="32">';
+    }
+
+    $list['icon_full_id'] = [
+      '#type' => 'radios',
+      '#options' => $options,
+      '#attributes' => [
+        'class' => ['icon-preview-load'],
+      ],
+    ];
+
+    return $list;
   }
 
   /**
@@ -376,8 +409,8 @@ final class IconSelectForm extends FormBase {
       '#weight' => -10,
     ];
 
-    $output = $renderer->renderRoot($form);
-    $messages = $renderer->renderRoot($status_messages);
+    $output = (string) $renderer->renderRoot($form);
+    $messages = (string) $renderer->renderRoot($status_messages);
 
     $message_wrapper_id = '#' . self::MESSAGE_WRAPPER_ID;
 
@@ -490,36 +523,6 @@ final class IconSelectForm extends FormBase {
         '#markup' => $this->t('Page @current_page/@total_page', $arg),
       ],
     ];
-  }
-
-  /**
-   * Get the icon pack plugin manager.
-   *
-   * @return \Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface
-   *   Plugin manager for icon pack discovery and definitions.
-   */
-  private function getIconPackManager(): IconPackManagerInterface {
-    if (!isset($this->pluginManagerIconPack)) {
-      // @phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
-      $this->pluginManagerIconPack = \Drupal::service('plugin.manager.icon_pack');
-    }
-
-    return $this->pluginManagerIconPack;
-  }
-
-  /**
-   * Get the icon search service.
-   *
-   * @return \Drupal\ui_icons\IconSearch
-   *   Icon search service.
-   */
-  private function getIconSearch(): IconSearch {
-    if (!isset($this->iconSearch)) {
-      // @phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
-      $this->iconSearch = \Drupal::service('ui_icons.search');
-    }
-
-    return $this->iconSearch;
   }
 
 }

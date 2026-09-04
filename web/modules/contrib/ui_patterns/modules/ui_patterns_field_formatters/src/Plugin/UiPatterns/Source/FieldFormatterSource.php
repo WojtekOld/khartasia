@@ -14,4 +14,5 @@ use Drupal\ui_patterns\Plugin\UiPatterns\Source\FieldFormatterSource as BaseFiel
  * @see https://www.drupal.org/project/ui_patterns/issues/3545507
  */
 class FieldFormatterSource extends BaseFieldFormatterSource {
+
 }

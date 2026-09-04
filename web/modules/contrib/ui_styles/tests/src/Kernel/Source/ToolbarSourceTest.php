@@ -8,12 +8,16 @@ use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Extension\ExtensionPathResolver;
 use Drupal\Core\Render\Markup;
 use Drupal\ui_styles\Definition\StyleDefinition;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\ui_styles\Plugin\UiStyles\Source\Toolbar
  *
  * @group ui_styles
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class ToolbarSourceTest extends SourceTestBase {
 
   /**

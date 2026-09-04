@@ -8,12 +8,14 @@ use Drupal\Tests\media\Kernel\MediaKernelTestBase;
 use Drupal\ui_icons_media\Plugin\media\Source\Icon;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the Icon class.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[CoversClass(Icon::class)]
 #[Group('ui_icons')]
 #[Group('ui_icons_media')]

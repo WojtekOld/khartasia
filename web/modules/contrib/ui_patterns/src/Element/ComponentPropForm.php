@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Element;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 
 /**
  * Component to render a single prop.
@@ -21,12 +22,14 @@ use Drupal\Core\Form\FormStateInterface;
  *     'source_id' => 'textfield'
  *   ],
  * ];
+ *
  * @endcode
  *
  * Value example:
  *
  * @code
  * '#default_value' => ['source_id' => 'id', 'source' => []]
+ *
  * @endcode
  *
  *  Configuration:
@@ -35,16 +38,15 @@ use Drupal\Core\Form\FormStateInterface;
  *  '#prop_id' => Required Prop ID.
  *  '#source_contexts' => The context of the sources.
  *  '#tag_filter' => Filter sources based on these tags.
- *
- * @FormElement("component_prop_form")
  */
+#[FormElement('component_prop_form')]
 class ComponentPropForm extends ComponentFormBase {
 
   /**
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = get_class($this);
+    $class = static::class;
     return [
       '#input' => TRUE,
       '#multiple' => FALSE,
@@ -53,7 +55,7 @@ class ComponentPropForm extends ComponentFormBase {
       '#tag_filter' => [],
       '#component_id' => NULL,
       '#slot_id' => NULL,
-    // Wrapped (into details/summary) or not.
+      // Wrapped (into details/summary) or not.
       '#wrap' => FALSE,
       '#render_sources' => TRUE,
       '#process' => [
@@ -99,7 +101,7 @@ class ComponentPropForm extends ComponentFormBase {
 
     $element += [
       'source_id' => $source_selector,
-      'source' => array_merge($source_form, ['#prop_id' => $prop_id]),
+      'source' => \array_merge($source_form, ['#prop_id' => $prop_id]),
     ];
     if (!($element['#render_sources'] ?? TRUE) && $selected_source) {
       $element['source_id'] = [
@@ -107,6 +109,10 @@ class ComponentPropForm extends ComponentFormBase {
         '#value' => $selected_source->getPluginId(),
       ];
     }
+    $element['node_id'] = [
+      '#type' => 'hidden',
+      '#value' => $configuration['node_id'] ?? NULL,
+    ];
     $element = static::addRequired($element, $prop_id);
     // This allows "widgets" to have a title when #wrap is unset.
     if (!($element['#wrap'] ?? TRUE)) {

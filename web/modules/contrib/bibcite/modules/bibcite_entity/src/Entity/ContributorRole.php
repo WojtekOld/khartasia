@@ -2,7 +2,9 @@
 
 namespace Drupal\bibcite_entity\Entity;
 
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the Contributor role entity.
@@ -39,6 +41,37 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'bibcite_contributor_role',
+  label: new TranslatableMarkup('Contributor role'),
+  handlers: [
+    'list_builder' => 'Drupal\bibcite_entity\ContributorRoleListBuilder',
+    'form' => [
+      'add' => 'Drupal\bibcite_entity\Form\ContributorRoleForm',
+      'edit' => 'Drupal\bibcite_entity\Form\ContributorRoleForm',
+      'delete' => 'Drupal\bibcite_entity\Form\ContributorRoleDeleteForm',
+    ],
+  ],
+  config_prefix: 'bibcite_contributor_role',
+  admin_permission: 'administer bibcite_reference',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+    'weight' => 'weight',
+  ],
+  links: [
+    'add-form' => '/admin/structure/bibcite/contributor/settings/role/add',
+    'edit-form' => '/admin/structure/bibcite/contributor/settings/role/{bibcite_contributor_role}',
+    'delete-form' => '/admin/structure/bibcite/contributor/settings/role/{bibcite_contributor_role}/delete',
+    'collection' => '/admin/structure/bibcite/contributor/settings/role',
+  ],
+  config_export: [
+    'id',
+    'label',
+    'weight',
+  ]
+)]
 class ContributorRole extends ConfigEntityBase implements ContributorRoleInterface {
 
   /**

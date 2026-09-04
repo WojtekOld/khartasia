@@ -2,7 +2,7 @@ uuid: 8fba9170-9dd2-4e80-8750-da9c499890d9
 langcode: en
 status: true
 dependencies: {  }
-name: 'Botanical genus'
+name: 'Classification botanique'
 vid: classification_botanique
 description: 'Genre dans la Classification botanique'
 weight: -10

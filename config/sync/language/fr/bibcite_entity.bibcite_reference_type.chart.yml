@@ -1,0 +1,14 @@
+label: Graphe
+fields:
+  bibcite_volume:
+    label: "Taille de l'image"
+  bibcite_edition:
+    label: Version
+  bibcite_pages:
+    label: Description
+  bibcite_type_of_work:
+    label: "Type d'image"
+  bibcite_place_published:
+    label: Ville
+  bibcite_tertiary_title:
+    label: 'Nom du fichier'

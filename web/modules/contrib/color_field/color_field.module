@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * A color field with a custom color picker using the Field Types API.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\color_field\Hook\ColorFieldHooks;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+#[LegacyHook]
+function color_field_help(string $route_name, RouteMatchInterface $route_match) {
+  return \Drupal::service(ColorFieldHooks::class)->help($route_name, $route_match);
+}
+
+/**
+ * Implements hook_theme().
+ */
+#[LegacyHook]
+function color_field_theme(): array {
+  return \Drupal::service(ColorFieldHooks::class)->theme();
+}
+
+/**
+ * Implements hook_token_info().
+ */
+#[LegacyHook]
+function color_field_token_info(): array {
+  return \Drupal::service(ColorFieldHooks::class)->tokenInfo();
+}
+
+/**
+ * Implements hook_tokens().
+ */
+#[LegacyHook]
+function color_field_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  return \Drupal::service(ColorFieldHooks::class)->tokens($type, $tokens, $data, $options, $bubbleable_metadata);
+}
+
+/**
+ * Implements hook_content_export_field_value_alter().
+ *
+ * Include the color_field in exports by the single_content_sync module.
+ */
+#[LegacyHook]
+function color_field_content_export_field_value_alter(mixed &$value, FieldItemListInterface $field): void {
+  \Drupal::service(ColorFieldHooks::class)->contentExportFieldValueAlter($value, $field);
+}

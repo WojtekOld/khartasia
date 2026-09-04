@@ -6,12 +6,13 @@ namespace Drupal\Tests\ui_skins\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_skins\Definition\CssVariableDefinition;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_skins\Definition\CssVariableDefinition
- *
- * @group ui_skins
+ * Tests CssVariableDefinition.
  */
+#[Group('ui_skins')]
 class CssVariableDefinitionTest extends UnitTestCase {
 
   /**
@@ -23,19 +24,8 @@ class CssVariableDefinitionTest extends UnitTestCase {
    *   The name of the plugin attributes.
    * @param mixed $value
    *   The attribute's value.
-   *
-   * @covers ::getCategory
-   * @covers ::getDefaultValues
-   * @covers ::getDescription
-   * @covers ::getLabel
-   * @covers ::getProvider
-   * @covers ::getType
-   * @covers ::getWeight
-   * @covers ::id
-   * @covers ::isEnabled
-   *
-   * @dataProvider definitionGettersProvider
    */
+  #[DataProvider('definitionGettersProvider')]
   public function testGetters(string $getter, string $name, $value): void {
     $definition = new CssVariableDefinition([$name => $value]);
     // @phpstan-ignore-next-line
@@ -72,11 +62,8 @@ class CssVariableDefinitionTest extends UnitTestCase {
    *   The value.
    * @param bool $expected
    *   The expected result.
-   *
-   * @covers ::isDefaultScopeValue
-   *
-   * @dataProvider definitionDefaultScopeValueProvider
    */
+  #[DataProvider('definitionDefaultScopeValueProvider')]
   public function testIsDefaultScopeValue(string $scope, string $value, bool $expected): void {
     $definition = new CssVariableDefinition([
       'default_values' => [

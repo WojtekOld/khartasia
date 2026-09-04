@@ -1,0 +1,29 @@
+proc-stream-wrapper: 'private://proc'
+proc-enable-stream-wrapper: 1
+proc-rsa-key-size: '2048'
+proc-file-entity-max-filesize: ''
+proc-file-block-size: ''
+proc-enable-block-size: 0
+proc-encrypt-button-label: 'Encrypt'
+proc-encrypt-button-label-filled-field: ''
+proc-decrypt-button-label: 'Decrypt'
+proc-encrypt-button-class: 'button encrypt-button'
+proc-decrypt-button-class: 'button decrypt-button'
+proc-allow-password-cache-fields: 0
+proc-allow-password-cache-standalone: 0
+proc-suppress-encryption-success-msg: 0
+proc-suppress-decrypt-link: 0
+proc-auto-filter-recipients: 1
+proc-single-value-remove-button: 1
+proc-single-value-remove-button-label: ''
+proc-file-enable-autocomplete: 0
+metadata_message_created: 0
+proc-break-chain-of-trust: 0
+proc-keyring-meta-update-log-enabled: 0
+proc-enable-inline-decryption-standalone: 0
+proc-background-update-jobs-limit: 2
+proc-enable-background-reencryption: 1
+proc-enable-autonomous-reencryption: 0
+proc-autonomous-reencryption-cooldown: 300
+proc-recipients-delivery-mode: 'csv'
+proc-cipher-cache-max-entries: 200

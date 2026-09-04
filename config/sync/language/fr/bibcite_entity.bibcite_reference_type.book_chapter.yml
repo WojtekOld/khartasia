@@ -1,0 +1,12 @@
+label: 'Chapitre de livre'
+fields:
+  bibcite_secondary_title:
+    label: "Titre de l'ouvrage"
+  bibcite_section:
+    label: Chapitre
+  bibcite_place_published:
+    label: Ville
+  bibcite_tertiary_title:
+    label: 'Titre de la série'
+  bibcite_alternate_title:
+    label: Abrévation

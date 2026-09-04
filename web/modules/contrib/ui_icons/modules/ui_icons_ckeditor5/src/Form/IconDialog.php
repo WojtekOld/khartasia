@@ -61,6 +61,19 @@ final class IconDialog extends FormBase {
       '#max_result' => $max_result,
     ];
 
+    // Check for settings in case we are updating an existing icon.
+    $editor_object = $form_state->getUserInput()['editor_object'] ?? [];
+    if (!empty($editor_object['iconId'])) {
+      $form['icon']['#default_value'] = $editor_object['iconId'];
+
+      if (!empty($editor_object['iconSettings'])) {
+        [$pack_id] = explode(':', $editor_object['iconId']);
+        $form['icon']['#default_settings'] = [
+          $pack_id => $editor_object['iconSettings'],
+        ];
+      }
+    }
+
     $form['actions'] = [
       '#type' => 'actions',
     ];

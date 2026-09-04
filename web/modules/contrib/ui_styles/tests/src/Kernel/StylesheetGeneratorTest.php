@@ -6,6 +6,8 @@ namespace Drupal\Tests\ui_styles\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_skins\UiSkinsInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
 use Sabberworm\CSS\Settings;
@@ -17,6 +19,8 @@ use Sabberworm\CSS\Settings;
  *
  * @coversDefaultClass \Drupal\ui_styles\Service\StylesheetGenerator
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class StylesheetGeneratorTest extends KernelTestBase {
 
   /**

@@ -85,7 +85,7 @@ class EntityDeleteBase extends ActionBase implements ContainerFactoryPluginInter
   /**
    * {@inheritdoc}
    */
-  public function execute($object = NULL) {
+  public function execute(?object $object = NULL) {
     $this->executeMultiple([$object]);
   }
 

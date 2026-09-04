@@ -7,12 +7,13 @@ namespace Drupal\Tests\ui_skins\Unit;
 use Drupal\Core\Form\FormState;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_skins\Element\AlphaColor;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_skins\Element\AlphaColor
- *
- * @group ui_skins
+ * Tests AlphaColor.
  */
+#[Group('ui_skins')]
 class AlphaColorElementTest extends UnitTestCase {
 
   /**
@@ -22,11 +23,8 @@ class AlphaColorElementTest extends UnitTestCase {
    *   The expected return depending on the input.
    * @param mixed $input
    *   The input.
-   *
-   * @covers ::valueCallback
-   *
-   * @dataProvider providerTestValueCallback
    */
+  #[DataProvider('providerTestValueCallback')]
   public function testValueCallback($expected, $input): void {
     $element = [];
     $form_state = new FormState();

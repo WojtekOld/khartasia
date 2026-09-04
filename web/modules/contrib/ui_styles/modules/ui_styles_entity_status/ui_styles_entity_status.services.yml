@@ -1,0 +1,5 @@
+
+services:
+  Drupal\ui_styles_entity_status\Hook\UiStylesEntityStatusHooks:
+    class: Drupal\ui_styles_entity_status\Hook\UiStylesEntityStatusHooks
+    autowire: true

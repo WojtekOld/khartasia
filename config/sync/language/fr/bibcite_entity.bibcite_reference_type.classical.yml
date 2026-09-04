@@ -1,0 +1,8 @@
+label: Classique
+fields:
+  bibcite_secondary_title:
+    label: 'Titre de la série'
+  bibcite_type_of_work:
+    label: Type
+  bibcite_place_published:
+    label: Ville

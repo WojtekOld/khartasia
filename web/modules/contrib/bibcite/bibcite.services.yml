@@ -18,3 +18,7 @@ services:
     arguments: ['@plugin.manager.bibcite_format']
     tags:
       - { name: paramconverter }
+
+  Drupal\bibcite\Hook\BibciteHooks:
+    class: Drupal\bibcite\Hook\BibciteHooks
+    autowire: true

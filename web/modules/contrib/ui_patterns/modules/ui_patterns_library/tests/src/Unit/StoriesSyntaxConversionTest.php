@@ -6,20 +6,24 @@ namespace Drupal\Tests\ui_patterns_library\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_patterns_library\StoriesSyntaxConverter;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_patterns_library\StoriesSyntaxConverter
+ * Test the StoriesSyntaxConverter.
  *
- * @group ui_patterns
- * @group ui_patterns_library
+ * @internal
  */
+#[CoversClass(StoriesSyntaxConverter::class)]
+#[Group('ui_patterns')]
+#[Group('ui_patterns_library')]
 final class StoriesSyntaxConversionTest extends UnitTestCase {
 
   /**
    * Test the method ::convertSlots().
-   *
-   * @dataProvider provideConversionData
    */
+  #[DataProvider('provideConversionData')]
   public function testConvertSlot(array $value, array $expected): void {
     $converter = new StoriesSyntaxConverter();
     $converted = $converter->convertSlots($value);
@@ -31,14 +35,15 @@ final class StoriesSyntaxConversionTest extends UnitTestCase {
    */
   public static function provideConversionData(): \Generator {
     $data = [
-      "Not convertible" => self::notConvertible(),
-      "Bootstrap accordion" => self::bootstrapAccordion(),
-      "Bootstrap carousel" => self::bootstrapCarousel(),
-      "Daisy Grid Row 4" => self::daisyGridRow4(),
-      "Props special words" => self::componentSpecialProps(),
+      'Not convertible' => self::notConvertible(),
+      'Bootstrap accordion' => self::bootstrapAccordion(),
+      'Bootstrap carousel' => self::bootstrapCarousel(),
+      'Daisy Grid Row 4' => self::daisyGridRow4(),
+      'Props special words' => self::componentSpecialProps(),
       'Theme layout' => self::themeLayout(),
       'Theme item_list' => self::themeItemList(),
     ];
+
     foreach ($data as $label => $test) {
       yield $label => [
         $test['value'],
@@ -54,31 +59,32 @@ final class StoriesSyntaxConversionTest extends UnitTestCase {
     $value = [
       'empty' => [],
       'list' => [
-        "one",
-        "two",
-        "free",
+        'one',
+        'two',
+        'free',
       ],
       'no_render_properties' => [
-        "foo" => "bar",
-        "bar" => "foo",
+        'foo' => 'bar',
+        'bar' => 'foo',
       ],
       'two_render_properties' => [
-        "type" => "component",
-        "markup" => "Lorem ipsum",
+        'type' => 'component',
+        'markup' => 'Lorem ipsum',
       ],
       'twice_same_property' => [
-        "type" => "component",
-        "#type" => "component",
+        'type' => 'component',
+        '#type' => 'component',
       ],
       'already_converted' => [
-        "#type" => "html_tag",
-        "#tag" => "p",
-        "#value" => "Lorem ipsum",
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => 'Lorem ipsum',
       ],
     ];
+
     return [
-      "value" => $value,
-      "expected" => $value,
+      'value' => $value,
+      'expected' => $value,
     ];
   }
 
@@ -158,9 +164,10 @@ final class StoriesSyntaxConversionTest extends UnitTestCase {
         ],
       ],
     ];
+
     return [
-      "value" => $slots,
-      "expected" => $expected,
+      'value' => $slots,
+      'expected' => $expected,
     ];
   }
 
@@ -300,9 +307,10 @@ final class StoriesSyntaxConversionTest extends UnitTestCase {
         ],
       ],
     ];
+
     return [
-      "value" => $slots,
-      "expected" => $expected,
+      'value' => $slots,
+      'expected' => $expected,
     ];
   }
 
@@ -462,9 +470,10 @@ final class StoriesSyntaxConversionTest extends UnitTestCase {
       'col_third' => [],
       'col_fourth' => [],
     ];
+
     return [
-      "value" => $slots,
-      "expected" => $expected,
+      'value' => $slots,
+      'expected' => $expected,
     ];
   }
 
@@ -536,6 +545,7 @@ final class StoriesSyntaxConversionTest extends UnitTestCase {
         ],
       ],
     ];
+
     return [
       'value' => $slots,
       'expected' => $expected,
@@ -718,6 +728,7 @@ final class StoriesSyntaxConversionTest extends UnitTestCase {
         ],
       ],
     ];
+
     return [
       'value' => $value,
       'expected' => $expected,

@@ -7,6 +7,8 @@ namespace Drupal\Tests\ui_styles\Unit\PageCache;
 use Drupal\Core\PageCache\RequestPolicyInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_styles\PageCache\AllowGeneratedStylesheet;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -14,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @group ui_styles
  */
+#[Group('ui_styles')]
 class AllowGeneratedStylesheetTest extends UnitTestCase {
 
   /**
@@ -38,6 +41,7 @@ class AllowGeneratedStylesheetTest extends UnitTestCase {
    *
    * @covers ::check
    */
+  #[DataProvider('providerTestAllowGeneratedStylesheet')]
   public function testAllowGeneratedStylesheet(?string $expected_result, string $path): void {
     $request = Request::create($path);
     $result = $this->policy->check($request);

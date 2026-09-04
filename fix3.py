@@ -1,0 +1,6 @@
+content = open('web/themes/custom/khartasia_ui/templates/node/node--article.html.twig').read()
+print("Avant:", content.count('plante_papers'), content.count('papers_lies'))
+content = content.replace("drupal_view('plante_papers', 'block_papers'", "drupal_view('papers_lies', 'block_1'")
+content = content.replace("drupal_view('plante_noms_communs', 'block_noms_communs'", "drupal_view('plante_noms_communs', 'block_1'")
+open('web/themes/custom/khartasia_ui/templates/node/node--article.html.twig','w').write(content)
+print("Apres:", content.count('plante_papers'), content.count('papers_lies'))

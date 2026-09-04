@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
+use Drupal\ui_patterns\SourceTags;
 
 /**
  * Plugin implementation of the source.
@@ -17,7 +18,7 @@ use Drupal\ui_patterns\SourcePluginBase;
   label: new TranslatableMarkup('Textarea for list'),
   description: new TranslatableMarkup('One item by line.'),
   prop_types: ['list'],
-  tags: ['widget', 'widget:dismissible']
+  tags: [SourceTags::Widget->value, SourceTags::WidgetDismissible->value]
 )]
 class ListTextareaWidget extends SourcePluginBase {
 
@@ -29,13 +30,13 @@ class ListTextareaWidget extends SourcePluginBase {
     if (empty($long_text)) {
       return [];
     }
-    $list_of_items = (array) preg_split("/\r\n|\n|\r/", $long_text);
+    $list_of_items = (array) \preg_split("/\r\n|\n|\r/", $long_text);
     // Cast items if required.
     $items_types = $this->propDefinition['items']['type'] ?? [];
-    if (!empty($items_types) && is_string($items_types)) {
+    if (!empty($items_types) && \is_string($items_types)) {
       $items_types = [$items_types];
     }
-    if (!is_array($items_types)) {
+    if (!\is_array($items_types)) {
       return $list_of_items;
     }
     return $this->castValues($list_of_items, $items_types);
@@ -56,7 +57,7 @@ class ListTextareaWidget extends SourcePluginBase {
     $casted_values = [];
     foreach ($values as $value) {
       $converted = NULL;
-      if ($value === "" && in_array("string", $types, TRUE)) {
+      if ($value === '' && \in_array('string', $types, TRUE)) {
         $casted_values[] = $value;
         continue;
       }
@@ -88,9 +89,9 @@ class ListTextareaWidget extends SourcePluginBase {
         $value = $this->replaceTokens($value, FALSE);
       }
       return match ($type) {
-        'integer' => (is_int($value) || is_numeric($value) || ($value === "")) ? (int) $value : NULL,
-        'float', 'decimal' => is_float($value) ? $value : (float) $value,
-        'boolean' => is_bool($value) ? $value : (bool) $value,
+        'integer' => (\is_int($value) || \is_numeric($value) || ($value === '')) ? (int) $value : NULL,
+        'float', 'decimal' => \is_float($value) ? $value : (float) $value,
+        'boolean' => \is_bool($value) ? $value : (bool) $value,
         'string' => $value,
         default => NULL,
       };
@@ -106,13 +107,13 @@ class ListTextareaWidget extends SourcePluginBase {
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
     $items = $this->getSetting('value');
-    if (is_array($items)) {
-      $items = implode("\r", $items);
+    if (\is_array($items)) {
+      $items = \implode("\r", $items);
     }
     $form['value'] = [
       '#type' => 'textarea',
       '#default_value' => $items,
-      "#description" => $this->t("One item by line"),
+      '#description' => $this->t('One item by line'),
     ];
     $this->addRequired($form['value']);
     return $form;

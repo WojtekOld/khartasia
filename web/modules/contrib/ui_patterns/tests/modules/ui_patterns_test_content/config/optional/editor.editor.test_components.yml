@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.test_components
+  module:
+    - ckeditor5
+format: test_components
+editor: ckeditor5
+settings:
+  toolbar:
+    items:
+      - bold
+      - drupalComponent
+  plugins: {  }
+image_upload:
+  status: false

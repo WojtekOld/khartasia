@@ -3,10 +3,12 @@
 namespace Drupal\bibcite_entity\Plugin\Field\FieldWidget;
 
 use Drupal\bibcite_entity\Entity\Contributor;
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'bibcite_parse_name' widget.
@@ -19,6 +21,13 @@ use Drupal\Core\Form\FormStateInterface;
  *   }
  * )
  */
+#[FieldWidget(
+  id: 'bibcite_parse_name',
+  label: new TranslatableMarkup('Parse name'),
+  field_types: [
+    'string',
+  ]
+)]
 class ParseNameWidget extends WidgetBase {
 
   /**

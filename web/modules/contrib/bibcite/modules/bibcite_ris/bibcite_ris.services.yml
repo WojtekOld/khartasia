@@ -15,3 +15,7 @@ services:
       contributorKey: 'AU'
       keywordKey: 'KW'
       typeKey: 'TY'
+
+  Drupal\bibcite_ris\Hook\BibciteRisHooks:
+    class: Drupal\bibcite_ris\Hook\BibciteRisHooks
+    autowire: true

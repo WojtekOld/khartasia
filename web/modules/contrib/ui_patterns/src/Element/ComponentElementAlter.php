@@ -16,17 +16,15 @@ use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
  */
 class ComponentElementAlter implements TrustedCallbackInterface {
 
-  /**
-   * Constructs a ComponentElementAlter.
-   */
-  public function __construct(protected ComponentPluginManager $componentPluginManager) {}
+  public function __construct(
+    protected ComponentPluginManager $componentPluginManager,
+  ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function trustedCallbacks() {
     return ['alter'];
-
   }
 
   /**
@@ -38,30 +36,28 @@ class ComponentElementAlter implements TrustedCallbackInterface {
    */
   public function alter(array $element): array {
     $element = $this->normalizeSlots($element);
-    $element = $this->processAttributesRenderProperty($element);
-    return $element;
+    return $this->processAttributesRenderProperty($element);
   }
 
   /**
    * Normalize slots.
    */
   public function normalizeSlots(array $element): array {
-
-    foreach ($element["#slots"] as $slot_id => $slot) {
+    foreach ($element['#slots'] as $slot_id => $slot) {
       // Because SDC validator is sometimes confused by a null slot.
-      if (is_null($slot)) {
+      if ($slot === NULL) {
         unset($element['#slots'][$slot_id]);
         continue;
       }
       $slot = SlotPropType::normalize($slot);
       // Because SDC validator is sometimes confused by an empty slot.
       // We check the current slot render element.
-      if (is_array($slot) && self::isSlotEmpty($slot)) {
+      if (\is_array($slot) && self::isSlotEmpty($slot)) {
         self::mergeSlotBubbleableMetadata($element, $slot, 1);
         unset($element['#slots'][$slot_id]);
         continue;
       }
-      $element["#slots"][$slot_id] = $slot;
+      $element['#slots'][$slot_id] = $slot;
     }
     return $element;
   }
@@ -76,11 +72,11 @@ class ComponentElementAlter implements TrustedCallbackInterface {
    * @todo Move this to Drupal Core.
    */
   public function processAttributesRenderProperty(array $element): array {
-    if (!isset($element["#attributes"])) {
+    if (!isset($element['#attributes'])) {
       return $element;
     }
-    if (is_a($element["#attributes"], '\Drupal\Core\Template\Attribute')) {
-      $element["#attributes"] = $element["#attributes"]->toArray();
+    if (\is_a($element['#attributes'], '\Drupal\Core\Template\Attribute')) {
+      $element['#attributes'] = $element['#attributes']->toArray();
     }
     // Like \Drupal\Core\Template\Attribute::merge(), we use
     // NestedArray::mergeDeep().
@@ -88,9 +84,9 @@ class ComponentElementAlter implements TrustedCallbackInterface {
     // it handles non-array values differently. When merging values that are
     // not both arrays, the latter value replaces the former rather than
     // merging with it.
-    $element["#props"]["attributes"] = NestedArray::mergeDeep(
-      $element["#attributes"],
-      $element["#props"]["attributes"] ?? []
+    $element['#props']['attributes'] = NestedArray::mergeDeep(
+      $element['#attributes'],
+      $element['#props']['attributes'] ?? []
     );
     return $element;
   }
@@ -125,7 +121,7 @@ class ComponentElementAlter implements TrustedCallbackInterface {
    *   Returns true for empty.
    */
   public static function isSlotEmpty(array $slot, int $max_level = 5, int $level = 0): bool {
-    if (is_array($slot) && empty($slot)) {
+    if (\is_array($slot) && empty($slot)) {
       return TRUE;
     }
     if ($level < $max_level) {
@@ -133,9 +129,8 @@ class ComponentElementAlter implements TrustedCallbackInterface {
         if (self::isSlotEmpty($slot[$child], $max_level, $level + 1) === FALSE) {
           return FALSE;
         }
-        else {
-          unset($slot[$child]);
-        }
+
+        unset($slot[$child]);
       }
     }
 
@@ -154,13 +149,13 @@ class ComponentElementAlter implements TrustedCallbackInterface {
    * @return bool
    *   Whether the given element is empty.
    */
-  private static function checkSlotEmpty(array $slot):bool {
+  private static function checkSlotEmpty(array $slot): bool {
     foreach (['#markup', '#plain_text'] as $key) {
-      if (array_key_exists($key, $slot) && empty($slot[$key])) {
+      if (\array_key_exists($key, $slot) && empty($slot[$key])) {
         unset($slot[$key]);
       }
     }
-    if (isset($slot['#access']) && is_string($slot['#access'])) {
+    if (isset($slot['#access']) && \is_string($slot['#access'])) {
       // This fix is for isVisibleElement() to work properly.
       $slot['#access'] = (bool) $slot['#access'];
     }

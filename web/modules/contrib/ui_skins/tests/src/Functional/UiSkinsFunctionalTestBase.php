@@ -74,16 +74,12 @@ abstract class UiSkinsFunctionalTestBase extends BrowserTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->configFactory = $this->container->get('config.factory');
-    $this->themeInstaller = $this->container->get('theme_installer');
+    $this->configFactory = $this->container->get(ConfigFactoryInterface::class);
+    $this->themeInstaller = $this->container->get(ThemeInstallerInterface::class);
     $this->themeInstaller->install($this->themes);
     \drupal_flush_all_caches();
 
-    $user = $this->drupalCreateUser($this->getAdminUserPermissions());
-    if (!($user instanceof UserInterface)) {
-      $this->fail('Impossible to create the tests user.');
-    }
-    $this->adminUser = $user;
+    $this->adminUser = $this->drupalCreateUser($this->getAdminUserPermissions());
   }
 
   /**

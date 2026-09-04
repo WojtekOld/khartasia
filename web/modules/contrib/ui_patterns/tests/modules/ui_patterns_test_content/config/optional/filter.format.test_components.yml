@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - ui_patterns_ckeditor5
+name: 'Test components'
+format: test_components
+weight: 0
+filters:
+  component_embed:
+    id: component_embed
+    provider: ui_patterns_ckeditor5
+    status: true
+    weight: 100
+    settings: {  }

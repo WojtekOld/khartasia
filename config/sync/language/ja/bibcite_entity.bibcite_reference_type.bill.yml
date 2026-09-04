@@ -1,0 +1,7 @@
+fields:
+  bibcite_secondary_title:
+    label: コード
+  bibcite_edition:
+    label: セッション
+  bibcite_original_publication:
+    label: 履歴

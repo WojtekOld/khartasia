@@ -1,0 +1,7 @@
+fields:
+  bibcite_edition:
+    label: 세션
+  bibcite_place_published:
+    label: 도시
+  bibcite_original_publication:
+    label: 기록

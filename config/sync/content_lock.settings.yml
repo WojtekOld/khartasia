@@ -1,0 +1,7 @@
+_core:
+  default_config_hash: DDn16ZIbPPieMWTr6v8P3UsJUQy_OY0qy3C4ZD6jP7k
+verbose: true
+types: {  }
+types_translation_lock: {  }
+form_op_lock: {  }
+timeout: 1800

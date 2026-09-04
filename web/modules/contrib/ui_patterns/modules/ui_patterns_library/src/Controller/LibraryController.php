@@ -7,33 +7,16 @@ namespace Drupal\ui_patterns_library\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_library\StoryPluginManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Component library's overview and single pages.
- *
- * @package Drupal\ui_patterns_library\Controller
  */
 class LibraryController extends ControllerBase {
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     protected ComponentPluginManager $componentPluginManager,
     protected StoryPluginManager $storyPluginManager,
-  ) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('plugin.manager.sdc'),
-      $container->get('plugin.manager.component_story'),
-    );
-  }
+  ) {}
 
   /**
    * Title callback.
@@ -47,9 +30,9 @@ class LibraryController extends ControllerBase {
    *   Pattern label.
    */
   public function title(string $provider, string $machineName) {
-    $id = $provider . ":" . $machineName;
+    $id = $provider . ':' . $machineName;
     $definition = $this->componentPluginManager->getDefinition($id);
-    return $definition["name"];
+    return $definition['name'];
   }
 
   /**
@@ -75,7 +58,7 @@ class LibraryController extends ControllerBase {
    *   Return render array.
    */
   public function single(string $provider, string $machineName) {
-    $id = $provider . ":" . $machineName;
+    $id = $provider . ':' . $machineName;
 
     return [
       '#theme' => 'ui_patterns_single_page',
@@ -112,7 +95,7 @@ class LibraryController extends ControllerBase {
     // @todo move to componentPluginManager?
     foreach ($grouped_definitions as $group_id => $definitions) {
       foreach ($definitions as $definition_id => $definition) {
-        if ($definition['provider'] == $provider) {
+        if ($definition['provider'] === $provider) {
           $definition['stories'] = $this->storyPluginManager->getComponentStories($definition_id);
           $groups[$group_id][$definition_id] = $definition;
         }

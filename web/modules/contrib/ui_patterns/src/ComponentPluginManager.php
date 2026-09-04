@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns;
 
-use Drupal\Component\Plugin\CategorizingPluginManagerInterface;
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -17,7 +16,6 @@ use Drupal\Core\Plugin\Component;
 use Drupal\Core\Theme\Component\ComponentValidator;
 use Drupal\Core\Theme\Component\SchemaCompatibilityChecker;
 use Drupal\Core\Theme\ComponentNegotiator;
-use Drupal\Core\Theme\ComponentPluginManager as CoreComponentPluginManager;
 use Drupal\Core\Theme\ComponentPluginManager as SdcPluginManager;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\ui_patterns\SchemaManager\ReferencesResolver;
@@ -25,9 +23,16 @@ use Drupal\ui_patterns\SchemaManager\ReferencesResolver;
 /**
  * UI Patterns extension of SDC component plugin manager.
  */
-class ComponentPluginManager extends SdcPluginManager implements CategorizingPluginManagerInterface {
+class ComponentPluginManager extends SdcPluginManager {
 
+  // @todo Remove when Core 11.2.0 will be the minimum version supported.
+  // As it will be managed by Core component plugin manager.
   use CategorizingPluginManagerTrait;
+
+  /**
+   * The decorated component plugin manager.
+   */
+  protected SdcPluginManager $decorated;
 
   /**
    * The prop type plugin manager.
@@ -42,39 +47,11 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   /**
    * The reference resolver.
    */
-  protected CoreComponentPluginManager $componentPluginManager;
-
-  /**
-   * The reference resolver.
-   */
   protected ReferencesResolver $referencesSolver;
 
-  /**
-   * Constructs ComponentPluginManager object.
-   *
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
-   * @param \Drupal\Core\Extension\ThemeHandlerInterface $themeHandler
-   *   The theme handler.
-   * @param \Drupal\Core\Cache\CacheBackendInterface $cacheBackend
-   *   Cache backend instance to use.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The configuration factory.
-   * @param \Drupal\Core\Theme\ThemeManagerInterface $themeManager
-   *   The theme manager.
-   * @param \Drupal\Core\Theme\ComponentNegotiator $componentNegotiator
-   *   The component negotiator.
-   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
-   *   The file system service.
-   * @param \Drupal\Core\Theme\Component\SchemaCompatibilityChecker $compatibilityChecker
-   *   The compatibility checker.
-   * @param \Drupal\Core\Theme\Component\ComponentValidator $componentValidator
-   *   The component validator.
-   * @param string $appRoot
-   *   The application root.
-   */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend
   public function __construct(
-    ModuleHandlerInterface $module_handler,
+    ModuleHandlerInterface $moduleHandler,
     ThemeHandlerInterface $themeHandler,
     CacheBackendInterface $cacheBackend,
     ConfigFactoryInterface $configFactory,
@@ -84,9 +61,41 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
     SchemaCompatibilityChecker $compatibilityChecker,
     ComponentValidator $componentValidator,
     string $appRoot,
+    SdcPluginManager $decorated,
   ) {
+    // Hybrid class: it both EXTENDS the core component plugin manager
+    // (parent::__construct below gives us our own discovery, cache and
+    // factory) AND WRAPS the next layer of the decoration chain via
+    // $this->decorated.
+    //
+    // `parent` and `$this->decorated` are NOT the same thing:
+    //
+    //  - `parent` always means core SDC code running on $this, using our own
+    //    state.
+    //
+    //  - `$this->decorated` is wired at container build time. With canvas
+    //    installed it is the canvas decorator; without canvas it is a
+    //    SEPARATE core SDC instance (a different object than $this, with
+    //    its own state). Chain order is set in ui_patterns.services.yml
+    //    via `decoration_priority: -100`, which keeps us outermost. A
+    //    typical chain is: ui_patterns → canvas → core SDC.
+    //
+    // When adding or changing methods:
+    //
+    //  - Methods that READ definitions — getDefinition, getAllComponents,
+    //    find, createInstance, getInstance — must NOT delegate to
+    //    $this->decorated. Our annotations and inlined $refs live in our
+    //    own cache; reading through $this->decorated returns raw
+    //    definitions and ComponentValidator rejects any component whose
+    //    `type` comes from an inlined `$ref: ui-patterns://...`.
+    //
+    //  - Methods that WRITE or invalidate — processDefinition,
+    //    clearCachedDefinitions — DO forward to $this->decorated, so the
+    //    next layer of the chain (e.g. canvas) still gets a chance to run
+    //    its own logic.
+    $this->decorated = $decorated;
     parent::__construct(
-      $module_handler,
+      $moduleHandler,
       $themeHandler,
       $cacheBackend,
       $configFactory,
@@ -95,9 +104,9 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
       $fileSystem,
       $compatibilityChecker,
       $componentValidator,
-      $appRoot);
+      $appRoot
+    );
     $this->alterInfo('component_info');
-    $this->setCacheBackend($cacheBackend, 'component_plugins');
   }
 
   /**
@@ -138,8 +147,73 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
     // Name is mandatory, so this precaution should never happen. But we have
     // seen SDC without name property in the wild.
     if (!isset($definition['name'])) {
-      $definition['name'] = explode(':', $definition['id'])[1];
+      $definition['name'] = \explode(':', $definition['id'])[1];
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefinitions() {
+    $definitions = $this->getCachedDefinitions();
+    if ($definitions) {
+      return $definitions;
+    }
+
+    $definitions = $this->decorated->getCachedDefinitions();
+    if ($definitions) {
+      $this->setCachedDefinitions($definitions);
+      return $definitions;
+    }
+
+    $definitions = parent::getDefinitions();
+    $this->decorated->setCachedDefinitions($definitions);
+    $this->setCachedDefinitions($definitions);
+
+    return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clearCachedDefinitions(): void {
+    parent::clearCachedDefinitions();
+    $this->decorated->clearCachedDefinitions();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function useCaches($use_caches = FALSE): void {
+    $this->decorated->useCaches($use_caches);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts(): array {
+    return $this->decorated->getCacheContexts();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags(): array {
+    return $this->decorated->getCacheTags();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheMaxAge(): int {
+    return $this->decorated->getCacheMaxAge();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCacheBackend(CacheBackendInterface $cache_backend, $cache_key, array $cache_tags = []): void {
+    parent::setCacheBackend($cache_backend, $cache_key . '.ui_patterns', $cache_tags);
   }
 
   /**
@@ -148,7 +222,8 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
    * @phpstan-ignore-next-line
    */
   public function processDefinition(&$definition, $plugin_id): void {
-    parent::processDefinition($definition, $plugin_id);
+    // Delegate to decorated service.
+    $this->decorated->processDefinition($definition, $plugin_id);
     $this->cleanDefinition($definition);
     $this->processDefinitionCategory($definition);
   }
@@ -171,29 +246,28 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   protected function alterDefinition(array $definition): array {
     // Overriding SDC alterDefinition method.
     $definition = parent::alterDefinition($definition);
-    // Adding custom logic.
-    $fallback_prop_type_id = $this->propTypePluginManager->getFallbackPluginId("");
+    // Adding custom UI Patterns logic.
+    $fallback_prop_type_id = $this->propTypePluginManager->getFallbackPluginId('');
     $definition = $this->alterLinks($definition);
     $definition = $this->alterSlots($definition);
     $definition = $this->annotateSlots($definition);
-    $definition = $this->annotateProps($definition, $fallback_prop_type_id);
-    return $definition;
+    return $this->annotateProps($definition, $fallback_prop_type_id);
   }
 
   /**
    * Alter links.
    */
-  protected function alterLinks(array $definition): array {
+  private function alterLinks(array $definition): array {
     if (!isset($definition['links'])) {
       return $definition;
     }
     // Resolve the short notation.
     foreach ($definition['links'] as $delta => $link) {
-      if (is_array($link)) {
+      if (\is_array($link)) {
         continue;
       }
       $definition['links'][$delta] = [
-        "url" => (string) $link,
+        'url' => (string) $link,
       ];
     }
     return $definition;
@@ -202,13 +276,13 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   /**
    * Alter slots.
    */
-  protected function alterSlots(array $definition): array {
+  private function alterSlots(array $definition): array {
     if (!isset($definition['slots'])) {
       return $definition;
     }
     // Prevent slots without title from breaking.
     foreach ($definition['slots'] as $slot_id => $slot) {
-      $definition['slots'][$slot_id]["title"] = $slot["title"] ?? $slot_id;
+      $definition['slots'][$slot_id]['title'] = $slot['title'] ?? $slot_id;
     }
     return $definition;
   }
@@ -216,7 +290,7 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   /**
    * Annotate each slot in a component definition.
    */
-  protected function annotateSlots(array $definition): array {
+  private function annotateSlots(array $definition): array {
     if (empty($definition['slots'])) {
       return $definition;
     }
@@ -234,14 +308,14 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
    * This is the main purpose of overriding SDC component plugin manager.
    * We add a 'ui_patterns' object in each prop schema of the definition.
    */
-  protected function annotateProps(array $definition, string $fallback_prop_type_id): array {
+  private function annotateProps(array $definition, string $fallback_prop_type_id): array {
     // In JSON schema, 'required' is out of the prop definition.
     if (isset($definition['props']['required'])) {
       foreach ($definition['props']['required'] as $prop_id) {
         $definition['props']['properties'][$prop_id]['ui_patterns']['required'] = TRUE;
       }
     }
-    if (isset($definition["variants"])) {
+    if (isset($definition['variants'])) {
       $definition['props']['properties']['variant'] = $this->buildVariantProp($definition);
     }
     $definition['props']['properties'] = $this->addAttributesProp($definition);
@@ -254,10 +328,10 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   /**
    * Annotate a single prop.
    */
-  protected function annotateProp(string $prop_id, array $prop, string $fallback_prop_type_id): array {
-    $prop["title"] = $prop["title"] ?? $prop_id;
-
-    $this->resolveJsonSchemaReference($prop);
+  private function annotateProp(string $prop_id, array $prop, string $fallback_prop_type_id): array {
+    $prop['title'] = $prop['title'] ?? $prop_id;
+    $prop = $this->referencesSolver->resolve($prop);
+    /** @var \Drupal\ui_patterns\PropTypeInterface $prop_type */
     $prop_type = $this->propTypePluginManager->guessFromSchema($prop);
     if ($prop_type->getPluginId() === $fallback_prop_type_id) {
       // Sometimes, a prop JSON schema is different enough to not be caught by
@@ -271,32 +345,9 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
         $prop['ui_patterns']['prop_type_adapter'] = $prop_type_adapter->getPluginId();
       }
     }
-    if (isset($prop['$ref']) && str_starts_with($prop['$ref'], "ui-patterns://")) {
-      // Resolve prop schema here, because:
-      // - Drupal\Core\Theme\Component\ComponentValidator::getClassProps() is
-      //   executed before schema references are resolved, so SDC believe
-      //   a reference is a PHP namespace.
-      // - It is not possible to propose a patch to SDC because
-      //   SchemaStorage::resolveRefSchema() is not recursively resolving
-      //   the schemas anyway.
-      $prop = $this->referencesSolver->resolve($prop);
-    }
     $prop['ui_patterns']['type_definition'] = $prop_type;
-    $prop['ui_patterns']["summary"] = ($prop_type instanceof PropTypeInterface) ? $prop_type->getSummary($prop) : "";
+    $prop['ui_patterns']['summary'] = ($prop_type instanceof PropTypeInterface) ? $prop_type->getSummary($prop) : '';
     return $prop;
-  }
-
-  /**
-   * Resolve a JSON schema reference.
-   */
-  protected function resolveJsonSchemaReference(array &$prop) : void {
-    if (isset($prop['$ref']) && str_starts_with($prop['$ref'], "ui-patterns://") === FALSE) {
-      // We need to resolve non ui-patterns before guessFromSchema.
-      // To load refs including "ui-patterns" leads to wrong type mapping.
-      // So we load ui patterns refs in a second step.
-      // @todo improve error handling and logging?
-      $prop = $this->referencesSolver->resolve($prop);
-    }
   }
 
   /**
@@ -308,13 +359,13 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
    */
   private function addAttributesProp(array $definition): array {
     // Let's put it at the beginning (for forms).
-    return array_merge(
-     [
-       'attributes' => [
-         'title' => 'Attributes',
-         '$ref' => "ui-patterns://attributes",
-       ],
-     ],
+    return \array_merge(
+      [
+        'attributes' => [
+          'title' => 'Attributes',
+          '$ref' => 'ui-patterns://attributes',
+        ],
+      ],
       $definition['props']['properties'] ?? [],
     );
   }
@@ -328,13 +379,13 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   private function buildVariantProp(array $definition): array {
     $enums = [];
     $meta_enums = [];
-    foreach ($definition["variants"] as $variant_id => $variant) {
+    foreach ($definition['variants'] as $variant_id => $variant) {
       $enums[] = $variant_id;
       $meta_enums[$variant_id] = $variant['title'] ?? $variant_id;
     }
     return [
       'title' => 'Variant',
-      '$ref' => "ui-patterns://variant",
+      '$ref' => 'ui-patterns://variant',
       'enum' => $enums,
       'meta:enum' => $meta_enums,
     ];
@@ -344,12 +395,13 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
    * {@inheritdoc}
    */
   protected function findDefinitions() {
+    // Currently not working to call the decorated service.
     $definitions = parent::findDefinitions();
     // Add annotated_name property to distinct components with the same name.
-    $labels = array_column($definitions, "name");
-    $duplicate_labels = array_unique(array_intersect($labels, array_unique(array_diff_key($labels, array_unique($labels)))));
+    $labels = \array_column($definitions, 'name');
+    $duplicate_labels = \array_unique(\array_intersect($labels, \array_unique(\array_diff_key($labels, \array_unique($labels)))));
     foreach ($definitions as $id => $definition) {
-      $definitions[$id]["annotated_name"] = $this->getAnnotatedLabel($definition, $duplicate_labels);
+      $definitions[$id]['annotated_name'] = $this->getAnnotatedLabel($definition, $duplicate_labels);
     }
     return $definitions;
   }
@@ -357,21 +409,21 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   /**
    * Add annotation to label when many components share the same name.
    */
-  protected function getAnnotatedLabel(array $definition, array $duplicate_labels): string {
+  private function getAnnotatedLabel(array $definition, array $duplicate_labels): string {
     $label = $definition['name'] ?? $definition['machineName'];
-    if (!in_array($label, $duplicate_labels)) {
+    if (!\in_array($label, $duplicate_labels, TRUE)) {
       return $label;
     }
     if (!isset($definition['provider'])) {
       return $label;
     }
-    return $label . " (" . $this->getExtensionLabel($definition['provider']) . ")";
+    return $label . ' (' . $this->getExtensionLabel($definition['provider']) . ')';
   }
 
   /**
    * Get the extension (module or theme) label.
    */
-  protected function getExtensionLabel(string $extension): string {
+  private function getExtensionLabel(string $extension): string {
     if ($this->moduleHandler->moduleExists($extension)) {
       return $this->moduleExtensionList->getName($extension);
     }
@@ -390,9 +442,9 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
    * @return array
    *   Config Dependencies.
    */
-  public function calculateDependencies(Component $component) : array {
+  public function calculateDependencies(Component $component): array {
     $definition = $component->getPluginDefinition();
-    $provider = ($definition instanceof PluginDefinitionInterface) ? $definition->getProvider() : (string) ($definition["provider"] ?? '');
+    $provider = ($definition instanceof PluginDefinitionInterface) ? $definition->getProvider() : (string) ($definition['provider'] ?? '');
     $extension_type = $this->getExtensionType($provider);
     return (empty($provider) || empty($extension_type)) ? [] : [$extension_type => [$provider]];
   }
@@ -431,7 +483,7 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
    * @return bool
    *   TRUE if the definition is hidden, FALSE otherwise.
    */
-  protected function isHiddenDefinition(array $definition, bool $include_replaces = FALSE): bool {
+  private function isHiddenDefinition(array $definition, bool $include_replaces = FALSE): bool {
     if (!empty($definition['replaces']) && $include_replaces === FALSE) {
       return TRUE;
     }
@@ -476,7 +528,7 @@ class ComponentPluginManager extends SdcPluginManager implements CategorizingPlu
   /**
    * Get extension type (theme or module).
    */
-  protected function getExtensionType(string $extension): string {
+  private function getExtensionType(string $extension): string {
     if ($this->moduleHandler->moduleExists($extension)) {
       return 'module';
     }

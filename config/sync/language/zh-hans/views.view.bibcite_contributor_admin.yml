@@ -1,0 +1,66 @@
+display:
+  default:
+    display_options:
+      exposed_form:
+        options:
+          submit_button: 过滤
+          reset_button_label: 重置
+          exposed_sorts_label: 排序依据
+          sort_asc_label: 升序
+          sort_desc_label: 降序
+      pager:
+        options:
+          tags:
+            previous: ‹‹
+            next: ››
+            first: '« 首页'
+            last: '末页 »'
+          expose:
+            items_per_page_label: 每页条目数
+            items_per_page_options_all_label: '- 全部 -'
+            offset_label: 偏移量
+      fields:
+        leading_title:
+          separator: ', '
+        prefix:
+          separator: ', '
+        first_name:
+          separator: ', '
+        middle_name:
+          separator: ', '
+        last_name:
+          separator: ', '
+        nick:
+          separator: ', '
+        suffix:
+          separator: ', '
+        bibcite_contributor_bulk_form:
+          label: 批量更新
+          action_title: 动作
+        name:
+          label: 名称
+          separator: ', '
+        operations:
+          label: 操作
+      filters:
+        combine:
+          expose:
+            label: 名称
+      sorts:
+        last_name:
+          expose:
+            label: 姓氏
+        first_name:
+          expose:
+            label: 名字
+        nick:
+          expose:
+            label: 昵称
+        prefix:
+          expose:
+            label: 前缀
+        suffix:
+          expose:
+            label: 后缀
+  page_1:
+    display_title: 页面

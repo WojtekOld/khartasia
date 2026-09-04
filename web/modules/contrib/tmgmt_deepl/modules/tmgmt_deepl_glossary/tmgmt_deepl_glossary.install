@@ -1,0 +1,144 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the tmgmt_deepl_glossary module.
+ */
+
+use Drupal\user\Entity\Role;
+use Drupal\views\Entity\View;
+use Symfony\Component\Yaml\Yaml;
+
+/**
+ * Add permission for existing 'administer deepl_glossary entities' permission.
+ */
+function tmgmt_deepl_glossary_update_8001(): void {
+  // Load all available user roles and rewrite permissions.
+  foreach (Role::loadMultiple() as $user_role) {
+    if ($user_role->hasPermission('administer deepl_glossary entities')) {
+      $user_role->grantPermission('access deepl_glossary overview');
+      $user_role->save();
+    }
+  }
+}
+
+/**
+ * Use new permission 'access deepl_glossary overview' for deepl_glossary view.
+ */
+function tmgmt_deepl_glossary_update_8002(): void {
+  $view_config_name = 'views.view.tmgmt_deepl_glossary';
+  $module_handler = \Drupal::moduleHandler();
+  $module_path = $module_handler->getModule('tmgmt_deepl')->getPath();
+  $config_path = $module_path . '/modules/tmgmt_deepl_glossary/config/install/' . $view_config_name . '.yml';
+  if (file_exists($config_path)) {
+    /** @var array $existing_config */
+    $existing_config = \Drupal::config($view_config_name)->get();
+    /** @var array $updated_config */
+    $updated_config = Yaml::parseFile($config_path);
+    // Merge the updated configuration into the existing configuration.
+    $new_config = array_merge($existing_config, $updated_config);
+    // Save the merged configuration.
+    \Drupal::configFactory()->getEditable($view_config_name)->setData($new_config)->save(TRUE);
+  }
+}
+
+/**
+ * Makes new entity types for multilingual glossaries available.
+ */
+function tmgmt_deepl_glossary_update_8005(): void {
+  // Clear caches first to ensure new entity definitions are discovered.
+  drupal_flush_all_caches();
+
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  $entity_type_ids_to_process = [
+    'deepl_ml_glossary',
+    'deepl_ml_glossary_dictionary',
+  ];
+
+  foreach ($entity_type_ids_to_process as $entity_type_id) {
+    // Check for existing definition.
+    $existing_definition = $entity_definition_update_manager->getEntityType($entity_type_id);
+    if ($existing_definition !== NULL) {
+      continue;
+    }
+
+    try {
+      // Get fresh definition and install.
+      $entity_type_definition = $entity_type_manager->getDefinition($entity_type_id);
+      $entity_definition_update_manager->installEntityType($entity_type_definition);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('debug')->info('Entity definition could not be installed for @id', [
+        '@id' => $entity_type_id,
+      ]);
+    }
+  }
+
+  // Clear caches again after installation.
+  drupal_flush_all_caches();
+}
+
+/**
+ * Install new administrative views for multilingual glossaries.
+ */
+function tmgmt_deepl_glossary_update_8006(): void {
+  $config_factory = \Drupal::configFactory();
+  $module_handler = \Drupal::moduleHandler();
+  // Define new administrative views.
+  $view_configs = [
+    'views.view.tmgmt_deepl_ml_glossary',
+    'views.view.tmgmt_deepl_ml_glossary_dictionary',
+  ];
+  foreach ($view_configs as $view_config_name) {
+    $module_path = $module_handler->getModule('tmgmt_deepl')->getPath();
+    $config_path = $module_path . '/modules/tmgmt_deepl_glossary/config/install/' . $view_config_name . '.yml';
+    if (file_exists($config_path)) {
+      /** @var array $existing_config */
+      $existing_config = \Drupal::config($view_config_name)->get();
+      /** @var array $updated_config */
+      $updated_config = Yaml::parseFile($config_path);
+      // Merge the updated configuration into the existing configuration.
+      $new_config = array_merge($existing_config, $updated_config);
+      // Save the merged configuration.
+      $config_factory->getEditable($view_config_name)->setData($new_config)->save(TRUE);
+    }
+  }
+
+  // Delete obsolete tmgmt_deepl_glossary config.
+  $obsolete_view = $config_factory->getEditable('views.view.tmgmt_deepl_glossary');
+  $obsolete_view->delete();
+}
+
+/**
+ * Fix boolean values in tmgmt_deepl_ml_glossary view to match config schema.
+ */
+function tmgmt_deepl_glossary_update_8007(): void {
+  $view = \Drupal::entityTypeManager()->getStorage('view')->load('tmgmt_deepl_ml_glossary');
+  // Only act if the view exists in active configuration.
+  if (!$view instanceof View) {
+    return;
+  }
+
+  /**
+   * @var array{
+   *   default: array{
+   *     display_options: array{
+   *       fields: array<string, array<string, mixed>>,
+   *       filters: array{
+   *         tmgmt_translator: array{
+   *           expose: array<string, mixed>,
+   *         },
+   *       },
+   *     },
+   *   },
+   * } $display
+   */
+  $display = $view->get('display');
+  $display['default']['display_options']['fields']['related_dictionaries']['link_to_entity'] = TRUE;
+  $display['default']['display_options']['filters']['tmgmt_translator']['expose']['reduce'] = FALSE;
+  $display['default']['display_options']['filters']['tmgmt_translator']['reduce_duplicates'] = FALSE;
+  $view->set('display', $display);
+  $view->save();
+}

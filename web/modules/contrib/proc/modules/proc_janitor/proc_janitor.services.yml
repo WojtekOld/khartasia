@@ -1,0 +1,19 @@
+services:
+  proc_janitor.maintenance:
+    class: Drupal\proc_janitor\Service\ProcJanitorMaintenanceService
+    arguments:
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@proc.unreferenced_cipher_proc_service'
+      - '@proc.remove_update_job_for_all_keys_service'
+      - '@logger.channel.proc_janitor'
+      - '@lock'
+      - '@database'
+      - '@module_handler'
+
+  logger.channel.proc_janitor:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: ['@logger.factory', 'get']
+    arguments:
+      - 'proc_janitor'
+

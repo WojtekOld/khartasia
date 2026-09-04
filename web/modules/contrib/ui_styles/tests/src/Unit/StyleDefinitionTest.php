@@ -7,12 +7,15 @@ namespace Drupal\Tests\ui_styles\Unit;
 use Drupal\Core\Url;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_styles\Definition\StyleDefinition;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * @coversDefaultClass \Drupal\ui_styles\Definition\StyleDefinition
  *
  * @group ui_styles
  */
+#[Group('ui_styles')]
 class StyleDefinitionTest extends UnitTestCase {
 
   /**
@@ -40,6 +43,7 @@ class StyleDefinitionTest extends UnitTestCase {
    *
    * @dataProvider definitionGettersProvider
    */
+  #[DataProvider('definitionGettersProvider')]
   public function testGetters(string $getter, string $name, $value): void {
     $definition = new StyleDefinition([$name => $value]);
     // @phpstan-ignore-next-line
@@ -84,6 +88,7 @@ class StyleDefinitionTest extends UnitTestCase {
    *
    * @dataProvider definitionGetOptionsAsOptionsProvider
    */
+  #[DataProvider('definitionGetOptionsAsOptionsProvider')]
   public function testGetOptionsAsOptions(array $options, array $expected): void {
     $definition = new StyleDefinition([
       'options' => $options,
@@ -124,6 +129,7 @@ class StyleDefinitionTest extends UnitTestCase {
    *
    * @dataProvider definitionGetOptionsForPreviewProvider
    */
+  #[DataProvider('definitionGetOptionsForPreviewProvider')]
   public function testGetOptionsForPreview(array $style, array $expected): void {
     $definition = new StyleDefinition($style);
     $this->assertEquals($expected, $definition->getOptionsForPreview());
@@ -305,6 +311,7 @@ class StyleDefinitionTest extends UnitTestCase {
    *
    * @dataProvider definitionGetOptionsWithIconProvider
    */
+  #[DataProvider('definitionGetOptionsWithIconProvider')]
   public function testGetOptionsWithIcon(array $style, array $expected): void {
     $definition = new StyleDefinition($style);
     $this->assertEquals($expected, $definition->getOptionsWithIcon());
@@ -404,6 +411,7 @@ class StyleDefinitionTest extends UnitTestCase {
    *
    * @dataProvider definitionGetLinksProvider
    */
+  #[DataProvider('definitionGetLinksProvider')]
   public function testGetLinks(array $links, array $expected): void {
     $definition = new StyleDefinition([
       'links' => $links,
@@ -453,6 +461,7 @@ class StyleDefinitionTest extends UnitTestCase {
    *
    * @dataProvider definitionGetRenderLinksProvider
    */
+  #[DataProvider('definitionGetRenderLinksProvider')]
   public function testGetRenderLinks(array $links, array $expected): void {
     $definition = new StyleDefinition([
       'links' => $links,

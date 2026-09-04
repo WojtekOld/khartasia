@@ -10,6 +10,8 @@ use Drupal\block_content\BlockContentInterface;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\node\NodeInterface;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the ui styles layout builder.
@@ -17,6 +19,9 @@ use Drupal\user\UserInterface;
  * @group ui_styles
  * @group ui_styles_layout_builder
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_layout_builder')]
+#[RunTestsInSeparateProcesses]
 class UiStylesLayoutBuilderTest extends BlockContentTestBase {
 
   use AssertTrait;

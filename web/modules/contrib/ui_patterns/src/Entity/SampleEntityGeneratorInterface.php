@@ -29,7 +29,7 @@ interface SampleEntityGeneratorInterface {
    * @return \Drupal\Core\Entity\EntityInterface
    *   An entity.
    */
-  public function get(string $entity_type_id, string $bundle_id) : EntityInterface;
+  public function get(string $entity_type_id, string $bundle_id): EntityInterface;
 
   /**
    * Deletes a sample entity for a given entity type and bundle.
@@ -41,6 +41,6 @@ interface SampleEntityGeneratorInterface {
    *
    * @return $this
    */
-  public function delete(string $entity_type_id, string $bundle_id) :SampleEntityGeneratorInterface;
+  public function delete(string $entity_type_id, string $bundle_id): SampleEntityGeneratorInterface;
 
 }

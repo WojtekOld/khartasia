@@ -1,0 +1,72 @@
+uuid: a644b248-01eb-4089-b3aa-76bee62873c5
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.synonymes_botaniques.field_syn_nom_accepte
+    - field.field.taxonomy_term.synonymes_botaniques.field_syn_source
+    - field.field.taxonomy_term.synonymes_botaniques.field_syn_source_id
+    - field.field.taxonomy_term.synonymes_botaniques.field_syn_source_url
+    - field.field.taxonomy_term.synonymes_botaniques.field_syn_type
+    - taxonomy.vocabulary.synonymes_botaniques
+  module:
+    - link
+    - options
+    - text
+id: taxonomy_term.synonymes_botaniques.default
+targetEntityType: taxonomy_term
+bundle: synonymes_botaniques
+mode: default
+content:
+  description:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_syn_nom_accepte:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_syn_source:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_syn_source_id:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_syn_source_url:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_syn_type:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true

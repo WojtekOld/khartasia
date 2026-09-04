@@ -1,0 +1,5 @@
+view proc reporting:
+  title: 'View Protected Content Reporting'
+  description: 'Allows access to the proc_reporting admin monitoring pages (update-task snapshots and daily operations).'
+  restrict access: true
+

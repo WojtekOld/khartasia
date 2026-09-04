@@ -1,0 +1,9 @@
+uuid: bc0ace9d-5098-46d2-a45d-c67fdadc6291
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: sWzigMCjlbvywAZX5IlcjeeqfYVwfqIm9QutfVJt2ZU
+id: corporate_author
+label: 'Corporate Author'
+weight: -6

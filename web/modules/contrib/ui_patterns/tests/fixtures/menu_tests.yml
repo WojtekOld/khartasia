@@ -1,4 +1,3 @@
----
 menu_1:
   component:
     component_id: ui_patterns_test:test-component
@@ -9,3 +8,36 @@ menu_1:
           menu: main
           level: '1'
           depth: '0'
+menu_set_active_trail:
+  component:
+    component_id: ui_patterns_test:test-component
+    props:
+      links:
+        source_id: "menu"
+        source:
+          menu: main
+          level: '1'
+          depth: '0'
+          set_active_trail: true
+menu_collapsed:
+  component:
+    component_id: ui_patterns_test:test-component
+    props:
+      links:
+        source_id: "menu"
+        source:
+          menu: main
+          level: '1'
+          depth: '0'
+          expand_all_items: false
+menu_collapsed_level_2:
+  component:
+    component_id: ui_patterns_test:test-component
+    props:
+      links:
+        source_id: "menu"
+        source:
+          menu: main
+          level: '2'
+          depth: '0'
+          expand_all_items: false

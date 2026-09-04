@@ -1,0 +1,16 @@
+{#
+/**
+ * @file
+ * Default check-specific help page template for checks.
+ *
+ * Available variables:
+ * - title: The title to show on the top of the page.
+ * - paragraphs: Array of paragraphs (strings) to show after the title.
+ */
+#}
+
+{% for paragraph in paragraphs %}
+    <p>
+        {{ paragraph }}
+    </p>
+{% endfor %}

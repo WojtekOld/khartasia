@@ -50,8 +50,8 @@ class ReferenceViewsData extends EntityViewsData {
       ],
     ];
 
-    // @todo Use $this->entityTypeManager only, once Drupal 8.9.0 is released.
-    $entity_manager = isset($this->entityTypeManager) ? $this->entityTypeManager : $this->entityManager;
+
+    $entity_manager = $this->entityTypeManager;
     $entity_type = $entity_manager->getDefinition('bibcite_keyword');
     $data['bibcite_reference__keywords']['keywords_target_id']['relationship'] = [
       'base' => $this->getViewsTableForEntityType($entity_type),
@@ -61,7 +61,7 @@ class ReferenceViewsData extends EntityViewsData {
       'id' => 'standard',
     ];
 
-    $entity_manager = isset($this->entityTypeManager) ? $this->entityTypeManager : $this->entityManager;
+    $entity_manager = $this->entityTypeManager;
     $entity_type = $entity_manager->getDefinition('bibcite_contributor');
     $data['bibcite_reference__author']['author_target_id']['relationship'] = [
       'base' => $this->getViewsTableForEntityType($entity_type),
@@ -104,7 +104,7 @@ class ReferenceViewsData extends EntityViewsData {
 
     // Expose additional delta column for multiple value fields.
     // Workaround for core issue #3097568.
-    if ($this->getFieldStorageDefinitions()[$field_name]->isMultiple()) {
+    if ($field_definition->getFieldStorageDefinition() && $field_definition->getFieldStorageDefinition()->isMultiple()) {
       $label = $field_definition->getLabel();
 
       $table_data['delta'] = [

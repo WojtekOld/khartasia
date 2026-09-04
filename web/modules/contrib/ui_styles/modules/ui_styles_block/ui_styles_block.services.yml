@@ -1,0 +1,5 @@
+
+services:
+  Drupal\ui_styles_block\Hook\UiStylesBlockHooks:
+    class: Drupal\ui_styles_block\Hook\UiStylesBlockHooks
+    autowire: true

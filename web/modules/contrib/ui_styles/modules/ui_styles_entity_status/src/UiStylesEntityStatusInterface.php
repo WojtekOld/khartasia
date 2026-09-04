@@ -12,6 +12,6 @@ interface UiStylesEntityStatusInterface {
   /**
    * The theme config key for classes added when an entity is unpublished.
    */
-  public const UNPUBLISHED_CLASSES_THEME_SETTING_KEY = 'ui_styles_entity_status_unpublished';
+  public const UNPUBLISHED_CLASSES_THEME_SETTING_KEY = 'third_party_settings.ui_styles_entity_status.unpublished';
 
 }

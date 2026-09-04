@@ -1,0 +1,24 @@
+ui_patterns_ckeditor5_component:
+  ckeditor5:
+    plugins:
+      - drupalComponent.DrupalComponent
+    config:
+      drupalComponent:
+        dialogSettings:
+          classes:
+            ui-dialog: ui-patterns-ckeditor5-dialog
+          width: 90%
+  drupal:
+    label: Component
+    library: ui_patterns_ckeditor5/drupal_component
+    admin_library: ui_patterns_ckeditor5/admin.drupal_component
+    class: Drupal\ui_patterns_ckeditor5\Plugin\CKEditor5Plugin\ComponentPlugin
+    toolbar_items:
+      drupalComponent:
+        label: Component
+    elements:
+      - <drupal-component>
+      - <drupal-component data-component-id data-component-settings>
+    conditions:
+      filter: component_embed
+      toolbarItem: drupalComponent

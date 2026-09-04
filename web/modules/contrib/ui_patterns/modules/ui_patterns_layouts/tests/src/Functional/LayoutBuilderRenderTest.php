@@ -1,17 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ui_patterns_layouts\Functional;
 
 use Drupal\Tests\ui_patterns\Functional\UiPatternsFunctionalTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test components rendering as layouts.
  *
- * @group ui_patterns_layouts
+ * @internal
+ *
+ * @coversNothing
  */
-class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
-
+#[Group('ui_patterns')]
+#[Group('ui_patterns_layouts')]
+#[RunTestsInSeparateProcesses]
+final class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
 
   use TestDataTrait;
 
@@ -68,14 +76,14 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
     foreach ($tests as $test_set) {
       $node = $this->createTestContentNode('page', $test_set['entity'] ?? []);
       $ui_patterns_config = $this->buildUiPatternsConfig($test_set);
-      $config_import['third_party_settings']['layout_builder']['sections'][0]['layout_id'] = 'ui_patterns:' . str_replace('-', '_', $test_set['component']['component_id']);
+      $config_import['third_party_settings']['layout_builder']['sections'][0]['layout_id'] = 'ui_patterns:' . \str_replace('-', '_', $test_set['component']['component_id']);
       $this->importConfigFixture(
         'core.entity_view_display.node.page.full',
         $config_import
       );
       $this->drupalGet('admin/structure/types/manage/page/display/full/layout');
       $assert_session->statusCodeEquals(200);
-      $component_id = str_replace('_', '-', explode(':', $test_set['component']['component_id'])[1]);
+      $component_id = \str_replace('_', '-', \explode(':', $test_set['component']['component_id'])[1]);
       $assert_session->elementExists('css', '.ui-patterns-' . $component_id);
       $this->drupalGet('node/' . $node->id());
       $assert_session->statusCodeEquals(200);
@@ -104,7 +112,7 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
     // Add body to slot and check for existence.
     $button = $page->find('css', '.ui-patterns-test-form-replaced-slot a');
     $button->click();
-    $page->clickLink('Text (formatted)');
+    $page->clickLink('text 1');
     $page->pressButton('Add block');
 
     // Check if layout specific classes are added.
@@ -113,7 +121,6 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
     $this->drupalGet('node/' . $node->id());
     $assert_session->elementExists('css', '.ui-patterns-test-form-replaced');
     $assert_session->elementTextContains('css', '.ui-patterns-test-form-replaced-slot', 'field_text_1 value');
-
   }
 
   /**
@@ -134,7 +141,7 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
 
     // Add body to slot and check for existence.
     $page->clickLink('Add block');
-    $page->clickLink('Text (formatted)');
+    $page->clickLink('text 1');
     $page->pressButton('Add block');
 
     // Check if layout specific classes are added.
@@ -143,7 +150,6 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
     $this->drupalGet('node/' . $node->id());
     $assert_session->elementExists('css', '.ui-patterns-test-component');
     $assert_session->elementTextContains('css', '.ui-patterns-slots-slot', 'field_text_1 value');
-
   }
 
   /**
@@ -164,14 +170,13 @@ class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
 
     // Add body to slot and check for existence.
     $page->clickLink('Add block');
-    $page->clickLink('Text (formatted)');
+    $page->clickLink('text 1');
     $page->pressButton('Add block');
     $page->pressButton('Save layout');
     $this->drupalGet('node/' . $node->id());
 
     $assert_session->elementExists('css', '.ui-patterns-test-component');
     $assert_session->elementTextContains('css', '.ui-patterns-slots-empty-slot', 'EMPTY SLOT');
-
   }
 
 }

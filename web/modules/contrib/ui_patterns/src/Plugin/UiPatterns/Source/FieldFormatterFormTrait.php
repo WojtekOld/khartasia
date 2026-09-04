@@ -55,11 +55,11 @@ trait FieldFormatterFormTrait {
     if (!empty($triggeringElement['#array_parents'])) {
       $subformKeys = $triggeringElement['#array_parents'];
       // Remove the triggering element itself and add the 'settings' below key.
-      array_pop($subformKeys);
+      \array_pop($subformKeys);
       // Return the subform:
-      $subform_settings_wrapper = NestedArray::getValue($form, array_merge($subformKeys, ['settings_wrapper']));
-      $subform_settings = NestedArray::getValue($form, array_merge($subformKeys, ['settings']));
-      $subform_third_party_settings = NestedArray::getValue($form, array_merge($subformKeys, ['third_party_settings']));
+      $subform_settings_wrapper = NestedArray::getValue($form, \array_merge($subformKeys, ['settings_wrapper']));
+      $subform_settings = NestedArray::getValue($form, \array_merge($subformKeys, ['settings']));
+      $subform_third_party_settings = NestedArray::getValue($form, \array_merge($subformKeys, ['third_party_settings']));
       return [
         '#prefix' => $subform_settings_wrapper['#prefix'],
         'settings' => $subform_settings,

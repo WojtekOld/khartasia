@@ -6,6 +6,9 @@ namespace Drupal\ui_skins\Form;
 
 use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Extension\ThemeSettingsProvider;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -13,7 +16,7 @@ use Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface;
 use Drupal\ui_skins\Definition\CssVariableDefinition;
 use Drupal\ui_skins\UiSkinsInterface;
 use Drupal\ui_skins\UiSkinsUtility;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * UI skins CSS variables theme settings.
@@ -31,18 +34,9 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
   public const string MULTIPLE_GROUPS_KEY = 'ui_skins_multiple_groups';
 
   /**
-   * The CSS variables plugin manager.
-   *
-   * @var \Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface
+   * The root key of the tree of form elements.
    */
-  protected CssVariablePluginManagerInterface $cssVariablePluginManager;
-
-  /**
-   * The transliteration service.
-   *
-   * @var \Drupal\Component\Transliteration\TransliterationInterface
-   */
-  protected TransliterationInterface $transliteration;
+  public const string TREE_KEY = 'ui_skins_css_variables';
 
   /**
    * An array of configuration names that should be editable.
@@ -51,15 +45,15 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
    */
   protected array $editableConfig = [];
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    /** @var static $instance */
-    $instance = parent::create($container);
-    $instance->cssVariablePluginManager = $container->get('plugin.manager.ui_skins.css_variable');
-    $instance->transliteration = $container->get('transliteration');
-    return $instance;
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    protected CssVariablePluginManagerInterface $cssVariablePluginManager,
+    #[Autowire(service: 'transliteration')]
+    protected TransliterationInterface $transliteration,
+    protected ThemeSettingsProvider $themeSettings,
+  ) {
+    parent::__construct($config_factory, $typedConfigManager);
   }
 
   /**
@@ -99,9 +93,9 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
     }
 
     /** @var array $ui_skins_css_variables_settings */
-    $ui_skins_css_variables_settings = \theme_get_setting(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, $theme) ?? [];
+    $ui_skins_css_variables_settings = $this->themeSettings->getSetting(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, $theme) ?? [];
 
-    $form[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY] = [
+    $form[$this::TREE_KEY] = [
       '#type' => $form_state->get(static::MULTIPLE_GROUPS_KEY) ? 'vertical_tabs' : 'container',
       '#tree' => TRUE,
     ];
@@ -113,19 +107,19 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
         // Create group if it does not exist yet.
         if ($form_state->get(static::MULTIPLE_GROUPS_KEY) && $plugin_definition->hasCategory()) {
           $group_key = $this->getMachineName($plugin_definition->getCategory());
-          if (!isset($form[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY][$group_key])) {
-            $form[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY][$group_key] = [
+          if (!isset($form[$this::TREE_KEY][$group_key])) {
+            $form[$this::TREE_KEY][$group_key] = [
               '#type' => 'details',
               '#title' => $plugin_definition->getCategory(),
-              '#group' => UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY,
+              '#group' => $this::TREE_KEY,
             ];
           }
 
           // @phpstan-ignore-next-line
-          $form[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY][$group_key][$plugin_definition->id()] = $plugin_element;
+          $form[$this::TREE_KEY][$group_key][$plugin_definition->id()] = $plugin_element;
         }
         else {
-          $form[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY][$plugin_definition->id()] = $plugin_element;
+          $form[$this::TREE_KEY][$plugin_definition->id()] = $plugin_element;
         }
       }
     }
@@ -141,11 +135,11 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
     $saved_variables = [];
 
     /** @var array $ui_skins_css_variables */
-    $ui_skins_css_variables = $form_state->getValue(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, []);
+    $ui_skins_css_variables = $form_state->getValue($this::TREE_KEY, []);
 
     // Clean up vertical tabs form element value.
-    if (isset($ui_skins_css_variables[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY . '__active_tab'])) {
-      unset($ui_skins_css_variables[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY . '__active_tab']);
+    if (isset($ui_skins_css_variables[$this::TREE_KEY . '__active_tab'])) {
+      unset($ui_skins_css_variables[$this::TREE_KEY . '__active_tab']);
     }
 
     foreach ($ui_skins_css_variables as $root_plugin_id => $group_variables) {
@@ -166,7 +160,7 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
       }
     }
 
-    $form_state->setValue(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, $saved_variables);
+    $form_state->setValue($this::TREE_KEY, $saved_variables);
   }
 
   /**
@@ -178,7 +172,7 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
     $this->editableConfig = [
       $theme . '.settings',
     ];
-    $values = $form_state->getValue(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY);
+    $values = $form_state->getValue($this::TREE_KEY);
     $config = $this->config($theme . '.settings');
     $config->set(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY, $values)
       ->save();
@@ -210,11 +204,11 @@ class CssVariablesThemeSettingsForm extends ConfigFormBase {
     if ($form_state->get(static::MULTIPLE_GROUPS_KEY) && $plugin_definition->hasCategory()) {
       $group_key = $this->getMachineName($plugin_definition->getCategory());
       // @phpstan-ignore-next-line
-      return $form[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY][$group_key][$plugin_id]['values_container'];
+      return $form[$this::TREE_KEY][$group_key][$plugin_id]['values_container'];
     }
 
     // @phpstan-ignore-next-line
-    return $form[UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY][$plugin_id]['values_container'];
+    return $form[$this::TREE_KEY][$plugin_id]['values_container'];
   }
 
   /**

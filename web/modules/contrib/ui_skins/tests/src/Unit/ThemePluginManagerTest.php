@@ -12,15 +12,13 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_skins\Definition\ThemeDefinition;
 use Drupal\ui_skins_test\DummyThemePluginManager;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Test the CSS variable plugin manager.
- *
- * @group ui_skins
- *
- * @coversDefaultClass \Drupal\ui_skins\Theme\ThemePluginManager
  */
+#[Group('ui_skins')]
 class ThemePluginManagerTest extends UnitTestCase {
 
   /**
@@ -72,8 +70,6 @@ class ThemePluginManagerTest extends UnitTestCase {
 
   /**
    * Tests the processDefinition().
-   *
-   * @covers ::processDefinition
    */
   public function testProcessDefinitionWillReturnException(): void {
     $plugin_id = 'test';
@@ -84,8 +80,6 @@ class ThemePluginManagerTest extends UnitTestCase {
 
   /**
    * Tests the processDefinition().
-   *
-   * @covers ::processDefinition
    */
   public function testProcessDefinition(): void {
     $plugin_id = 'test';
@@ -100,8 +94,6 @@ class ThemePluginManagerTest extends UnitTestCase {
 
   /**
    * Tests the getDefinitionWithDependencies().
-   *
-   * @covers ::getDefinitionWithDependencies
    */
   public function testGetDefinitionWithDependencies(): void {
     $themes = [

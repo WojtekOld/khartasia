@@ -1,0 +1,10 @@
+label: 地图
+fields:
+  bibcite_custom1:
+    label: 缩放
+  bibcite_pages:
+    label: 描述
+  bibcite_type_of_work:
+    label: 类型
+  bibcite_place_published:
+    label: 城市

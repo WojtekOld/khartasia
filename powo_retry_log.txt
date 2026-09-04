@@ -1,0 +1,81 @@
+Especes deja traitees: 28
+
+Especes restantes: 70
+
+NO SYN: Actinidia chinensis Planch.
+SKIP (not found): Caesalpinia sappan L.
+SKIP (not found): Cannabis chinensis Delile
+SKIP (not found): Cannabis indica Lam.
+Cannabis sativa var. indica (Lam.) E. Small & Cronquist ÔåÆ 36 synonymes
+SKIP (not found): Cinnamomum camphora (L.) J. Presl
+SKIP (not found): Cinnamomum Loureirii Nees
+NO SYN: Cyperus exaltatus Retz
+NO SYN: Daphne pseudomezereum A. Gray
+SKIP (not found): Deinanthe Bifida Maxim.
+SKIP (not found): Dendrocalamus affinis Rendle
+SKIP (not found): Euonymus sieboldianus Blume
+SKIP (not found): Hibiscus cannabinus L.
+SKIP (not found): Hibiscus manihot L. var. manihot
+NOT FOUND: Hibiscus simplex L. W. Wight
+Hibiscus syriacus L. ÔåÆ 27 synonymes
+Hordeum vulgare L. ÔåÆ 5 synonymes
+Hydrangea paniculata Siebold ÔåÆ 24 synonymes
+Indigofera tinctoria L. ÔåÆ 2 synonymes
+NO SYN: Isatis tinctoria L.
+Juncus effusus var. decipiens Buchenau ÔåÆ 8 synonymes
+Juncus setchuensis Buchenau ÔåÆ 5 synonymes
+Kadsura japonica (L.) Dunal ÔåÆ 2 synonymes
+Linum usitatissimum L. ÔåÆ 1 synonymes
+Lithospermum erythrorhizon Siebold & Zucc. ÔåÆ 5 synonymes
+Lycoris radiata (LÔÇÖH├®r.) Herb. ÔåÆ 10 synonymes
+Mercurialis leiocarpa Siebold & Zucc. ÔåÆ 3 synonymes
+Miscanthus sinensis Anders. ÔåÆ 72 synonymes
+Miscanthus tinctorius (Steud.) Hack ÔåÆ 6 synonymes
+Morus alba L. ÔåÆ 103 synonymes
+SKIP (not found): Morus australis Poir.
+Morus mongolica (Bureau) Schneid. ÔåÆ 10 synonymes
+NOT FOUND: Morus papyrifera L.
+Musa textilis N├®e ÔåÆ 6 synonymes
+Myrica rubra (Lour.) Siebold & Zucc. ÔåÆ 5 synonymes
+SKIP (not found): Opuntia dillenii (Ker Gawl.) Haw.
+Oryza sativa L. ÔåÆ 334 synonymes
+Phellodendron amurense Rupr. ÔåÆ 18 synonymes
+NOT FOUND: Phellodendron sachalinense (F. Schmidt) Sarg.
+NOT FOUND: Phragmites communis Trin.
+SKIP (not found): Polygonum tinctorium Aiton
+Prunus mume (Siebold) Siebold & Zucc. ÔåÆ 2 synonymes
+Pueraria montana var. lobata (Willd) Maesen & S.M . Almeida ex Sanjappa & Predeep ÔåÆ 2 synonymes
+Quercus acutissima Carruth. ÔåÆ 1 synonymes
+Quercus serrata Murray ÔåÆ 22 synonymes
+Rubia cordifolia L. ÔåÆ 1 synonymes
+Rubia tinctorum L. ÔåÆ 14 synonymes
+NOT FOUND: Salix koreensis Andersson
+Salix purpurea L. ÔåÆ 5 synonymes
+SKIP (not found): Smithiodendron artocarpioideum Hu
+Sophora flavescens Aiton ÔåÆ 1 synonymes
+NOT FOUND: Sophora japonica L.
+NOT FOUND: Sphagnum palustre  L.
+NOT FOUND: Spirogyra turfosa F. Gray
+Stellera Chamaejasme L. ÔåÆ 21 synonymes
+SKIP (not found): Sterculiaceae
+NOT FOUND: Strobilanthes flaccidifolia Nees
+Symplocos paniculata  Miq. ÔåÆ 34 synonymes
+Tilia amurensis Rupr. ÔåÆ 1 synonymes
+Triticum aestivum L. ÔåÆ 16 synonymes
+Typha orientalis C. Presl ÔåÆ 7 synonymes
+NOT FOUND: Ulmus cavaleriei H.Lev.
+NO SYN: Ulmus davidiana var. japonica (Rehder) Nakai
+Ulmus parvifolia Jacq. ÔåÆ 18 synonymes
+Wikstroemia canescens Wall. ex Meisn. ÔåÆ 8 synonymes
+Wikstroemia chamaedaphne (Bunge) Meisn. ÔåÆ 3 synonymes
+Wikstroemia retusa A. Gray ÔåÆ 2 synonymes
+SKIP (not found): Wikstroemia sikokiania Franc. & Sav.
+Wikstroemia trichotoma (Thunb.) Makino ÔåÆ 3 synonymes
+Wisteria floribunda (willd.) DC ÔåÆ 51 synonymes
+
+=== BILAN RETRY ===
+Synonymes crees : 855
+Erreurs         : 0
+Total synonymes en base: 1513
+
+Done

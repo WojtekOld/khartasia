@@ -5,6 +5,7 @@ namespace Drupal\bibcite_entity\Plugin\views\field;
 use Drupal\bibcite\CitationStylerInterface;
 use Drupal\bibcite\Entity\CslStyleInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -17,6 +18,7 @@ use Symfony\Component\Serializer\Serializer;
  *
  * @ViewsField("bibcite_citation")
  */
+#[ViewsField("bibcite_citation")]
 class Citation extends FieldPluginBase {
 
   /**

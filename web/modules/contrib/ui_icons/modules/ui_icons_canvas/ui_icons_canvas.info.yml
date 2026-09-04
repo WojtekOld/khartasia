@@ -1,0 +1,13 @@
+name: 'UI Icons Canvas'
+type: module
+description: 'Makes the ui_icon field type and its icon_widget editable as a Drupal Canvas component input.'
+package: User interface
+core_version_requirement: ^11.3 || ^12.0
+dependencies:
+  - canvas:canvas
+  - ui_icons:ui_icons_field
+
+# Information added by Drupal.org packaging script on 2026-08-03
+version: '2.0.0'
+project: 'ui_icons'
+datestamp: 1785781859

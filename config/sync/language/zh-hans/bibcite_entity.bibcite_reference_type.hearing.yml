@@ -1,0 +1,7 @@
+fields:
+  bibcite_edition:
+    label: 会话
+  bibcite_place_published:
+    label: 城市
+  bibcite_original_publication:
+    label: 历史

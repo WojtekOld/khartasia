@@ -1,0 +1,8 @@
+label: 图表
+fields:
+  bibcite_edition:
+    label: 版本
+  bibcite_pages:
+    label: 描述
+  bibcite_place_published:
+    label: 城市

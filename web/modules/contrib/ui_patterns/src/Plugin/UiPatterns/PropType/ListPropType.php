@@ -32,14 +32,14 @@ class ListPropType extends PropTypePluginBase {
   public function getSummary(array $definition): array {
     $summary = parent::getSummary($definition);
     if (isset($definition['items']['enum'])) {
-      $values = implode(", ", $definition['items']['enum']);
-      $summary[] = $this->t("Values: @values", ["@values" => $values]);
+      $values = \implode(', ', $definition['items']['enum']);
+      $summary[] = $this->t('Values: @values', ['@values' => $values]);
     }
     if (isset($definition['items']['minItems'])) {
-      $summary[] = $this->t("Min items: @length", ["@length" => $definition['items']['minItems']]);
+      $summary[] = $this->t('Min items: @length', ['@length' => $definition['items']['minItems']]);
     }
     if (isset($definition['items']['maxItems'])) {
-      $summary[] = $this->t("Max items: @length", ["@length" => $definition['items']['maxItems']]);
+      $summary[] = $this->t('Max items: @length', ['@length' => $definition['items']['maxItems']]);
     }
     return $summary;
   }

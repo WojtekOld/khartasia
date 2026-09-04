@@ -1,0 +1,5 @@
+proc_metadata_transitioner.settings:
+  title: Re-encryption Metadata Transitioner Settings
+  parent: system.admin_config_system
+  route_name: proc_metadata_transitioner.settings
+  weight: 10

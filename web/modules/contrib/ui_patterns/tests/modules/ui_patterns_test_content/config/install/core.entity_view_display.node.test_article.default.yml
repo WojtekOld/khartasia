@@ -1,0 +1,48 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.test_article.field_test_body
+    - field.field.node.test_article.field_test_related
+    - field.field.node.test_article.field_test_summary
+    - field.field.node.test_article.field_test_tags
+    - node.type.test_article
+  module:
+    - text
+id: node.test_article.default
+targetEntityType: node
+bundle: test_article
+mode: default
+content:
+  field_test_summary:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_test_tags:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_test_related:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_test_body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+hidden:
+  links: true

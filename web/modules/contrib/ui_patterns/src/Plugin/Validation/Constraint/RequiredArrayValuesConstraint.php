@@ -20,17 +20,13 @@ class RequiredArrayValuesConstraint extends SymfonyConstraint {
 
   /**
    * The error message if a value is required.
-   *
-   * @var string
    */
   public string $requiredValueMessage = "'@value' is required.";
 
   /**
    * The error message if a value is not an array.
-   *
-   * @var string
    */
-  public string $notArrayMessage = "Is not an array.";
+  public string $notArrayMessage = 'Is not an array.';
 
   /**
    * Values which are allowed in the validated array.

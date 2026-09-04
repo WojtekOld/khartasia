@@ -1,0 +1,40 @@
+content_lock.settings:
+  type: config_object
+  mapping:
+    verbose:
+      type: boolean
+      label: 'Display content lock messages'
+    types:
+      type: sequence
+      label: 'Types'
+      sequence:
+        type: sequence
+        label: 'Entity type'
+        sequence:
+          type: string
+          label: 'Bundle type'
+    types_translation_lock:
+      type: sequence
+      label: 'Entity types with translation lock on'
+      sequence:
+        type: string
+        label: 'Entity type with translation lock on'
+    form_op_lock:
+      type: sequence
+      label: 'Entity types'
+      sequence:
+        type: mapping
+        mapping:
+          mode:
+            type: integer
+            label: 'Disabled / denylist / allowlist mode per entity type'
+          values:
+            type: sequence
+            label: 'Allowed / denied form operations per entity type'
+            sequence:
+              type: string
+              label: 'form operation'
+    timeout:
+      type: integer
+      nullable: true
+      label: 'Number of seconds after which content lock expire'

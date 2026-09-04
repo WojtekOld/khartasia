@@ -1,0 +1,2 @@
+# Ignore build directory - contains webpack-generated files
+js/build/

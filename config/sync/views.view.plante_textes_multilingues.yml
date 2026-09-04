@@ -1,0 +1,142 @@
+langcode: fr
+status: true
+dependencies:
+  module:
+    - node
+    - user
+id: plante_textes_multilingues
+label: 'Textes multilingues de la plante'
+module: views
+description: 'Affiche les textes plante_texte liés à une plante par son NID.'
+tag: khartasia
+base_table: node_field_data
+base_field: nid
+display:
+  default:
+    id: default
+    display_title: Default
+    display_plugin: default
+    position: 0
+    display_options:
+      title: 'Textes multilingues'
+      fields:
+        field_langue_texte:
+          id: field_langue_texte
+          table: node__field_langue_texte
+          field: field_langue_texte
+          plugin_id: field
+          label: Langue
+          type: entity_reference_label
+          settings:
+            link: false
+        field_gen_culture_ml:
+          id: field_gen_culture_ml
+          table: node__field_gen_culture_ml
+          field: field_gen_culture_ml
+          plugin_id: field
+          label: 'Culture et usage'
+          hide_empty: true
+          empty_zero: false
+          type: text_default
+          settings: {  }
+          empty_column: true
+        field_intr_paper_ml:
+          id: field_intr_paper_ml
+          table: node__field_intr_paper_ml
+          field: field_intr_paper_ml
+          plugin_id: field
+          label: 'Fabrication du papier'
+          hide_empty: true
+          empty_zero: false
+          type: text_default
+          settings: {  }
+          empty_column: true
+        field_mode_prep_ml:
+          id: field_mode_prep_ml
+          table: node__field_mode_prep_ml
+          field: field_mode_prep_ml
+          plugin_id: field
+          label: 'Mode de préparation'
+          hide_empty: true
+          empty_zero: false
+          type: text_default
+          settings: {  }
+          empty_column: true
+        field_aire_utilis_ml:
+          id: field_aire_utilis_ml
+          table: node__field_aire_utilis_ml
+          field: field_aire_utilis_ml
+          plugin_id: field
+          label: "Aire d'utilisation"
+          hide_empty: true
+          empty_zero: false
+          type: text_default
+          settings: {  }
+          empty_column: true
+      pager:
+        type: none
+      access:
+        type: perm
+        options:
+          perm: 'access content'
+      sorts:
+        field_langue_texte_target_id:
+          id: field_langue_texte_target_id
+          table: node__field_langue_texte
+          field: field_langue_texte_target_id
+          plugin_id: standard
+          order: ASC
+      arguments:
+        field_plante_ref_target_id:
+          id: field_plante_ref_target_id
+          table: node__field_plante_ref
+          field: field_plante_ref_target_id
+          plugin_id: numeric
+          default_action: empty
+          exception:
+            value: all
+          default_argument_type: fixed
+          summary:
+            format: default_summary
+      filters:
+        status:
+          id: status
+          table: node_field_data
+          field: status
+          plugin_id: boolean
+          value: '1'
+          group: 1
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          plugin_id: in_operator
+          value:
+            plante_texte: plante_texte
+          group: 1
+      style:
+        type: default
+      row:
+        type: fields
+  block_1:
+    id: block_1
+    display_title: 'Bloc fiche plante'
+    display_plugin: block
+    position: 1
+    display_options:
+      title: ''
+      style:
+        type: default
+        options:
+          row_class: 'kh-plante-texte kh-plante-texte--{{ fields.field_langue_texte }}'
+      row:
+        type: fields
+        options:
+          inline: {  }
+          separator: ''
+          hide_empty: true
+      defaults:
+        title: false
+        style: false
+        row: false
+      display_description: 'Textes multilingues embarqués dans la fiche plante'

@@ -42,9 +42,11 @@ props:
     boolean_with_default_false:
       title: "Boolean"
       $ref: "ui-patterns://boolean"
+      default: false
     boolean_with_default_true:
       title: "Boolean"
       $ref: "ui-patterns://boolean"
+      default: true
     links:
       title: "Links"
       $ref: "ui-patterns://links"

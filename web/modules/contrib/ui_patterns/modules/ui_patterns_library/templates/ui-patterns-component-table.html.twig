@@ -22,7 +22,18 @@
           </td>
           <td>{{ slot.title }}</td>
           <td>{{ 'Slot'|t }}</td>
-          <td>{{ slot.description }}</td>
+          <td>
+            {{ slot.description }}
+            {% if slot.expected %}
+              <br>{{ "Expected: @components"|t({"@components": slot.expected|join(", ")}) }}
+            {% endif %}
+            {% if slot.minItems is defined %}
+              <br>{{ "Minimum items: @min"|t({"@min": slot.minItems}) }}
+            {% endif %}
+            {% if slot.maxItems is defined %}
+              <br>{{ "Maximum items: @max"|t({"@max": slot.maxItems}) }}
+            {% endif %}
+          </td>
         </tr>
       {% endfor %}
       {% for prop_id, prop in component.props.properties %}

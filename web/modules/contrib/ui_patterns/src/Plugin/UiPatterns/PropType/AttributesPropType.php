@@ -7,6 +7,7 @@ namespace Drupal\ui_patterns\Plugin\UiPatterns\PropType;
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RenderableInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
@@ -31,8 +32,8 @@ use Drupal\ui_patterns\PropTypePluginBase;
             'type' => 'array',
             'items' => [
               'anyOf' => [
-              ['type' => 'number'],
-              ['type' => 'string'],
+                ['type' => 'number'],
+                ['type' => 'string'],
               ],
             ],
           ],
@@ -53,13 +54,13 @@ class AttributesPropType extends PropTypePluginBase {
     plugins are expected to return a mapping to not break SDC prop validation
     against the prop type schema.
      */
-    if (is_array($value) && !empty($value)) {
+    if (\is_array($value) && !empty($value)) {
       // Attribute::createAttributeValue() is already normalizing some stuff:
       // - 'class' attribute must be a list
       // - MarkupInterface values must be resolved.
       $value = (new Attribute($value))->toArray();
     }
-    elseif (is_a($value, '\Drupal\Core\Template\Attribute')) {
+    elseif (\is_a($value, '\Drupal\Core\Template\Attribute')) {
       // Attribute PHP objects are rendered as strings by SDC ComponentValidator
       // this is raising an error: "InvalidComponentException: String value
       // found, but an object is required".
@@ -78,39 +79,42 @@ class AttributesPropType extends PropTypePluginBase {
    * Normalize attribute value.
    */
   protected static function normalizeAttrValue(mixed $value): mixed {
-    if (is_object($value)) {
+    if (\is_object($value)) {
       return static::normalizeObject($value);
     }
-    if (is_array($value) && array_is_list($value)) {
+    if (\is_array($value) && \array_is_list($value)) {
       return static::normalizeList($value);
     }
-    if (is_array($value) && !array_is_list($value)) {
+    if (\is_array($value) && !\array_is_list($value)) {
       return static::normalizeMapping($value);
     }
-    // We don't allow markup in attribute value.
-    return strip_tags((string) $value);
+    // Return the raw scalar. HTML-context escaping happens at render
+    // time via \Drupal\Core\Template\Attribute::__toString(), which
+    // applies Html::escape to each attribute value.
+    return (string) $value;
   }
 
   /**
    * Normalize list item.
    */
   protected static function normalizeListItem(mixed $value): mixed {
-    if (is_object($value)) {
+    if (\is_object($value)) {
       return static::normalizeObject($value);
     }
-    if (is_array($value) && array_is_list($value)) {
+    if (\is_array($value) && \array_is_list($value)) {
       // We encode to JSON because we don't know how deep is the nesting.
-      return json_encode($value, 0, 3) ?: "";
+      return \json_encode($value, 0, 3) ?: '';
     }
-    if (is_array($value) && !array_is_list($value)) {
+    if (\is_array($value) && !\array_is_list($value)) {
       return static::normalizeRenderArray($value);
     }
     // Integer and number are always allowed values.
-    if (is_int($value) || is_float($value)) {
+    if (\is_int($value) || \is_float($value)) {
       return $value;
     }
-    // We don't allow markup in attribute value.
-    return strip_tags((string) $value);
+    // Same rationale as normalizeAttrValue(): Attribute::__toString()
+    // already escapes for the HTML attribute context at render time.
+    return (string) $value;
   }
 
   /**
@@ -131,7 +135,7 @@ class AttributesPropType extends PropTypePluginBase {
     }
     // Instead of keeping an unexpected object, we return PHP namespace.
     // It will be valid and can inform the component user about its mistake.
-    return get_class($value);
+    return \get_class($value);
   }
 
   /**
@@ -151,7 +155,7 @@ class AttributesPropType extends PropTypePluginBase {
     if (!empty(Element::properties($value))) {
       return static::normalizeRenderArray($value);
     }
-    return static::normalizeList(array_values($value));
+    return static::normalizeList(\array_values($value));
   }
 
   /**
@@ -159,11 +163,11 @@ class AttributesPropType extends PropTypePluginBase {
    */
   protected static function normalizeRenderArray(array $value): string {
     if (!empty(Element::properties($value))) {
-      $markup = (string) \Drupal::service('renderer')->render($value);
-      return strip_tags($markup);
+      // Attribute::__toString() will escape this at render time.
+      return (string) \Drupal::service(RendererInterface::class)->render($value);
     }
     // We encode to JSON because we don't know how deep is the nesting.
-    return json_encode($value, 0, 3) ?: "";
+    return \json_encode($value, 0, 3) ?: '';
   }
 
   /**
@@ -179,10 +183,10 @@ class AttributesPropType extends PropTypePluginBase {
     is already an object
     - ArrayAccess interface allows manipulation as an array.
      */
-    if (is_a($value, '\Drupal\Core\Template\Attribute')) {
+    if (\is_a($value, '\Drupal\Core\Template\Attribute')) {
       return $value;
     }
-    if (is_array($value)) {
+    if (\is_array($value)) {
       return new Attribute($value);
     }
     return new Attribute();

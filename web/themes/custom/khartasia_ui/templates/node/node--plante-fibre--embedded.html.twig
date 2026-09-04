@@ -1,0 +1,69 @@
+{# node--plante-fibre--embedded.html.twig #}
+<div class="kh-fibre-item">
+  <dl class="kh-aside__dl">
+    {% if content.field_pf_type|render %}
+      <dt>Type</dt>
+      <dd>{{ node.field_pf_type.value }}</dd>
+    {% endif %}
+    {% if content.field_pf_long_min|render %}
+      <dt>Longueur (mm)</dt>
+      <dd>{{ node.field_pf_long_min.value }} – {{ node.field_pf_long_max.value }}</dd>
+    {% endif %}
+    {% if content.field_pf_larg_min|render %}
+      <dt>Largeur (mm)</dt>
+      <dd>{{ node.field_pf_larg_min.value }} – {{ node.field_pf_larg_max.value }}</dd>
+    {% endif %}
+    {% if content.field_pf_herzberg|render %}
+      <dt>Herzberg</dt>
+      <dd>{{ node.field_pf_herzberg.value }}</dd>
+    {% endif %}
+    {% if content.field_pf_graff_c|render %}
+      <dt>Graff C</dt>
+      <dd>{{ node.field_pf_graff_c.value }}</dd>
+    {% endif %}
+  </dl>
+
+  {% if content.field_pf_extremites|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Extrémités</h4>
+      {% if node.field_pf_extremites.value %}
+        <div class="field__item">{{ node.field_pf_extremites.value|raw }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_striations|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Striations</h4>
+      {% if node.field_pf_striations.value %}
+        <div class="field__item">{{ node.field_pf_striations.value|raw }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_cellules|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Cellules associées</h4>
+      {% if node.field_pf_cellules.value %}
+        <div class="field__item">{{ node.field_pf_cellules.value|raw }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_particularites|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Caractéristiques particulières</h4>
+      {% if node.field_pf_particularites.value %}
+        <div class="field__item">{{ node.field_pf_particularites.value|raw }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_notes|render %}
+    <div class="kh-fibre__notes">
+      {% if node.field_pf_notes.value %}
+        <div class="field__item">{{ node.field_pf_notes.value }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,12 @@
+label: Casse
+fields:
+  bibcite_secondary_title:
+    label: Rapporteur
+  bibcite_section:
+    label: 'Page citée'
+  bibcite_date:
+    label: 'Date définie'
+  bibcite_publisher:
+    label: Cour
+  bibcite_original_publication:
+    label: Historique

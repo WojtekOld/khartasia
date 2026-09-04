@@ -2,18 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\ui_patterns\Kernel\Source;
+namespace Drupal\Tests\ui_patterns\Kernel;
 
-use Drupal\Tests\ui_patterns\Kernel\SourcePluginsTestBase;
+use Drupal\ui_patterns\Plugin\UiPatterns\Source\TextfieldWidget;
 use Drupal\ui_patterns\SourcePluginBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test WidgetSettings.
  *
- * @coversDefaultClass \Drupal\ui_patterns\Plugin\UiPatterns\Source\TextfieldWidget
- * @group ui_patterns
+ * @internal
  */
-class WidgetSettingTest extends SourcePluginsTestBase {
+#[CoversClass(TextfieldWidget::class)]
+#[Group('ui_patterns')]
+#[RunTestsInSeparateProcesses]
+final class WidgetSettingTest extends SourcePluginsTestBase {
 
   /**
    * Test merge default settings.
@@ -22,9 +27,9 @@ class WidgetSettingTest extends SourcePluginsTestBase {
     $configuration = SourcePluginBase::buildConfiguration('prop_id', [], [], []);
     /** @var \Drupal\ui_patterns\Plugin\UiPatterns\Source\TextfieldWidget $source */
     $source = $this->sourcePluginManager()->createInstance('textfield', $configuration);
-    $this->assertNotNull($source);
-    $this->assertFalse($source->getWidgetSetting('required'));
-    $this->assertEquals('', $source->getWidgetSetting('title'));
+    self::assertNotNull($source);
+    self::assertFalse($source->getWidgetSetting('required'));
+    self::assertEquals('', $source->getWidgetSetting('title'));
   }
 
   /**
@@ -36,9 +41,9 @@ class WidgetSettingTest extends SourcePluginsTestBase {
     ], []);
     /** @var \Drupal\ui_patterns\Plugin\UiPatterns\Source\TextfieldWidget $source */
     $source = $this->sourcePluginManager()->createInstance('textfield', $configuration);
-    $this->assertNotNull($source);
-    $this->assertTrue($source->getWidgetSetting('required'));
-    $this->assertEquals('test', $source->getWidgetSetting('title'));
+    self::assertNotNull($source);
+    self::assertTrue($source->getWidgetSetting('required'));
+    self::assertEquals('test', $source->getWidgetSetting('title'));
   }
 
 }

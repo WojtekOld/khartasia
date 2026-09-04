@@ -1,0 +1,33 @@
+uuid: 2f99ac93-6cf5-4c39-8527-fa4594991860
+langcode: fr
+status: true
+dependencies:
+  module:
+    - options
+    - taxonomy
+id: taxonomy_term.field_syn_source
+field_name: field_syn_source
+entity_type: taxonomy_term
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: powo
+      label: powo
+    -
+      value: gbif
+      label: gbif
+    -
+      value: ipni
+      label: ipni
+    -
+      value: manuel
+      label: manuel
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

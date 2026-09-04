@@ -173,38 +173,11 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
 
     foreach ($query as $node) {
       /** @var \DOMElement $node */
-      $icon_id = $node->getAttribute('data-icon-id');
-
-      // Because of Ckeditor attributes system, we use a single attribute with
-      // serialized settings.
-      $settings = [];
-      /** @var \DOMElement $node */
-      $data_settings = $node->getAttribute('data-icon-settings');
-      if ($data_settings && json_validate($data_settings)) {
-        $settings = json_decode($data_settings, TRUE);
-      }
-
-      $attributes = [];
-      if ($class = $node->getAttribute('class')) {
-        $attributes['class'] = explode(' ', $class);
-      }
-      if ($aria_label = $node->getAttribute('aria-label')) {
-        $attributes['aria-label'] = $aria_label;
-      }
-      if ($node->getAttribute('aria-hidden')) {
-        $attributes['aria-hidden'] = TRUE;
-      }
-      if ($role = $node->getAttribute('role')) {
-        $attributes['role'] = $role;
-        // The element with role="presentation" is not part of the accessibility
-        // tree and should not have an accessible name.
-        // @see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/presentation_role
-        if (in_array($role, ['presentation', 'none'])) {
-          unset($attributes['aria-label']);
-        }
-      }
-
-      $build = $this->getWrappedRenderable($icon_id, $settings, $attributes);
+      $build = $this->getWrappedRenderable(
+        $node->getAttribute('data-icon-id'),
+        $this->extractSettings($node),
+        $this->extractAttributes($node),
+      );
       $this->renderIntoDomNode($build, $node, $result);
     }
 
@@ -214,11 +187,66 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
   }
 
   /**
+   * Reads the icon settings off a `<drupal-icon>` node.
+   *
+   * Because of the CKEditor attributes system, settings travel as a single
+   * serialized attribute.
+   *
+   * @param \DOMElement $node
+   *   The `<drupal-icon>` node.
+   *
+   * @return array
+   *   The settings, empty when absent or not valid JSON.
+   */
+  private function extractSettings(\DOMElement $node): array {
+    $data_settings = $node->getAttribute('data-icon-settings');
+    if (!$data_settings || !json_validate($data_settings)) {
+      return [];
+    }
+
+    return json_decode($data_settings, TRUE);
+  }
+
+  /**
+   * Reads the passthrough HTML attributes off a `<drupal-icon>` node.
+   *
+   * @param \DOMElement $node
+   *   The `<drupal-icon>` node.
+   *
+   * @return array
+   *   Attributes to apply to the rendered icon.
+   */
+  private function extractAttributes(\DOMElement $node): array {
+    $attributes = [];
+
+    if ($class = $node->getAttribute('class')) {
+      $attributes['class'] = explode(' ', $class);
+    }
+    if ($aria_label = $node->getAttribute('aria-label')) {
+      $attributes['aria-label'] = $aria_label;
+    }
+    if ($node->getAttribute('aria-hidden')) {
+      $attributes['aria-hidden'] = TRUE;
+    }
+    if ($role = $node->getAttribute('role')) {
+      $attributes['role'] = $role;
+      // The element with role="presentation" is not part of the accessibility
+      // tree and should not have an accessible name.
+      // @see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/presentation_role
+      if (in_array($role, ['presentation', 'none'])) {
+        unset($attributes['aria-label']);
+      }
+    }
+
+    return $attributes;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function tips($long = FALSE) {
     if ($long) {
-      return $this->t('
+      return (string) $this->t('
       <p>You can embed icon:</p>
       <ul>
         <li>Choose which icon item to embed: <code>&lt;drupal-icon data-icon-id="pack_id:icon_id" /&gt;</code></li>
@@ -226,7 +254,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       </ul>');
     }
     else {
-      return $this->t('You can embed icon items (using the <code>&lt;drupal-icon&gt;</code> tag).');
+      return (string) $this->t('You can embed icon items (using the <code>&lt;drupal-icon&gt;</code> tag).');
     }
   }
 

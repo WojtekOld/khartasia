@@ -61,11 +61,11 @@ leaflet-drupal:
     - leaflet/leaflet
 
 leaflet-geoman:
-  remote: http://leafletjs.com/
-  version: 2.13.0
+  remote: https://github.com/geoman-io/leaflet-geoman/releases/tag/v2.19.3
+  version: 2.19.3
   license:
     name: Leaflet-Geoman-License
-    url: https://github.com/geoman-io/leaflet-geoman/blob/develop/LICENSE
+    url: https://github.com/geoman-io/leaflet-geoman/releases/download/v2.19.3/LICENSE
     gpl-compatible: true
   js:
     js/leaflet-geoman-free/dist/leaflet-geoman.min.js: { }

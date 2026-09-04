@@ -1,0 +1,29 @@
+field.value.deepl_glossary_item:
+  type: mapping
+  label: 'DeepL glossary item'
+  mapping:
+    subject:
+      type: string
+      label: 'Subject'
+    definition:
+      type: string
+      label: 'Definition'
+
+views.field.tmgmt_deepl_ml_glossary_related_dictionaries:
+  type: views_field
+  label: 'DeepL glossary related dictionaries'
+  mapping:
+    link_to_entity:
+      type: boolean
+      label: 'Link to entity'
+
+views.filter.tmgmt_deepl_glossary_allowed_translators:
+  type: views.filter.many_to_one
+  label: 'DeepL glossary allowed translators'
+
+views.filter_value.tmgmt_deepl_glossary_allowed_translators:
+  type: sequence
+  label: 'Values'
+  sequence:
+    type: string
+    label: 'Value'

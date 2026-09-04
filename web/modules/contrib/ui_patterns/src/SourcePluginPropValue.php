@@ -19,7 +19,7 @@ abstract class SourcePluginPropValue extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function defaultSettings(): array {
-    return ["value" => $this->getDefaultFromPropDefinition()];
+    return ['value' => $this->getDefaultFromPropDefinition()];
   }
 
   /**
@@ -27,7 +27,7 @@ abstract class SourcePluginPropValue extends SourcePluginBase {
    */
   public function getSetting(string $key): mixed {
     $value = parent::getSetting($key);
-    if (("value" === $key) && (NULL === $value)) {
+    if (($key === 'value') && ($value === NULL)) {
       return $this->getDefaultFromPropDefinition();
     }
 
@@ -39,12 +39,12 @@ abstract class SourcePluginPropValue extends SourcePluginBase {
    */
   public function settingsSummary(): array {
     $value = $this->getSetting('value') ?? NULL;
-    if (!$value || !is_string($value)) {
+    if (!$value || !\is_string($value)) {
       return [];
     }
 
     return [
-      u(strip_tags($value))->truncate(20, '...', FALSE),
+      u(\strip_tags($value))->truncate(20, '...', FALSE),
     ];
   }
 
@@ -55,11 +55,11 @@ abstract class SourcePluginPropValue extends SourcePluginBase {
    *   Default value from prop definition if relevant.
    */
   protected function getDefaultFromPropDefinition(): mixed {
-    if (is_array($this->propDefinition) &&
-      array_key_exists("default", $this->propDefinition)) {
+    if (\is_array($this->propDefinition)
+      && \array_key_exists('default', $this->propDefinition)) {
       // Inside the prop definition,
       // the default value is in the prop type's format.
-      return $this->convertPropValueToStoredValue($this->propDefinition["default"]);
+      return $this->convertPropValueToStoredValue($this->propDefinition['default']);
     }
     return NULL;
   }
@@ -80,13 +80,13 @@ abstract class SourcePluginPropValue extends SourcePluginBase {
   /**
    * Merges default settings values into $settings.
    */
-  protected function mergeDefaults() : void {
+  protected function mergeDefaults(): void {
     $defaultSettings = $this->defaultSettings();
     // -> we prefer the prop definition default value.
-    if (array_key_exists("value", $defaultSettings)) {
+    if (\array_key_exists('value', $defaultSettings)) {
       $defaultValueProp = $this->getDefaultFromPropDefinition();
-      if (NULL !== $defaultValueProp) {
-        $defaultSettings["value"] = $defaultValueProp;
+      if ($defaultValueProp !== NULL) {
+        $defaultSettings['value'] = $defaultValueProp;
       }
     }
     $this->settings += $defaultSettings;

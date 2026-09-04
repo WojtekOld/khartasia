@@ -54,7 +54,7 @@ class BibtexReferenceNormalizer extends ReferenceNormalizerBase {
   /**
    * {@inheritdoc}
    */
-  public function normalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
+  public function normalize($object, $format = NULL, array $context = []): array {
     /** @var \Drupal\bibcite_entity\Entity\ReferenceInterface $object */
     $attributes = [];
     $attributes[$this->typeKey] = $this->convertEntityType($object->bundle(), $format);
@@ -89,7 +89,8 @@ class BibtexReferenceNormalizer extends ReferenceNormalizerBase {
   protected function extractFields(ReferenceInterface $reference, $format) {
     $attributes = parent::extractFields($reference, $format);
     $attributes['title'] = $this->extractScalar($reference->get('title'));
-    $attributes['reference'] = $reference->get('bibcite_citekey')->getString();
+    $citekey = $reference->get('bibcite_citekey')->getString();
+    $attributes['reference'] = !empty($citekey) ? $citekey : $reference->generateCitekey();
     return $attributes;
   }
 

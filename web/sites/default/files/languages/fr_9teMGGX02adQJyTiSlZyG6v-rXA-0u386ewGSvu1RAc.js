@@ -1,1 +1,0 @@
-Drupal.locale = { 'pluralFormula': function ($n) { return Number(($n!=1)); }, 'strings': {"Configure":"Configurer","This field is required.":"Ce champ est obligatoire.","Show":"Afficher","Select all rows in this table":"S\u00e9lectionner toutes les lignes du tableau","Deselect all rows in this table":"D\u00e9s\u00e9lectionner toutes les lignes du tableau"} };

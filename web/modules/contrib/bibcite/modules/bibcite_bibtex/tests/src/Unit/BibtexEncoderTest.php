@@ -2,13 +2,14 @@
 
 namespace Drupal\Tests\bibcite_bibtex\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\Tests\UnitTestCase;
 use Drupal\bibcite_bibtex\Encoder\BibtexEncoder;
 
 /**
  * @coversDefaultClass \Drupal\bibcite_bibtex\Encoder\BibtexEncoder
- * @group bibcite
  */
+#[Group('bibcite')]
 class BibtexEncoderTest extends UnitTestCase {
 
   /**

@@ -1,0 +1,6 @@
+label: 非掲載
+fields:
+  bibcite_place_published:
+    label: 市区町村
+  bibcite_alternate_title:
+    label: 略語

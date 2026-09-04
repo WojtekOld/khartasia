@@ -1,4 +1,5 @@
 name: "UI Patterns Test wrapper component"
+tags: [wrapper]
 props:
   type: object
   properties: {}

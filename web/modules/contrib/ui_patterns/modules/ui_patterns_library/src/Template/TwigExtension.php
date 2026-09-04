@@ -10,13 +10,10 @@ use Twig\TwigFunction;
 
 /**
  * Twig extension providing UI Patterns Legacy functionalities.
- *
- * @package Drupal\ui_patterns_library\Template
  */
 class TwigExtension extends AbstractExtension {
 
-  public function __construct(protected StoryPluginManager $storyPluginManager) {
-  }
+  public function __construct(protected StoryPluginManager $storyPluginManager) {}
 
   /**
    * {@inheritdoc}
@@ -30,10 +27,7 @@ class TwigExtension extends AbstractExtension {
    */
   public function getFunctions(): array {
     return [
-      new TwigFunction('component_story', [
-        $this,
-        'renderComponentStory',
-      ]),
+      new TwigFunction('component_story', $this->renderComponentStory(...)),
     ];
   }
 
@@ -68,12 +62,12 @@ class TwigExtension extends AbstractExtension {
       return $renderable;
     }
     $story = $this->storyPluginManager->getComponentStories($component_id)[$story_id] ?? [];
-    if (!isset($story["library_wrapper"]) || empty($story["library_wrapper"])) {
+    if (!isset($story['library_wrapper']) || empty($story['library_wrapper'])) {
       return $renderable;
     }
     return [
       '#type' => 'inline_template',
-      '#template' => $story["library_wrapper"],
+      '#template' => $story['library_wrapper'],
       '#context' => $slots + $props + ['_story' => $renderable],
     ];
   }

@@ -1,0 +1,15 @@
+name = Scroll to top
+description = Scroll to top module.
+package = Other
+core = 7.x
+files[] = scroll_to_top.css
+files[] = scroll_to_top.js
+
+configure = admin/config/user-interface/scrolltotop
+
+
+; Information added by Drupal.org packaging script on 2019-08-13
+version = "7.x-2.2"
+core = "7.x"
+project = "scroll_to_top"
+datestamp = "1565726890"

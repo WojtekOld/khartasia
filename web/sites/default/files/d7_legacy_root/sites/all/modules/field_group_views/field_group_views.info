@@ -1,0 +1,13 @@
+name = Fieldgroup views
+description = Provides view format for fieldgroup.
+package = Fields
+core = 7.x
+dependencies[] = field_group
+dependencies[] = views_field
+recommends[] = field_suppress
+
+; Information added by Drupal.org packaging script on 2020-05-01
+version = "7.x-1.2"
+core = "7.x"
+project = "field_group_views"
+datestamp = "1588340919"

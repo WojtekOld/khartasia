@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Component Layout.
  */
 #[Layout(
-  id: "ui_patterns",
+  id: 'ui_patterns',
   deriver: DerivativeComponentLayout::class
 )]
 class ComponentLayout extends LayoutDefault implements ContainerFactoryPluginInterface {
@@ -34,21 +34,9 @@ class ComponentLayout extends LayoutDefault implements ContainerFactoryPluginInt
    * {@inheritdoc}
    */
   protected function addContextAssignmentElement(ContextAwarePluginInterface $plugin, array $contexts) {
-    return $this->componentsAdjustContextEntitySelection(parent::addContextAssignmentElement($plugin, $contexts), "layout_builder.entity");
+    return $this->componentsAdjustContextEntitySelection(parent::addContextAssignmentElement($plugin, $contexts), 'layout_builder.entity');
   }
 
-  /**
-   * Constructs a new Component Layout instance.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\ui_patterns\Resolver\ChainContextEntityResolverInterface $chainContextEntityResolver
-   *   The context resolver.
-   */
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -66,7 +54,7 @@ class ComponentLayout extends LayoutDefault implements ContainerFactoryPluginInt
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('ui_patterns.chain_context_entity_resolver'),
+      $container->get(ChainContextEntityResolverInterface::class),
     );
     return $plugin;
   }
@@ -114,8 +102,8 @@ class ComponentLayout extends LayoutDefault implements ContainerFactoryPluginInt
         $this->context['entity'] = EntityContext::fromEntity($entity);
       }
     }
-    if (!isset($this->context["bundle"]) && isset($this->context["entity"]) && ($entity = $this->context["entity"]->getContextValue())) {
-      $this->context['bundle'] = new Context(ContextDefinition::create('string'), $entity->bundle() ?? "");
+    if (!isset($this->context['bundle']) && isset($this->context['entity']) && ($entity = $this->context['entity']->getContextValue())) {
+      $this->context['bundle'] = new Context(ContextDefinition::create('string'), $entity->bundle() ?? '');
     }
     return $this->context;
   }
@@ -155,7 +143,7 @@ class ComponentLayout extends LayoutDefault implements ContainerFactoryPluginInt
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state):void {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {
     $this->submitComponentsForm($form_state);
     parent::submitConfigurationForm($form, $form_state);
   }
@@ -168,7 +156,7 @@ class ComponentLayout extends LayoutDefault implements ContainerFactoryPluginInt
     $component_id = $this->getPluginDefinition()->id();
     $component_dependencies = $this->calculateComponentDependencies($component_id, $this->getComponentSourceContexts());
     SourcePluginBase::mergeConfigDependencies($dependencies, $component_dependencies);
-    SourcePluginBase::mergeConfigDependencies($dependencies, ["module" => ["ui_patterns_layouts"]]);
+    SourcePluginBase::mergeConfigDependencies($dependencies, ['module' => ['ui_patterns_layouts']]);
     return $dependencies;
   }
 

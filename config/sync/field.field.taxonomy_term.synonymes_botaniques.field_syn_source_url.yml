@@ -1,0 +1,23 @@
+uuid: 712b5034-a6a3-4b0e-b620-a3f04a0362db
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_syn_source_url
+    - taxonomy.vocabulary.synonymes_botaniques
+  module:
+    - link
+id: taxonomy_term.synonymes_botaniques.field_syn_source_url
+field_name: field_syn_source_url
+entity_type: taxonomy_term
+bundle: synonymes_botaniques
+label: 'URL source'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 1
+  link_type: 17
+field_type: link

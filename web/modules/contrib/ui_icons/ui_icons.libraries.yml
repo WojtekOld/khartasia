@@ -11,11 +11,19 @@ ui_icons.autocomplete:
     - core/once
     - core/drupal.autocomplete
 
+ui_icons.default_admin_autocomplete:
+  version: VERSION
+  css:
+    component:
+      css/default_admin.icon.autocomplete.css: {}
+  dependencies:
+    - ui_icons/ui_icons.autocomplete
+
 ui_icons.gin_autocomplete:
   version: VERSION
   css:
     component:
-      css/gin.icon.autocomplete.css: { }
+      css/gin.icon.autocomplete.css: {}
   dependencies:
     - ui_icons/ui_icons.autocomplete
 
@@ -23,7 +31,7 @@ ui_icons.daisyui_autocomplete:
   version: VERSION
   css:
     component:
-      css/daisyui.icon.autocomplete.css: { }
+      css/daisyui.icon.autocomplete.css: {}
   dependencies:
     - ui_icons/ui_icons.autocomplete
 
@@ -31,7 +39,7 @@ ui_icons.dsfr_autocomplete:
   version: VERSION
   css:
     component:
-      css/dsfr.icon.autocomplete.css: { }
+      css/dsfr.icon.autocomplete.css: {}
   dependencies:
     - ui_icons/ui_icons.autocomplete
 

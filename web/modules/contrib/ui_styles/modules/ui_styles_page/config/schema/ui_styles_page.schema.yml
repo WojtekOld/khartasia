@@ -1,6 +1,10 @@
-ui_styles_regions:
-  type: sequence
-  label: 'Selected regions styles'
-  sequence:
-    type: ui_styles.selected_mapping
-    label: 'Selected styles mapping'
+theme_settings.third_party.ui_styles_page:
+  type: mapping
+  label: 'UI Styles Page settings'
+  mapping:
+    regions:
+      type: sequence
+      label: 'Selected regions styles'
+      sequence:
+        type: ui_styles.selected_mapping
+        label: 'Selected styles mapping'

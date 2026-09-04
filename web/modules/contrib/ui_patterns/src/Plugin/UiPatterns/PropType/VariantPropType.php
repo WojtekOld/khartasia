@@ -30,8 +30,8 @@ class VariantPropType extends PropTypePluginBase {
    */
   public static function normalize(mixed $value, ?array $definition = NULL): mixed {
     // First get the enum array.
-    $enum = (!is_array($definition)) ? [] : ($definition['enum'] ?? []);
-    if (!is_array($enum)) {
+    $enum = (!\is_array($definition)) ? [] : ($definition['enum'] ?? []);
+    if (!\is_array($enum)) {
       $enum = [];
     }
     return static::normalizer()->normalizeEnumValue($value, $enum);

@@ -1,0 +1,16 @@
+drupal_component:
+  js:
+    js/build/drupalComponent.js: { preprocess: false, minified: true }
+  css:
+    theme:
+      css/drupal-component.css: {}
+  dependencies:
+    - core/ckeditor5
+    - core/drupal
+    - editor/drupal.editor.dialog
+
+# Icon of the toolbar item in the text format configuration form.
+admin.drupal_component:
+  css:
+    theme:
+      css/drupal-component.admin.css: {}

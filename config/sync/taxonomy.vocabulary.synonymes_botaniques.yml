@@ -1,0 +1,9 @@
+uuid: 970b8529-c463-4ea2-b36c-b3511b17ad80
+langcode: fr
+status: true
+dependencies: {  }
+name: 'Synonymes botaniques'
+vid: synonymes_botaniques
+description: null
+weight: 0
+new_revision: false

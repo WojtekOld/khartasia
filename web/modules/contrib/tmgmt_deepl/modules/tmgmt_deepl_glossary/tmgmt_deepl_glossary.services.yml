@@ -1,0 +1,17 @@
+services:
+  tmgmt_deepl_glossary.ml.helper:
+    class: Drupal\tmgmt_deepl_glossary\DeeplMultilingualGlossaryHelper
+    arguments: ['@entity_type.manager', '@tmgmt_deepl_glossary.ml.api', '@module_handler', '@language_manager']
+  tmgmt_deepl_glossary.ml.batch:
+    class: Drupal\tmgmt_deepl_glossary\DeeplMultilingualGlossaryBatch
+    arguments: [ '@tmgmt_deepl_glossary.ml.api', '@tmgmt_deepl_glossary.ml.helper', '@entity_type.manager', '@messenger' ]
+  tmgmt_deepl_glossary.ml.api:
+    class: Drupal\tmgmt_deepl_glossary\DeeplMultilingualGlossaryApi
+    arguments: ['@entity_type.manager', '@key.repository', '@logger.factory', '@messenger']
+
+  Drupal\tmgmt_deepl_glossary\DeeplMultilingualGlossaryHelperInterface:
+    alias: tmgmt_deepl_glossary.ml.helper
+
+  Drupal\tmgmt_deepl_glossary\Hook\TmgmtDeeplGlossaryHooks:
+    class: Drupal\tmgmt_deepl_glossary\Hook\TmgmtDeeplGlossaryHooks
+    autowire: true

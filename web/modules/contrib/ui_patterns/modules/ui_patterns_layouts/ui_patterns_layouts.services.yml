@@ -1,0 +1,4 @@
+services:
+  Drupal\ui_patterns_layouts\Hook\UiPatternsLayoutsHooks:
+    class: Drupal\ui_patterns_layouts\Hook\UiPatternsLayoutsHooks
+    autowire: true

@@ -1,0 +1,63 @@
+tmgmt.translator.settings.deepl_free:
+  type: tmgmt_deepl_settings
+
+tmgmt.translator.settings.deepl_pro:
+  type: tmgmt_deepl_settings
+
+tmgmt.translator.settings.deepl_api:
+  type: tmgmt_deepl_settings
+
+tmgmt_deepl_settings:
+  type: mapping
+  mapping:
+    auto_accept:
+      type: boolean
+      label: Automatically accept
+    auth_key_entity:
+      type: string
+      label: Authentication Key entity
+    tag_handling:
+      type: string
+      label: Sets which kind of tags should be handled.
+    tag_handling_version:
+      type: string
+      label: Sets which version of the tag handling algorithm should be used.
+    non_splitting_tags:
+      type: string
+      label: Comma-separated list of XML tags which never split sentences
+    splitting_tags:
+      type: string
+      label: Comma-separated list of XML tags which always cause splits.
+    ignore_tags:
+      type: string
+      label: Comma-separated list of XML tags whose content is never translated
+    split_sentences:
+      type: string
+      label: Sets whether the translation engine should first split the input into sentences.
+    preserve_formatting:
+      type: integer
+      label: Sets whether the translation engine should preserve some aspects of the formatting, even if it would usually correct some aspects.
+    formality:
+      type: string
+      label: Sets whether the translated text should lean towards formal or informal language.
+    outline_detection:
+      type: integer
+      label: Sets automatic outline detection.
+    enable_context:
+      type: boolean
+      label: Enable context for translation
+    model_type:
+      type: string
+      label: Sets which DeepL model should be used for translation.
+    translate_documents:
+      type: boolean
+      label: 'Translate documents'
+    enable_document_minification:
+      type: boolean
+      label: 'Use document minification'
+    omit_partner_id:
+      type: boolean
+      label: 'Do not send the DeepL Partner ID in API requests.'
+
+key.type.deepl_api_key:
+  type: sequence

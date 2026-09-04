@@ -44,7 +44,7 @@ services:
     arguments: ['@entity_type.manager', '@reference.form_builder']
   reference.form_builder:
     class: Drupal\bibcite_entity\ReferenceFormBuilder
-    arguments: ['@form_validator', '@form_submitter', '@form_cache', '@module_handler', '@event_dispatcher', '@request_stack', '@class_resolver', '@element_info', '@theme.manager', '@?csrf_token']
+    arguments: ['@form_validator', '@form_submitter', '@form_cache', '@module_handler', '@event_dispatcher', '@request_stack', '@class_resolver', '@element_info', '@theme.manager', '@?csrf_token', '@callable_resolver']
 
   access_check.bibcite_reference.preview:
     class: Drupal\bibcite_entity\Access\ReferencePreviewAccessCheck
@@ -62,3 +62,7 @@ services:
     arguments: ['@current_route_match']
     tags:
       - { name: 'context_provider' }
+
+  Drupal\bibcite_entity\Hook\BibciteEntityHooks:
+    class: Drupal\bibcite_entity\Hook\BibciteEntityHooks
+    autowire: true

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_styles\Render\Element;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Kernel tests for UI Styles Render element.
@@ -12,6 +15,8 @@ use Drupal\ui_styles\Render\Element;
  *
  * @coversDefaultClass \Drupal\ui_styles\Render\Element
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class UiStylesRenderElementTest extends KernelTestBase {
 
   /**
@@ -28,6 +33,7 @@ class UiStylesRenderElementTest extends KernelTestBase {
    *
    * @dataProvider providerTestAttributes
    */
+  #[DataProvider('providerTestAttributes')]
   public function testIsAcceptingAttributes(array $element, bool $expected): void {
     $result = Element::isAcceptingAttributes($element);
     $this->assertSame($expected, $result);

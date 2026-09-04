@@ -2,14 +2,17 @@
 
 namespace Drupal\Tests\bibcite_import\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Tests\BrowserTestBase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Test for main import functions.
- *
- * @group bibcite
  */
+#[RunTestsInSeparateProcesses]
+#[Group('bibcite')]
 class ImportTest extends BrowserTestBase {
 
   /**
@@ -62,9 +65,8 @@ class ImportTest extends BrowserTestBase {
 
   /**
    * Test Populate form.
-   *
-   * @dataProvider importDataProvider
    */
+  #[DataProvider('importDataProvider')]
   public function testPopulateForm($input_data, $format, $title, $year) {
     $this->drupalLogin($this->user);
 

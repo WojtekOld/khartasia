@@ -2,10 +2,12 @@
 
 namespace Drupal\bibcite_entity\Entity;
 
-use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the Keyword entity.
@@ -53,6 +55,44 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *   field_ui_base_route = "entity.bibcite_keyword.collection"
  * )
  */
+#[ContentEntityType(
+  id: 'bibcite_keyword',
+  label: new TranslatableMarkup('Keyword'),
+  handlers: [
+    'view_builder' => 'Drupal\Core\Entity\EntityViewBuilder',
+    'list_builder' => 'Drupal\bibcite_entity\KeywordListBuilder',
+    'views_data' => 'Drupal\bibcite_entity\KeywordViewsData',
+    'form' => [
+      'default' => 'Drupal\bibcite_entity\Form\KeywordForm',
+      'add' => 'Drupal\bibcite_entity\Form\KeywordForm',
+      'edit' => 'Drupal\bibcite_entity\Form\KeywordForm',
+      'delete' => 'Drupal\Core\Entity\ContentEntityDeleteForm',
+    ],
+    'access' => 'Drupal\bibcite_entity\KeywordAccessControlHandler',
+    'route_provider' => [
+      'html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider',
+    ],
+  ],
+  base_table: 'bibcite_keyword',
+  admin_permission: 'administer bibcite_keyword',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'name',
+    'uuid' => 'uuid',
+    'langcode' => 'langcode',
+  ],
+  links: [
+    'canonical' => '/bibcite/keyword/{bibcite_keyword}',
+    'edit-form' => '/bibcite/keyword/{bibcite_keyword}/edit',
+    'delete-form' => '/bibcite/keyword/{bibcite_keyword}/delete',
+    'bibcite-merge-form' => '/bibcite/keyword/{bibcite_keyword}/merge',
+    'add-form' => '/bibcite/keyword/add',
+    'bibcite-merge-multiple-form' => '/admin/content/bibcite/keyword/merge',
+    'delete-multiple-form' => '/admin/content/bibcite/keyword/delete',
+    'collection' => '/admin/content/bibcite/keyword',
+  ],
+  field_ui_base_route: 'entity.bibcite_keyword.collection'
+)]
 class Keyword extends ContentEntityBase implements KeywordInterface {
 
   use EntityChangedTrait;

@@ -8,6 +8,8 @@ use Drupal\Component\Plugin\PluginBase;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_styles\Definition\StyleDefinition;
 use Drupal\ui_styles\Source\SourcePluginManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the source plugin manager.
@@ -16,6 +18,8 @@ use Drupal\ui_styles\Source\SourcePluginManagerInterface;
  *
  * @coversDefaultClass \Drupal\ui_styles\Source\SourcePluginManager
  */
+#[Group('ui_styles')]
+#[RunTestsInSeparateProcesses]
 class SourcePluginManagerTest extends KernelTestBase {
 
   /**

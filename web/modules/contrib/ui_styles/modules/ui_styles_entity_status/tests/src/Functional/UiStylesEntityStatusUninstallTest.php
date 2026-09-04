@@ -6,6 +6,8 @@ namespace Drupal\Tests\ui_styles_entity_status\Functional;
 
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\ui_styles_entity_status\UiStylesEntityStatusInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test uninstall ui_styles_entity_status module.
@@ -13,6 +15,9 @@ use Drupal\ui_styles_entity_status\UiStylesEntityStatusInterface;
  * @group ui_styles
  * @group ui_styles_entity_status
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_entity_status')]
+#[RunTestsInSeparateProcesses]
 class UiStylesEntityStatusUninstallTest extends UiStylesEntityStatusFunctionalTestBase {
 
   /**
@@ -43,14 +48,16 @@ class UiStylesEntityStatusUninstallTest extends UiStylesEntityStatusFunctionalTe
     ]);
     $themeSettings->save();
 
-    $settings = $themeSettings->get(UiStylesEntityStatusInterface::UNPUBLISHED_CLASSES_THEME_SETTING_KEY);
-    $this->assertNotNull($settings);
+    $this->assertNotNull($themeSettings->get(UiStylesEntityStatusInterface::UNPUBLISHED_CLASSES_THEME_SETTING_KEY));
+    $this->assertNotNull($themeSettings->get('third_party_settings.ui_styles_entity_status'));
+    $this->assertNotNull($themeSettings->get('third_party_settings'));
 
     $this->moduleInstaller->uninstall(['ui_styles_entity_status']);
 
     $themeSettings = $this->configFactory->getEditable($this->defaultTheme . '.settings');
-    $settings = $themeSettings->get(UiStylesEntityStatusInterface::UNPUBLISHED_CLASSES_THEME_SETTING_KEY);
-    $this->assertNull($settings);
+    $this->assertNull($themeSettings->get(UiStylesEntityStatusInterface::UNPUBLISHED_CLASSES_THEME_SETTING_KEY));
+    $this->assertNull($themeSettings->get('third_party_settings.ui_styles_entity_status'));
+    $this->assertNull($themeSettings->get('third_party_settings'));
   }
 
 }

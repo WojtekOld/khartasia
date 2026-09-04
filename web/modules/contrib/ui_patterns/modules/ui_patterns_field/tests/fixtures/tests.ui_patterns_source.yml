@@ -1,5 +1,5 @@
 ---
-# this test demonstrates a simple mapping  of a prop
+# this test demonstrates a simple mapping of a prop
 # from a field to a component
 # this fails if the field is not working (not saving)
 # or if the mapping is not working

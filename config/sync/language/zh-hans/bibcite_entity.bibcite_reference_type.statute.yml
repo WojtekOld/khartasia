@@ -1,0 +1,11 @@
+fields:
+  bibcite_secondary_title:
+    label: 代码
+  bibcite_edition:
+    label: 会话
+  bibcite_place_published:
+    label: 国家/地区
+  bibcite_alternate_title:
+    label: 缩写
+  bibcite_original_publication:
+    label: 历史

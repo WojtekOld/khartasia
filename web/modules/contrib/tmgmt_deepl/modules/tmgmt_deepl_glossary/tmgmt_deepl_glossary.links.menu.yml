@@ -1,0 +1,6 @@
+entity.tmgmt_deepl_glossary.collection:
+  title: 'DeepL glossaries'
+  description: 'Add and modify DeepL glossaries.'
+  route_name: entity.deepl_ml_glossary.collection
+  parent: tmgmt.admin_tmgmt
+  weight: 95

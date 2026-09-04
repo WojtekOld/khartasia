@@ -1,0 +1,228 @@
+# Schema for the configuration files of the Protected Content module.
+proc.settings:
+  type: mapping
+  label: 'Protected Content settings'
+  mapping:
+    proc-stream-wrapper:
+      label: 'Stream wrapper'
+      type: text
+      default: 'private://proc'
+    proc-enable-stream-wrapper:
+      label: 'Enable stream wrapper'
+      type: integer
+      default: 1
+    proc-rsa-key-size:
+      label: 'RSA key size'
+      type: text
+      default: '2048'
+    proc-file-entity-max-filesize:
+      label: 'Maximum file size'
+      type: text
+      default: ''
+    proc-file-block-size:
+      label: 'Block size'
+      type: text
+      default: ''
+    proc-enable-block-size:
+      label: 'Enable block size'
+      type: integer
+      default: 0
+    proc-encrypt-button-label:
+      label: 'Encrypt button label'
+      type: label
+      default: 'Encrypt'
+    proc-encrypt-button-label-filled-field:
+      label: 'Encrypt button label when field is filled'
+      type: label
+      default: ''
+    proc-decrypt-button-label:
+      label: 'Decrypt button label'
+      type: label
+      default: 'Decrypt'
+    proc-encrypt-button-class:
+      label: 'Encrypt button class'
+      type: text
+      default: 'button encrypt-button'
+    proc-decrypt-button-class:
+      label: 'Decrypt button class'
+      type: text
+      default: 'button decrypt-button'
+    proc-allow-password-cache-fields:
+      label: 'Allow password cache for fields'
+      type: integer
+      default: 0
+    proc-allow-password-cache-standalone:
+      label: 'Allow password cache in stand-alone mode'
+      type: integer
+      default: 0
+    proc-auto-filter-recipients:
+      label: 'Encryption strategy'
+      type: integer
+      default: 1
+    proc-suppress-encrypt-success-msg:
+      label: 'Suppress encryption success message'
+      type: integer
+      default: 0
+    proc-suppress-decrypt-link:
+      label: 'Suppress decryption link on encryption success'
+      type: integer
+      default: 0
+    proc-suppress-encryption-success-msg:
+      label: 'Suppress encryption success message'
+      type: integer
+      default: 0
+    proc-single-value-remove-button:
+      label: 'Show remove button for single value fields'
+      type: integer
+      default: 0
+    proc-single-value-remove-button-label:
+      label: 'Remove button label for single value fields'
+      type: label
+      default: ''
+    proc-file-enable-autocomplete:
+      label: 'Enable autocomplete in file fields for non-admin users'
+      type: integer
+      default: 0
+    metadata_message_created:
+      label: 'Use the entity creation date for the metadata message shown to recipients on protected content file fields'
+      type: boolean
+      default: false
+    proc-break-chain-of-trust:
+      label: 'Allow non recipients to trigger automatic recipient updates'
+      type: boolean
+      default: false
+    proc-keyring-meta-update-log-enabled:
+      label: 'Enable queue info log for keyring meta updates'
+      type: boolean
+      default: false
+    proc-enable-inline-decryption-standalone:
+      label: 'Enable inline decryption in stand-alone mode'
+      type: boolean
+      default: false
+    proc-background-update-jobs-limit:
+      label: 'Background re-encryption jobs during decryption'
+      type: integer
+      default: 2
+    proc-enable-background-reencryption:
+      label: 'Enable background re-encryption during decryption'
+      type: boolean
+      default: true
+    proc-enable-autonomous-reencryption:
+      label: 'Enable autonomous background re-encryption on page load'
+      type: boolean
+      default: false
+    proc-autonomous-reencryption-cooldown:
+      label: 'Cooldown in seconds between autonomous re-encryption runs'
+      type: integer
+      default: 300
+    proc-cipher-cache-max-entries:
+      label: 'Maximum cipher cache entries in browser Cache Storage'
+      type: integer
+      default: 200
+    proc-recipients-delivery-mode:
+      label: 'Recipients delivery mode for encryption forms'
+      type: string
+      default: 'csv'
+    _core:
+      type: _core_config_info
+
+field.field_settings.proc_entity_reference_field:
+  type: mapping
+  mapping:
+    handler:
+      type: string
+      label: 'Reference method'
+    handler_settings:
+      type: entity_reference_selection.[%parent.handler]
+      label: 'File selection handler settings'
+    proc_field_recipients_fetcher_endpoint:
+      type: string
+      label: 'Recipients fetcher endpoint'
+    proc_field_recipients_manual_fetcher:
+      type: string
+      label: 'Manual fetcher'
+    proc_field_recipients_to_field:
+      type: string
+      label: 'Recipients to field'
+    proc_field_recipients_cc_field:
+      type: string
+      label: 'Recipients cc field'
+    proc_field_mode:
+      type: integer
+      label: 'Mode'
+    encrypt_button_label:
+      type: string
+      label: 'Encrypt button label'
+    decrypt_button_label:
+      type: string
+      label: 'Decrypt button label'
+    proc_field_input_mode:
+      type: integer
+      label: 'Input mode'
+    proc_field_decryption_mode:
+      type: integer
+      label: 'Decryption mode'
+    proc_allow_password_caching:
+      type: integer
+      label: 'Caching mode'
+    proc_trigger_format:
+      type: integer
+      label: 'Trigger format'
+    proc_master_field_submit_id:
+      type: string
+      label: 'Submit element ID'
+    proc_decryption_trigger_fields:
+      type: integer
+      label: 'Trigger decryption for all fields'
+    proc_field_recipients_fetcher_endpoint_filter:
+      type: string
+      label: 'Recipients to field'
+    proc_field_recipients_fetcher_endpoint_filter_type:
+      type: integer
+      label: 'Type of identifier'
+    proc_relabeling_pattern:
+      type: string
+      label: 'Relabeling pattern'
+    proc_re_encryption_plugin:
+      type: string
+      label: 'Re-encryption plugin'
+
+field.value.proc_entity_reference_field:
+  type: mapping
+  label: Default value
+  mapping:
+    value:
+      type: label
+      label: Value
+
+field.widget.settings.proc_entity_reference_widget:
+  type: mapping
+  label: Proc Entity Reference Field Widget widget settings
+  mapping:
+    size:
+      type: integer
+      label: 'Size'
+    proc_recipients_delivery_override:
+      type: string
+      label: 'Recipients delivery mode override'
+
+base_proc_entity_reference_field_field_settings:
+  type: mapping
+  mapping:
+    handler:
+      type: string
+      label: 'Reference method'
+    handler_settings:
+      type: entity_reference_selection.[%parent.handler]
+      label: 'File selection handler settings'
+    proc_field_recipients_manual_fetcher:
+      type: string
+      label: 'Manual fetcher'
+
+field.field_settings.proc:
+  type: base_proc_entity_reference_field_field_settings
+  label: 'Proc File settings'
+  mapping:
+    description_field:
+      type: boolean
+      label: 'Enable Description field'

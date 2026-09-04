@@ -1,0 +1,5 @@
+tmgmt.deepl_glossary:
+  route_name: entity.deepl_ml_glossary.collection
+  base_route: view.tmgmt_job_overview.page_1
+  title: 'DeepL glossaries'
+  weight: 95

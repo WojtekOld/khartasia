@@ -1,0 +1,57 @@
+<?php
+function khartasia_ui_preprocess_node(&$variables) {
+  $node = $variables['node'];
+  if ($node->bundle() !== 'article') return;
+
+  $taxo_tid = $node->get('field_tax_genus')->target_id;
+  if (!$taxo_tid) return;
+
+  $db = \Drupal::database();
+
+  // DISTINCT pour eviter doublons dus au champ multivaleur
+  $nids = $db->query("
+    SELECT DISTINCT entity_id
+    FROM node__field_genus_taxo
+    WHERE field_genus_taxo_target_id = :tid
+    AND bundle = 'common_names'
+    AND deleted = 0
+  ", [':tid' => $taxo_tid])->fetchCol();
+
+  $noms = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($nids) as $cn) {
+    $lang = $cn->get('field_language_taxo_vern')->entity;
+    $noms[] = [
+      'nid'      => $cn->id(),
+      'titre'    => $cn->label(),
+      'langue'   => $lang ? $lang->label() : '',
+      'scripture'=> $cn->get('field_ver_local_scripture')->value ?? '',
+      'type'     => $cn->get('field_nom_type')->value ?? '',
+      'url'      => $cn->toUrl()->toString(),
+    ];
+  }
+
+  usort($noms, fn($a,$b) => strcmp($a['langue'], $b['langue']));
+  $variables['noms_communs'] = $noms;
+
+  // Papers — DISTINCT aussi
+  $paper_nids = $db->query("
+    SELECT DISTINCT entity_id
+    FROM node__field_genus_pap_entity
+    WHERE field_genus_pap_entity_target_id = :nid
+    AND bundle = 'papers'
+    AND deleted = 0
+  ", [':nid' => $node->id()])->fetchCol();
+
+  $papers = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($paper_nids) as $p) {
+    $origin = $p->get('field_origin_taxo')->entity;
+    $papers[] = [
+      'nid'    => $p->id(),
+      'titre'  => $p->label(),
+      'origin' => $origin ? $origin->label() : '',
+      'url'    => $p->toUrl()->toString(),
+    ];
+  }
+  usort($papers, fn($a,$b) => strcmp($a['origin'], $b['origin']));
+  $variables['papers_lies'] = $papers;
+}

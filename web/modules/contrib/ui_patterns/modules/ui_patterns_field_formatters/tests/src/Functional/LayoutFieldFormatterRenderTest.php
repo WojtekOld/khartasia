@@ -1,16 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ui_patterns_field_formatters\Functional;
 
 use Drupal\Tests\ui_patterns\Functional\UiPatternsFunctionalTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test pattern preview rendering.
  *
- * @group ui_patterns_field_formatters
+ * @internal
+ *
+ * @coversNothing
  */
-class LayoutFieldFormatterRenderTest extends UiPatternsFunctionalTestBase {
+#[Group('ui_patterns')]
+#[Group('ui_patterns_field_formatters')]
+#[RunTestsInSeparateProcesses]
+final class LayoutFieldFormatterRenderTest extends UiPatternsFunctionalTestBase {
 
   use TestDataTrait;
 
@@ -32,8 +41,9 @@ class LayoutFieldFormatterRenderTest extends UiPatternsFunctionalTestBase {
    */
   public function testRender(): void {
     $test_data = self::loadTestDataFixture();
-    $test_data_field_formatters = self::loadTestDataFixture(__DIR__ . "/../../fixtures/tests.formatter_per_item.yml");
-    $tests = array_merge($test_data->getTestSets(), $test_data_field_formatters->getTestSets());
+    $test_data_field_formatters = self::loadTestDataFixture(__DIR__ . '/../../../../../tests/fixtures/tests.formatter_per_item.yml');
+    $tests = \array_merge($test_data->getTestSets(), $test_data_field_formatters->getTestSets());
+
     foreach ($tests as $test_set) {
       $node = $this->createTestContentNode('page', $test_set['entity'] ?? []);
       $ui_patterns_config_to_set = $this->buildUiPatternsConfig($test_set);
@@ -42,18 +52,20 @@ class LayoutFieldFormatterRenderTest extends UiPatternsFunctionalTestBase {
       $config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/core.entity_view_display.node.page.full.layout.classic.yml');
       $ui_patterns_config_layout_1 = &$config_import['content']['body']['settings']['ui_patterns'];
       $ui_patterns_config_layout_1 = $ui_patterns_config_to_set;
-      $field_name = (isset($test_set["contexts"]) && isset($test_set["contexts"]["field_name"])) ? $test_set["contexts"]["field_name"] : NULL;
-      if (!empty($field_name) && $field_name !== "body") {
-        $config_import['content'][$field_name] = $config_import['content']["body"];
-        unset($config_import['content']["body"]);
+      $field_name = (isset($test_set['contexts'], $test_set['contexts']['field_name'])) ? $test_set['contexts']['field_name'] : NULL;
+
+      if (!empty($field_name) && $field_name !== 'body') {
+        $config_import['content'][$field_name] = $config_import['content']['body'];
+        unset($config_import['content']['body']);
       }
       $this->importConfigFixture('core.entity_view_display.node.page.full', $config_import);
       $this->drupalGet('node/' . $node->id());
       $status_code = $this->getSession()->getStatusCode();
-      $this->assertTrue($status_code === 200, sprintf('Status code is $status_code for test %s. %s', $test_set['name'], $this->getSession()->getPage()->getContent()));
+      self::assertTrue($status_code === 200, \sprintf('Status code is $status_code for test %s. %s', $test_set['name'], $this->getSession()->getPage()->getContent()));
       $this->validateRenderedComponent($test_set);
-      if (isset($test_set["assertSession"])) {
-        $this->assertSessionObject($test_set["assertSession"]);
+
+      if (isset($test_set['assertSession'])) {
+        $this->assertSessionObject($test_set['assertSession']);
       }
     }
   }

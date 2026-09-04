@@ -36,10 +36,10 @@ interface SourceInterface extends ConfigurableInterface, PluginInspectionInterfa
    * @param \Drupal\ui_patterns\PropTypeInterface|null $prop_type
    *   The expected prop type of the value or NULL to get default value.
    *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
    * @return mixed
    *   The converted value.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function getValue(?PropTypeInterface $prop_type = NULL): mixed;
 
@@ -57,16 +57,5 @@ interface SourceInterface extends ConfigurableInterface, PluginInspectionInterfa
    * Allow sources to alter the component render element.
    */
   public function alterComponent(array $element): array;
-
-  /**
-   * Get metadata stored in the plugin definition.
-   *
-   * @param string $key
-   *   The key name of plugin definition to get data.
-   *
-   * @return null|mixed
-   *   The data inside plugin definition or false if error.
-   */
-  public function getCustomPluginMetadata(string $key): mixed;
 
 }

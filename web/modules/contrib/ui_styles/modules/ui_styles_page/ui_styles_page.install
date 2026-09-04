@@ -17,13 +17,34 @@ function ui_styles_page_uninstall(): void {
   $configFactory = \Drupal::configFactory();
   foreach ($themeHandler->listInfo() as $theme) {
     $config = $configFactory->getEditable($theme->getName() . '.settings');
-    $regionsStylesSettings = $config->get(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS);
-    if ($regionsStylesSettings == NULL) {
-      continue;
+    $config->clear(UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS);
+
+    if (empty($config->get('third_party_settings.ui_styles_page'))) {
+      $config->clear('third_party_settings.ui_styles_page');
     }
-    /** @var array $settings */
-    $settings = $config->get();
-    unset($settings[UiStylesPageInterface::REGION_STYLES_KEY_THEME_SETTINGS]);
-    $config->setData($settings)->save();
+    if (empty($config->get('third_party_settings'))) {
+      $config->clear('third_party_settings');
+    }
+
+    $config->save();
+  }
+}
+
+/**
+ * Put UI Styles Page config into theme's third party settings.
+ */
+function ui_styles_page_update_10101(): void {
+  $themeHandler = \Drupal::service('theme_handler');
+  $configFactory = \Drupal::configFactory();
+  foreach ($themeHandler->listInfo() as $theme) {
+    $config = $configFactory->getEditable($theme->getName() . '.settings');
+
+    $ui_styles_regions = $config->get('ui_styles_regions');
+    if ($ui_styles_regions) {
+      $config->set('third_party_settings.ui_styles_page.regions', $ui_styles_regions);
+      $config->clear('ui_styles_regions');
+    }
+
+    $config->save();
   }
 }

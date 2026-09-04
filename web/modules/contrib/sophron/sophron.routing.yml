@@ -1,0 +1,18 @@
+# Sophron module routes
+
+sophron.settings:
+  path: '/admin/config/system/sophron'
+  defaults:
+    _form: '\Drupal\sophron\Form\SettingsForm'
+    _title: 'Sophron - MIME Types'
+  requirements:
+    _permission: 'administer site configuration'
+
+sophron.mime_types.json:
+  path: '/sophron/mime-types.json'
+  defaults:
+    _controller: \Drupal\sophron\Controller\JsonController::mimeTypes
+    _title: 'Mime Types'
+  requirements:
+    _permission: 'access mime types json feed'
+    _content_type_format: json

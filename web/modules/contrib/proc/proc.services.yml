@@ -1,0 +1,122 @@
+services:
+  proc_subscriber:
+    class: Drupal\proc\EventSubscriber\ProcSubscriber
+    tags:
+      - { name: event_subscriber }
+  proc.key_manager:
+    class: Drupal\proc\ProcKeyManager
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.factory'
+      - '@current_user'
+      - '@datetime.time'
+      - '@module_handler'
+      - '@proc.hash_service'
+      - '@proc.hash_salt_service'
+  plugin.manager.proc_relabelling:
+    class: Drupal\proc\ProcRelabellingPluginManager
+    parent: default_plugin_manager
+  proc.enc_access_checker:
+    class: Drupal\proc\Access\ProcEncAccessCheck
+    arguments:
+      - '@proc.access_result_service'
+    tags:
+      - { name: access_check, applies_to: _proc_enc_access_check }
+  proc.dec_access_checker:
+    class: Drupal\proc\Access\ProcDecAccessCheck
+    arguments:
+      - '@proc.access_result_service'
+      - '@current_user'
+      - '@path.current'
+      - '@logger.channel.proc'
+      - '@entity_type.manager'
+      - '@request_stack'
+    tags:
+      - { name: access_check, applies_to: _proc_dec_access_check }
+  proc.pubkey_access_checker:
+    class: Drupal\proc\Access\ProcPubKeyAccessCheck
+    arguments:
+      - '@proc.access_result_service'
+    tags:
+      - { name: access_check, applies_to: _proc_pubkey_access_check }
+  proc.access_result_service:
+    class: 'Drupal\proc\Service\AccessResultService'
+  proc.hash_service:
+    class: 'Drupal\proc\Service\HashService'
+  proc.hash_salt_service:
+    class: Drupal\proc\Service\HashSaltService
+    arguments:
+      - '@settings'
+  proc.field:
+    class: Drupal\proc\Element\ProcField
+    arguments:
+      - '@path.current'
+      - '@config.factory'
+      - '@token'
+      - '@proc.proc_field_processor'
+  proc.proc_field_processor:
+    class: Drupal\proc\Service\ProcFieldProcessor
+    arguments:
+      - '@module_handler'
+      - '@path.current'
+      - '@config.factory'
+      - '@token'
+      - '@current_user'
+      - '@proc.key_manager'
+      - '@entity_type.manager'
+      - '@logger.channel.proc'
+  logger.channel.proc:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: ['@logger.factory', 'get']
+    arguments:
+      - 'proc'
+  string_translation.byte_size_markup:
+    class: Drupal\Core\StringTranslation\ByteSizeMarkup
+  proc.byte_size_formatter:
+    class: Drupal\proc\ByteSizeFormatter
+    arguments:
+      - '@string_translation'
+  proc.url_parser:
+    class: Drupal\proc\UrlParser
+  proc.css_identifier_cleaner:
+    class: Drupal\proc\Service\HtmlCssIdentifierCleaner
+  plugin.manager.proc_re_enc_rec_set:
+    class: Drupal\proc\ProcReEncRecSetPluginManager
+    parent: default_plugin_manager
+  proc.environment:
+    class: Drupal\Component\Utility\Environment
+  proc.update_jobs_validator:
+    class: Drupal\proc\Plugin\Validation\Constraint\UpdateJobsValidator
+    arguments:
+      - '@entity_type.manager'
+    tags:
+      - { name: validator.constraint_validator }
+  proc.proc_json_file_service:
+    class: Drupal\proc\Service\ProcJsonFileService
+    arguments:
+      - '@config.factory'
+      - '@file_system'
+      - '@file.repository'
+  proc.clean_up_expired_update_job:
+    class: Drupal\proc\Service\CleanUpExpiredUpdateJobService
+    arguments:
+      - '@database'
+      - '@logger.channel.proc'
+      - '@entity_type.manager'
+  proc.re_re_enc_link_service:
+    class: Drupal\proc\Service\ProcReEncLinkService
+  proc.unreferenced_cipher_proc_service:
+    class: Drupal\proc\Service\UnreferencedCipherProcService
+    arguments:
+      - '@entity_type.manager'
+      - '@database'
+      - '@logger.factory'
+  proc.remove_update_job_for_all_keys_service:
+    class: Drupal\proc\Service\RemoveUpdateJobForAllKeysService
+    arguments:
+      - '@entity_type.manager'
+      - '@proc.key_manager'
+  proc.update_jobs_count_service:
+    class: Drupal\proc\Service\ProcUpdateJobsCountService
+    arguments:
+      - '@entity_type.manager'

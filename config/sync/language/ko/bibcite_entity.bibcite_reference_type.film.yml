@@ -1,0 +1,7 @@
+fields:
+  bibcite_custom5:
+    label: 양식
+  bibcite_type_of_work:
+    label: '중간길이 형식'
+  bibcite_place_published:
+    label: 국가

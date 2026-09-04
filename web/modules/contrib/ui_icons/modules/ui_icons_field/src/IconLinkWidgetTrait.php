@@ -6,6 +6,7 @@ namespace Drupal\ui_icons_field;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ui_icons\IconSearch;
 
 /**
@@ -17,6 +18,8 @@ use Drupal\ui_icons\IconSearch;
  * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
  */
 trait IconLinkWidgetTrait {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}

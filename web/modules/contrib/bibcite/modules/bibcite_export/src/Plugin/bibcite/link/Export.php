@@ -3,11 +3,14 @@
 namespace Drupal\bibcite_export\Plugin\bibcite\link;
 
 use Drupal\bibcite\Plugin\BibciteFormatManagerInterface;
+use Drupal\bibcite_entity\Attribute\BibciteLink;
 use Drupal\bibcite_entity\Entity\ReferenceInterface;
 use Drupal\bibcite_entity\Plugin\BibciteLinkPluginBase;
+use Drupal\bibcite_export\Plugin\Derivative\FormatExportLink;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Build link to export reference entity.
@@ -18,6 +21,13 @@ use Drupal\Core\Url;
  *   deriver = "Drupal\bibcite_export\Plugin\Derivative\FormatExportLink",
  * )
  */
+#[
+  BibciteLink(
+    id: "export",
+    label: new TranslatableMarkup("Export"),
+    deriver: FormatExportLink::class,
+  )
+]
 class Export extends BibciteLinkPluginBase implements ContainerFactoryPluginInterface {
 
   /**

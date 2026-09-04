@@ -2,6 +2,7 @@
 
 namespace Drupal\bibcite_entity\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
@@ -21,6 +22,15 @@ use Drupal\Core\TypedData\DataDefinition;
  *   list_class = "\Drupal\Core\Field\EntityReferenceFieldItemList",
  * )
  */
+#[FieldType(
+  id: 'bibcite_contributor',
+  label: new TranslatableMarkup('Contributor'),
+  no_ui: TRUE,
+  description: new TranslatableMarkup('Entity reference with label'),
+  default_widget: 'bibcite_contributor_widget',
+  default_formatter: 'bibcite_contributor_label',
+  list_class: '\Drupal\Core\Field\EntityReferenceFieldItemList'
+)]
 class Contributor extends EntityReferenceItem implements ContributorFieldInterface {
 
   /**

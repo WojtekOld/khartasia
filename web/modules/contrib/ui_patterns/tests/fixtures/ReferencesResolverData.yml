@@ -35,6 +35,8 @@
                 type: string
                 format: "iri-reference"
                 id: "ui-patterns://url"
+              is_button: { type: boolean }
+              in_active_trail: { type: boolean }
               attributes:
                 type: object
                 id: "ui-patterns://attributes"
@@ -101,3 +103,39 @@
     items:
       type: integer
       enum: [1, 2, 3, 4, 5, 6]
+
+# A schema owning a property named "id" must not be altered by the resolver.
+- schema:
+    type: object
+    properties:
+      foo:
+        type: object
+        properties:
+          id:
+            type: string
+  expected:
+    type: object
+    properties:
+      foo:
+        type: object
+        properties:
+          id:
+            type: string
+
+# A property named "id" living next to a resolved reference.
+- schema:
+    type: object
+    properties:
+      foo:
+        $ref: "ui-patterns://url"
+      id:
+        type: string
+  expected:
+    type: object
+    properties:
+      foo:
+        type: string
+        format: "iri-reference"
+        id: "ui-patterns://url"
+      id:
+        type: string

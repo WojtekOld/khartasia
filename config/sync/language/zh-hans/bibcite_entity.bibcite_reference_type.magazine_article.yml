@@ -1,0 +1,5 @@
+fields:
+  bibcite_issue:
+    label: 发行编号
+  bibcite_number_of_volumes:
+    label: 频率

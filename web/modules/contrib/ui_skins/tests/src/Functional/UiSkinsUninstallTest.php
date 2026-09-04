@@ -6,12 +6,14 @@ namespace Drupal\Tests\ui_skins\Functional;
 
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\ui_skins\UiSkinsInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test uninstall ui_skins module.
- *
- * @group ui_skins
  */
+#[Group('ui_skins')]
+#[RunTestsInSeparateProcesses]
 class UiSkinsUninstallTest extends UiSkinsFunctionalTestBase {
 
   /**
@@ -26,7 +28,7 @@ class UiSkinsUninstallTest extends UiSkinsFunctionalTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->moduleInstaller = $this->container->get('module_installer');
+    $this->moduleInstaller = $this->container->get(ModuleInstallerInterface::class);
   }
 
   /**
@@ -48,18 +50,18 @@ class UiSkinsUninstallTest extends UiSkinsFunctionalTestBase {
     $themeSettings->set(UiSkinsInterface::THEME_THEME_SETTING_KEY, 'mode1');
     $themeSettings->save();
 
-    $css_variables_settings = $themeSettings->get(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY);
-    $this->assertNotNull($css_variables_settings);
-    $theme_settings = $themeSettings->get(UiSkinsInterface::THEME_THEME_SETTING_KEY);
-    $this->assertNotNull($theme_settings);
+    $this->assertNotNull($themeSettings->get(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY));
+    $this->assertNotNull($themeSettings->get(UiSkinsInterface::THEME_THEME_SETTING_KEY));
+    $this->assertNotNull($themeSettings->get('third_party_settings.ui_skins'));
+    $this->assertNotNull($themeSettings->get('third_party_settings'));
 
     $this->moduleInstaller->uninstall(['ui_skins']);
 
     $themeSettings = $this->configFactory->getEditable($this->defaultTheme . '.settings');
-    $css_variables_settings = $themeSettings->get(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY);
-    $this->assertNull($css_variables_settings);
-    $theme_settings = $themeSettings->get(UiSkinsInterface::THEME_THEME_SETTING_KEY);
-    $this->assertNull($theme_settings);
+    $this->assertNull($themeSettings->get(UiSkinsInterface::CSS_VARIABLES_THEME_SETTING_KEY));
+    $this->assertNull($themeSettings->get(UiSkinsInterface::THEME_THEME_SETTING_KEY));
+    $this->assertNull($themeSettings->get('third_party_settings.ui_skins'));
+    $this->assertNull($themeSettings->get('third_party_settings'));
   }
 
 }

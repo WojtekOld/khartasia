@@ -1,0 +1,17 @@
+parameters:
+  level: 0
+  fileExtensions:
+    - php
+    - module
+    - inc
+    - install
+    - theme
+    - profile
+  reportUnmatchedIgnoredErrors: false
+  excludePaths:
+    # drupal/feeds is an optional require-dev dependency. Excluding its
+    # integration class prevents PHPStan from failing when feeds is absent.
+    - src/Feeds/Target/Color.php
+  ignoreErrors:
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"

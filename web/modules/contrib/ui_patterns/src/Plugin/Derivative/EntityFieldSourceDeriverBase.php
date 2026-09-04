@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Entity\EditorialContentEntityBase;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItemInterface;
 use Drupal\Core\Logger\LoggerChannelTrait;
@@ -22,7 +19,8 @@ use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\TypedData\DataReferenceTargetDefinition;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\ui_patterns\SourceMetadataKey;
+use Drupal\ui_patterns\SourceTags;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -40,18 +38,6 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    */
   protected array $entityFieldsMetadata = [];
 
-  /**
-   * Constructs new FieldBlockDeriver.
-   *
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
-   *   The entity field manager.
-   * @param \Drupal\Core\TypedData\TypedDataManagerInterface $typedDataManager
-   *   The typed data manager.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityTypeBundleInfo
-   *   The entity type bundle info.
-   */
   public function __construct(
     protected EntityFieldManagerInterface $entityFieldManager,
     protected TypedDataManagerInterface $typedDataManager,
@@ -66,46 +52,11 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
-      $container->get('entity_field.manager'),
-      $container->get('typed_data_manager'),
-      $container->get('entity_type.manager'),
-      $container->get('entity_type.bundle.info'),
+      $container->get(EntityFieldManagerInterface::class),
+      $container->get(TypedDataManagerInterface::class),
+      $container->get(EntityTypeManagerInterface::class),
+      $container->get(EntityTypeBundleInfoInterface::class),
     );
-  }
-
-  /**
-   * Get entity fields classification.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type_definition
-   *   The entity type definition.
-   *
-   * @return array
-   *   The classification of the fields.
-   *
-   * @throws \Drupal\Core\Entity\Exception\UnsupportedEntityTypeDefinitionException
-   */
-  protected function getEntityFieldsClassification(EntityTypeInterface $entity_type_definition) {
-    // Location of field definitions for this entity.
-    $entity_type_class = $entity_type_definition->getClass();
-    $entity_type_parent_class = get_parent_class($entity_type_class);
-    $fields_editorial = [];
-    $parents_base = [];
-    $fields_base = [];
-    if (is_subclass_of($entity_type_class, EditorialContentEntityBase::class)) {
-      $fields_editorial = array_merge($fields_editorial, array_keys($entity_type_class::revisionLogBaseFieldDefinitions($entity_type_definition) ?? []));
-    }
-    if (is_subclass_of($entity_type_class, EntityPublishedTrait::class)) {
-      $fields_editorial = array_merge($fields_editorial, array_keys($entity_type_class::publishedBaseFieldDefinitions($entity_type_definition) ?? []));
-    }
-    if ($entity_type_parent_class && is_subclass_of($entity_type_parent_class, FieldableEntityInterface::class)) {
-      $parents_base = array_keys($entity_type_parent_class::baseFieldDefinitions($entity_type_definition) ?? []);
-      $fields_base = array_keys($entity_type_class::baseFieldDefinitions($entity_type_definition) ?? []);
-    }
-    return [
-      "fields_editorial" => $fields_editorial,
-      "parents_base" => $parents_base,
-      "fields_base" => $fields_base,
-    ];
   }
 
   /**
@@ -115,8 +66,6 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    *   The field storage definitions.
    * @param array $entity_field_map
    *   The entity field map.
-   * @param array $entityFieldsClassification
-   *   The classification of the fields.
    *
    * @return array
    *   The metadata for each field.
@@ -124,31 +73,25 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
   protected function getEntityFieldStorageMetadata(
     array $field_storage_definitions,
     array $entity_field_map,
-    array $entityFieldsClassification,
   ) {
     $returned = [];
     // Field storage definitions.
     foreach ($entity_field_map as $field_name => $field_info) {
-      if (!array_key_exists($field_name, $field_storage_definitions)) {
+      if (!\array_key_exists($field_name, $field_storage_definitions)) {
         continue;
       }
       /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition */
       $field_storage_definition = $field_storage_definitions[$field_name];
-      $main_property_name = (is_object($field_storage_definition) && method_exists($field_storage_definition, "getMainPropertyName")) ? $field_storage_definition->getMainPropertyName() : NULL;
-      $is_base = (in_array($field_name, $entityFieldsClassification["fields_base"]) || ($field_storage_definition instanceof BaseFieldDefinition));
+      $main_property_name = (\is_object($field_storage_definition) && \method_exists($field_storage_definition, 'getMainPropertyName')) ? $field_storage_definition->getMainPropertyName() : NULL;
       $returned[$field_name] = [
-        "label" => $field_storage_definition->getLabel(),
-        "bundles" => array_values($field_info['bundles'] ?? []),
-        "metadata" => [
-          "type" => $field_storage_definition->getType(),
-          "configurable" => ($field_storage_definition instanceof FieldStorageConfig),
-          "editorial" => in_array($field_name, $entityFieldsClassification["fields_editorial"]),
-          "parent_base" => in_array($field_name, $entityFieldsClassification["parents_base"]),
-          "base" => $is_base,
-          "cardinality" => $field_storage_definition->getCardinality(),
+        'label' => $field_storage_definition->getLabel(),
+        'bundles' => \array_values($field_info['bundles'] ?? []),
+        'metadata' => [
+          SourceMetadataKey::Type->value => $field_storage_definition->getType(),
+          SourceMetadataKey::Cardinality->value => $field_storage_definition->getCardinality(),
         ],
-        "provider" => $field_storage_definition->getProvider(),
-        "main_property" => $main_property_name,
+        'provider' => $field_storage_definition->getProvider(),
+        'main_property' => $main_property_name,
         'config_dependencies' => [],
         'properties' => [],
       ];
@@ -157,14 +100,14 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
         // Skip entity reference
         // Description could have been more precise,
         // but at the price of loading lot of stuff for nothing.
-        $returned[$field_name]["properties"][$property_id] = [
-          "label" => $this->t("[Field item] @property", ["@property" => $property_definition->getLabel()]),
-          "description" => $this->t('Property "@property" of field "@field', [
+        $returned[$field_name]['properties'][$property_id] = [
+          'label' => $this->t('[Field item] @property', ['@property' => $property_definition->getLabel()]),
+          'description' => $this->t('Property "@property" of field "@field', [
             '@property' => $property_definition->getLabel(),
             '@field' => $field_storage_definition->getLabel(),
           ]),
-          "data_type" => $property_definition->getDataType(),
-          "entity_reference" => (($main_property_name === $property_id) && ($property_definition instanceof DataReferenceTargetDefinition)),
+          'data_type' => $property_definition->getDataType(),
+          'entity_reference' => (($main_property_name === $property_id) && ($property_definition instanceof DataReferenceTargetDefinition)),
         ];
       }
     }
@@ -174,43 +117,33 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
   /**
    * Get entity bundle field metadata.
    *
-   * @param string $field_name
-   *   The field name.
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
    *   The field definition.
    * @param \Drupal\Core\TypedData\DataDefinitionInterface $item_definition
    *   The item definition.
-   * @param array $entityFieldsClassification
-   *   The classification of the fields.
    *
    * @return array
    *   The metadata for the field.
    */
   protected function getEntityBundleFieldMetadata(
-    string $field_name,
     $field_definition,
     $item_definition,
-    array $entityFieldsClassification,
   ) {
-    $main_property_name = (method_exists($item_definition, "getMainPropertyName")) ? $item_definition->getMainPropertyName() : NULL;
+    $main_property_name = (\method_exists($item_definition, 'getMainPropertyName')) ? $item_definition->getMainPropertyName() : NULL;
     $field_storage_definition = $field_definition->getFieldStorageDefinition();
     $returned = [
-      "label" => $field_definition->getLabel(),
-      "config_dependencies" => [],
-      "metadata" => [
-        "configurable" => ($field_definition instanceof FieldConfigInterface),
-        "editorial" => in_array($field_name, $entityFieldsClassification["fields_editorial"]),
-        "parent_base" => in_array($field_name, $entityFieldsClassification["parents_base"]),
-        "base" => in_array($field_name, $entityFieldsClassification["fields_base"]) || ($field_definition instanceof BaseFieldDefinition),
-        "cardinality" => $field_storage_definition->getCardinality(),
+      'label' => $field_definition->getLabel(),
+      'config_dependencies' => [],
+      'metadata' => [
+        SourceMetadataKey::Cardinality->value => $field_storage_definition->getCardinality(),
       ],
-      "provider" => $field_storage_definition->getProvider(),
-      "main_property" => $main_property_name,
+      'provider' => $field_storage_definition->getProvider(),
+      'main_property' => $main_property_name,
     ];
     // Config dependencies.
     if ($field_definition instanceof FieldConfigInterface) {
-      $returned['config_dependencies'][$field_definition->getConfigDependencyKey()][] =
-        $field_definition->getConfigDependencyName();
+      $returned['config_dependencies'][$field_definition->getConfigDependencyKey()][]
+        = $field_definition->getConfigDependencyName();
     }
     return $returned;
   }
@@ -237,23 +170,23 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
     array $entity_type_definitions,
   ) {
     $returned = [];
-    $main_property_definition = ($main_property_name && method_exists($item_definition, "getPropertyDefinition")) ? $item_definition->getPropertyDefinition($main_property_name) : NULL;
+    $main_property_definition = ($main_property_name && \method_exists($item_definition, 'getPropertyDefinition')) ? $item_definition->getPropertyDefinition($main_property_name) : NULL;
     // Entity reference.
     if ($main_property_definition instanceof DataReferenceTargetDefinition) {
       $target_entity_type_id = $item_definition->getSetting('target_type');
       $target_entity_type_definition = $entity_type_definitions[$target_entity_type_id] ?? NULL;
       $returned = [
-        "entity_type_id" => $target_entity_type_id,
-        "fieldable" => $target_entity_type_definition ? $target_entity_type_definition->entityClassImplements(FieldableEntityInterface::class) : FALSE,
-        "bundles" => [],
+        'entity_type_id' => $target_entity_type_id,
+        'fieldable' => $target_entity_type_definition ? $target_entity_type_definition->entityClassImplements(FieldableEntityInterface::class) : FALSE,
+        'bundles' => [],
       ];
       $target_type_to_bundles = NULL;
       $item_class = $item_definition->getClass();
-      if (is_subclass_of($item_class, EntityReferenceItemInterface::class)) {
+      if (\is_subclass_of($item_class, EntityReferenceItemInterface::class)) {
         $target_type_to_bundles = $item_class::getReferenceableBundles($field_definition);
       }
-      if ($target_type_to_bundles && array_key_exists($target_entity_type_id, $target_type_to_bundles)) {
-        $target_bundles = array_values($target_type_to_bundles[$target_entity_type_id]);
+      if ($target_type_to_bundles && \array_key_exists($target_entity_type_id, $target_type_to_bundles)) {
+        $target_bundles = \array_values($target_type_to_bundles[$target_entity_type_id]);
         $returned['bundles'] = $target_bundles;
       }
     }
@@ -269,8 +202,6 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    *   The field storage definitions.
    * @param array $entity_type_definitions
    *   The entity type definitions.
-   * @param array $entityFieldsClassification
-   *   The classification of the fields.
    *
    * @return array
    *   The metadata for each bundle and each field.
@@ -279,8 +210,7 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
     string $entity_type_id,
     array $field_storage_definitions,
     array $entity_type_definitions,
-    array $entityFieldsClassification,
-  ) : array {
+  ): array {
     $returned = [];
     // Derive for each bundle, field information.
     $bundle_list = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
@@ -288,18 +218,18 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
       $field_definitions = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
       // ------
       $returned[$bundle] = [
-        "label" => $bundle_info["label"],
-        "fields" => [],
+        'label' => $bundle_info['label'],
+        'fields' => [],
       ];
       foreach ($field_definitions as $field_name => $field_definition) {
-        if (!array_key_exists($field_name, $field_storage_definitions) && !$field_definition->isComputed()) {
+        if (!\array_key_exists($field_name, $field_storage_definitions) && !$field_definition->isComputed()) {
           continue;
         }
         $item_definition = $field_definition->getItemDefinition();
-        $returned[$bundle]["fields"][$field_name] =
-          $this->getEntityBundleFieldMetadata($field_name, $field_definition, $item_definition, $entityFieldsClassification);
-        $returned[$bundle]["fields"][$field_name]["entity_reference"] =
-          $this->getEntityBundleFieldMetadataEntityReference($returned[$bundle]["fields"][$field_name]["main_property"], $field_definition, $item_definition, $entity_type_definitions);
+        $returned[$bundle]['fields'][$field_name]
+          = $this->getEntityBundleFieldMetadata($field_definition, $item_definition);
+        $returned[$bundle]['fields'][$field_name]['entity_reference']
+          = $this->getEntityBundleFieldMetadataEntityReference($returned[$bundle]['fields'][$field_name]['main_property'], $field_definition, $item_definition, $entity_type_definitions);
       }
     }
     return $returned;
@@ -308,39 +238,38 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
   /**
    * Get data about entity fields.
    *
+   * @throws \Drupal\Core\Entity\Exception\UnsupportedEntityTypeDefinitionException
+   *
    * @return array
    *   The metadata for each entity and each field.
-   *
-   * @throws \Drupal\Core\Entity\Exception\UnsupportedEntityTypeDefinitionException
    */
-  protected function getEntityFieldsMetadata() : array {
+  protected function getEntityFieldsMetadata(): array {
     $fields_metadata = [];
     $entity_type_definitions = $this->entityTypeManager->getDefinitions();
     $all_entity_field_map = $this->entityFieldManager->getFieldMap();
     foreach ($entity_type_definitions as $entity_type_id => $entity_type_definition) {
       $fields_metadata[$entity_type_id] = [
-        "fieldable" => $entity_type_definition->entityClassImplements(FieldableEntityInterface::class),
-        "label" => $entity_type_definition->getLabel(),
+        'fieldable' => $entity_type_definition->entityClassImplements(FieldableEntityInterface::class),
+        'label' => $entity_type_definition->getLabel(),
       ];
-      if (!$fields_metadata[$entity_type_id]["fieldable"]) {
+      if (!$fields_metadata[$entity_type_id]['fieldable']) {
         continue;
       }
       $entity_field_map = $all_entity_field_map[$entity_type_id] ?? NULL;
-      if (!is_array($entity_field_map)) {
+      if (!\is_array($entity_field_map)) {
         continue;
       }
-      $entityFieldsClassification = $this->getEntityFieldsClassification($entity_type_definition);
       $field_storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($entity_type_id);
-      $fields_metadata[$entity_type_id]["field_storages"] = $this->getEntityFieldStorageMetadata($field_storage_definitions, $entity_field_map, $entityFieldsClassification);
-      $fields_metadata[$entity_type_id]["bundles"] = $this->getEntityBundleFieldsMetadata($entity_type_id, $field_storage_definitions, $entity_type_definitions, $entityFieldsClassification);
-      foreach ($fields_metadata[$entity_type_id]["bundles"] as $bundle_data) {
-        foreach ($bundle_data["fields"] as $field_name => $field_data) {
-          if (isset($field_data["config_dependencies"])) {
-            foreach ($field_data["config_dependencies"] as $config_dependency_key => $config_dependency_names) {
-              if (!isset($fields_metadata[$entity_type_id]["field_storages"][$field_name]['config_dependencies'][$config_dependency_key])) {
-                $fields_metadata[$entity_type_id]["field_storages"][$field_name]['config_dependencies'][$config_dependency_key] = [];
+      $fields_metadata[$entity_type_id]['field_storages'] = $this->getEntityFieldStorageMetadata($field_storage_definitions, $entity_field_map);
+      $fields_metadata[$entity_type_id]['bundles'] = $this->getEntityBundleFieldsMetadata($entity_type_id, $field_storage_definitions, $entity_type_definitions);
+      foreach ($fields_metadata[$entity_type_id]['bundles'] as $bundle_data) {
+        foreach ($bundle_data['fields'] as $field_name => $field_data) {
+          if (isset($field_data['config_dependencies'])) {
+            foreach ($field_data['config_dependencies'] as $config_dependency_key => $config_dependency_names) {
+              if (!isset($fields_metadata[$entity_type_id]['field_storages'][$field_name]['config_dependencies'][$config_dependency_key])) {
+                $fields_metadata[$entity_type_id]['field_storages'][$field_name]['config_dependencies'][$config_dependency_key] = [];
               }
-              $fields_metadata[$entity_type_id]["field_storages"][$field_name]['config_dependencies'][$config_dependency_key][] = array_values($config_dependency_names)[0];
+              $fields_metadata[$entity_type_id]['field_storages'][$field_name]['config_dependencies'][$config_dependency_key][] = \array_values($config_dependency_names)[0];
             }
           }
         }
@@ -364,39 +293,57 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
     $entity_type_fields_data = $this->entityFieldsMetadata[$entity_type_id];
     $entity_context = EntityContextDefinition::fromEntityTypeId($entity_type_id)
       ->setRequired()
-      ->setLabel((string) ($entity_type_fields_data["label"] ?? ""));
-    if (!isset($entity_type_fields_data["bundles"]) || !is_array($entity_type_fields_data["bundles"])) {
+      ->setLabel((string) ($entity_type_fields_data['label'] ?? ''));
+    if (!isset($entity_type_fields_data['bundles']) || !\is_array($entity_type_fields_data['bundles'])) {
       return;
     }
     // Derive for each bundle.
-    foreach ($entity_type_fields_data["bundles"] as $bundle => $bundle_data) {
+    foreach ($entity_type_fields_data['bundles'] as $bundle => $bundle_data) {
       $bundle_context = (new ContextDefinition('string'))
         ->setRequired()
-        ->setLabel((string) ($bundle_data["label"] ?? ""))
-        ->addConstraint('AllowedValues', [$bundle]);
-      foreach ($bundle_data["fields"] as $field_name => $field_data) {
+        ->setLabel((string) ($bundle_data['label'] ?? ''));
+      DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '11.4',
+        currentCallable: static function () use ($bundle_context, $bundle): void {
+          $bundle_context->addConstraint('AllowedValues', ['choices' => [$bundle]]);
+        },
+        deprecatedCallable: static function () use ($bundle_context, $bundle): void {
+          $bundle_context->addConstraint('AllowedValues', [$bundle]);
+        },
+      );
+
+      foreach ($bundle_data['fields'] as $field_name => $field_data) {
         $field_name_context = (new ContextDefinition('string'))
           ->setRequired()
-          ->setLabel("field_name")
-          ->setDefaultValue($field_name)
-          ->addConstraint('AllowedValues', [$field_name]);
-        $base_plugin_derivative = array_merge($base_plugin_definition, [
-          'label' => $field_data["label"],
+          ->setLabel('field_name')
+          ->setDefaultValue($field_name);
+        DeprecationHelper::backwardsCompatibleCall(
+          currentVersion: \Drupal::VERSION,
+          deprecatedVersion: '11.4',
+          currentCallable: static function () use ($field_name_context, $field_name): void {
+            $field_name_context->addConstraint('AllowedValues', ['choices' => [$field_name]]);
+          },
+          deprecatedCallable: static function () use ($field_name_context, $field_name): void {
+            $field_name_context->addConstraint('AllowedValues', [$field_name]);
+          },
+        );
+
+        $base_plugin_derivative = \array_merge($base_plugin_definition, [
+          'label' => $field_data['label'],
           'context_definitions' => [
             'entity' => $entity_context,
             'bundle' => $bundle_context,
             'field_name' => $field_name_context,
           ],
           'metadata' => [
-            "field" => $field_data["metadata"],
-            'field_name' => $field_name,
-            "entity_type_id" => $entity_type_id,
-            "entity_bundle" => $bundle,
-            "provider" => $field_data["provider"] ?? NULL,
+            SourceMetadataKey::Field->value => $field_data['metadata'],
+            SourceMetadataKey::FieldName->value => $field_name,
+            SourceMetadataKey::Provider->value => $field_data['provider'] ?? NULL,
           ],
-          "tags" => ["entity", "field"],
+          'tags' => [SourceTags::Field->value],
           'context_requirements' => [],
-          'config_dependencies' => array_merge($base_plugin_definition['config_dependencies'], $field_data['config_dependencies']),
+          'config_dependencies' => \array_merge($base_plugin_definition['config_dependencies'], $field_data['config_dependencies']),
         ]);
         $this->getDerivativeDefinitionsForEntityBundleField($entity_type_id, $bundle, $field_name, $base_plugin_derivative);
       }
@@ -418,65 +365,92 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
     $entity_type_fields_data = $this->entityFieldsMetadata[$entity_type_id];
     $entity_context = EntityContextDefinition::fromEntityTypeId($entity_type_id)
       ->setRequired()
-      ->setLabel((string) ($entity_type_fields_data["label"] ?? ""));
+      ->setLabel((string) ($entity_type_fields_data['label'] ?? ''));
     // Derive when bundle is unknown (in views for example)
-    foreach (($entity_type_fields_data["field_storages"] ?? []) as $field_name => $field_storage_data) {
-      if (!isset($field_storage_data["label"])) {
+    foreach (($entity_type_fields_data['field_storages'] ?? []) as $field_name => $field_storage_data) {
+      if (!isset($field_storage_data['label'])) {
         // During site install $field_storage_data is not setup completed.
         // Skip for now.
         continue;
       }
       $field_name_context = (new ContextDefinition('string'))
         ->setRequired()
-        ->setLabel("field_name")
-        ->setDefaultValue($field_name)
-        ->addConstraint('AllowedValues', [$field_name]);
+        ->setLabel('field_name')
+        ->setDefaultValue($field_name);
+      DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '11.4',
+        currentCallable: static function () use ($field_name_context, $field_name): void {
+          $field_name_context->addConstraint('AllowedValues', ['choices' => [$field_name]]);
+        },
+        deprecatedCallable: static function () use ($field_name_context, $field_name): void {
+          $field_name_context->addConstraint('AllowedValues', [$field_name]);
+        },
+      );
+
       $bundle_context = (new ContextDefinition('string'))
         ->setRequired()
-        ->setLabel("Bundle")
-        ->addConstraint('AllowedValues', [""]);
-      $base_plugin_derivative = array_merge($base_plugin_definition, [
-        'label' => $field_storage_data["label"],
+        ->setLabel('Bundle');
+      DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '11.4',
+        currentCallable: static function () use ($bundle_context): void {
+          $bundle_context->addConstraint('AllowedValues', ['choices' => ['']]);
+        },
+        deprecatedCallable: static function () use ($bundle_context): void {
+          $bundle_context->addConstraint('AllowedValues', ['']);
+        },
+      );
+
+      $base_plugin_derivative = \array_merge($base_plugin_definition, [
+        'label' => $field_storage_data['label'],
         'context_definitions' => [
           'entity' => $entity_context,
           'bundle' => $bundle_context,
           'field_name' => $field_name_context,
         ],
-        "tags" => ["entity", "field", "field_storage"],
+        'tags' => [SourceTags::Field->value],
         'metadata' => [
-          "field" => $field_storage_data["metadata"],
-          'field_name' => $field_name,
-          "entity_type_id" => $entity_type_id,
-          "provider" => $field_storage_data["provider"] ?? NULL,
+          SourceMetadataKey::Field->value => $field_storage_data['metadata'],
+          SourceMetadataKey::FieldName->value => $field_name,
+          SourceMetadataKey::Provider->value => $field_storage_data['provider'] ?? NULL,
         ],
         'context_requirements' => [],
-        'config_dependencies' => array_merge($base_plugin_definition['config_dependencies'], $field_storage_data['config_dependencies']),
+        'config_dependencies' => \array_merge($base_plugin_definition['config_dependencies'], $field_storage_data['config_dependencies']),
       ]);
       $this->getDerivativeDefinitionsForEntityStorageField($entity_type_id, $field_name, $base_plugin_derivative);
       // Derive for each property.
       $bundle_context_for_properties = (new ContextDefinition('string'))
         ->setRequired()
-        ->setLabel("Bundle")
-        ->addConstraint('AllowedValues', array_merge($field_storage_data["bundles"] ?? [], [""]));
-      foreach ($field_storage_data["properties"] as $property_id => $property_data) {
+        ->setLabel('Bundle');
+      DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '11.4',
+        currentCallable: static function () use ($bundle_context_for_properties, $field_storage_data): void {
+          $bundle_context_for_properties->addConstraint('AllowedValues', ['choices' => \array_merge($field_storage_data['bundles'] ?? [], [''])]);
+        },
+        deprecatedCallable: static function () use ($bundle_context_for_properties, $field_storage_data): void {
+          $bundle_context_for_properties->addConstraint('AllowedValues', \array_merge($field_storage_data['bundles'] ?? [], ['']));
+        },
+      );
 
-        $base_plugin_derivative = array_merge($base_plugin_definition, [
-          'label' => $property_data["label"],
+      foreach ($field_storage_data['properties'] as $property_id => $property_data) {
+        $base_plugin_derivative = \array_merge($base_plugin_definition, [
+          'label' => $property_data['label'],
           'context_definitions' => [
             'entity' => $entity_context,
             'bundle' => $bundle_context_for_properties,
             'field_name' => $field_name_context,
           ],
           'metadata' => [
-            "field" => $field_storage_data["metadata"],
-            'field_name' => $field_name,
-            "property" => $property_id,
-            "entity_type_id" => $entity_type_id,
-            "provider" => $field_storage_data["provider"] ?? NULL,
+            SourceMetadataKey::Field->value => $field_storage_data['metadata'],
+            SourceMetadataKey::FieldName->value => $field_name,
+            SourceMetadataKey::Property->value => $property_id,
+            SourceMetadataKey::Provider->value => $field_storage_data['provider'] ?? NULL,
           ],
-          "tags" => ["entity", "field", "field_property"],
+          'tags' => [SourceTags::Field->value],
           'context_requirements' => [],
-          'config_dependencies' => array_merge($base_plugin_definition['config_dependencies'], $field_storage_data['config_dependencies']),
+          'config_dependencies' => \array_merge($base_plugin_definition['config_dependencies'], $field_storage_data['config_dependencies']),
         ]);
         $this->getDerivativeDefinitionsForEntityStorageFieldProperty($entity_type_id, $field_name, $property_id, $base_plugin_derivative);
       }
@@ -487,11 +461,13 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition): array {
-    if (!array_key_exists('config_dependencies', $base_plugin_definition) || !is_array($base_plugin_definition['config_dependencies'])) {
+    // Source definitions are always arrays, never PluginDefinitionInterface.
+    \assert(\is_array($base_plugin_definition));
+    if (!\array_key_exists('config_dependencies', $base_plugin_definition) || !\is_array($base_plugin_definition['config_dependencies'])) {
       $base_plugin_definition['config_dependencies'] = [];
     }
     foreach ($this->entityFieldsMetadata as $entity_type_id => $entity_type_fields_data) {
-      if (!$entity_type_fields_data["fieldable"]) {
+      if (!$entity_type_fields_data['fieldable']) {
         continue;
       }
       $this->getDerivativeDefinitionsForEntityBundles($entity_type_id, $base_plugin_definition);
@@ -514,8 +490,7 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  protected function getDerivativeDefinitionsForEntityBundleField(string $entity_type_id, string $bundle, string $field_name, array $base_plugin_derivative): void {
-  }
+  protected function getDerivativeDefinitionsForEntityBundleField(string $entity_type_id, string $bundle, string $field_name, array $base_plugin_derivative): void {}
 
   /**
    * Get derivative definitions per entity field storage.
@@ -529,8 +504,7 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  protected function getDerivativeDefinitionsForEntityStorageField(string $entity_type_id, string $field_name, array $base_plugin_derivative): void {
-  }
+  protected function getDerivativeDefinitionsForEntityStorageField(string $entity_type_id, string $field_name, array $base_plugin_derivative): void {}
 
   /**
    * Get derivative definitions per entity field storage.
@@ -546,8 +520,6 @@ abstract class EntityFieldSourceDeriverBase extends DeriverBase implements Conta
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  protected function getDerivativeDefinitionsForEntityStorageFieldProperty(string $entity_type_id, string $field_name, string $property, array $base_plugin_derivative): void {
-
-  }
+  protected function getDerivativeDefinitionsForEntityStorageFieldProperty(string $entity_type_id, string $field_name, string $property, array $base_plugin_derivative): void {}
 
 }

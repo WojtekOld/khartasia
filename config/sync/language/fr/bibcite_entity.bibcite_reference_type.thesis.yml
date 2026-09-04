@@ -1,0 +1,12 @@
+label: Thèse
+fields:
+  bibcite_secondary_title:
+    label: 'Département académique'
+  bibcite_volume:
+    label: Diplôme
+  bibcite_type_of_work:
+    label: 'Type de thèse'
+  bibcite_publisher:
+    label: Université
+  bibcite_place_published:
+    label: Ville

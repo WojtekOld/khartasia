@@ -1,0 +1,5 @@
+
+services:
+  Drupal\ui_styles_page\Hook\UiStylesPageHooks:
+    class: Drupal\ui_styles_page\Hook\UiStylesPageHooks
+    autowire: true

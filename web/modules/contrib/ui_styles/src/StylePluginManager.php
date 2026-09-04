@@ -6,6 +6,7 @@ namespace Drupal\ui_styles;
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Transliteration\TransliterationInterface;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
@@ -119,7 +120,7 @@ class StylePluginManager extends DefaultPluginManager implements StylePluginMana
    *
    * @phpstan-ignore-next-line
    */
-  public function getSortedDefinitions(?array $definitions = NULL): array {
+  public function getSortedDefinitions(?array $definitions = NULL, string $label_key = 'label'): array {
     $definitions = $definitions ?? $this->getDefinitions();
 
     \uasort($definitions, static function (StyleDefinition $item1, StyleDefinition $item2) {
@@ -171,7 +172,7 @@ class StylePluginManager extends DefaultPluginManager implements StylePluginMana
   /**
    * {@inheritdoc}
    */
-  public function getGroupedDefinitions(?array $definitions = NULL): array {
+  public function getGroupedDefinitions(?array $definitions = NULL, string $label_key = 'label'): array {
     $definitions = $this->getSortedDefinitions($definitions ?? $this->getDefinitions());
     $grouped_definitions = [];
     foreach ($definitions as $id => $definition) {
@@ -414,7 +415,12 @@ class StylePluginManager extends DefaultPluginManager implements StylePluginMana
       // @phpstan-ignore-next-line
       && \in_array($element['#theme'], $this::THEME_WITH_ITEM_ATTRIBUTES, TRUE)
     ) {
-      return '#item_attributes';
+      return DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '11.4',
+        currentCallable: static fn (): string => '#attributes',
+        deprecatedCallable: static fn (): string => '#item_attributes',
+      );
     }
     return '#attributes';
   }

@@ -1,0 +1,8 @@
+label: Livre
+fields:
+  bibcite_secondary_title:
+    label: 'Titre de la série'
+  bibcite_place_published:
+    label: Ville
+  bibcite_alternate_title:
+    label: Abrévation

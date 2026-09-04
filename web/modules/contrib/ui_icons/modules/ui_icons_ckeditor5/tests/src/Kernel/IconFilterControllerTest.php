@@ -11,12 +11,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the IconFilterController class.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[CoversClass(IconFilterController::class)]
 #[Group('ui_icons')]
 class IconFilterControllerTest extends KernelTestBase {

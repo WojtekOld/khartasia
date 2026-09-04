@@ -6,20 +6,27 @@ namespace Drupal\Tests\ui_patterns\Kernel;
 
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the ComponentPluginManager service.
  *
- * @coversDefaultClass \Drupal\ui_patterns\ComponentPluginManager
- *
- * @group ui_patterns
+ * @internal
  */
+#[CoversClass(ComponentPluginManager::class)]
+#[Group('ui_patterns')]
+#[RunTestsInSeparateProcesses]
 final class ComponentPluginManagerTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['ui_patterns', 'ui_patterns_test'];
+  protected static $modules = [
+    'ui_patterns',
+    'ui_patterns_test',
+  ];
 
   /**
    * Themes to install.
@@ -30,8 +37,6 @@ final class ComponentPluginManagerTest extends KernelTestBase {
 
   /**
    * The component plugin manager from ui_patterns.
-   *
-   * @var \Drupal\Core\Theme\ComponentPluginManager
    */
   protected ComponentPluginManager $manager;
 
@@ -40,25 +45,39 @@ final class ComponentPluginManagerTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->manager = \Drupal::service('plugin.manager.sdc');
+    $this->manager = \Drupal::service(ComponentPluginManager::class);
   }
 
   /**
    * Test the method hook_component_info_alter().
    */
-  public function testHookComponentInfoAlter() : void {
+  public function testHookComponentInfoAlter(): void {
     $definition = $this->manager->getDefinition('ui_patterns_test:test-component');
-    $this->assertEquals('Hook altered', $definition['variants']['hook']['title']);
+    self::assertEquals('Hook altered', $definition['variants']['hook']['title']);
+  }
+
+  /**
+   * Slot expected, minItems and maxItems reach the definition unchanged.
+   *
+   * Other modules read them from getDefinition() to constrain their builders.
+   */
+  public function testSlotConstraintsAreKept(): void {
+    $slots = $this->manager->getDefinition('ui_patterns_test:test-slot-constraints')['slots'];
+    self::assertSame(2, $slots['slot_max']['maxItems']);
+    self::assertSame(['ui_patterns_test:test-form-component', 'wrapper'], $slots['slot_expected']['expected']);
+    self::assertSame(1, $slots['slot_both']['minItems']);
+    self::assertArrayNotHasKey('maxItems', $slots['slot_free']);
+    self::assertArrayNotHasKey('expected', $slots['slot_free']);
   }
 
   /**
    * Test the method ::getCategories().
    */
-  public function testGetCategories() : void {
+  public function testGetCategories(): void {
     /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $categories = $manager->getCategories();
-    $this->assertNotEmpty($categories);
+    self::assertNotEmpty($categories);
   }
 
   /**
@@ -68,7 +87,7 @@ final class ComponentPluginManagerTest extends KernelTestBase {
     /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $sortedDefinitions = $manager->getSortedDefinitions();
-    $this->assertNotEmpty($sortedDefinitions);
+    self::assertNotEmpty($sortedDefinitions);
   }
 
   /**
@@ -78,7 +97,7 @@ final class ComponentPluginManagerTest extends KernelTestBase {
     /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $groupedDefinitions = $manager->getGroupedDefinitions();
-    $this->assertNotEmpty($groupedDefinitions);
+    self::assertNotEmpty($groupedDefinitions);
   }
 
   /**
@@ -89,11 +108,11 @@ final class ComponentPluginManagerTest extends KernelTestBase {
     $manager = $this->manager;
     $sortedDefinitions = $manager->getSortedDefinitions();
     $groupedDefinitions = $manager->getNegotiatedGroupedDefinitions();
-    $this->assertNotEmpty($groupedDefinitions);
-    $this->assertArrayNotHasKey('ui_patterns_test:test-form-component-replaced', $groupedDefinitions['Other']);
-    $this->assertArrayHasKey('ui_patterns_test:test-form-component', $groupedDefinitions['Other']);
-    $this->assertArrayHasKey('ui_patterns_test:no-ui-component', $sortedDefinitions);
-    $this->assertArrayNotHasKey('ui_patterns_test:no-ui-component', $groupedDefinitions['Other']);
+    self::assertNotEmpty($groupedDefinitions);
+    self::assertArrayNotHasKey('ui_patterns_test:test-form-component-replaced', $groupedDefinitions['Other']);
+    self::assertArrayHasKey('ui_patterns_test:test-form-component', $groupedDefinitions['Other']);
+    self::assertArrayHasKey('ui_patterns_test:no-ui-component', $sortedDefinitions);
+    self::assertArrayNotHasKey('ui_patterns_test:no-ui-component', $groupedDefinitions['Other']);
   }
 
   /**
@@ -104,11 +123,11 @@ final class ComponentPluginManagerTest extends KernelTestBase {
     $manager = $this->manager;
     $sortedDefinitions = $manager->getSortedDefinitions();
     $groupedDefinitions = $manager->getNegotiatedGroupedDefinitions(NULL, 'label', TRUE);
-    $this->assertNotEmpty($groupedDefinitions);
-    $this->assertArrayHasKey('ui_patterns_test:test-form-component-replaced', $groupedDefinitions['Other']);
-    $this->assertArrayHasKey('ui_patterns_test:test-form-component', $groupedDefinitions['Other']);
-    $this->assertArrayHasKey('ui_patterns_test:no-ui-component', $sortedDefinitions);
-    $this->assertArrayNotHasKey('ui_patterns_test:no-ui-component', $groupedDefinitions['Other']);
+    self::assertNotEmpty($groupedDefinitions);
+    self::assertArrayHasKey('ui_patterns_test:test-form-component-replaced', $groupedDefinitions['Other']);
+    self::assertArrayHasKey('ui_patterns_test:test-form-component', $groupedDefinitions['Other']);
+    self::assertArrayHasKey('ui_patterns_test:no-ui-component', $sortedDefinitions);
+    self::assertArrayNotHasKey('ui_patterns_test:no-ui-component', $groupedDefinitions['Other']);
   }
 
   /**
@@ -117,14 +136,13 @@ final class ComponentPluginManagerTest extends KernelTestBase {
   public function testGetNegotiatedSortedDefinitions(): void {
     /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
-    $sortedDefinitions = $manager->getSortedDefinitions();
     $groupedDefinitions = $manager->getNegotiatedSortedDefinitions();
-    $this->assertNotEmpty($groupedDefinitions);
-    $this->assertArrayNotHasKey('ui_patterns_test:test-form-component-replaced', $groupedDefinitions);
-    $this->assertArrayNotHasKey('ui_patterns_test:no-ui-component', $groupedDefinitions);
-    $this->assertArrayNotHasKey('ui_patterns_test:ui-component', $groupedDefinitions);
-    $this->assertArrayNotHasKey('ui_patterns_test:ui-component-replaces-no-ui', $groupedDefinitions);
-    $this->assertArrayHasKey('ui_patterns_test:test-form-component', $groupedDefinitions);
+    self::assertNotEmpty($groupedDefinitions);
+    self::assertArrayNotHasKey('ui_patterns_test:test-form-component-replaced', $groupedDefinitions);
+    self::assertArrayNotHasKey('ui_patterns_test:no-ui-component', $groupedDefinitions);
+    self::assertArrayNotHasKey('ui_patterns_test:ui-component', $groupedDefinitions);
+    self::assertArrayNotHasKey('ui_patterns_test:ui-component-replaces-no-ui', $groupedDefinitions);
+    self::assertArrayHasKey('ui_patterns_test:test-form-component', $groupedDefinitions);
   }
 
 }

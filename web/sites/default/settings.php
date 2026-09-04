@@ -932,3 +932,19 @@ $ddev_settings = __DIR__ . '/settings.ddev.php';
 if (getenv('IS_DDEV_PROJECT') == 'true' && is_readable($ddev_settings)) {
   require $ddev_settings;
 }
+
+// Securite
+$settings['update_free_access'] = FALSE;
+$settings['allow_authorize_operations'] = FALSE;
+$config['system.logging']['error_level'] = 'hide';
+$config['system.performance']['css']['preprocess'] = TRUE;
+$config['system.performance']['js']['preprocess'] = TRUE;
+
+// Fichiers prives hors webroot
+$settings['file_private_path'] = '../private';
+
+// Trusted hosts
+$settings['trusted_host_patterns'] = [
+  '^khartasia\.ddev\.site$',
+  '^localhost$',
+];

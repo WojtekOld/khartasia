@@ -1,0 +1,10 @@
+filter_settings.component_embed:
+  type: mapping
+  label: 'Embed components'
+  mapping:
+    allowed_components:
+      type: sequence
+      label: 'Allowed components'
+      sequence:
+        type: string
+        label: 'Component ID'

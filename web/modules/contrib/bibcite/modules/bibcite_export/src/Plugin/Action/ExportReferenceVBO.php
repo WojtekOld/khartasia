@@ -4,14 +4,18 @@ namespace Drupal\bibcite_export\Plugin\Action;
 
 use Drupal\bibcite\Plugin\BibciteFormatInterface;
 use Drupal\bibcite\Plugin\BibciteFormatManagerInterface;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileExists;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
-use Drupal\Core\Url;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -25,6 +29,11 @@ use Symfony\Component\Serializer\SerializerInterface;
  *   confirm = TRUE,
  * )
  */
+#[Action(
+  id: 'bibcite_export_multiple_vbo',
+  label: new TranslatableMarkup('Download Selected Citations'),
+  type: 'bibcite_reference',
+)]
 class ExportReferenceVBO extends ActionBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -133,7 +142,13 @@ class ExportReferenceVBO extends ActionBase implements ContainerFactoryPluginInt
 
       $wrapper = 'public';
       $destination = $wrapper . '://' . $filename;
-      $file = \Drupal::service('file.repository')->writeData($output, $destination, \Drupal\Core\File\FileSystemInterface::EXISTS_REPLACE);
+      $replace = DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '10.3',
+        currentCallable: fn() => FileExists::Replace,
+        deprecatedCallable: fn() => FileSystemInterface::EXISTS_REPLACE,
+      );
+      $file = \Drupal::service('file.repository')->writeData($output, $destination, $replace);
       $file->setTemporary();
       $file->save();
       $file_url = \Drupal::service('file_url_generator')->generate($file->getFileUri());
@@ -147,7 +162,7 @@ class ExportReferenceVBO extends ActionBase implements ContainerFactoryPluginInt
   /**
    * {@inheritdoc}
    */
-  public function execute($entity = NULL) {
+  public function execute(?object $entity = NULL) {
     /** @var \Drupal\bibcite_entity\Entity\ReferenceInterface $entity */
     $this->executeMultiple([$entity]);
   }

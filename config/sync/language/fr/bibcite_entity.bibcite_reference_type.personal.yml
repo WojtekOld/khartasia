@@ -1,0 +1,12 @@
+label: Personnel
+fields:
+  bibcite_edition:
+    label: Description
+  bibcite_number:
+    label: 'Numéro de folio'
+  bibcite_type_of_work:
+    label: Type
+  bibcite_place_published:
+    label: Ville
+  bibcite_alternate_title:
+    label: Abrévation

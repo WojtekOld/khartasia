@@ -129,7 +129,7 @@ trait IconLinkFormatterTrait {
       }
 
       // Mark processed to avoid double pass with
-      // ui_icons_menu::ui_icons_menu_link_alter.
+      // \Drupal\ui_icons_menu\Hook\UiIconsMenuHooks::linkAlter().
       if (isset($elements[$delta]['#url'])) {
         $elements[$delta]['#url']->setOption('ui_icons_processed', TRUE);
       }

@@ -22,9 +22,6 @@ class DerivableContextPluginManager extends DefaultPluginManager implements Cont
   use ContextAwarePluginManagerTrait;
   use ContextMatcherPluginManagerTrait;
 
-  /**
-   * Constructs the object.
-   */
   public function __construct(
     \Traversable $namespaces,
     CacheBackendInterface $cache_backend,
@@ -55,17 +52,17 @@ class DerivableContextPluginManager extends DefaultPluginManager implements Cont
    * @param string $plugin_id
    *   Plugin Id.
    */
-  public function processDefinition(&$definition, $plugin_id) : void {
+  public function processDefinition(&$definition, $plugin_id): void {
     parent::processDefinition($definition, $plugin_id);
-    if (array_key_exists("context_requirements", $definition) && count($definition["context_requirements"]) > 0) {
-      $definition["context_definitions"]["context_requirements"] = RequirementsContextDefinition::fromRequirements($definition["context_requirements"]);
+    if (\array_key_exists('context_requirements', $definition) && \count($definition['context_requirements']) > 0) {
+      $definition['context_definitions']['context_requirements'] = RequirementsContextDefinition::fromRequirements($definition['context_requirements']);
     }
   }
 
   /**
    * Get the cache tags to invalidate.
    */
-  protected function getInvalidationCacheTags() : array {
+  private function getInvalidationCacheTags(): array {
     $tags = [];
     $entity_type_definitions = $this->entityTypeManager->getDefinitions();
     foreach ($entity_type_definitions as $entity_type_definition) {
@@ -75,7 +72,7 @@ class DerivableContextPluginManager extends DefaultPluginManager implements Cont
       }
       $bundle_entity_type = $entity_type_definition->getBundleEntityType();
       if ($bundle_entity_type) {
-        $tags[] = sprintf("config:%s_list", $bundle_entity_type);
+        $tags[] = \sprintf('config:%s_list', $bundle_entity_type);
       }
     }
     return $tags;

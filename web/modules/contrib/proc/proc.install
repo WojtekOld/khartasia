@@ -1,0 +1,638 @@
+<?php
+
+/**
+ * @file
+ * File reserved for Protected Content's install, update & uninstall functions.
+ */
+
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Symfony\Component\Yaml\Yaml;
+
+/**
+ * Implements hook_install().
+ *
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function proc_install(): void {
+  // Ensure the View entity type from the views module is fully installed.
+  // This resolves the "View entity type needs to be installed" warning when
+  // proc is installed on a fresh site where views was enabled simultaneously.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  if ($entity_type_manager->hasDefinition('view')) {
+    $view_entity_type = $entity_type_manager->getDefinition('view');
+    if (!$entity_definition_update_manager->getEntityType('view')) {
+      $entity_definition_update_manager->installEntityType($view_entity_type);
+    }
+  }
+
+  // Create the wished recipients set field for fresh installs.
+  // This replicates what proc_post_update_10001() does for existing sites,
+  // without calling the post_update function directly (which would bypass
+  // Drupal's post_update tracking and risk double-execution).
+  $proc_fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('proc', 'proc');
+  if (!isset($proc_fields['field_wished_recipients_set'])) {
+    $field_storage = \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_wished_recipients_set',
+      'entity_type' => 'proc',
+      'type' => 'entity_reference',
+      'cardinality' => \Drupal\Core\Field\FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => [
+        'target_type' => 'user',
+        'status' => FALSE,
+      ],
+      'translatable' => FALSE,
+      'status' => FALSE,
+    ]);
+    $field_storage->save();
+
+    $field = \Drupal\field\Entity\FieldConfig::create([
+      'field_storage' => $field_storage,
+      'field_name' => 'field_wished_recipients_set',
+      'entity_type' => 'proc',
+      'bundle' => 'proc',
+      'label' => t('Wished set of recipients'),
+      'type' => 'entity_reference',
+      'cardinality' => \Drupal\Core\Field\FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'translatable' => FALSE,
+      'settings' => [
+        'target_type' => 'user',
+        'handler' => 'default',
+        'status' => FALSE,
+      ],
+      'status' => FALSE,
+    ]);
+    $field->save();
+
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+
+    $display_repository->getFormDisplay('proc', 'proc')
+      ->setComponent('field_wished_recipients_set', [
+        'type' => 'entity_reference_autocomplete',
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'match_limit' => 10,
+          'size' => 60,
+          'placeholder' => '',
+        ],
+        'weight' => -3,
+      ])
+      ->save();
+
+    $display_repository->getViewDisplay('proc', 'proc')
+      ->setComponent('field_wished_recipients_set', [
+        'label' => t('Wished set of recipients'),
+        'type' => 'entity_reference_label',
+        'entity_type' => 'proc',
+        'bundle' => 'proc',
+        'settings' => [
+          'view_mode' => 'default',
+        ],
+      ])
+      ->save();
+  }
+}
+
+/**
+ * Add Keys Overview view.
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
+function proc_update_10000(&$sandbox): void { // phpcs:ignore
+  $config_id = 'views.view.keys_overview';
+  $config_path = \Drupal::service('extension.list.module')->getPath('proc') . '/config/optional/' . $config_id . '.yml';
+  $data = Yaml::parseFile($config_path);
+  \Drupal::configFactory()->getEditable($config_id)->setData($data)->save(TRUE);
+}
+
+/**
+ * Download OpenPGP library.
+ */
+function proc_update_10001(&$sandbox) { // phpcs:ignore
+  // Removed in favor of shipping the library within the module.
+}
+
+/**
+ * Remove update jobs for keyring meta updates and clear wished recipients.
+ */
+function proc_update_10002(&$sandbox): void { // phpcs:ignore
+  $batch_size = 100;
+
+  // Get storage for proc entities.
+  try {
+    $storage = \Drupal::entityTypeManager()->getStorage('proc');
+  }
+  catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
+    \Drupal::logger('proc')->error('proc_update_10002: error loading proc storage.');
+    $sandbox['#finished'] = 1;
+    return;
+  }
+
+  // Check if field_wished_recipients_set exists. It is created by
+  // proc_post_update_10001 which may not have run yet.
+  $field_exists = \Drupal::entityTypeManager()
+    ->getStorage('field_storage_config')
+    ->load('proc.field_wished_recipients_set');
+  if (!$field_exists) {
+    \Drupal::logger('proc')->info('proc_update_10002: field_wished_recipients_set does not exist yet. Skipping.');
+    $sandbox['#finished'] = 1;
+    return;
+  }
+
+  // Initialize sandbox on first run.
+  if (!isset($sandbox['initialized']) || $sandbox['initialized'] !== TRUE) {
+    // Keyrings: all proc entities where type != 'cipher'.
+    $query_keyrings = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'cipher', '!=');
+    $keyring_ids = array_values($query_keyrings->execute() ?: []);
+
+    // Ciphers: all proc entities of type 'cipher'. We will inspect each and
+    // only clear field_wished_recipients_set when it contains values.
+    $query_ciphers = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'cipher')
+      ->exists('field_wished_recipients_set');
+    $cipher_ids = array_values($query_ciphers->execute() ?: []);
+
+    \Drupal::logger('proc')->info('proc_update_10002: selected @count cipher for clearing wished set of recipients.', [
+      '@count' => count($cipher_ids),
+    ]);
+
+    $sandbox['ids_keyrings'] = $keyring_ids;
+    $sandbox['ids_ciphers'] = $cipher_ids;
+    $sandbox['total'] = count($sandbox['ids_keyrings']) + count($sandbox['ids_ciphers']);
+    $sandbox['processed'] = 0;
+    $sandbox['updated_keyrings'] = 0;
+    $sandbox['updated_ciphers'] = 0;
+    $sandbox['phase'] = 'keyrings';
+    $sandbox['initialized'] = TRUE;
+  }
+
+  $total = $sandbox['total'];
+  $processed = $sandbox['processed'];
+
+  // Helper to update finished fraction.
+  $update_finished = function () use (&$sandbox, $processed, $total) {
+    $sandbox['#finished'] = ($total === 0) ? 1 : min(1, $processed / $total);
+  };
+
+  // Process current phase.
+  if ($sandbox['phase'] === 'keyrings') {
+    \Drupal::logger('proc')->info('proc_update_10002: clearing update_jobs from keyrings, processed @processed of @total.', [
+      '@processed' => $processed,
+      '@total' => $total,
+    ]);
+
+    $ids = $sandbox['ids_keyrings'];
+    $already_done_keyrings = $sandbox['keyrings_processed'] ?? 0;
+    $chunk = array_slice($ids, $already_done_keyrings, $batch_size);
+
+    if (!empty($chunk)) {
+      $entities = $storage->loadMultiple($chunk);
+      foreach ($entities as $entity) {
+        try {
+          $meta_value = $entity->get('meta')->getValue();
+          $meta = isset($meta_value[0]) && is_array($meta_value[0]) ? $meta_value[0] : [];
+
+          if (empty($meta['update_jobs'])) {
+            // Nothing to change for this entity.
+            $sandbox['processed']++;
+            $sandbox['keyrings_processed'] = ($sandbox['keyrings_processed'] ?? 0) + 1;
+            continue;
+          }
+
+          $meta['update_jobs'] = [];
+          $entity->set('meta', $meta);
+          $entity->save();
+
+          $sandbox['updated_keyrings']++;
+          $sandbox['processed']++;
+          $sandbox['keyrings_processed'] = ($sandbox['keyrings_processed'] ?? 0) + 1;
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('proc')->error('proc_update_10002: failed to clear update_jobs for proc ID @id: @message', [
+            '@id' => method_exists($entity, 'id') ? $entity->id() : 'unknown',
+            '@message' => $e->getMessage(),
+          ]);
+          // Still count as processed to avoid infinite loops.
+          $sandbox['processed']++;
+          $sandbox['keyrings_processed'] = ($sandbox['keyrings_processed'] ?? 0) + 1;
+        }
+      }
+    }
+
+    // If all keyrings processed, move to ciphers phase.
+    if (($sandbox['keyrings_processed'] ?? 0) >= count($sandbox['ids_keyrings'])) {
+      $sandbox['phase'] = 'ciphers';
+    }
+
+    // Update finished fraction.
+    $processed = $sandbox['processed'];
+    $update_finished();
+  }
+
+  if ($sandbox['phase'] === 'ciphers') {
+    \Drupal::logger('proc')->info('proc_update_10002: clearing wished recipients from ciphers, processed @processed of @total.', [
+      '@processed' => $processed,
+      '@total' => $total,
+    ]);
+
+    $ids = $sandbox['ids_ciphers'];
+    $already_done_ciphers = $sandbox['ciphers_processed'] ?? 0;
+    $chunk = array_slice($ids, $already_done_ciphers, $batch_size);
+
+    if (!empty($chunk)) {
+      $entities = $storage->loadMultiple($chunk);
+      foreach ($entities as $entity) {
+        try {
+          $entity->set('field_wished_recipients_set', []);
+          $entity->save();
+
+          $sandbox['updated_ciphers']++;
+          $sandbox['processed']++;
+          $sandbox['ciphers_processed'] = ($sandbox['ciphers_processed'] ?? 0) + 1;
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('proc')->info('proc_update_10002: failed to clear wished recipients for proc ID @id: @message', [
+            '@id' => method_exists($entity, 'id') ? $entity->id() : 'unknown',
+            '@message' => $e->getMessage(),
+          ]);
+          $sandbox['processed']++;
+          $sandbox['ciphers_processed'] = ($sandbox['ciphers_processed'] ?? 0) + 1;
+        }
+      }
+    }
+
+    // Free memory from the loaded entity objects and prompt GC.
+    unset($entities, $entity, $chunk);
+    if (function_exists('gc_collect_cycles')) {
+      gc_collect_cycles();
+    }
+
+    // If all ciphers processed, mark finished.
+    if (($sandbox['ciphers_processed'] ?? 0) >= count($sandbox['ids_ciphers'])) {
+      $sandbox['#finished'] = 1;
+    }
+    else {
+      // Update finished fraction.
+      $processed = $sandbox['processed'];
+      $update_finished();
+    }
+  }
+
+  // When fully finished, log a summary.
+  if (!empty($sandbox['#finished']) && $sandbox['#finished'] == 1) {
+    \Drupal::logger('proc')->info('proc_update_10002: cleared update_jobs for @count_updated_keyrings keyring(s) and cleared wished recipients for @count cipher(s).', [
+      '@count_updated_keyrings' => $sandbox['updated_keyrings'],
+      '@count_updated_ciphers' => $sandbox['updated_ciphers'],
+    ]);
+  }
+}
+
+/**
+ * Remove invalid update jobs from keyrings.
+ *
+ * An invalid update job ID is one that does not exist as a proc cipher
+ * entity. This update scans all keyrings and removes any such entries
+ * from their meta field's update_jobs array.
+ */
+function proc_update_10003(&$sandbox) { // phpcs:ignore
+  $batch_size = 10;
+
+  // Get storage for proc entities.
+  try {
+    $storage = \Drupal::entityTypeManager()->getStorage('proc');
+  }
+  catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
+    \Drupal::logger('proc')->error('proc_update_10003: error loading proc storage.');
+    $sandbox['#finished'] = 1;
+    return;
+  }
+
+  // Initialize sandbox on first run.
+  if (!isset($sandbox['initialized']) || $sandbox['initialized'] !== TRUE) {
+    $query_keyrings = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'cipher', '!=');
+    $keyring_ids = array_values($query_keyrings->execute() ?: []);
+
+    \Drupal::logger('proc')->info('proc_update_10003: selected @count keyring(s) to scan for invalid update jobs.', [
+      '@count' => count($keyring_ids),
+    ]);
+
+    $sandbox['ids'] = $keyring_ids;
+    $sandbox['total'] = count($keyring_ids);
+    $sandbox['processed'] = 0;
+    $sandbox['updated'] = 0;
+    $sandbox['removed_jobs'] = 0;
+    $sandbox['initialized'] = TRUE;
+  }
+
+  $ids = $sandbox['ids'];
+  $total = $sandbox['total'];
+  $already_done = $sandbox['processed'];
+  $chunk = array_slice($ids, $already_done, $batch_size);
+
+  if (!empty($chunk)) {
+    $entities = $storage->loadMultiple($chunk);
+    foreach ($entities as $entity) {
+      try {
+        $meta_value = $entity->get('meta')->getValue();
+        $meta = isset($meta_value[0]) && is_array($meta_value[0]) ? $meta_value[0] : [];
+
+        $update_jobs = $meta['update_jobs'] ?? [];
+
+        if (empty($update_jobs) || !is_array($update_jobs)) {
+          $sandbox['processed']++;
+          continue;
+        }
+
+        // Use an entity query to find valid cipher IDs instead of loading
+        // each entity individually, avoiding excessive memory usage.
+        $valid_ids = $storage->getQuery()
+          ->accessCheck(FALSE)
+          ->condition('type', 'cipher')
+          ->condition('id', $update_jobs, 'IN')
+          ->execute();
+        $valid_jobs = array_values(array_intersect($update_jobs, $valid_ids));
+        $removed = count($update_jobs) - count($valid_jobs);
+        $sandbox['removed_jobs'] += $removed;
+
+        // Only save if we actually removed something.
+        if ($removed > 0) {
+          $meta['update_jobs'] = $valid_jobs;
+          $entity->set('meta', $meta);
+          $entity->save();
+          $sandbox['updated']++;
+        }
+
+        $sandbox['processed']++;
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('proc')->error('proc_update_10003: failed to process keyring ID @id: @message', [
+          '@id' => method_exists($entity, 'id') ? $entity->id() : 'unknown',
+          '@message' => $e->getMessage(),
+        ]);
+        $sandbox['processed']++;
+      }
+    }
+
+    // Free memory: reset static entity cache and trigger garbage collection.
+    $storage->resetCache($chunk);
+    unset($entities, $entity, $chunk);
+    if (function_exists('gc_collect_cycles')) {
+      gc_collect_cycles();
+    }
+  }
+
+  // Update finished fraction.
+  $sandbox['#finished'] = ($total === 0) ? 1 : min(1, $sandbox['processed'] / $total);
+
+  // When fully finished, log a summary.
+  if (!empty($sandbox['#finished']) && $sandbox['#finished'] == 1) {
+    \Drupal::logger('proc')->info('proc_update_10003: processed @count_processed keyring(s), updated @count_updated keyring(s), removed @count_removed invalid update job(s).', [
+      '@count_processed' => $sandbox['processed'],
+      '@count_updated' => $sandbox['updated'],
+      '@count_removed' => $sandbox['removed_jobs'],
+    ]);
+    return t('Processed @count_processed keyring(s), updated @count_updated, removed @count_removed invalid update job(s).', [
+      '@count_processed' => $sandbox['processed'],
+      '@count_updated' => $sandbox['updated'],
+      '@count_removed' => $sandbox['removed_jobs'],
+    ]);
+  }
+}
+
+/**
+ * Re-run removal of invalid update jobs from keyrings.
+ *
+ * Stale queue items could re-introduce invalid update_jobs after
+ * proc_update_10003 ran. This re-executes the same cleanup now that the
+ * queue worker validates cipher existence before writing.
+ */
+function proc_update_10004(&$sandbox) { // phpcs:ignore
+  return proc_update_10003($sandbox);
+}
+
+/**
+ * Update the Protected content entity type definition.
+ *
+ * Adds "owner" entity key to the proc entity type definition and corrects
+ * stale revision table metadata in the installed definition. This resolves
+ * the "Protected content entity type needs to be updated" warning in the
+ * status report.
+ */
+function proc_update_10005(): void {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+
+  // Adding the "owner" entity key makes the user_id column NOT NULL. Existing
+  // sites may hold proc rows (typically old ciphers) that were saved without
+  // an owner and therefore have a NULL user_id. Applying the NOT NULL
+  // constraint over such data fails with "The user_id column cannot have NOT
+  // NULL constraints as it holds NULL values." Assign these ownerless rows to
+  // the anonymous user (uid 0) so the schema change can be applied cleanly.
+  // This is a no-op when no NULL values are present.
+  $database = \Drupal::database();
+  if ($database->schema()->tableExists('proc')) {
+    $database->update('proc')
+      ->fields(['user_id' => 0])
+      ->isNull('user_id')
+      ->execute();
+  }
+
+  // Get the live (code) entity type definition. This includes the "owner"
+  // key added to the annotation and correct table information.
+  $live_entity_type = $entity_type_manager->getDefinition('proc');
+
+  if (!$live_entity_type) {
+    return;
+  }
+
+  // Directly set the last installed definition to match the live definition.
+  // We cannot use $definition_update_manager->updateEntityType() because the
+  // installed definition may contain incorrect revision table metadata that
+  // triggers a "shared table structure change" exception in the storage schema
+  // handler.
+  /** @var \Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface $schema_repository */
+  $schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $schema_repository->setLastInstalledDefinition($live_entity_type);
+
+  // Also update the stored entity schema data to match the current schema
+  // generated from the live definition, so the schema comparison no longer
+  // detects a mismatch.
+  $storage = $entity_type_manager->getStorage('proc');
+  if ($storage instanceof \Drupal\Core\Entity\Sql\SqlContentEntityStorage) {
+    try {
+      // Use reflection to access the protected getStorageSchema() method.
+      $ref = new \ReflectionMethod($storage, 'getStorageSchema');
+      $ref->setAccessible(TRUE);
+      $storage_schema = $ref->invoke($storage);
+
+      // Call getEntitySchema to compute the current schema.
+      $get_schema = new \ReflectionMethod($storage_schema, 'getEntitySchema');
+      $get_schema->setAccessible(TRUE);
+      $entity_schema = $get_schema->invoke($storage_schema, $live_entity_type, TRUE);
+
+      // Save the entity schema data.
+      $save_schema = new \ReflectionMethod($storage_schema, 'saveEntitySchemaData');
+      $save_schema->setAccessible(TRUE);
+      $save_schema->invoke($storage_schema, $live_entity_type, $entity_schema);
+    }
+    catch (\ReflectionException $e) {
+      // These internal methods may no longer exist in future Drupal versions.
+      // This update hook is only relevant for sites upgrading from older
+      // versions and can be safely skipped if the API has changed.
+      \Drupal::logger('proc')->warning('proc_update_10005: Could not update stored entity schema data via reflection. This is expected if internal storage schema methods have changed. Error: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
+  // Update the user_id field storage definition. Adding "owner" to
+  // entity_keys changes the field's schema (not null constraint), so the
+  // stored field schema data must also be refreshed.
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $live_field_definitions = $entity_field_manager->getFieldStorageDefinitions('proc');
+  if (isset($live_field_definitions['user_id'])) {
+    $definition_update_manager->updateFieldStorageDefinition($live_field_definitions['user_id']);
+  }
+}
+
+/**
+ * Ensure the View entity type is installed.
+ *
+ * Resolves the "View entity type needs to be installed" warning that can
+ * appear when the views module's entity type was not fully registered.
+ */
+function proc_update_10006(): void {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  if ($entity_type_manager->hasDefinition('view')) {
+    $view_entity_type = $entity_type_manager->getDefinition('view');
+    if (!$entity_definition_update_manager->getEntityType('view')) {
+      $entity_definition_update_manager->installEntityType($view_entity_type);
+    }
+  }
+}
+
+/**
+ * Fix stale revision table metadata in the proc entity type definition.
+ *
+ * The installed entity type definition contained incorrect revision table
+ * references (proc_revision) despite the entity not being revisionable. This
+ * caused a persistent "needs to be updated" warning. This update directly
+ * corrects the stored definition and schema data to match the live code.
+ */
+function proc_update_10007(): void {
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  $live_entity_type = $entity_type_manager->getDefinition('proc');
+  if (!$live_entity_type) {
+    return;
+  }
+
+  /** @var \Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface $schema_repository */
+  $schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $schema_repository->setLastInstalledDefinition($live_entity_type);
+
+  // Update the stored entity schema data.
+  $storage = $entity_type_manager->getStorage('proc');
+  if ($storage instanceof \Drupal\Core\Entity\Sql\SqlContentEntityStorage) {
+    try {
+      $ref = new \ReflectionMethod($storage, 'getStorageSchema');
+      $ref->setAccessible(TRUE);
+      $storage_schema = $ref->invoke($storage);
+
+      $get_schema = new \ReflectionMethod($storage_schema, 'getEntitySchema');
+      $get_schema->setAccessible(TRUE);
+      $entity_schema = $get_schema->invoke($storage_schema, $live_entity_type, TRUE);
+
+      $save_schema = new \ReflectionMethod($storage_schema, 'saveEntitySchemaData');
+      $save_schema->setAccessible(TRUE);
+      $save_schema->invoke($storage_schema, $live_entity_type, $entity_schema);
+    }
+    catch (\ReflectionException $e) {
+      // These internal methods may no longer exist in future Drupal versions.
+      // This update hook is only relevant for sites upgrading from older
+      // versions and can be safely skipped if the API has changed.
+      \Drupal::logger('proc')->warning('proc_update_10007: Could not update stored entity schema data via reflection. This is expected if internal storage schema methods have changed. Error: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+}
+
+/**
+ * Update user_id field storage definition for the proc entity.
+ *
+ * Adding "owner" to entity_keys causes the user_id field schema to change
+ * (not null constraint). This update refreshes the stored field schema data
+ * to match the live definition.
+ */
+function proc_update_10008(): void {
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+
+  // Get the live (code) field storage definitions for the proc entity.
+  $live_field_definitions = $entity_field_manager->getFieldStorageDefinitions('proc');
+
+  if (isset($live_field_definitions['user_id'])) {
+    $definition_update_manager->updateFieldStorageDefinition($live_field_definitions['user_id']);
+  }
+}
+
+/**
+ * De-duplicate the proc_update_keyring_meta queue.
+ */
+function proc_update_10009(&$sandbox) { // phpcs:ignore
+  $database = \Drupal::database();
+  $queue_name = 'proc_update_keyring_meta';
+  $batch_size = 5000;
+
+  if (!$database->schema()->tableExists('queue')) {
+    $sandbox['#finished'] = 1;
+    return t('No database {queue} table present; nothing to de-duplicate.');
+  }
+
+  // Compute every redundant item_id.
+  if (!isset($sandbox['redundant_ids'])) {
+    $sandbox['redundant_ids'] = $database->query(
+      'SELECT q.item_id
+         FROM {queue} q
+         INNER JOIN (
+           SELECT data, MIN(item_id) AS keep_id
+             FROM {queue}
+            WHERE name = :n
+            GROUP BY data
+           HAVING COUNT(*) > 1
+         ) k ON q.name = :n AND q.data = k.data AND q.item_id <> k.keep_id',
+      [':n' => $queue_name]
+    )->fetchCol();
+    $sandbox['total'] = count($sandbox['redundant_ids']);
+    $sandbox['deleted'] = 0;
+  }
+
+  // Delete one batch of redundant rows by primary key.
+  $chunk = array_splice($sandbox['redundant_ids'], 0, $batch_size);
+  if (!empty($chunk)) {
+    $database->delete('queue')
+      ->condition('item_id', $chunk, 'IN')
+      ->execute();
+    $sandbox['deleted'] += count($chunk);
+  }
+
+  // Finished once the redundant list is exhausted.
+  if (empty($sandbox['redundant_ids'])) {
+    $sandbox['#finished'] = 1;
+    \Drupal::logger('proc')->notice('proc_update_10009: removed @deleted duplicate proc_update_keyring_meta queue item(s).', [
+      '@deleted' => $sandbox['deleted'],
+    ]);
+    return t('Removed @deleted duplicate proc_update_keyring_meta queue item(s).', [
+      '@deleted' => $sandbox['deleted'],
+    ]);
+  }
+
+  $sandbox['#finished'] = ($sandbox['total'] > 0)
+    ? min(0.99, $sandbox['deleted'] / $sandbox['total'])
+    : 0.99;
+}

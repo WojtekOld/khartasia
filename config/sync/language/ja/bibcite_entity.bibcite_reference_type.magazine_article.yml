@@ -1,0 +1,5 @@
+fields:
+  bibcite_issue:
+    label: 発行番号
+  bibcite_number_of_volumes:
+    label: 周期的

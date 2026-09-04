@@ -1,0 +1,6 @@
+label: 비공개
+fields:
+  bibcite_place_published:
+    label: 도시
+  bibcite_alternate_title:
+    label: 줄임말

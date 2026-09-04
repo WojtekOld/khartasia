@@ -26,11 +26,11 @@ class BooleanPropType extends PropTypePluginBase {
    * {@inheritdoc}
    */
   public static function normalize(mixed $value, ?array $definition = NULL): ?bool {
-    if (is_bool($value)) {
+    if (\is_bool($value)) {
       return $value;
     }
     static::normalizer()->convertToScalar($value);
-    if (is_numeric($value) && is_string($value)) {
+    if (\is_numeric($value) && \is_string($value)) {
       $value = (int) $value;
       return (bool) $value;
     }

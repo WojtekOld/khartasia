@@ -15,43 +15,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class CssVariables extends DeriverBase implements ContainerDeriverInterface {
 
-  /**
-   * The theme handler.
-   *
-   * @var \Drupal\Core\Extension\ThemeHandlerInterface
-   */
-  protected ThemeHandlerInterface $themeHandler;
-
-  /**
-   * The CSS variables plugin manager.
-   *
-   * @var \Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface
-   */
-  protected CssVariablePluginManagerInterface $cssVariablePluginManager;
-
-  /**
-   * Constructor.
-   *
-   * @param \Drupal\Core\Extension\ThemeHandlerInterface $themeHandler
-   *   The theme handler.
-   * @param \Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface $cssVariablePluginManager
-   *   The CSS variables plugin manager.
-   */
   public function __construct(
-    ThemeHandlerInterface $themeHandler,
-    CssVariablePluginManagerInterface $cssVariablePluginManager,
-  ) {
-    $this->themeHandler = $themeHandler;
-    $this->cssVariablePluginManager = $cssVariablePluginManager;
-  }
+    protected ThemeHandlerInterface $themeHandler,
+    protected CssVariablePluginManagerInterface $cssVariablePluginManager,
+  ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id): static {
     return new static(
-      $container->get('theme_handler'),
-      $container->get('plugin.manager.ui_skins.css_variable')
+      $container->get(ThemeHandlerInterface::class),
+      $container->get(CssVariablePluginManagerInterface::class)
     );
   }
 

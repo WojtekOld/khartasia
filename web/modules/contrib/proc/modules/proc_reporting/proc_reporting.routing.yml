@@ -1,0 +1,17 @@
+proc_reporting.update_tasks:
+  path: '/admin/reports/proc-reporting/update-tasks'
+  defaults:
+    _controller: '\Drupal\proc_reporting\Controller\ProcReportingController::updateTasksReport'
+    _title: 'Protected Content: Update Tasks Monitoring'
+  requirements:
+    _permission: 'view proc reporting'
+
+proc_reporting.daily_operations:
+  path: '/admin/reports/proc-reporting/daily-operations'
+  defaults:
+    _controller: '\Drupal\proc_reporting\Controller\ProcReportingController::dailyOperationsReport'
+    _title: 'Protected Content: Daily Operations'
+  requirements:
+    _permission: 'view proc reporting'
+
+

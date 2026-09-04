@@ -37,14 +37,14 @@ class EnumSetPropType extends PropTypePluginBase {
   public function getSummary(array $definition): array {
     $summary = parent::getSummary($definition);
     if (isset($definition['items']['enum'])) {
-      $values = implode(", ", static::getAllowedValues($definition['items']));
-      $summary[] = $this->t("Allowed values: @values", ["@values" => $values]);
+      $values = \implode(', ', static::getAllowedValues($definition['items']));
+      $summary[] = $this->t('Allowed values: @values', ['@values' => $values]);
     }
     if (isset($definition['minItems'])) {
-      $summary[] = $this->t("Min items: @length", ["@length" => $definition['minItems']]);
+      $summary[] = $this->t('Min items: @length', ['@length' => $definition['minItems']]);
     }
     if (isset($definition['maxItems'])) {
-      $summary[] = $this->t("Max items: @length", ["@length" => $definition['maxItems']]);
+      $summary[] = $this->t('Max items: @length', ['@length' => $definition['maxItems']]);
     }
     return $summary;
   }
@@ -53,8 +53,8 @@ class EnumSetPropType extends PropTypePluginBase {
    * {@inheritdoc}
    */
   public static function normalize(mixed $value, ?array $definition = NULL): mixed {
-    $definition_items = (!is_array($definition)) ? [] : ($definition['items'] ?? []);
-    $value = array_unique(static::normalizer()->normalizeEnumValues($value, $definition_items['enum'] ?? []));
+    $definition_items = (!\is_array($definition)) ? [] : ($definition['items'] ?? []);
+    $value = \array_unique(static::normalizer()->normalizeEnumValues($value, $definition_items['enum'] ?? []));
     return static::normalizeEnumListSize($value, $definition, TRUE);
   }
 

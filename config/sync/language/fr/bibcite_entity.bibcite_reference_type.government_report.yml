@@ -1,0 +1,4 @@
+label: 'Rapport gouvernemental'
+fields:
+  bibcite_tertiary_title:
+    label: 'Titre de la série'

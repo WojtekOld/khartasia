@@ -8,12 +8,14 @@ use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the UI icons field features.
- *
- * @group ui_icons
  */
+#[RunTestsInSeparateProcesses]
+#[Group('ui_icons')]
 class IconFieldTest extends BrowserTestBase {
   /**
    * Icon pack from ui_icons_test module.

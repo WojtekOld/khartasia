@@ -7,6 +7,8 @@ namespace Drupal\Tests\ui_styles_library\Functional;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * UI Styles library functional tests.
@@ -14,6 +16,9 @@ use Drupal\user\UserInterface;
  * @group ui_styles
  * @group ui_styles_library
  */
+#[Group('ui_styles')]
+#[Group('ui_styles_library')]
+#[RunTestsInSeparateProcesses]
 class UiStylesLibraryTest extends BrowserTestBase {
 
   /**

@@ -9,6 +9,7 @@ use Drupal\Core\Theme\Registry;
 use Drupal\Core\Utility\CallableResolver;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_styles\Render\Element;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -18,6 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  *
  * @coversDefaultClass \Drupal\ui_styles\Render\Element
  */
+#[Group('ui_styles')]
 class UiStylesRenderElementTest extends UnitTestCase {
 
   /**

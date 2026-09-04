@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\ui_styles_library\Hook\UiStylesLibraryHooks;
+
 /**
  * Implements hook_theme().
  */
+#[LegacyHook]
 function ui_styles_library_theme(): array {
-  return [
-    'ui_styles_overview_page' => [
-      'variables' => ['styles' => NULL],
-    ],
-  ];
+  return \Drupal::service(UiStylesLibraryHooks::class)->theme();
 }

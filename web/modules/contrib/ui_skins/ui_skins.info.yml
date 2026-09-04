@@ -1,11 +1,11 @@
 name: 'UI Skins'
 type: module
 description: 'Allow handle some theme settings like CSS variables.'
-core_version_requirement: ^10.3 || ^11
+core_version_requirement: ^11.4 || ^12
 package: 'User interface'
 php: 8.3
 
-# Information added by Drupal.org packaging script on 2025-09-09
-version: '1.1.0-alpha5'
+# Information added by Drupal.org packaging script on 2026-07-27
+version: '1.2.1'
 project: 'ui_skins'
-datestamp: 1757425854
+datestamp: 1785164805

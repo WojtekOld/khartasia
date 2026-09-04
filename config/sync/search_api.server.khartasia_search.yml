@@ -1,0 +1,15 @@
+uuid: 5af030c1-af93-4f3a-8a2b-73c9864773b1
+langcode: fr
+status: true
+dependencies:
+  module:
+    - search_api_db
+id: khartasia_search
+name: 'Khartasia Search'
+description: ''
+backend: search_api_db
+backend_config:
+  database: 'default:default'
+  min_chars: 1
+  matching: partial
+  phrase: bigram

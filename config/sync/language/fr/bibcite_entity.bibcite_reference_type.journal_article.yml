@@ -1,0 +1,8 @@
+label: 'Article de revue'
+fields:
+  bibcite_secondary_title:
+    label: Journal
+  bibcite_section:
+    label: 'Page de début'
+  bibcite_type_of_work:
+    label: "Type d'article"

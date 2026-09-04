@@ -6,34 +6,13 @@
  */
 
 /**
- * Implements hook_requirements().
- */
-function bibcite_requirements($phase) {
-  $requirements = [];
-
-  switch ($phase) {
-    case 'runtime':
-    case 'install':
-      if (!class_exists('\Seboettg\CiteProc\CiteProc') || !class_exists('\ADCI\FullNameParser\Parser')) {
-        $requirements['bibcite_dependencies'] = [
-          'title' => t('Bibliography &amp; Citation dependencies'),
-          'description' => t("Bibliography &amp; Citation requires the seboettg/citeproc-php and adci/full-name-parser libraries. See the module's README.md file for more information."),
-          'severity' => REQUIREMENT_ERROR,
-        ];
-      }
-  }
-
-  return $requirements;
-}
-
-/**
  * Delete "links" from bibcite.settings configuration.
  */
 function bibcite_update_8001() {
   $config_factory = \Drupal::configFactory();
   $config = $config_factory->getEditable('bibcite.settings');
   $config->clear('links');
-  $config->save(TRUE);
+  $config->save();
 }
 
 /**

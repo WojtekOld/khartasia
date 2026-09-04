@@ -2,9 +2,12 @@
 
 namespace Drupal\bibcite_entity\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceLabelFormatter;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Plugin implementation of the 'entity reference label' formatter.
@@ -18,7 +21,17 @@ use Drupal\Core\Form\FormStateInterface;
  *   }
  * )
  */
+#[FieldFormatter(
+  id: 'bibcite_contributor_label',
+  label: new TranslatableMarkup('Label'),
+  description: new TranslatableMarkup('Display the label of the contributors.'),
+  field_types: [
+    'bibcite_contributor',
+  ]
+)]
 class ContributorLabelFormatter extends EntityReferenceLabelFormatter {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -29,7 +42,7 @@ class ContributorLabelFormatter extends EntityReferenceLabelFormatter {
     $show_role = $this->getSetting('role');
     $show_category = $this->getSetting('category');
 
-    /* @var \Drupal\bibcite_entity\ContributorPropertiesServiceInterface $contributorPropertiesService */
+    /** @var \Drupal\bibcite_entity\ContributorPropertiesServiceInterface $contributorPropertiesService */
     $contributorPropertiesService = \Drupal::service('bibcite_entity.contributor_properties_service');
 
     $roles = $contributorPropertiesService->getRoles();
@@ -97,12 +110,12 @@ class ContributorLabelFormatter extends EntityReferenceLabelFormatter {
     $element = parent::settingsForm($form, $form_state);
 
     $element['role'] = [
-      '#title' => t('Show role'),
+      '#title' => $this->t('Show role'),
       '#type' => 'checkbox',
       '#default_value' => $this->getSetting('role'),
     ];
     $element['category'] = [
-      '#title' => t('Show category'),
+      '#title' => $this->t('Show category'),
       '#type' => 'checkbox',
       '#default_value' => $this->getSetting('category'),
     ];

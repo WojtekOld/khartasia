@@ -1,0 +1,5 @@
+fields:
+  bibcite_type_of_work:
+    label: 종류
+  bibcite_place_published:
+    label: 도시

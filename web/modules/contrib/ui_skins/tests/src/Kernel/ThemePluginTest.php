@@ -6,12 +6,15 @@ namespace Drupal\Tests\ui_skins\Kernel;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_skins\Theme\ThemePluginManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the UI Skins theme plugin manager.
- *
- * @group ui_skins
  */
+#[Group('ui_skins')]
+#[RunTestsInSeparateProcesses]
 class ThemePluginTest extends KernelTestBase {
 
   use StringTranslationTrait;
@@ -29,7 +32,7 @@ class ThemePluginTest extends KernelTestBase {
    */
   public function testDetectedPlugins(): void {
     /** @var \Drupal\ui_skins\Theme\ThemePluginManagerInterface $themePluginManager */
-    $themePluginManager = $this->container->get('plugin.manager.ui_skins.theme');
+    $themePluginManager = $this->container->get(ThemePluginManagerInterface::class);
     $definitions = $themePluginManager->getDefinitions();
 
     $this->assertEquals(1, \count($definitions), 'There is one theme detected.');
@@ -57,14 +60,14 @@ class ThemePluginTest extends KernelTestBase {
     // Test when the module overriding the definition is executed before.
     \module_set_weight('ui_skins_test_disabled', -1);
     /** @var \Drupal\ui_skins\Theme\ThemePluginManagerInterface $themePluginManager */
-    $themePluginManager = $this->container->get('plugin.manager.ui_skins.theme');
+    $themePluginManager = $this->container->get(ThemePluginManagerInterface::class);
     $this->assertArrayHasKey('theme_from_module', $themePluginManager->getDefinitions());
 
     // Test when the module overriding the definition is executed after.
     \module_set_weight('ui_skins_test_disabled', 1);
     \drupal_flush_all_caches();
     /** @var \Drupal\ui_skins\Theme\ThemePluginManagerInterface $themePluginManager */
-    $themePluginManager = $this->container->get('plugin.manager.ui_skins.theme');
+    $themePluginManager = $this->container->get(ThemePluginManagerInterface::class);
     $this->assertArrayNotHasKey('theme_from_module', $themePluginManager->getDefinitions());
   }
 

@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Protected Content module.
+ */
+
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+require_once 'inc/proc.functions.inc';
+
+/**
+ * Implements hook_help().
+ *
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
+function proc_help($route_name, RouteMatchInterface $route_match): bool|string {
+  if ($route_name == 'help.page.proc') {
+    $text = file_get_contents(__DIR__ . '/README.md');
+    return '<pre>' . Html::escape($text) . '</pre>';
+  }
+  return '';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function proc_form_field_storage_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
+  if (isset($form['settings']['target_type']) && $form['settings']['target_type']['#default_value'] === 'proc') {
+    $form['settings']['target_type']['#disabled'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function proc_form_field_ui_field_storage_add_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $form['#attached']['library'][] = 'proc/proc-field-ui-icons';
+}

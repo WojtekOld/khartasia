@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns_ui\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Url;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
@@ -12,49 +14,49 @@ use Drupal\ui_patterns\PropTypePluginBase;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns_ui\ComponentFormDisplayInterface;
+use Drupal\ui_patterns_ui\Form\ComponentFormDisplayDeleteForm;
+use Drupal\ui_patterns_ui\Form\ComponentFormDisplayForm;
 
 /**
  * Defines the component display entity type.
- *
- * @ConfigEntityType(
- *   id = "component_form_display",
- *   label = @Translation("Component form display"),
- *   label_collection = @Translation("Component form displays"),
- *   label_singular = @Translation("Component form display"),
- *   label_plural = @Translation("Component form  displays"),
- *   label_count = @PluralTranslation(
- *     singular = "@count component display",
- *     plural = "@count component displays",
- *   ),
- *   config_prefix = "component_display",
- *   admin_permission = "administer component_display",
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *     "uuid" = "uuid",
- *   },
- *   handlers = {
- *     "form" = {
- *       "add" = "Drupal\ui_patterns_ui\Form\ComponentFormDisplayForm",
- *       "edit" = "Drupal\ui_patterns_ui\Form\ComponentFormDisplayForm",
- *       "delete" = "Drupal\ui_patterns_ui\Form\ComponentFormDisplayDeleteForm",
- *     },
- *   },
- *   links = {
- *      "collection" = "/admin/structure/component/{component_type}",
- *      "delete-form" = "/admin/structure/component/{component_type}/form-display/{form_mode_name}/delete",
- *   },
- *
- *   config_export = {
- *     "id",
- *     "label",
- *     "component_id",
- *     "form_mode_name",
- *     "content",
- *     "hidden",
- *   },
- * )
  */
+#[ConfigEntityType(
+  id: 'component_form_display',
+  label: new TranslatableMarkup('Component form display'),
+  label_collection: new TranslatableMarkup('Component form displays'),
+  label_singular: new TranslatableMarkup('Component form display'),
+  label_plural: new TranslatableMarkup('Component form displays'),
+  label_count: [
+    'singular' => '@count component display',
+    'plural' => '@count component displays',
+  ],
+  config_prefix: 'component_display',
+  admin_permission: 'administer component_display',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'uuid' => 'uuid',
+  ],
+  handlers: [
+    'form' => [
+      'add' => ComponentFormDisplayForm::class,
+      'edit' => ComponentFormDisplayForm::class,
+      'delete' => ComponentFormDisplayDeleteForm::class,
+    ],
+  ],
+  links: [
+    'collection' => '/admin/structure/component/{component_type}',
+    'delete-form' => '/admin/structure/component/{component_type}/form-display/{form_mode_name}/delete',
+  ],
+  config_export: [
+    'id',
+    'label',
+    'component_id',
+    'form_mode_name',
+    'content',
+    'hidden',
+  ]
+)]
 final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFormDisplayInterface {
 
   /**
@@ -102,27 +104,27 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
    * {@inheritdoc}
    */
   public function id(): string {
-    return str_replace(':', '.', $this->getComponentId()) . '.' . $this->getFormModeName();
+    return \str_replace(':', '.', $this->getComponentId()) . '.' . $this->getFormModeName();
   }
 
   /**
    * Returns the component plugin manager.
    */
   public static function getComponentPluginManager(): ComponentPluginManager {
-    return \Drupal::service('plugin.manager.sdc');
+    return \Drupal::service(ComponentPluginManager::class);
   }
 
   /**
    * Returns the source plugin manager.
    */
   public static function getSourcePluginManager(): SourcePluginManager {
-    return \Drupal::service('plugin.manager.ui_patterns_source');
+    return \Drupal::service(SourcePluginManager::class);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getComponentId():string {
+  public function getComponentId(): string {
     return $this->component_id;
   }
 
@@ -136,8 +138,8 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
   /**
    * Returns the prop definition.
    */
-  public function getPropDefinition(string $prop_id): array | NULL {
-    /* @phpstan-ignore method.notFound */
+  public function getPropDefinition(string $prop_id): ?array {
+    // @phpstan-ignore method.notFound
     $component_definition = self::getComponentPluginManager()->negotiateDefinition($this->component_id);
     if (isset($component_definition['props']['properties'][$prop_id])) {
       return $component_definition['props']['properties'][$prop_id];
@@ -181,7 +183,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
   /**
    * Sets the form mode name.
    */
-  public function setFormModeName(string $form_mode_name):void {
+  public function setFormModeName(string $form_mode_name): void {
     $this->form_mode_name = $form_mode_name;
   }
 
@@ -208,7 +210,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
   public function getSourcePlugins(string $prop_id): array {
     $component = $this->getPropSlotOption($prop_id);
     $sources = self::getSourcePluginManager()->getDefinitionsForPropType($this->getPropType($prop_id)->getPluginId());
-    return self::getSourcePluginManager()->createInstances(array_keys($sources), ['widget_settings' => $component['widget_settings'] ?? []]);
+    return self::getSourcePluginManager()->createInstances(\array_keys($sources), ['widget_settings' => $component['widget_settings'] ?? []]);
   }
 
   /**
@@ -234,7 +236,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
   public function getSelectedSourcePlugin(string $prop_id): ?SourcePluginBase {
     $display_options = $this->getPropSlotOption($prop_id);
     $selected_source_id = $display_options['source_id'] ?? NULL;
-    assert(is_string($selected_source_id) || is_null($selected_source_id));
+    \assert(\is_string($selected_source_id) || $selected_source_id === NULL);
     if ($selected_source_id === '') {
       return NULL;
     }
@@ -252,7 +254,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
    */
   public function getPropSlotOptions(): array {
     $content = $this->content;
-    uasort($content, function ($a, $b) {
+    \uasort($content, static function ($a, $b) {
       return $a['weight'] <=> $b['weight'];
     });
     return $content;
@@ -277,7 +279,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
         $weights[] = $options['weight'];
       }
     }
-    return $weights ? max($weights) : NULL;
+    return $weights ? \max($weights) : NULL;
   }
 
   /**
@@ -292,8 +294,8 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
     // Ensure we always have an empty settings and array.
     $options += ['widget_settings' => [], 'third_party_settings' => []];
     $this->content[$name] = $options;
-    unset($this->hidden[$name]);
-    unset($this->plugins[$name]);
+    unset($this->hidden[$name], $this->plugins[$name]);
+
     return $this;
   }
 
@@ -302,8 +304,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
    */
   public function removePropSlotOption($name) {
     $this->hidden[$name] = TRUE;
-    unset($this->content[$name]);
-    unset($this->plugins[$name]);
+    unset($this->content[$name], $this->plugins[$name]);
 
     return $this;
   }
@@ -327,7 +328,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
    * Load form display by form mode.
    */
   public static function loadByFormMode(string $component_id, mixed $form_mode): ?ComponentFormDisplayInterface {
-    if (is_array($form_mode)) {
+    if (\is_array($form_mode)) {
       // Strange behavior for default value form modes.
       // @todo Debug it.
       return NULL;
@@ -335,7 +336,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
     /** @var \Drupal\ui_patterns_ui\Entity\ComponentFormDisplay[] $items */
     $items = \Drupal::entityTypeManager()->getStorage('component_form_display')
       ->loadByProperties(['component_id' => $component_id, 'form_mode_name' => $form_mode]);
-    return count($items) !== 0 ? current($items) : NULL;
+    return \count($items) !== 0 ? \current($items) : NULL;
   }
 
   /**
@@ -345,7 +346,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
     /** @var \Drupal\ui_patterns_ui\Entity\ComponentFormDisplay[] $items */
     $items = \Drupal::entityTypeManager()->getStorage('component_form_display')
       ->loadByProperties(['component_id' => $component_id]);
-    return count($items) !== 0 ? current($items) : NULL;
+    return \count($items) !== 0 ? \current($items) : NULL;
   }
 
 }

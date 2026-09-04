@@ -1,0 +1,10 @@
+label: 'Comptes-rendus de conférence'
+fields:
+  bibcite_year:
+    label: 'Année de la conférence'
+  bibcite_secondary_title:
+    label: 'Nom de la conférence'
+  bibcite_place_published:
+    label: 'Lieu de la conférence'
+  bibcite_tertiary_title:
+    label: 'Titre de la série'

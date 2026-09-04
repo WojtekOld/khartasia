@@ -22,8 +22,7 @@ class ContributorViewsData extends EntityViewsData {
       'numeric' => TRUE,
     ];
 
-    // @todo Use $this->entityTypeManager only, once Drupal 8.9.0 is released.
-    $entity_manager = isset($this->entityTypeManager) ? $this->entityTypeManager : $this->entityManager;
+    $entity_manager = $this->entityTypeManager;
     $entity_type = $entity_manager->getDefinition('bibcite_reference');
 
     $data[$this->entityType->getBaseTable()] += [

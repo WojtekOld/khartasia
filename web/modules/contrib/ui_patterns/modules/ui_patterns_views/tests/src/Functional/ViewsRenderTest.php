@@ -1,16 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ui_patterns_views\Functional;
 
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Tests\ui_patterns\Functional\UiPatternsFunctionalTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test component rendering in views.
  *
- * @group ui_patterns_views
+ * @internal
+ *
+ * @coversNothing
  */
-class ViewsRenderTest extends UiPatternsFunctionalTestBase {
+#[Group('ui_patterns')]
+#[Group('ui_patterns_views')]
+#[RunTestsInSeparateProcesses]
+final class ViewsRenderTest extends UiPatternsFunctionalTestBase {
 
   use TestDataTrait;
 
@@ -34,7 +44,7 @@ class ViewsRenderTest extends UiPatternsFunctionalTestBase {
   public function testPlugins(): void {
     $this->createTestContentContentType();
     $assert_session = $this->assertSession();
-    $view_test_data = self::loadTestDataFixture(__DIR__ . "/../../fixtures/TestDataSet.yml");
+    $view_test_data = self::loadTestDataFixture(__DIR__ . '/../../fixtures/TestDataSet.yml');
     // ---
     // View Style
     // ---
@@ -45,13 +55,14 @@ class ViewsRenderTest extends UiPatternsFunctionalTestBase {
     );
     // Check that the Views style plugin appears.
     $this->drupalGet('admin/structure/views/nojs/display/test/default/style');
-    $assert_session->elementTextEquals("css", ".form-item label", "Component (UI Patterns)");
+    $assert_session->elementTextEquals('css', '.form-item label', 'Component (UI Patterns)');
     // Configure the style plugin.
     $config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/views.view.test.style.yml');
-    $ui_patterns_config = &$config_import['display']['page_1']['display_options']["style"]["options"]["ui_patterns"]['ui_patterns'];
+    $ui_patterns_config = &$config_import['display']['page_1']['display_options']['style']['options']['ui_patterns']['ui_patterns'];
     $tests = $view_test_data->getTestSets();
+
     foreach ($tests as $test_set_name => $test_set) {
-      if (!str_starts_with($test_set_name, 'style') || !isset($test_set["assertSession"])) {
+      if (!\str_starts_with($test_set_name, 'style') || !isset($test_set['assertSession'])) {
         continue;
       }
       $node = $this->createTestContentNode('page', $test_set['entity'] ?? []);
@@ -60,9 +71,9 @@ class ViewsRenderTest extends UiPatternsFunctionalTestBase {
         'views.view.test',
         $config_import
       );
-      \Drupal::service('router.builder')->rebuild();
+      \Drupal::service(RouteBuilderInterface::class)->rebuild();
       $this->drupalGet('test');
-      $this->assertSessionObject($test_set["assertSession"]);
+      $this->assertSessionObject($test_set['assertSession']);
       $node->delete();
     }
     // ---
@@ -75,13 +86,14 @@ class ViewsRenderTest extends UiPatternsFunctionalTestBase {
     );
     // Check that the View rows style plugin appears.
     $this->drupalGet('admin/structure/views/nojs/display/test/default/row');
-    $assert_session->elementTextEquals("css", ".form-item label", "Component (UI Patterns)");
+    $assert_session->elementTextEquals('css', '.form-item label', 'Component (UI Patterns)');
     // Configure the row style plugin.
     $config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/views.view.test.row_style.yml');
-    $ui_patterns_config = &$config_import['display']['page_1']['display_options']["row"]["options"]["ui_patterns"];
+    $ui_patterns_config = &$config_import['display']['page_1']['display_options']['row']['options']['ui_patterns'];
     $tests = $view_test_data->getTestSets();
+
     foreach ($tests as $test_set_name => $test_set) {
-      if (!str_starts_with($test_set_name, 'row_style') || !isset($test_set["assertSession"])) {
+      if (!\str_starts_with($test_set_name, 'row_style') || !isset($test_set['assertSession'])) {
         continue;
       }
       $node = $this->createTestContentNode('page', $test_set['entity'] ?? []);
@@ -90,10 +102,10 @@ class ViewsRenderTest extends UiPatternsFunctionalTestBase {
         'views.view.test',
         $config_import
       );
-      \Drupal::service('router.builder')->rebuild();
+      \Drupal::service(RouteBuilderInterface::class)->rebuild();
       $this->drupalGet('test');
       $this->validateRenderedComponent($test_set);
-      $this->assertSessionObject($test_set["assertSession"]);
+      $this->assertSessionObject($test_set['assertSession']);
       $node->delete();
     }
     // ---
@@ -106,30 +118,35 @@ class ViewsRenderTest extends UiPatternsFunctionalTestBase {
     );
     // Check that field formatter plugin appears.
     $this->drupalGet('admin/structure/views/nojs/handler/test/default/field/title');
-    $text_field_formatter_plugin = "Component per item (UI Patterns)";
-    $key_field_formatter_plugin = "ui_patterns_component_per_item";
+    $text_field_formatter_plugin = 'Component per item (UI Patterns)';
+    $key_field_formatter_plugin = 'ui_patterns_component_per_item';
     $page = $this->getSession()->getPage();
-    $nodes = $page->findAll("css", "select[name='options[type]'] option");
+    $nodes = $page->findAll('css', "select[name='options[type]'] option");
     $textFound = FALSE;
     $valueFound = FALSE;
+
     foreach ($nodes as $node) {
       $text = $node->getText();
+
       if ($text === $text_field_formatter_plugin) {
         $textFound = TRUE;
       }
-      if ($node->getAttribute("value") === $key_field_formatter_plugin) {
+
+      if ($node->getAttribute('value') === $key_field_formatter_plugin) {
         $valueFound = TRUE;
       }
     }
+
     if (!$textFound || !$valueFound) {
-      $this->fail(sprintf("Option not found for field formatter: %s / %s", $key_field_formatter_plugin, $text_field_formatter_plugin));
+      self::fail(\sprintf('Option not found for field formatter: %s / %s', $key_field_formatter_plugin, $text_field_formatter_plugin));
     }
     // Configure a field, with field formatter plugin.
     $config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/views.view.test.field.yml');
-    $ui_patterns_config = &$config_import['display']['page_1']['display_options']["fields"]["title"]["settings"]["ui_patterns"];
+    $ui_patterns_config = &$config_import['display']['page_1']['display_options']['fields']['title']['settings']['ui_patterns'];
     $tests = $view_test_data->getTestSets();
+
     foreach ($tests as $test_set_name => $test_set) {
-      if (!str_starts_with($test_set_name, 'field') || !isset($test_set["assertSession"])) {
+      if (!\str_starts_with($test_set_name, 'field') || !isset($test_set['assertSession'])) {
         continue;
       }
       $node = $this->createTestContentNode('page', $test_set['entity'] ?? []);
@@ -138,9 +155,9 @@ class ViewsRenderTest extends UiPatternsFunctionalTestBase {
         'views.view.test',
         $config_import
       );
-      \Drupal::service('router.builder')->rebuild();
+      \Drupal::service(RouteBuilderInterface::class)->rebuild();
       $this->drupalGet('test');
-      $this->assertSessionObject($test_set["assertSession"]);
+      $this->assertSessionObject($test_set['assertSession']);
       $node->delete();
     }
   }

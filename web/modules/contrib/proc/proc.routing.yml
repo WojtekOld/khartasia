@@ -1,0 +1,196 @@
+proc.generate_keys:
+  path: '/proc/generate-keys'
+  defaults:
+    _title: 'Generate encryption keys'
+    _form: '\Drupal\proc\Form\ProcKeysGenerationForm'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+
+proc.encrypt:
+  path: '/proc/add/{users}'
+  defaults:
+    _title_callback: '\Drupal\proc\Form\ProcEncryptForm::getTitle'
+    _form: '\Drupal\proc\Form\ProcEncryptForm'
+  requirements:
+    _permission: 'access content'
+    _custom_access: '\Drupal\proc\Controller\ProcController::checkRecipientsCsvController'
+    _proc_enc_access_check: 'TRUE'
+
+proc.settings_form:
+  path: '/admin/config/system/proc'
+  defaults:
+    _title: 'Protected Content settings'
+    _form: 'Drupal\proc\Form\SettingsForm'
+  requirements:
+    _permission: 'administer proc configuration'
+
+proc.json_api_proc:
+  path: '/api/proc/getpubkey/{entity_ids}/{search_by}'
+  defaults:
+    _controller: 'Drupal\proc\Controller\JsonApiProcController::index'
+    _title: 'Proc JSON api - Get Public Key'
+    entity_ids: ''
+    search_by: ''
+  methods: [ GET ]
+  requirements:
+    _permission: 'access content'
+    _proc_pubkey_access_check: 'TRUE'
+    search_by: user_id|id
+
+proc.json_api_proc_cipher:
+  path: '/api/proc/getcipher/{cipher_id}'
+  defaults:
+    _controller: 'Drupal\proc\Controller\JsonApiProcController::cipher'
+    _title: 'Proc JSON api - Get Cipher Text'
+    cipher_id: ''
+  methods: [ GET ]
+  requirements:
+    _permission: 'access content'
+    _proc_pubkey_access_check: 'TRUE'
+    _proc_dec_access_check: 'TRUE'
+
+proc.api_decrypt_text:
+  path: '/api/proc/decrypt-text/{cipher_id}'
+  defaults:
+    _controller: 'Drupal\proc\Controller\JsonApiProcController::decryptText'
+    _title: 'Proc JSON api - Decrypt Text'
+  methods: [ GET ]
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+
+proc.my_update_jobs_count:
+  path: '/api/proc/my-update-jobs-count'
+  defaults:
+    _controller: 'Drupal\proc\Controller\JsonApiProcController::myUpdateJobsCount'
+    _title: 'Proc JSON api - My Update Jobs Count'
+  methods: [ GET ]
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+
+entity.proc.decrypt:
+  path: '/proc/{proc}'
+  defaults:
+    _title_callback: '\Drupal\proc\Form\ProcDecryptForm::getTitle'
+    _form: '\Drupal\proc\Form\ProcDecryptForm'
+  requirements:
+    _permission: 'access content'
+    _proc_dec_access_check: 'TRUE'
+
+entity.proc.canonical:
+  path: '/proc/{proc}/details'
+  defaults:
+    _entity_view: 'proc'
+    _title: 'Protected content details'
+  requirements:
+    _entity_access: 'proc.view'
+    proc: \d+
+
+proc.cache_settings:
+  path: '/proc/key-cache-settings'
+  defaults:
+    _title: 'Encryption key cache settings'
+    _form: '\Drupal\proc\Form\ProcKeysCacheTypeForm'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+
+proc.my_keys_overview:
+  path: '/proc/my-keys-overview'
+  defaults:
+    _title: 'My keys overview'
+    _entity_list: 'proc'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+
+proc.update:
+  path: '/proc/{cipher_id}/update'
+  defaults:
+    _title_callback: '\Drupal\proc\Form\ProcUpdateForm::getTitle'
+    _form: '\Drupal\proc\Form\ProcUpdateForm'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _permission: 'access content'
+    _proc_enc_access_check: 'TRUE'
+    _proc_dec_access_check: 'TRUE'
+
+proc.edit_entity:
+  path: '/proc/edit-entity'
+  defaults:
+    _controller: '\Drupal\proc\Controller\ProcEntityEditController::editEntity'
+    _title: 'Edit Proc Entity'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _permission: 'access content'
+    _proc_enc_access_check: 'TRUE'
+    _csrf_request_header_token: 'TRUE'
+  methods: [POST]
+
+proc.my_update:
+  path: '/proc/my-update/{proc_ids}'
+  defaults:
+    _title_callback: '\Drupal\proc\Form\ProcMyUpdateForm::getTitle'
+    _form: '\Drupal\proc\Form\ProcMyUpdateForm'
+    proc_ids: ''
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _permission: 'access content'
+    _proc_enc_access_check: 'TRUE'
+
+proc.proc_request_re_encryption_confirm:
+  path: '/proc/request-re-encryption-confirm/{proc_ids}'
+  defaults:
+    _title: 'Proc Request Re Encryption Confirm'
+    _form: 'Drupal\proc\Form\ProcRequestReEncryptionConfirmForm'
+    proc_ids: ''
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _permission: 'access content'
+    _proc_enc_access_check: 'TRUE'
+
+proc.cipher_edit:
+  path: '/api/proc/edit-cipher'
+  defaults:
+    _controller: '\Drupal\proc\Controller\ProcCipherTextEditController::editCipherText'
+    _title: 'Proc JSON api - Edit Cipher Text'
+  methods: [POST]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _permission: 'access content'
+    _proc_enc_access_check: 'TRUE'
+    _proc_dec_access_check: 'TRUE'
+    _csrf_request_header_token: 'TRUE'
+
+proc.my_update_batch:
+  path: '/proc/my-update-batch'
+  defaults:
+    _title_callback: '\Drupal\proc\Form\ProcUpdateBatchForm::getTitle'
+    _form: '\Drupal\proc\Form\ProcUpdateBatchForm'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _permission: 'access content'
+    _proc_enc_access_check: 'TRUE'
+
+proc.store_recipients:
+  path: '/api/proc/store-recipients'
+  defaults:
+    _controller: 'Drupal\proc\Controller\JsonApiProcController::storeRecipients'
+    _title: 'Proc JSON api - Store Recipients'
+  methods: [POST]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _permission: 'access content'
+    _csrf_request_header_token: 'TRUE'
+
+proc.service_worker:
+  path: '/proc-service-worker.js'
+  defaults:
+    _controller: 'Drupal\proc\Controller\ProcServiceWorkerController::serve'
+    _title: 'Protected Content Service Worker'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'

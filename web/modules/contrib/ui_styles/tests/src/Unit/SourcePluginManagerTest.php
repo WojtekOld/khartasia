@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_styles_test\DummySourcePluginManager;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Test the source plugin manager.
@@ -16,6 +17,7 @@ use Drupal\ui_styles_test\DummySourcePluginManager;
  *
  * @coversDefaultClass \Drupal\ui_styles\Source\SourcePluginManager
  */
+#[Group('ui_styles')]
 class SourcePluginManagerTest extends UnitTestCase {
 
   /**

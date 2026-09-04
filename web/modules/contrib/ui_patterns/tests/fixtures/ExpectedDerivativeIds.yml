@@ -1,0 +1,33 @@
+exact:
+  field_property:
+    - 'field_property:node:field_reference_multi:target_id'
+    - 'field_property:node:field_reference_single:target_id'
+    - 'field_property:node:field_shared:value'
+  field_formatter:
+    - 'field_formatter:node::field_reference_multi'
+    - 'field_formatter:node::field_reference_single'
+    - 'field_formatter:node::field_shared'
+    - 'field_formatter:node:other:field_shared'
+    - 'field_formatter:node:page:field_reference_multi'
+    - 'field_formatter:node:page:field_reference_single'
+    - 'field_formatter:node:page:field_shared'
+  'entity:field_property':
+    - 'entity:field_property:node:field_reference_multi:target_id'
+    - 'entity:field_property:node:field_reference_single:target_id'
+  field:
+    - 'field:node::field_reference_multi'
+    - 'field:node::field_reference_single'
+    - 'field:node::field_shared'
+    - 'field:node:other:field_shared'
+    - 'field:node:page:field_reference_multi'
+    - 'field:node:page:field_reference_single'
+    - 'field:node:page:field_shared'
+  entity_reference:
+    - 'entity_reference:node::field_reference_multi:node:'
+    - 'entity_reference:node::field_reference_multi:node:other'
+    - 'entity_reference:node::field_reference_multi:node:page'
+    - 'entity_reference:node::field_reference_single:node:page'
+    - 'entity_reference:node:page:field_reference_multi:node:'
+    - 'entity_reference:node:page:field_reference_multi:node:other'
+    - 'entity_reference:node:page:field_reference_multi:node:page'
+    - 'entity_reference:node:page:field_reference_single:node:page'

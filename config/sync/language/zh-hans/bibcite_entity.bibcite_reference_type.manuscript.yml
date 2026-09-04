@@ -1,0 +1,5 @@
+fields:
+  bibcite_place_published:
+    label: 城市
+  bibcite_alternate_title:
+    label: 缩写

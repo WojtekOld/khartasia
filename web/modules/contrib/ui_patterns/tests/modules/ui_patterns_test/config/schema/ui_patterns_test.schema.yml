@@ -13,3 +13,14 @@ block.settings.ui_patterns_test_block:
     display_message:
       type: string
       label: 'The display message'
+
+ui_patterns_source.boolean_settings:
+  type: mapping
+  label: 'Source: Boolean settings'
+  mapping:
+    on_by_default:
+      type: boolean
+      label: 'On by default'
+    off_by_default:
+      type: boolean
+      label: 'Off by default'

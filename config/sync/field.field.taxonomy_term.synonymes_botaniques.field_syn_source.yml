@@ -1,0 +1,21 @@
+uuid: ad0c5dfd-9dab-4967-8d6d-52c68d4ea4e9
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_syn_source
+    - taxonomy.vocabulary.synonymes_botaniques
+  module:
+    - options
+id: taxonomy_term.synonymes_botaniques.field_syn_source
+field_name: field_syn_source
+entity_type: taxonomy_term
+bundle: synonymes_botaniques
+label: Source
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

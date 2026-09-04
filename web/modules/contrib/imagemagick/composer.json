@@ -1,0 +1,13 @@
+{
+    "name": "drupal/imagemagick",
+    "type": "drupal-module",
+    "description": "Provides an image toolkit to integrate ImageMagick with the Image API.",
+    "require": {
+        "drupal/core": "^11.3",
+        "drupal/file_mdm": "^3.2",
+        "drupal/sophron": "^3"
+    },
+    "require-dev": {
+        "drupal/image_effects": "^5"
+    }
+}

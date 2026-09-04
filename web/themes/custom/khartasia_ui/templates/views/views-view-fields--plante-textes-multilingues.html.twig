@@ -1,0 +1,35 @@
+{# views-view-fields--plante-textes-multilingues.html.twig #}
+{% set lang_raw = fields.field_langue_texte.content|striptags|trim %}
+{% set lang_code = 'fr' %}
+{% if lang_raw == 'Chinois' %}{% set lang_code = 'zh' %}
+{% elseif lang_raw == 'Japonais' %}{% set lang_code = 'ja' %}
+{% elseif lang_raw == 'Coréen' %}{% set lang_code = 'ko' %}
+{% elseif lang_raw == 'Anglais' %}{% set lang_code = 'en' %}
+{% elseif lang_raw == 'Thai' %}{% set lang_code = 'th' %}
+{% endif %}
+<div class="kh-plante-texte" data-lang="{{ lang_code }}">
+  {% if fields.field_gen_culture_ml is defined and fields.field_gen_culture_ml.content|render %}
+    <div class="kh-texte-section">
+      <h4 class="kh-plante__section-title">Culture et usage</h4>
+      <div class="kh-prose">{{ fields.field_gen_culture_ml.content|raw }}</div>
+    </div>
+  {% endif %}
+  {% if fields.field_intr_paper_ml is defined and fields.field_intr_paper_ml.content|render %}
+    <div class="kh-texte-section">
+      <h4 class="kh-plante__section-title">Fabrication du papier</h4>
+      <div class="kh-prose">{{ fields.field_intr_paper_ml.content|raw }}</div>
+    </div>
+  {% endif %}
+  {% if fields.field_mode_prep_ml is defined and fields.field_mode_prep_ml.content|render %}
+    <div class="kh-texte-section">
+      <h4 class="kh-plante__section-title">Mode de préparation</h4>
+      <div class="kh-prose">{{ fields.field_mode_prep_ml.content|raw }}</div>
+    </div>
+  {% endif %}
+  {% if fields.field_aire_utilis_ml is defined and fields.field_aire_utilis_ml.content|render %}
+    <div class="kh-texte-section">
+      <h4 class="kh-plante__section-title">Aire d utilisation</h4>
+      <div class="kh-prose">{{ fields.field_aire_utilis_ml.content|raw }}</div>
+    </div>
+  {% endif %}
+</div>

@@ -6,7 +6,6 @@ namespace Drupal\ui_patterns\Plugin\UiPatterns\PropType;
 
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\RenderableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\PropType;
@@ -31,13 +30,17 @@ class SlotPropType extends PropTypePluginBase {
    * {@inheritdoc}
    */
   public static function normalize(mixed $value, ?array $definition = NULL): mixed {
-    if (is_object($value)) {
+    if (\is_object($value)) {
       return self::convertObject($value);
     }
-    if (is_string($value)) {
-      return ['#children' => Markup::create($value)];
+    if (\is_string($value)) {
+      // A plain string is untrusted: #plain_text makes Drupal core
+      // escape it at render time. To pass raw HTML, give a trusted type
+      // instead — Markup::create(), a Twig {% set %} capture block, or a
+      // render array.
+      return ['#plain_text' => $value];
     }
-    if (!is_array($value)) {
+    if (!\is_array($value)) {
       return empty($value) ? ['#cache' => []] : ['#plain_text' => (string) $value];
     }
     return self::cleanRenderArray($value);
@@ -64,10 +67,10 @@ class SlotPropType extends PropTypePluginBase {
       // sequence (integer, consecutive) keys. For example a list of blocks
       // from page layout or layout builder: each block is keyed by its UUID.
       // So, transform this list of renderables to a proper Twig sequence.
-      return array_map(static fn($item) => static::normalize($item), array_is_list($value) ? $value : array_values($value));
+      return \array_map(static fn ($item) => static::normalize($item), \array_is_list($value) ? $value : \array_values($value));
     }
-    foreach ($value as $key => & $item) {
-      if (!in_array($key, $element_properties, TRUE)) {
+    foreach ($value as $key => &$item) {
+      if (!\in_array($key, $element_properties, TRUE)) {
         $item = static::normalize($item);
       }
     }
@@ -81,8 +84,8 @@ class SlotPropType extends PropTypePluginBase {
     if ($value instanceof RenderableInterface) {
       $value = $value->toRenderable();
     }
-    if (($value instanceof TwigMarkup) ||
-      ($value instanceof MarkupInterface)) {
+    if (($value instanceof TwigMarkup)
+      || ($value instanceof MarkupInterface)) {
       return ['#children' => $value];
     }
     if ($value instanceof \Stringable) {
@@ -98,7 +101,7 @@ class SlotPropType extends PropTypePluginBase {
    */
   public static function convertFrom(string $prop_type, mixed $value): mixed {
     return match ($prop_type) {
-      'string' => ($value instanceof MarkupInterface) ? ["#children" => $value] : ["#plain_text" => $value],
+      'string' => ($value instanceof MarkupInterface) ? ['#children' => $value] : ['#plain_text' => $value],
     };
   }
 

@@ -1,0 +1,21 @@
+uuid: 0c81eb33-471f-4775-8182-0cddf2c48930
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_syn_source_id
+    - taxonomy.vocabulary.synonymes_botaniques
+id: taxonomy_term.synonymes_botaniques.field_syn_source_id
+field_name: field_syn_source_id
+entity_type: taxonomy_term
+bundle: synonymes_botaniques
+label: 'Identifiant source'
+description: 'Exemple     : 672892-1'
+required: false
+translatable: false
+default_value:
+  -
+    value: 672892-1
+default_value_callback: ''
+settings: {  }
+field_type: string

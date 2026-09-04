@@ -24,10 +24,10 @@ final class LibrarySearchForm extends FormBase {
   private const ICON_DEFAULT_SIZE = 64;
 
   public function __construct(
-    private readonly IconPackManagerInterface $pluginManagerIconPack,
-    private readonly PagerManagerInterface $pagerManager,
-    private readonly IconSearch $iconSearch,
-    private SharedTempStoreFactory $tempStoreFactory,
+    protected IconPackManagerInterface $pluginManagerIconPack,
+    protected PagerManagerInterface $pagerManager,
+    protected IconSearch $iconSearch,
+    protected SharedTempStoreFactory $tempStoreFactory,
   ) {}
 
   /**

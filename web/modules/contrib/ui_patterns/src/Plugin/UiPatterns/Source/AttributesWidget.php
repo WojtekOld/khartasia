@@ -12,6 +12,7 @@ use Drupal\Core\Template\Attribute;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\AttributesTrait;
 use Drupal\ui_patterns\SourcePluginPropValueWidget;
+use Drupal\ui_patterns\SourceTags;
 use Drupal\ui_patterns\UnicodePatternValidatorTrait;
 
 /**
@@ -22,7 +23,7 @@ use Drupal\ui_patterns\UnicodePatternValidatorTrait;
   label: new TranslatableMarkup('Attributes'),
   description: new TranslatableMarkup('Textfield with double-quoted values or a space-separated list of HTML classes.'),
   prop_types: ['attributes'],
-  tags: ['widget', 'widget:dismissible'],
+  tags: [SourceTags::Widget->value, SourceTags::WidgetDismissible->value],
   context_definitions: [
     'entity' => new ContextDefinition('entity', label: new TranslatableMarkup('Entity'), required: FALSE),
   ]
@@ -63,13 +64,13 @@ class AttributesWidget extends SourcePluginPropValueWidget implements TrustedCal
     if ($propValue instanceof Attribute) {
       return (string) $propValue;
     }
-    if (!is_array($propValue)) {
+    if (!\is_array($propValue)) {
       return NULL;
     }
     $attributes = new Attribute($propValue);
     // Trim because Attribute::__toString() add a space on the left as it is
     // intended to be printed in HTML.
-    return trim((string) $attributes);
+    return \trim((string) $attributes);
   }
 
   /**
@@ -96,12 +97,12 @@ class AttributesWidget extends SourcePluginPropValueWidget implements TrustedCal
     // To allow form errors to be displayed correctly.
     $this->addRequired($form['value']);
     $form['value']['#placeholder'] = 'class="hidden" title="Lorem ipsum"';
-    $form['value']['#description'] = $this->t("HTML attributes with double-quoted values or a space-separated list of HTML classes.");
+    $form['value']['#description'] = $this->t('HTML attributes with double-quoted values or a space-separated list of HTML classes.');
 
     $form['value']['#element_validate'][] = [static::class, 'validateUnicodePattern'];
 
     // Add token tree link if token module is enabled.
-    $this->addTokenTreeLink($form, "help");
+    $this->addTokenTreeLink($form, 'help');
     return $form;
   }
 

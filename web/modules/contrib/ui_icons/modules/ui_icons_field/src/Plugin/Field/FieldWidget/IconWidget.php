@@ -96,7 +96,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
     $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
 
-    /** @var \Drupal\Core\Field\FieldItemInterface $item */
+    /** @var \Drupal\ui_icons_field\Plugin\Field\FieldType\IconType $item */
     $item = $items[$delta];
 
     $icon_selector = $this->getSetting('icon_selector');
@@ -116,8 +116,8 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       $element['value']['#result_format'] = $this->getSetting('result_format');
     }
 
-    if ($item && $item->target_id) {
-      $element['value']['#default_value'] = $item->target_id;
+    if ($item && $target_id = $item->get('target_id')->getValue()) {
+      $element['value']['#default_value'] = $target_id;
     }
 
     return $element;

@@ -1,0 +1,89 @@
+uuid: d81d4342-7062-4cb9-9daf-df508c967f6c
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.body
+    - field.storage.node.field_language_taxo_vern
+    - field.storage.node.field_origin_taxo
+    - field.storage.node.field_tax_family
+    - search_api.server.khartasia_search
+  module:
+    - node
+id: plantes_papiers
+name: 'Plantes et Papiers'
+description: ''
+read_only: false
+field_settings:
+  body:
+    label: Corps
+    datasource_id: 'entity:node'
+    property_path: body
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.body
+  field_language_taxo_vern:
+    label: Langue
+    datasource_id: 'entity:node'
+    property_path: field_language_taxo_vern
+    type: integer
+    dependencies:
+      config:
+        - field.storage.node.field_language_taxo_vern
+  field_origin_taxo:
+    label: Origine
+    datasource_id: 'entity:node'
+    property_path: field_origin_taxo
+    type: integer
+    dependencies:
+      config:
+        - field.storage.node.field_origin_taxo
+  field_tax_family:
+    label: Famille
+    datasource_id: 'entity:node'
+    property_path: field_tax_family
+    type: integer
+    dependencies:
+      config:
+        - field.storage.node.field_tax_family
+  title:
+    label: Titre
+    datasource_id: 'entity:node'
+    property_path: title
+    type: string
+    dependencies:
+      module:
+        - node
+  type:
+    label: 'Type de contenu'
+    datasource_id: 'entity:node'
+    property_path: type
+    type: string
+    dependencies:
+      module:
+        - node
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  custom_value: {  }
+  entity_type: {  }
+  language_with_fallback: {  }
+  rendered_item: {  }
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  cron_limit: 50
+  delete_on_fail: true
+  index_directly: true
+  track_changes_in_references: true
+server: khartasia_search

@@ -1,17 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ui_patterns_layouts\Functional;
 
+use Drupal\Core\Url;
 use Drupal\Tests\ui_patterns\Functional\UiPatternsFunctionalTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test components rendering as layouts.
  *
- * @group ui_patterns_layouts
+ * @internal
+ *
+ * @coversNothing
  */
-class FieldLayoutRenderTest extends UiPatternsFunctionalTestBase {
-
+#[Group('ui_patterns')]
+#[Group('ui_patterns_layouts')]
+#[RunTestsInSeparateProcesses]
+final class FieldLayoutRenderTest extends UiPatternsFunctionalTestBase {
 
   use TestDataTrait;
 
@@ -43,7 +52,7 @@ class FieldLayoutRenderTest extends UiPatternsFunctionalTestBase {
       'core.entity_view_display.node.page.default',
       $config_import
     );
-    $this->drupalGet('admin/structure/types/manage/page/display');
+    $this->drupalGet(Url::fromRoute('entity.entity_view_display.node.default', ['node_type' => 'page']));
     $assert_session->statusCodeEquals(200);
     $assert_session->elementTextEquals('css', '.context-exists', $test_set['output']['props']['string']['value']);
   }
@@ -72,7 +81,7 @@ class FieldLayoutRenderTest extends UiPatternsFunctionalTestBase {
         'core.entity_view_display.node.page.default',
         $config_import
       );
-      $component_id = str_replace('_', '-', explode(':', $test_set['component']['component_id'])[1]);
+      $component_id = \str_replace('_', '-', \explode(':', $test_set['component']['component_id'])[1]);
       $this->drupalGet('node/' . $node->id());
       $assert_session->statusCodeEquals(200);
       $assert_session->elementExists('css', '.ui-patterns-' . $component_id);

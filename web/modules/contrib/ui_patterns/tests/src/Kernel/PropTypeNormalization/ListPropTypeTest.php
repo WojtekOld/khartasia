@@ -6,49 +6,54 @@ namespace Drupal\Tests\ui_patterns\Kernel\PropTypeNormalization;
 
 use Drupal\Tests\ui_patterns\Kernel\PropTypeNormalizationTestBase;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\ListPropType;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test ListPropType normalization.
  *
- * @coversDefaultClass \Drupal\ui_patterns\Plugin\UiPatterns\PropType\ListPropType
- * @group ui_patterns
+ * @internal
  */
-class ListPropTypeTest extends PropTypeNormalizationTestBase {
+#[CoversClass(ListPropType::class)]
+#[Group('ui_patterns')]
+#[RunTestsInSeparateProcesses]
+final class ListPropTypeTest extends PropTypeNormalizationTestBase {
 
   /**
    * Test normalize static method.
-   *
-   * @dataProvider normalizationTests
    */
-  public function testNormalization(mixed $value, mixed $expected) : void {
-    $normalized = ListPropType::normalize($value, $this->testComponentProps['list_mixed']);
-    $this->assertEquals($normalized, $expected);
+  public function testNormalization(): void {
+    foreach (self::normalizationTests() as $name => [$value, $expected]) {
+      $normalized = ListPropType::normalize($value, $this->testComponentProps['list_mixed']);
+      self::assertEquals($normalized, $expected, (string) $name);
+    }
   }
 
   /**
    * Test rendered component with prop.
-   *
-   * @dataProvider renderingTests
    */
-  public function testRendering(mixed $value, mixed $rendered_value) : void {
-    $this->runRenderPropTest('list_mixed', ["value" => $value, "rendered_value" => $rendered_value]);
+  public function testRendering(): void {
+    foreach (self::renderingTests() as $name => [$value, $rendered_value]) {
+      $this->runRenderPropTest('list_mixed', ['value' => $value, 'rendered_value' => $rendered_value], (string) $name);
+    }
   }
 
   /**
    * Provides data for testNormalization.
    */
-  public static function normalizationTests() : array {
+  public static function normalizationTests(): array {
     return [
-      "null value" => [NULL, NULL],
+      'null value' => [NULL, NULL],
     ];
   }
 
   /**
    * Provides data for testNormalization.
    */
-  public static function renderingTests() : array {
+  public static function renderingTests(): array {
     return [
-      "null value" => [
+      'null value' => [
         NULL,
         '<div class="ui-patterns-props-list_mixed"></div>',
       ],

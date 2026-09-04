@@ -1,5 +1,6 @@
 name: "UI Patterns Test noUi component"
 noUi: true
+tags: [wrapper]
 props:
   type: object
   properties: {}

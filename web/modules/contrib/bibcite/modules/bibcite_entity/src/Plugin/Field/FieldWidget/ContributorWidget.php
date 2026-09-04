@@ -5,11 +5,13 @@ namespace Drupal\bibcite_entity\Plugin\Field\FieldWidget;
 use ADCI\FullNameParser\Exception\NameParsingException;
 use Drupal\bibcite_entity\ContributorPropertiesServiceInterface;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -25,6 +27,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   }
  * )
  */
+#[FieldWidget(
+  id: 'bibcite_contributor_widget',
+  label: new TranslatableMarkup('Contributor widget'),
+  field_types: [
+    'bibcite_contributor',
+  ]
+)]
 class ContributorWidget extends EntityReferenceAutocompleteWidget implements ContainerFactoryPluginInterface {
 
   /**
@@ -70,7 +79,7 @@ class ContributorWidget extends EntityReferenceAutocompleteWidget implements Con
     $element['category'] = [
       '#type' => 'select',
       '#title' => $this->t('Category'),
-      '#default_value' => isset($items[$delta]->category) ? $items[$delta]->category : $this->contributorPropertiesService->getDefaultCategory(),
+      '#default_value' => $items[$delta]->category ?? $this->contributorPropertiesService->getDefaultCategory(),
       '#description' => $this->t('Default category value can be set on <a href=":category">settings page</a>.', $links),
       '#maxlength' => $this->getFieldSetting('max_length'),
       '#options' => $this->contributorPropertiesService->getCategories(),
@@ -82,7 +91,7 @@ class ContributorWidget extends EntityReferenceAutocompleteWidget implements Con
     $element['role'] = [
       '#type' => 'select',
       '#title' => $this->t('Role'),
-      '#default_value' => isset($items[$delta]->role) ? $items[$delta]->role : $this->contributorPropertiesService->getDefaultRole(),
+      '#default_value' => $items[$delta]->role ?? $this->contributorPropertiesService->getDefaultRole(),
       '#description' => $this->t('Default role value can be set on <a href=":role">settings page</a>.', $links),
       '#maxlength' => $this->getFieldSetting('max_length'),
       '#options' => $this->contributorPropertiesService->getRoles(),
@@ -105,6 +114,9 @@ class ContributorWidget extends EntityReferenceAutocompleteWidget implements Con
     return $element;
   }
 
+  /**
+   * Custom validation.
+   */
   public static function validateValidContributorName($element, FormStateInterface $form_state, array &$complete_form) {
     try {
       // Invoke the normal validation that the entity_autocomplete element

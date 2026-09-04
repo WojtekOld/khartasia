@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
+use Drupal\Component\Plugin\Exception\ContextException;
+use Drupal\Component\Plugin\Exception\MissingValueContextException;
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\NullStorage;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Entity\EntityDisplayBase;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -22,6 +26,7 @@ use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Plugin\PluginFormFactoryInterface;
 use Drupal\Core\Plugin\PluginWithFormsInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Utility\Token;
 use Drupal\ui_patterns\Attribute\Source;
@@ -31,6 +36,7 @@ use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Drupal\ui_patterns\UiPatternsNormalizerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Plugin implementation of the source.
@@ -48,11 +54,13 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
    *
    * @var \Drupal\Core\Block\BlockPluginInterface|null
    */
-  protected $block = NULL;
+  protected $block;
 
   /**
-   * {@inheritdoc}
+   * The current user.
    */
+  protected AccountInterface $currentUser;
+
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -84,17 +92,18 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.ui_patterns_prop_type'),
-      $container->get('context.repository'),
-      $container->get('current_route_match'),
-      $container->get('ui_patterns.sample_entity_generator'),
-      $container->get('module_handler'),
-      $container->get('token'),
-      $container->get('ui_patterns.normalizer'),
-      $container->get('plugin.manager.block'),
-      $container->get('plugin_form.factory'),
-      $container->get('context.handler'),
+      $container->get(PropTypePluginManager::class),
+      $container->get(ContextRepositoryInterface::class),
+      $container->get(RouteMatchInterface::class),
+      $container->get(SampleEntityGeneratorInterface::class),
+      $container->get(ModuleHandlerInterface::class),
+      $container->get(Token::class),
+      $container->get(UiPatternsNormalizerInterface::class),
+      $container->get(BlockManagerInterface::class),
+      $container->get(PluginFormFactoryInterface::class),
+      $container->get(ContextHandlerInterface::class),
     );
+    $instance->currentUser = $container->get(AccountInterface::class);
     return $instance;
   }
 
@@ -111,7 +120,7 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  public static function afterBuildBlockForm(array $element, FormStateInterface $form_state) : array {
+  public static function afterBuildBlockForm(array $element, FormStateInterface $form_state): array {
     $element_settings = $form_state->getValue($element['#parents']);
     $plugin_id = $element_settings['plugin_id'];
     if (!$plugin_id) {
@@ -119,15 +128,18 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
     }
     $form = $form_state->getCompleteForm();
     $subform_state = SubformState::createForSubform($element[$plugin_id], $form, $form_state);
-    $block = \Drupal::service('plugin.manager.block')->createInstance($plugin_id, []);
+    $block = \Drupal::service(BlockManagerInterface::class)->createInstance($plugin_id, []);
     if ($block instanceof BlockPluginInterface) {
       $block->submitConfigurationForm($element, $subform_state);
-      $config = new Config("block.block.ui_patterns", new NullStorage(), \Drupal::service('event_dispatcher'), \Drupal::service('config.typed'));
+      // Throwaway save, only to cast the settings through the block config
+      // schema. A private dispatcher keeps it away from config.save listeners:
+      // test sites validate every saved object against its full schema.
+      $config = new Config('block.block.ui_patterns', new NullStorage(), new EventDispatcher(), \Drupal::service(TypedConfigManagerInterface::class));
       $config->setData([
-        "plugin" => $plugin_id,
-        "settings" => $block->getConfiguration(),
+        'plugin' => $plugin_id,
+        'settings' => $block->getConfiguration(),
       ])->save();
-      $form_state->setValue(array_merge($element['#parents'], [$plugin_id]), $config->getRawData()['settings']);
+      $form_state->setValue(\array_merge($element['#parents'], [$plugin_id]), $config->getRawData()['settings']);
     }
     return $element;
   }
@@ -149,8 +161,16 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
     if (!$this->block) {
       return [];
     }
+    // Same gate as a placed block: blockAccess() and the visibility
+    // conditions decide. The access cacheability is kept either way.
+    $access = $this->block->access($this->currentUser, TRUE);
+    $this->addCacheableDependency($access);
+    if (!$access->isAllowed()) {
+      return [];
+    }
+    $this->addCacheableDependency($this->block);
     $build = $this->block->build();
-    if (!is_array($build)) {
+    if (!\is_array($build)) {
       return [];
     }
     return $build;
@@ -180,31 +200,33 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
   /**
    * Build the form to create a block.
    */
-  protected function buildBlockCreateForm(array &$form, FormStateInterface $form_state) : void {
+  protected function buildBlockCreateForm(array &$form, FormStateInterface $form_state): void {
     $options = $this->getBlockOptions();
-    $wrapper_id = Html::getId(implode("_", $this->formArrayParents ?? []) . "_block-create-form-ajax");
+    $wrapper_id = Html::getId(\implode('_', $this->formArrayParents ?? []) . '_block-create-form-ajax');
     $plugin_id = $this->getSetting('plugin_id') ?? '';
-    $form["plugin_id"] = [
-      "#type" => "select",
-      "#title" => $this->t("Block"),
-      "#options" => $options,
+    $form['plugin_id'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Block'),
+      '#options' => $options,
       '#default_value' => $plugin_id,
 
       '#ajax' => [
         'callback' => [__CLASS__, 'onBlockPluginIdChange'],
         'wrapper' => $wrapper_id,
         'method' => 'replaceWith',
-      // 'callback' => [static::class, 'onBlockPluginIdChange'],
+        // 'callback' => [static::class, 'onBlockPluginIdChange'],
       ],
       '#executes_submit_callback' => FALSE,
       '#empty_value' => '',
       '#empty_option' => $this->t('- None -'),
       '#required' => FALSE,
+      // Read by ComponentFormBase::resetSwitchedSiblingsInput().
+      '#ui_patterns_resets_siblings' => TRUE,
     ];
     $form[$plugin_id] = [
       '#type' => 'container',
-      '#attributes' => ["id" => $wrapper_id],
-      "#tree" => TRUE,
+      '#attributes' => ['id' => $wrapper_id],
+      '#tree' => TRUE,
     ];
     $block = $this->getBlock($plugin_id);
     if ($block) {
@@ -260,31 +282,56 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
       return NULL;
     }
     $block_configuration = $this->getSetting($plugin_id) ?? [];
-    $contexts = $this->context;
     /** @var \Drupal\Core\Block\BlockPluginInterface $plugin */
     $plugin = $this->blockManager->createInstance($plugin_id, $block_configuration);
-    if ($plugin instanceof ContextAwarePluginInterface) {
-      // Propagate the contexts known by this source to the block instance.
-      $plugin_contexts = $plugin->getContexts();
-      $plugin_definition = $plugin->getPluginDefinition();
-      $provider = ($plugin_definition instanceof PluginDefinitionInterface) ? $plugin_definition->getProvider() : ($plugin_definition['provider'] ?? '');
-      if ($provider === "layout_builder") {
-        if (array_key_exists("view_mode", $plugin_contexts)) {
-          $plugin->setContextValue("view_mode", EntityDisplayBase::CUSTOM_MODE);
-        }
-      }
-      foreach ($contexts as $context_name => $context) {
-        if (!array_key_exists($context_name, $plugin_contexts)) {
-          $plugin->setContext($context_name, $context);
-        }
-        else {
-          $plugin->setContextValue($context_name, $context->getContextValue());
-        }
-      }
-      $this->contextHandler->applyContextMapping($plugin, $contexts);
+    if ($plugin instanceof ContextAwarePluginInterface && !$this->applyContexts($plugin)) {
+      return NULL;
     }
     // Custom patch for LB FieldBlock blocks.
     return $plugin;
+  }
+
+  /**
+   * Propagate the contexts known by this source to a block instance.
+   *
+   * @param \Drupal\Core\Plugin\ContextAwarePluginInterface $plugin
+   *   The block plugin.
+   *
+   * @return bool
+   *   FALSE when a required context has no value, so the block cannot be built.
+   */
+  protected function applyContexts(ContextAwarePluginInterface $plugin): bool {
+    $contexts = $this->context;
+    $plugin_contexts = $plugin->getContexts();
+    $plugin_definition = $plugin->getPluginDefinition();
+    $provider = ($plugin_definition instanceof PluginDefinitionInterface) ? $plugin_definition->getProvider() : ($plugin_definition['provider'] ?? '');
+    if ($provider === 'layout_builder' && \array_key_exists('view_mode', $plugin_contexts)) {
+      $plugin->setContextValue('view_mode', EntityDisplayBase::CUSTOM_MODE);
+    }
+    foreach ($contexts as $context_name => $context) {
+      if (!\array_key_exists($context_name, $plugin_contexts)) {
+        $plugin->setContext($context_name, $context);
+      }
+      else {
+        $plugin->setContextValue($context_name, $context->getContextValue());
+      }
+    }
+    try {
+      $this->contextHandler->applyContextMapping($plugin, $contexts);
+    }
+    catch (MissingValueContextException) {
+      // The context is known but carries no value: nothing to render, and the
+      // result stays cacheable.
+      return FALSE;
+    }
+    catch (ContextException) {
+      // The context is gone, so its cacheability is unknown.
+      $this->addCacheableDependency((new CacheableMetadata())->setCacheMaxAge(0));
+
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   /**
@@ -306,7 +353,7 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
     if (!empty($triggeringElement['#array_parents'])) {
       $subformKeys = $triggeringElement['#array_parents'];
       // Remove the triggering element itself and add the 'block' below key.
-      array_pop($subformKeys);
+      \array_pop($subformKeys);
       // Return the subform:
       $subform = NestedArray::getValue($form, $subformKeys);
       $plugin_id = $subform['plugin_id']['#value'];
@@ -330,34 +377,33 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
    */
-  protected function listBlockDefinitions() : array {
+  protected function listBlockDefinitions(): array {
     $context_for_block_discovery = $this->context;
     $definitions = $this->blockManager->getFilteredDefinitions('ui_patterns', $context_for_block_discovery, []);
     // Filter plugins based on the flag 'ui_patterns_compatibility'.
     // @see function ui_patterns_plugin_filter_block__ui_patterns_alter
     // from ui_patterns.module file
-    $definitions = array_filter($definitions, function ($definition, $plugin_id) {
-      return is_array($definition) && (!isset($definition['_ui_patterns_compatible']) || $definition['_ui_patterns_compatible']);
-    }, ARRAY_FILTER_USE_BOTH);
+    $definitions = \array_filter($definitions, static function ($definition, $plugin_id) {
+      return \is_array($definition) && (!isset($definition['_ui_patterns_compatible']) || $definition['_ui_patterns_compatible']);
+    }, \ARRAY_FILTER_USE_BOTH);
     // Filter based on contexts.
     $definitions = $this->contextHandler->filterPluginDefinitionsByContexts($context_for_block_discovery, $definitions);
     // Order by category, and then by admin label.
-    $definitions = $this->blockManager->getSortedDefinitions($definitions);
-    return $definitions;
+    return $this->blockManager->getSortedDefinitions($definitions);
   }
 
   /**
    * Get options for block select.
    */
-  protected function getBlockOptions() : array {
+  protected function getBlockOptions(): array {
     $choices = $this->getChoices();
     $options = [];
     foreach ($choices as $choice_id => $choice) {
-      $category = $choice["group"] ?? 'Other';
-      if (!array_key_exists($category, $options)) {
+      $category = $choice['group'] ?? 'Other';
+      if (!\array_key_exists($category, $options)) {
         $options[$category] = [];
       }
-      $options[$category][$choice_id] = $choice["label"];
+      $options[$category][$choice_id] = $choice['label'];
     }
     return $options;
   }
@@ -405,19 +451,7 @@ class BlockSource extends SourcePluginBase implements SourceWithChoicesInterface
   /**
    * {@inheritdoc}
    */
-  public function alterComponent(array $element): array {
-    if (!$this->block) {
-      return $element;
-    }
-
-    $element['#cache'] = $element['#cache'] ?? [];
-    return $element;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function calculateDependencies() : array {
+  public function calculateDependencies(): array {
     $dependencies = parent::calculateDependencies();
     if (!$this->block) {
       $this->block = $this->getBlock($this->getSetting('plugin_id') ?? '');

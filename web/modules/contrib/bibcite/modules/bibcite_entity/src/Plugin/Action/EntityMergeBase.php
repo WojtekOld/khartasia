@@ -84,7 +84,7 @@ class EntityMergeBase extends ActionBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function execute($object = NULL) {
+  public function execute(?object $object = NULL) {
     $this->executeMultiple([$object]);
   }
 

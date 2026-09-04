@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_test_color
+    - taxonomy.vocabulary.test_tags
+id: taxonomy_term.test_tags.field_test_color
+field_name: field_test_color
+entity_type: taxonomy_term
+bundle: test_tags
+label: Color
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

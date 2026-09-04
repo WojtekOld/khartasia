@@ -1,0 +1,10 @@
+label: 지도
+fields:
+  bibcite_custom1:
+    label: 스케일
+  bibcite_pages:
+    label: 설명
+  bibcite_type_of_work:
+    label: 종류
+  bibcite_place_published:
+    label: 도시
