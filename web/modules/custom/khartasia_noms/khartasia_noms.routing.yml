@@ -1,0 +1,14 @@
+khartasia_noms.add_wizard:
+  path: '/node/{node}/noms/ajouter'
+  defaults:
+    _form: '\Drupal\khartasia_noms\Form\NomPapierWizardForm'
+    _title: 'Ajouter un nom de papier'
+  requirements:
+    _permission: 'saisir noms de papiers'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - papers

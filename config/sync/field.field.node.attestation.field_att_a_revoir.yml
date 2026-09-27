@@ -1,0 +1,23 @@
+uuid: 5748acee-0160-4f66-bead-56a91d0605be
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_a_revoir
+    - node.type.attestation
+id: node.attestation.field_att_a_revoir
+field_name: field_att_a_revoir
+entity_type: node
+bundle: attestation
+label: 'À revoir'
+description: 'Filtre rapide dérivé de field_att_revue_motifs — jamais posé seul.'
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

@@ -1,0 +1,8 @@
+name: 'Khartasia Core'
+type: module
+description: 'Services et hub transverses du parcours de saisie guidée : ParcoursPapier, EntityReviewCalculator, page Dossier.'
+core_version_requirement: ^11
+package: Khartasia
+dependencies:
+  - drupal:node
+  - drupal:field

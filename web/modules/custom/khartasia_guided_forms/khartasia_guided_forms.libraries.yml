@@ -1,0 +1,7 @@
+guided-form:
+  css:
+    theme:
+      css/guided-form.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.form

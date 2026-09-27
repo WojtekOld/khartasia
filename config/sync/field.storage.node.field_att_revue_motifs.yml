@@ -1,0 +1,27 @@
+uuid: 627940c8-50d1-4b5e-af03-579c21e36043
+langcode: fr
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_att_revue_motifs
+field_name: field_att_revue_motifs
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: dispute_signalee
+      label: 'Dispute signalée (contributeur)'
+    -
+      value: source_sans_type
+      label: 'Source renseignée sans type de source'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

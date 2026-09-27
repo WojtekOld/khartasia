@@ -1,0 +1,21 @@
+langcode: fr
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_att_revue_motifs
+field_name: field_att_revue_motifs
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    dispute_signalee: 'Dispute signalée (contributeur)'
+    source_sans_type: 'Source renseignée sans type de source'
+  allowed_values_function: ''
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

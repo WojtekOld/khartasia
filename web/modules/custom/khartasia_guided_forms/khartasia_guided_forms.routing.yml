@@ -1,0 +1,16 @@
+khartasia_guided_forms.papier_nouveau:
+  path: '/papier/nouveau-guide'
+  defaults:
+    _title: 'Nouveau Papier — Saisie guidée'
+    _form: '\Drupal\khartasia_guided_forms\Form\PapierBaseForm'
+  requirements:
+    _permission: 'access content'
+
+khartasia_guided_forms.papier_attestations:
+  path: '/papier/{papier_nid}/attestations-guide'
+  defaults:
+    _title: 'Attestations — Saisie guidée'
+    _form: '\Drupal\khartasia_guided_forms\Form\PapierAttestationsForm'
+  requirements:
+    _permission: 'access content'
+    papier_nid: \d+

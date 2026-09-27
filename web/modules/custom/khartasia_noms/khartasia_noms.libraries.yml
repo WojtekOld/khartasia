@@ -1,0 +1,7 @@
+couche-detect:
+  version: 1.x
+  js:
+    js/couche-detect.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

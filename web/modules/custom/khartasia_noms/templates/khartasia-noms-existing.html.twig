@@ -1,0 +1,44 @@
+{#
+  khartasia-noms-existing.html.twig
+  ============================================================================
+  Module khartasia_noms, dans modules/custom/khartasia_noms/templates/
+  (convention MODULE standard — le piège "racine du thème vs templates/node/"
+  documenté dans node--papers.html.twig est spécifique au thème khartasia_ui ;
+  un module Drupal, lui, résout ses templates depuis le 'path' déclaré dans
+  hook_theme(), qui pointe naturellement vers son propre dossier templates/).
+
+  Rendu au Step 0 du wizard (« Ajouter un nom à <papier> ») — sert à éviter
+  le doublon AVANT la saisie, cf. Formulaire_saisie_nom_papier_v2.md §Step 0.
+
+  Variables (fournies par le hook_theme() ci-dessous, préparées dans
+  NomPapierWizardForm::buildForm() au step 0) :
+    - papier_titre : titre de la fiche papers parente
+    - papier_url   : lien vers la fiche
+    - noms         : tableau des nom_papier existants, même forme que dans
+                     node--papers.html.twig (valeur, couche, relation,
+                     statut, a_revoir, canonique)
+#}
+<div class="khartasia-noms-contexte">
+  <h2 class="khartasia-noms-titre">Ajouter un nom à <em>{{ papier_titre }}</em></h2>
+  <p class="khartasia-noms-retour"><a href="{{ papier_url }}">&larr; retour à la fiche</a></p>
+
+  {% if noms is not empty %}
+    <details class="khartasia-noms-existants">
+      <summary>Noms déjà enregistrés pour ce papier ({{ noms|length }})</summary>
+      <ul>
+        {% for n in noms %}
+          <li class="khartasia-noms-existant-entree{{ n.a_revoir ? ' a-revoir' : '' }}">
+            {% if n.canonique %}<strong>{{ n.valeur }}</strong> <span class="tag-canonique">canonique</span>
+            {% else %}{{ n.valeur }}
+              <span class="khartasia-noms-couche">{{ n.couche }}</span>
+              {% if n.relation %}<span class="khartasia-noms-relation">{{ n.relation }}</span>{% endif %}
+            {% endif %}
+            {% if n.a_revoir %}<span class="khartasia-noms-flag" title="En attente de revue">⚠</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% else %}
+    <p class="khartasia-noms-aucun"><em>Aucun nom enregistré pour ce papier pour l'instant.</em></p>
+  {% endif %}
+</div>

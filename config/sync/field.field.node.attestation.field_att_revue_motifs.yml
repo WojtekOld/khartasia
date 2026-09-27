@@ -1,0 +1,21 @@
+uuid: 13fed138-ea44-404d-8e64-479fd30d4b7f
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_revue_motifs
+    - node.type.attestation
+  module:
+    - options
+id: node.attestation.field_att_revue_motifs
+field_name: field_att_revue_motifs
+entity_type: node
+bundle: attestation
+label: 'Motifs de revue'
+description: 'Motifs typés justifiant la mise en file de revue.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

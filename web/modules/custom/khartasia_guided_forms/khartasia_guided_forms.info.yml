@@ -1,0 +1,5 @@
+name: Khartasia Guided Forms
+type: module
+description: 'Formulaire guidé consolidé de saisie — Papiers, Plantes et Attestations, à la manière du parcours Expertise de Wallpaper Canton.'
+core_version_requirement: ^11
+package: Khartasia

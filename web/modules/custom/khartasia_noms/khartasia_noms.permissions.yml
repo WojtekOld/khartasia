@@ -1,0 +1,8 @@
+saisir noms de papiers:
+  title: 'Saisir des noms de papier'
+  description: 'Ajouter des noms/variantes (nom_papier) sur les fiches papers via le formulaire guidé. Ne permet PAS de poser directement le statut "rejeté (non documenté)" (voir la permission ci-dessous, L4).'
+
+administer nom_papier statuts:
+  title: 'Administrer les statuts épistémiques de nom_papier'
+  description: 'Poser directement le statut "rejeté (non documenté)". Sans cette permission, un contributeur peut seulement PROPOSER un rejet (field_np_revue_motifs), qui reste en file de revue jusqu''à arbitrage éditorial.'
+  restrict access: true

@@ -1,0 +1,33 @@
+{#
+  khartasia-noms-progress.html.twig
+  ============================================================================
+  Module khartasia_noms, dans modules/custom/khartasia_noms/templates/.
+
+  Bandeau de progression affiché au-dessus de chaque étape du wizard.
+  Purement informatif — jamais cliquable en avant (on ne saute pas d'étape),
+  cliquable en arrière uniquement pour les étapes déjà validées, cohérent
+  avec « retour arrière sans perte » (§3 du document de formulaire).
+
+  Variables :
+    - etapes       : ['Contexte', 'Valeur et couche', 'Détail', 'Identité',
+                      'Statut', 'Source et récapitulatif']
+    - etape_actuelle : entier 0-5
+    - etapes_urls  : tableau parallèle, url|null (null = pas encore atteinte,
+                      donc pas de lien)
+#}
+<nav class="khartasia-noms-progress" aria-label="Progression de la saisie">
+  <ol>
+    {% for i, label in etapes %}
+      <li class="khartasia-noms-progress-etape
+                  {{ i == etape_actuelle ? ' etape-active' : '' }}
+                  {{ i < etape_actuelle ? ' etape-validee' : '' }}
+                  {{ i > etape_actuelle ? ' etape-a-venir' : '' }}">
+        {% if i < etape_actuelle and etapes_urls[i] %}
+          <a href="{{ etapes_urls[i] }}">{{ i + 1 }}. {{ label }}</a>
+        {% else %}
+          <span>{{ i + 1 }}. {{ label }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</nav>

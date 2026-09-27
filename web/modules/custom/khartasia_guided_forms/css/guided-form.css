@@ -1,0 +1,72 @@
+/* Formulaire guidé — habillage cohérent avec le thème khartasia_ui */
+
+.kh-guide__intro {
+  max-width: 680px;
+  margin: 40px auto 24px;
+  padding: 0 20px;
+}
+.kh-guide__eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a7a4f;
+}
+.kh-guide__title {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  margin: 8px 0 12px;
+  color: #1a1a1a;
+}
+.kh-guide__lead {
+  font-family: 'Source Sans 3', sans-serif;
+  color: #555;
+  line-height: 1.5;
+}
+
+.kh-guide__form {
+  max-width: 680px;
+  margin: 0 auto 60px;
+  padding: 32px;
+  background: #fff;
+  border: 1px solid #e8dfc8;
+  border-radius: 8px;
+}
+
+.kh-guide__input,
+.kh-guide__form select,
+.kh-guide__form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d8d2bd;
+  border-radius: 4px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 15px;
+  margin-top: 4px;
+  margin-bottom: 20px;
+}
+
+.kh-guide__form label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.kh-guide__form .description {
+  font-size: 13px;
+  color: #777;
+  margin-top: 2px;
+}
+
+.kh-guide__submit {
+  background: #2f4a3d;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.kh-guide__submit:hover {
+  background: #24392f;
+}

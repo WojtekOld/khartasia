@@ -1,0 +1,19 @@
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_a_revoir
+    - node.type.attestation
+id: node.attestation.field_att_a_revoir
+field_name: field_att_a_revoir
+entity_type: node
+bundle: attestation
+label: 'À revoir'
+description: 'Filtre rapide dérivé de field_att_revue_motifs — jamais posé seul.'
+required: false
+translatable: false
+default_value:
+  - value: 0
+default_value_callback: ''
+settings: {  }
+field_type: boolean

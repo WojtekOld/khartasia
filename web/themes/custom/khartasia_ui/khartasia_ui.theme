@@ -1,39 +1,122 @@
-<?php
+﻿<?php
+
+/**
+ * @file
+ * Fonctions de prÃ©process pour le thÃ¨me khartasia_ui.
+ */
+
+use Drupal\Core\Url;
+
+/**
+ * ImplÃ©mente hook_preprocess_node().
+ */
 function khartasia_ui_preprocess_node(&$variables) {
   $node = $variables['node'];
-  if ($node->bundle() !== 'article') return;
+  $bundle = $node->bundle();
 
-  $taxo_tid = $node->get('field_tax_genus')->target_id;
-  if (!$taxo_tid) return;
+  if ($bundle === 'article') {
+    khartasia_ui_preprocess_node_article($variables, $node);
+  }
+  elseif ($bundle === 'papers') {
+    khartasia_ui_preprocess_node_papers($variables, $node);
+  }
+  elseif ($bundle === 'common_names') {
+    khartasia_ui_preprocess_node_common_names($variables, $node);
+  }
+}
 
+/**
+ * PrÃ©process pour les fiches Noms vernaculaires â€” rÃ©ponse narrative :
+ * quelle plante, quelle famille, quels papiers l'utilisent.
+ * Relation directe : field_genus_com_entity -> fiche Plante.
+ */
+function khartasia_ui_preprocess_node_common_names(&$variables, $node) {
   $db = \Drupal::database();
 
-  // DISTINCT pour eviter doublons dus au champ multivaleur
-  $nids = $db->query("
-    SELECT DISTINCT entity_id
-    FROM node__field_genus_taxo
-    WHERE field_genus_taxo_target_id = :tid
-    AND bundle = 'common_names'
-    AND deleted = 0
-  ", [':tid' => $taxo_tid])->fetchCol();
-
-  $noms = [];
-  foreach (\Drupal\node\Entity\Node::loadMultiple($nids) as $cn) {
-    $lang = $cn->get('field_language_taxo_vern')->entity;
-    $noms[] = [
-      'nid'      => $cn->id(),
-      'titre'    => $cn->label(),
-      'langue'   => $lang ? $lang->label() : '',
-      'scripture'=> $cn->get('field_ver_local_scripture')->value ?? '',
-      'type'     => $cn->get('field_nom_type')->value ?? '',
-      'url'      => $cn->toUrl()->toString(),
-    ];
+  if (!$node->hasField('field_genus_com_entity') || $node->get('field_genus_com_entity')->isEmpty()) {
+    return;
   }
 
-  usort($noms, fn($a,$b) => strcmp($a['langue'], $b['langue']));
-  $variables['noms_communs'] = $noms;
+  $plante = $node->get('field_genus_com_entity')->entity;
+  if (!$plante) {
+    return;
+  }
 
-  // Papers — DISTINCT aussi
+  $langue_terme = $node->hasField('field_language_taxo_vern') && !$node->get('field_language_taxo_vern')->isEmpty()
+    ? $node->get('field_language_taxo_vern')->entity : NULL;
+
+  $variables['plante_liee'] = [
+    'nid' => $plante->id(),
+    'titre' => $plante->label(),
+    'url' => $plante->toUrl()->toString(),
+    'famille' => $plante->hasField('field_tax_family') && !$plante->get('field_tax_family')->isEmpty()
+      ? $plante->get('field_tax_family')->entity->label() : NULL,
+    'ordre' => $plante->hasField('field_tax_order') && !$plante->get('field_tax_order')->isEmpty()
+      ? $plante->get('field_tax_order')->entity->label() : NULL,
+  ];
+  $variables['langue_nom'] = $langue_terme ? $langue_terme->label() : NULL;
+
+  // Papiers fabriquÃ©s depuis cette mÃªme plante (mÃªme requÃªte que sur la fiche Plante)
+  $paper_nids = $db->query("
+    SELECT DISTINCT entity_id
+    FROM node__field_genus_pap_entity
+    WHERE field_genus_pap_entity_target_id = :nid
+    AND bundle = 'papers'
+    AND deleted = 0
+  ", [':nid' => $plante->id()])->fetchCol();
+
+  $tous_papiers = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($paper_nids) as $p) {
+    $tous_papiers[] = ['titre' => $p->label(), 'url' => $p->toUrl()->toString()];
+  }
+
+  // === PAGINATION PAPIERS ===
+  $papiers_per_page = 10;
+  $total_papiers_meme_plante = count($tous_papiers);
+
+  $pager_cn = \Drupal::service('pager.manager')->createPager($total_papiers_meme_plante, $papiers_per_page, 0);
+  $current_page_cn = $pager_cn->getCurrentPage();
+  $offset_cn = $current_page_cn * $papiers_per_page;
+
+  $variables['papiers_meme_plante'] = array_slice($tous_papiers, $offset_cn, $papiers_per_page);
+  $variables['papiers_meme_plante_total'] = $total_papiers_meme_plante;
+  $variables['papiers_meme_plante_pager'] = [
+    '#type' => 'pager',
+    '#element' => 0,
+    '#quantity' => 5,
+    '#tags' => ['Â« Premier', 'â€¹ PrÃ©cÃ©dent', 'Suivant â€º', 'Dernier Â»'],
+  ];
+
+  // === Attestations d'Ã©criture vernaculaire pour ce nom ===
+  // Relation field_att_nom_vernaculaire -> common_names, jamais affichÃ©e jusqu'ici.
+  $att_ids_ecriture = $db->query("
+    SELECT DISTINCT entity_id
+    FROM node__field_att_nom_vernaculaire
+    WHERE field_att_nom_vernaculaire_target_id = :nid
+    AND bundle = 'attestation'
+    AND deleted = 0
+  ", [':nid' => $node->id()])->fetchCol();
+
+  $ecritures = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($att_ids_ecriture) as $att) {
+    $type_ecriture_terme = $att->hasField('field_att_type_ecriture') && !$att->get('field_att_type_ecriture')->isEmpty()
+      ? $att->get('field_att_type_ecriture')->entity : NULL;
+    $ecritures[] = [
+      'type' => $type_ecriture_terme ? $type_ecriture_terme->label() : NULL,
+      'valeur' => $att->get('field_att_valeur')->value ?? '',
+      'statut' => $att->get('field_att_statut')->value ?? '',
+    ];
+  }
+  $variables['ecritures_vernaculaires'] = $ecritures;
+}
+
+/**
+ * PrÃ©process pour les fiches Plantes â€” logique inchangÃ©e depuis avant.
+ */
+function khartasia_ui_preprocess_node_article(&$variables, $node) {
+  $db = \Drupal::database();
+
+  // === 1. Papiers liÃ©s Ã  cette plante ===
   $paper_nids = $db->query("
     SELECT DISTINCT entity_id
     FROM node__field_genus_pap_entity
@@ -42,16 +125,521 @@ function khartasia_ui_preprocess_node(&$variables) {
     AND deleted = 0
   ", [':nid' => $node->id()])->fetchCol();
 
-  $papers = [];
+  $all_papers = [];
   foreach (\Drupal\node\Entity\Node::loadMultiple($paper_nids) as $p) {
     $origin = $p->get('field_origin_taxo')->entity;
-    $papers[] = [
+    $country = $origin ? $origin->label() : 'Pays non spÃ©cifiÃ©';
+
+    $all_papers[] = [
       'nid'    => $p->id(),
       'titre'  => $p->label(),
-      'origin' => $origin ? $origin->label() : '',
+      'origin' => $country,
       'url'    => $p->toUrl()->toString(),
     ];
   }
-  usort($papers, fn($a,$b) => strcmp($a['origin'], $b['origin']));
-  $variables['papers_lies'] = $papers;
+
+  // === PAGINATION PAPIERS ===
+  $papers_per_page = 10;
+  $total_papers = count($all_papers);
+
+  $pager = \Drupal::service('pager.manager')->createPager($total_papers, $papers_per_page, 0);
+  $current_page = $pager->getCurrentPage();
+  $offset = $current_page * $papers_per_page;
+
+  $papers_paged = array_slice($all_papers, $offset, $papers_per_page);
+
+  $papers_by_country_paged = [];
+  foreach ($papers_paged as $paper) {
+    $country = $paper['origin'];
+    if (!isset($papers_by_country_paged[$country])) {
+      $papers_by_country_paged[$country] = [];
+    }
+    $papers_by_country_paged[$country][] = $paper;
+  }
+  ksort($papers_by_country_paged);
+
+  $variables['papers_by_country_paged'] = $papers_by_country_paged;
+  $variables['papers_total'] = $total_papers;
+  $variables['papers_pager'] = [
+    '#type' => 'pager',
+    '#element' => 0,
+    '#quantity' => 5,
+    '#tags' => ['Â« Premier', 'â€¹ PrÃ©cÃ©dent', 'Suivant â€º', 'Dernier Â»'],
+  ];
+
+  // === 2. Noms vernaculaires ===
+  $taxo_tid = $node->get('field_tax_genus')->target_id;
+  $all_noms = [];
+
+  if ($taxo_tid) {
+    $nids = $db->query("
+      SELECT DISTINCT entity_id
+      FROM node__field_genus_taxo
+      WHERE field_genus_taxo_target_id = :tid
+      AND bundle = 'common_names'
+      AND deleted = 0
+    ", [':tid' => $taxo_tid])->fetchCol();
+
+    foreach (\Drupal\node\Entity\Node::loadMultiple($nids) as $cn) {
+      $lang = $cn->get('field_language_taxo_vern')->entity;
+      $langue = $lang ? $lang->label() : 'Langue non spÃ©cifiÃ©e';
+
+      $all_noms[] = [
+        'nid'      => $cn->id(),
+        'titre'    => $cn->label(),
+        'langue'   => $langue,
+        'scripture'=> $cn->get('field_ver_local_scripture')->value ?? '',
+        'url'      => $cn->toUrl()->toString(),
+      ];
+    }
+
+    usort($all_noms, fn($a, $b) => strcmp($a['langue'], $b['langue']));
+
+    // === PAGINATION NOMS ===
+    $noms_per_page = 10;
+    $total_noms = count($all_noms);
+
+    $pager_noms = \Drupal::service('pager.manager')->createPager($total_noms, $noms_per_page, 1);
+    $current_page_noms = $pager_noms->getCurrentPage();
+    $offset_noms = $current_page_noms * $noms_per_page;
+
+    $noms_paged = array_slice($all_noms, $offset_noms, $noms_per_page);
+
+    $noms_by_langue_paged = [];
+    foreach ($noms_paged as $nom) {
+      $langue = $nom['langue'];
+      if (!isset($noms_by_langue_paged[$langue])) {
+        $noms_by_langue_paged[$langue] = [];
+      }
+      $noms_by_langue_paged[$langue][] = $nom;
+    }
+    ksort($noms_by_langue_paged);
+
+    $variables['noms_by_langue_paged'] = $noms_by_langue_paged;
+    $variables['noms_total'] = $total_noms;
+    $variables['noms_pager'] = [
+      '#type' => 'pager',
+      '#element' => 1,
+      '#quantity' => 5,
+      '#tags' => ['Â« Premier', 'â€¹ PrÃ©cÃ©dent', 'Suivant â€º', 'Dernier Â»'],
+    ];
+  }
+
+  // === 3. CritÃ¨res morphologiques (Attestation, type=critÃ¨re morphologique) ===
+  $ordre_criteres = [
+    'Type de fibre', 'Longueur', 'Largeur', 'Parois cellulaires', 'Surface de la fibre',
+    'ExtrÃ©mitÃ©s', 'Stries et dislocations', 'Cellules associÃ©es', 'CaractÃ©ristiques particuliÃ¨res',
+    'Coloration Herzberg', 'Coloration Graff C',
+  ];
+
+  $att_nids = $db->query("
+    SELECT DISTINCT entity_id
+    FROM node__field_att_plante
+    WHERE field_att_plante_target_id = :nid
+    AND bundle = 'attestation'
+    AND deleted = 0
+  ", [':nid' => $node->id()])->fetchCol();
+
+  $criteres_par_nom = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($att_nids) as $att) {
+    $type_term = $att->get('field_att_type')->entity;
+    if (!$type_term || $type_term->label() !== 'CritÃ¨re morphologique') {
+      continue;
+    }
+    $axe_term = $att->get('field_att_axe')->entity;
+    if (!$axe_term) {
+      continue;
+    }
+    $criteres_par_nom[$axe_term->label()] = [
+      'valeur' => $att->get('field_att_valeur')->value ?? '',
+      'statut' => $att->get('field_att_statut')->value ?? '',
+    ];
+  }
+
+  $criteres_morpho = [];
+  foreach ($ordre_criteres as $nom) {
+    if (isset($criteres_par_nom[$nom])) {
+      $criteres_morpho[] = [
+        'critere' => $nom,
+        'valeur' => $criteres_par_nom[$nom]['valeur'],
+        'statut' => $criteres_par_nom[$nom]['statut'],
+      ];
+    }
+  }
+
+  $variables['criteres_morpho'] = $criteres_morpho;
+
+  // === Fiches plante_texte liÃ©es (remplace plante_geo comme source de la
+  // section "Zones de production" â€” plante_geo et plante_texte portaient le
+  // mÃªme contenu, dupliquÃ© sous deux structures diffÃ©rentes ; plante_texte
+  // est la structure consolidÃ©e retenue, plante_geo est retirÃ©). ===
+  $textes_ids = $db->query("
+    SELECT entity_id FROM node__field_plante_ref
+    WHERE field_plante_ref_target_id = :nid
+  ", [':nid' => $node->id()])->fetchCol();
+
+  $textes_multilingues = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($textes_ids) as $pt) {
+    $langue = $pt->hasField('field_langue_texte') && !$pt->get('field_langue_texte')->isEmpty()
+      ? $pt->get('field_langue_texte')->entity->label() : $pt->label();
+    $textes_multilingues[] = ['nid' => $pt->id(), 'label' => $langue];
+  }
+  $variables['textes_multilingues'] = $textes_multilingues;
+
+  // === 4. Synonymes botaniques sourcÃ©s (POWO), via classification_botanique ===
+  // Relation structurÃ©e existante, jamais exploitÃ©e jusqu'ici :
+  // synonymes_botaniques.field_syn_nom_accepte -> classification_botanique
+  // <- field_tax_genus <- cette fiche Plante
+  $genus_tid = $node->hasField('field_tax_genus') ? $node->get('field_tax_genus')->target_id : NULL;
+  $synonymes_powo = [];
+
+  if ($genus_tid) {
+    $syn_tids = $db->query("
+      SELECT entity_id
+      FROM taxonomy_term__field_syn_nom_accepte
+      WHERE field_syn_nom_accepte_target_id = :tid
+    ", [':tid' => $genus_tid])->fetchCol();
+
+    foreach (\Drupal\taxonomy\Entity\Term::loadMultiple($syn_tids) as $syn) {
+      $url_field = $syn->hasField('field_syn_source_url') && !$syn->get('field_syn_source_url')->isEmpty()
+        ? $syn->get('field_syn_source_url')->uri
+        : '';
+      $synonymes_powo[] = [
+        'nom' => $syn->label(),
+        'type' => $syn->hasField('field_syn_type') ? ($syn->get('field_syn_type')->value ?? '') : '',
+        'source' => $syn->hasField('field_syn_source') ? ($syn->get('field_syn_source')->value ?? '') : '',
+        'source_url' => $url_field,
+      ];
+    }
+  }
+
+  // === PAGINATION SYNONYMES ===
+  $synonymes_per_page = 10;
+  $total_synonymes = count($synonymes_powo);
+
+  $pager_syn = \Drupal::service('pager.manager')->createPager($total_synonymes, $synonymes_per_page, 2);
+  $current_page_syn = $pager_syn->getCurrentPage();
+  $offset_syn = $current_page_syn * $synonymes_per_page;
+
+  $variables['synonymes_powo'] = array_slice($synonymes_powo, $offset_syn, $synonymes_per_page);
+  $variables['synonymes_total'] = $total_synonymes;
+  $variables['synonymes_pager'] = [
+    '#type' => 'pager',
+    '#element' => 2,
+    '#quantity' => 5,
+    '#tags' => ['Â« Premier', 'â€¹ PrÃ©cÃ©dent', 'Suivant â€º', 'Dernier Â»'],
+  ];
+
+  // === 5. Attestations GÃ©ographie (zone_croissance) â€” statut sourcÃ©,
+  // distinct des zones de production plante_texte (texte libre non sourcÃ©)
+  // et de plante_geo (lat/lng, restaurÃ© sÃ©parÃ©ment). ===
+  $attestations_geo = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($att_nids) as $att) {
+    $type_term = $att->get('field_att_type')->entity;
+    if (!$type_term || $type_term->label() !== 'GÃ©ographie') {
+      continue;
+    }
+    $lieu_term = $att->hasField('field_att_lieu') && !$att->get('field_att_lieu')->isEmpty()
+      ? $att->get('field_att_lieu')->entity : NULL;
+    $source_ref = $att->hasField('field_att_source') && !$att->get('field_att_source')->isEmpty()
+      ? $att->get('field_att_source')->entity : NULL;
+    $statut_presence_val = $att->hasField('field_att_statut_presence') && !$att->get('field_att_statut_presence')->isEmpty()
+      ? $att->get('field_att_statut_presence')->value : '';
+
+    $statut_labels = [
+      'indigene' => 'IndigÃ¨ne', 'introduit' => 'Introduit',
+      'naturalise' => 'NaturalisÃ©', 'cultive' => 'CultivÃ©',
+      'introduit_hybride' => 'Introduit (hybride)',
+    ];
+
+    $attestations_geo[] = [
+      'lieu' => $lieu_term ? $lieu_term->label() : ($att->label() ?: 'Non localisÃ©'),
+      'statut_presence' => $statut_labels[$statut_presence_val] ?? $statut_presence_val,
+      'valeur' => strip_tags($att->get('field_att_valeur')->value ?? ''),
+      'source' => $source_ref ? $source_ref->label() : '',
+    ];
+  }
+  $variables['attestations_geo'] = $attestations_geo;
+
+  // === Nomenclature â€” nom acceptÃ© POWO et indicateur cultigÃ¨ne ===
+  $variables['att_nom_accepte_powo'] = $node->hasField('field_nom_accepte_powo') && !$node->get('field_nom_accepte_powo')->isEmpty()
+    ? $node->get('field_nom_accepte_powo')->value : NULL;
+  $variables['att_taxon_cultigene'] = $node->hasField('field_taxon_cultigene')
+    ? (bool) $node->get('field_taxon_cultigene')->value : FALSE;
+
+}
+
+/**
+ * PrÃ©process pour les fiches Papiers â€” noms vernaculaires groupÃ©s par
+ * langue, Ã©criture locale sur la mÃªme ligne, sans Ã©tiquette de champ.
+ * Remplace le rendu Vue brut (drupal_view) qui affichait les libellÃ©s
+ * et dupliquait les entrÃ©es en cas de correspondance multi-genre.
+ */
+function khartasia_ui_preprocess_node_papers(&$variables, $node) {
+  $db = \Drupal::database();
+
+  khartasia_ui_preprocess_node_papers_attestations($variables, $node);
+
+  // Variantes connues â€” relation inverse de field_variante_de : quels
+  // Papiers se dÃ©clarent variantes de celui-ci (ex. Lianqi zhi â†’ Liansi).
+  $variantes_ids = $db->query("
+    SELECT entity_id FROM node__field_variante_de
+    WHERE field_variante_de_target_id = :nid
+  ", [':nid' => $node->id()])->fetchCol();
+
+  if ($variantes_ids) {
+    $variantes = [];
+    foreach (\Drupal\node\Entity\Node::loadMultiple($variantes_ids) as $v) {
+      $variantes[] = ['titre' => $v->label(), 'url' => $v->toUrl()->toString()];
+    }
+    $variables['papier_variantes_connues'] = $variantes;
+  }
+
+  if (!$node->hasField('field_genus_taxo_pap') || $node->get('field_genus_taxo_pap')->isEmpty()) {
+    return;
+  }
+
+  $genus_tids = [];
+  foreach ($node->get('field_genus_taxo_pap') as $item) {
+    $genus_tids[] = $item->target_id;
+  }
+
+  $placeholders = implode(',', array_fill(0, count($genus_tids), '?'));
+  $nids = $db->query("
+    SELECT DISTINCT entity_id
+    FROM node__field_genus_taxo
+    WHERE field_genus_taxo_target_id IN ($placeholders)
+    AND bundle = 'common_names'
+    AND deleted = 0
+  ", $genus_tids)->fetchCol();
+
+  if (!$nids) {
+    return;
+  }
+
+  $par_langue = [];
+  foreach (\Drupal\node\Entity\Node::loadMultiple($nids) as $cn) {
+    $lang = $cn->hasField('field_language_taxo_vern') ? $cn->get('field_language_taxo_vern')->entity : NULL;
+    $langue = $lang ? $lang->label() : 'Langue non spÃ©cifiÃ©e';
+
+    $par_langue[$langue][] = [
+      'titre' => $cn->label(),
+      'scripture' => $cn->hasField('field_ver_local_scripture') ? ($cn->get('field_ver_local_scripture')->value ?? '') : '',
+      'url' => $cn->toUrl()->toString(),
+    ];
+  }
+  ksort($par_langue);
+
+  $variables['papier_noms_par_langue'] = $par_langue;
+  $variables['papier_noms_total'] = count($nids);
+}
+
+/**
+ * Rassemble les Attestations d'un Papier, groupÃ©es par type (et par axe
+ * quand le type est Composition), pour affichage. Couvre les types
+ * construits jusqu'ici : Datation, GÃ©ographie, Composition (avec ses axes
+ * Fibre principale / Colorant / Agent de traitement / MÃ©thode de
+ * fabrication / Dimension-Format).
+ */
+/**
+ * Rassemble les Attestations d'un Papier, groupÃ©es par type (et par axe
+ * quand le type est Composition), pour affichage.
+ *
+ * v2 â€” corrige un piÃ¨ge Drupal documentÃ© : Url::fromRoute()->toString()
+ * SANS l'argument $collect_bubbleable_metadata (donc sans le passer Ã 
+ * TRUE) gÃ©nÃ¨re l'URL sans capturer ses mÃ©tadonnÃ©es de cache â€” appelÃ©
+ * depuis une fonction de preprocess (hors contexte de rendu propre), Ã§a
+ * peut dÃ©clencher un arrÃªt d'assertion PHP, invisible Ã  un try/catch
+ * classique selon la configuration (zend.assertions activÃ© en dev,
+ * courant sur ddev). toString(TRUE) retourne un objet GeneratedUrl dont
+ * les mÃ©tadonnÃ©es se fusionnent proprement dans $variables['#cache'].
+ */
+function khartasia_ui_preprocess_node_papers_attestations(&$variables, $node) {
+  $db = \Drupal::database();
+
+  $att_ids = $db->query("
+    SELECT DISTINCT f.entity_id
+    FROM node__field_att_papier f
+    INNER JOIN node_field_data n ON n.nid = f.entity_id AND n.status = 1
+    WHERE f.field_att_papier_target_id = :nid
+    AND f.bundle = 'attestation'
+    AND f.deleted = 0
+  ", [':nid' => $node->id()])->fetchCol();
+
+  $attestations_par_type = [];
+  $cache_tags = [];
+
+  foreach (\Drupal\node\Entity\Node::loadMultiple($att_ids) as $att) {
+    $cache_tags = array_merge($cache_tags, $att->getCacheTags());
+
+    $type_term = $att->hasField('field_att_type') && !$att->get('field_att_type')->isEmpty()
+      ? $att->get('field_att_type')->entity : NULL;
+    $type_label = $type_term ? $type_term->label() : 'Non typé';
+
+    $axe_term = $att->hasField('field_att_axe') && !$att->get('field_att_axe')->isEmpty()
+      ? $att->get('field_att_axe')->entity : NULL;
+
+    $periodes = [];
+    if ($att->hasField('field_att_periode') && !$att->get('field_att_periode')->isEmpty()) {
+      foreach ($att->get('field_att_periode') as $item) {
+        if ($item->entity) $periodes[] = $item->entity->label();
+      }
+    }
+
+    $lieu = $att->hasField('field_att_lieu') && !$att->get('field_att_lieu')->isEmpty()
+      ? $att->get('field_att_lieu')->entity->label() : NULL;
+
+    $source_label = NULL;
+    if ($att->hasField('field_att_source') && !$att->get('field_att_source')->isEmpty()) {
+      $source_entite = $att->get('field_att_source')->entity;
+      $source_label = $source_entite ? $source_entite->label() : NULL;
+    }
+
+    $motifs = ($att->hasField('field_att_revue_motifs') && !$att->get('field_att_revue_motifs')->isEmpty())
+      ? array_column($att->get('field_att_revue_motifs')->getValue(), 'value') : [];
+    $a_revoir = $att->hasField('field_att_a_revoir') ? (bool) $att->get('field_att_a_revoir')->value : FALSE;
+
+    $url_dispute = NULL;
+    if (!in_array('dispute_signalee', $motifs, TRUE)) {
+      try {
+        $generated = \Drupal\Core\Url::fromRoute('khartasia_core.signaler_dispute', ['attestation' => $att->id()])
+          ->toString(TRUE);
+        $url_dispute = $generated->getGeneratedUrl();
+        $cache_tags = array_merge($cache_tags, $generated->getCacheTags());
+      }
+      catch (\Exception $e) {
+        $url_dispute = NULL;
+      }
+    }
+
+    $attestations_par_type[$type_label][] = [
+      'nid' => $att->id(),
+      'axe' => $axe_term ? $axe_term->label() : NULL,
+      'valeur' => $att->get('field_att_valeur')->value ?? '',
+      'statut' => $att->get('field_att_statut')->value ?? '',
+      'periodes' => $periodes,
+      'lieu' => $lieu,
+      'source' => $source_label,
+      'a_revoir' => $a_revoir,
+      'motifs' => $motifs,
+      'url_dispute' => $url_dispute,
+    ];
+  }
+  ksort($attestations_par_type);
+
+  $variables['attestations_par_type'] = $attestations_par_type;
+  $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'] ?? [], array_unique($cache_tags));
+}
+
+function khartasia_ui_preprocess_html(&$variables) {
+  $variables['wc_build_marker'] = NULL;
+  $stamp_path = DRUPAL_ROOT . '/build-stamp.json';
+  if (file_exists($stamp_path)) {
+    $stamp = json_decode(file_get_contents($stamp_path), TRUE);
+    if (!empty($stamp['build'])) {
+      // Simple chaÃ®ne, imprimÃ©e directement par html.html.twig â€” plus fiable
+      // que d'injecter un Ã©lÃ©ment dans page_bottom dont la structure exacte
+      // au moment du prÃ©processeur n'est pas garantie.
+      $variables['wc_build_marker'] = $stamp['build'];
+    }
+  }
+}
+
+/**
+ * ImplÃ©mente hook_theme().
+ */
+function khartasia_ui_theme($existing, $type, $theme, $path) {
+  return [
+    'node__plante_fibre__embedded' => [
+      'base hook' => 'node',
+      'template' => 'node--plante-fibre--embedded',
+      'path' => $path . '/templates',
+    ],
+    'node__plante_geo__embedded' => [
+      'base hook' => 'node',
+      'template' => 'node--plante-geo--embedded',
+      'path' => $path . '/templates',
+    ],
+    'node__plante_texte__embedded' => [
+      'base hook' => 'node',
+      'template' => 'node--plante-texte--embedded',
+      'path' => $path . '/templates',
+    ],
+  ];
+}
+
+/**
+ * ImplÃ©mente hook_preprocess_page() â€” fournit les compteurs rÃ©els pour la
+ * page d'accueil (kh_count_plantes, kh_count_papers), jamais alimentÃ©s
+ * jusqu'ici malgrÃ© leur prÃ©sence dans page--front.html.twig. LimitÃ© Ã  la
+ * page d'accueil pour ne pas exÃ©cuter ces requÃªtes sur chaque page.
+ */
+function khartasia_ui_preprocess_page(&$variables) {
+  if (empty($variables['is_front'])) {
+    return;
+  }
+
+  $variables['kh_count_plantes'] = \Drupal::entityQuery('node')
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    ->accessCheck(FALSE)
+    ->count()
+    ->execute();
+
+  $variables['kh_count_papers'] = \Drupal::entityQuery('node')
+    ->condition('type', 'papers')
+    ->condition('status', 1)
+    ->accessCheck(FALSE)
+    ->count()
+    ->execute();
+
+  // Liens de langue pour la page d'accueil â€” calculÃ©s directement plutÃ´t
+  // que via un bloc Drupal (deux tentatives Ã©chouÃ©es : drupal_block() et
+  // drupal_entity('block', ...) donnaient toutes deux "This block is
+  // broken or missing", probablement un problÃ¨me de contexte de route
+  // manquant lors d'un rendu forcÃ© hors du cycle normal de la page).
+  $langue_courante = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $kh_langues = [];
+  foreach (\Drupal::languageManager()->getLanguages() as $langue) {
+    $kh_langues[] = [
+      'code' => $langue->getId(),
+      'label' => $langue->getName(),
+      'url' => \Drupal\Core\Url::fromRoute('<front>', [], ['language' => $langue])->toString(),
+      'active' => $langue->getId() === $langue_courante,
+    ];
+  }
+  $variables['kh_langues'] = $kh_langues;
+}
+
+/**
+ * ImplÃ©mente hook_language_switch_links_alter().
+ * Filtre le bloc natif de changement de langue pour ne proposer que les
+ * langues rÃ©ellement traduites du nÅ“ud affichÃ© â€” sans ce filtre, Drupal
+ * liste toutes les langues activÃ©es sur le site, y compris celles
+ * (corÃ©en, chinois simplifiÃ©) qu'aucun contenu ne possÃ¨de rÃ©ellement,
+ * menant vers des pages vides ou des redirections trompeuses.
+ */
+/**
+ * ImplÃ©mente hook_preprocess_links__language_block().
+ * Filtre le bloc natif de changement de langue pour ne proposer que les
+ * langues rÃ©ellement traduites du nÅ“ud affichÃ©. Remplace une premiÃ¨re
+ * tentative via hook_language_switch_links_alter(), jamais invoquÃ©e par
+ * Drupal pour ce bloc (confirmÃ© par un test en watchdog : le hook alter
+ * ne se dÃ©clenche jamais) â€” hook_preprocess_HOOK() est le mÃ©canisme fiable
+ * dÃ©jÃ  utilisÃ© partout ailleurs dans ce thÃ¨me.
+ */
+function khartasia_ui_preprocess_links__language_block(&$variables) {
+  $node = \Drupal::routeMatch()->getParameter('node');
+
+  if (!$node instanceof \Drupal\node\NodeInterface) {
+    return; // pas une page de nÅ“ud â€” rien Ã  filtrer (page d'accueil, etc.)
+  }
+
+  $langues_disponibles = array_keys($node->getTranslationLanguages());
+
+  foreach ($variables['links'] as $langcode => $lien) {
+    if (!in_array($langcode, $langues_disponibles)) {
+      unset($variables['links'][$langcode]);
+    }
+  }
 }

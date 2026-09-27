@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * khartasia_noms.module — déclarations de thème pour le wizard nom_papier.
+ */
+
+/**
+ * Implements hook_theme().
+ *
+ * Sans cette déclaration, les deux templates créés pour le wizard
+ * (khartasia-noms-existing.html.twig, khartasia-noms-progress.html.twig)
+ * ne sont jamais trouvés par Drupal — 'path' pointe explicitement vers le
+ * dossier templates/ du module (convention module standard, distincte de
+ * la règle "racine du thème" qui s'applique à khartasia_ui).
+ */
+function khartasia_noms_theme($existing, $type, $theme, $path) {
+  return [
+    'khartasia_noms_existing' => [
+      'variables' => [
+        'papier_titre' => NULL,
+        'papier_url' => NULL,
+        'noms' => [],
+      ],
+      'template' => 'khartasia-noms-existing',
+      'path' => $path . '/templates',
+    ],
+    'khartasia_noms_progress' => [
+      'variables' => [
+        'etapes' => [],
+        'etape_actuelle' => 0,
+        'etapes_urls' => [],
+      ],
+      'template' => 'khartasia-noms-progress',
+      'path' => $path . '/templates',
+    ],
+  ];
+}

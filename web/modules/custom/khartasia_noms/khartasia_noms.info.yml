@@ -1,0 +1,9 @@
+name: 'Khartasia — Noms de papier'
+type: module
+description: 'Formulaire de saisie multistep pour les noms de papier (nom_papier) : heuristique de couche, verrous C1-C4, filtration de rôle (L4), file de revue.'
+package: Khartasia
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:field

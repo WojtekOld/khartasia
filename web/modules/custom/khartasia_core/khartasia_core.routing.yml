@@ -1,0 +1,27 @@
+khartasia_core.papier_dossier:
+  path: '/node/{node}/dossier'
+  defaults:
+    _controller: '\Drupal\khartasia_core\Controller\PapierDossierHubController::view'
+    _title: 'Dossier'
+  requirements:
+    _permission: 'access content'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+
+khartasia_core.signaler_dispute:
+  path: '/attestation/{attestation}/signaler-dispute'
+  defaults:
+    _form: '\Drupal\khartasia_core\Form\SignalerDisputeForm'
+    _title: 'Signaler une discussion'
+  requirements:
+    _permission: 'create attestation content+administer attestation disputes'
+    attestation: '\d+'
+  options:
+    parameters:
+      attestation:
+        type: 'entity:node'
+        bundle:
+          - attestation

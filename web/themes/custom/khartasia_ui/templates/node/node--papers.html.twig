@@ -1,0 +1,195 @@
+{#
+/**
+ * @file
+ * Template pour la fiche Papier Khartasia.
+ * Volontairement sobre sur les champs propres (papers en a peu) —
+ * la richesse vient des relations vers Plantes et Noms vernaculaires.
+ */
+#}
+
+{{ attach_library('khartasia_ui/kh-plante') }}
+
+<article class="kh-plante">
+
+  {# TITRE #}
+  <header class="kh-plante__header">
+    <h1 class="kh-plante__title">{{ node.label }}</h1>
+    {% if node.field_pap_synonyme|length %}
+      <div class="kh-plante__synonymes">
+        {% for item in node.field_pap_synonyme %}{{ item.value|raw }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </div>
+    {% endif %}
+  </header>
+
+  <div class="kh-plante__body">
+
+    {# COLONNE GAUCHE #}
+    <div class="kh-plante__col-left">
+
+      {# Image vedette — même position que sur Plante #}
+      {% if node.field_image.target_id %}
+        <div class="kh-vedette">
+          {{ content.field_image }}
+        </div>
+      {% endif %}
+
+      {# Description #}
+      {% if node.body.value %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Description</h2>
+          <div class="kh-prose">{{ content.body }}</div>
+        </section>
+      {% endif %}
+
+      {# Composition — référence directe, pas de Vue nécessaire #}
+      {% if node.field_genus_pap_entity|length %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Composition (plantes associées)</h2>
+          <ul class="kh-papers-group__list">
+            {% for item in node.field_genus_pap_entity %}
+              {% if item.entity %}
+                <li class="kh-papers-group__item">
+                  <a href="{{ path('entity.node.canonical', {'node': item.target_id}) }}">{{ item.entity.label }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+          <p class="kh-fibre__notes">Liste brute des plantes référencées — fibre structurelle et plantes tinctoriales non encore distinguées à ce niveau (voir Attestations quand disponibles).</p>
+        </section>
+      {% endif %}
+
+      {# Noms vernaculaires — groupés par langue, écriture locale inline #}
+      {% if papier_noms_par_langue %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Noms vernaculaires ({{ papier_noms_total }})</h2>
+          {% for langue, noms in papier_noms_par_langue %}
+            <div class="kh-noms-group">
+              <h4 class="kh-noms-group__title">
+                🌐 {{ langue }}
+                <span class="kh-noms-group__count">({{ noms|length }})</span>
+              </h4>
+              <ul class="kh-noms-group__list">
+                {% for nom in noms %}
+                  <li class="kh-noms-group__item">
+                    <a href="{{ nom.url }}">{{ nom.titre }}</a>
+                    {% if nom.scripture %}
+                      <span class="kh-nom-scripture">({{ nom.scripture }})</span>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </section>
+      {% endif %}
+
+      {# Variante de — relation structurée vers le papier principal #}
+      {% if node.field_variante_de|length %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Variante de</h2>
+          <ul class="kh-papers-group__list">
+            {% for item in node.field_variante_de %}
+              {% if item.entity %}
+                <li class="kh-papers-group__item">
+                  <a href="{{ path('entity.node.canonical', {'node': item.target_id}) }}">{{ item.entity.label }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {# Variantes connues — relation inverse, calculée en préprocess #}
+      {% if papier_variantes_connues %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Variantes connues</h2>
+          <ul class="kh-papers-group__list">
+            {% for variante in papier_variantes_connues %}
+              <li class="kh-papers-group__item">
+                <a href="{{ variante.url }}">{{ variante.titre }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {# Attestations — datation, géographie, composition, agent de traitement... #}
+      {% if attestations_par_type %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Attestations</h2>
+          {% for type_label, liste in attestations_par_type %}
+            <div class="kh-noms-group">
+              <h4 class="kh-noms-group__title">{{ type_label }}</h4>
+              <ul class="kh-papers-group__list">
+                {% for att in liste %}
+                  <li class="kh-papers-group__item">
+                    {% if att.axe %}<strong>{{ att.axe }}</strong> — {% endif %}
+                    {{ att.valeur }}
+                    {% if att.periodes %}<span class="kh-nom-scripture">({{ att.periodes|join(', ') }})</span>{% endif %}
+                    {% if att.lieu %}<span class="kh-nom-scripture">— {{ att.lieu }}</span>{% endif %}
+                    {% if att.source %}<span class="kh-fibre__notes">[source : {{ att.source }}]</span>{% endif %}
+                      {% if att.a_revoir %}<span class="kh-dispute-badge" title="En attente de revue">⚠ signalée</span>{% endif %}
+                      {% if att.url_dispute %}<a href="{{ att.url_dispute }}" class="kh-dispute-lien">Signaler une discussion</a>{% endif %}
+                    {% if att.statut and att.statut != 'attesté' %}<em class="kh-fibre__notes">[{{ att.statut }}]</em>{% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </section>
+      {% endif %}
+
+    </div>{# fin col-left #}
+
+    {# COLONNE DROITE #}
+    <div class="kh-plante__col-right">
+
+      <a href="/papier/{{ node.id }}/pdf" class="kh-meta-card__pdf-link">
+        Télécharger en PDF (protégé) →
+      </a>
+
+      <div class="kh-meta-card">
+        <h3 class="kh-meta-card__title">Identification</h3>
+        <dl class="kh-meta-card__dl">
+          {% if node.field_origin_taxo.target_id %}
+            <dt>Origine</dt><dd>{{ content.field_origin_taxo }}</dd>
+          {% endif %}
+          {% if node.field_famille_fibreuse.value %}
+            <dt>Famille fibreuse</dt><dd>{{ content.field_famille_fibreuse }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+
+      {% if node.field_pap_local_scripture|length %}
+        <div class="kh-meta-card">
+          <h3 class="kh-meta-card__title">Écriture locale</h3>
+          <div class="kh-prose">
+            {% for item in node.field_pap_local_scripture %}
+              <div>{{ item.value|raw }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if node.field_carte_region.uri %}
+        <div class="kh-meta-card">
+          <h3 class="kh-meta-card__title">Carte de la région</h3>
+          <iframe
+            src="{{ node.field_carte_region.uri }}"
+            width="100%"
+            height="260"
+            style="border:0;"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+          {% if node.field_carte_region.title %}
+            <p class="kh-meta-card__caption">{{ node.field_carte_region.title }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    </div>{# fin col-right #}
+
+  </div>{# fin body #}
+</article>
+

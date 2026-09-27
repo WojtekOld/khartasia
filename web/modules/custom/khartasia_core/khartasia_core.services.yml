@@ -1,0 +1,6 @@
+services:
+  khartasia_core.parcours_papier:
+    class: Drupal\khartasia_core\Service\ParcoursPapier
+    arguments: ['@entity_type.manager']
+  khartasia_core.review_calculator:
+    class: Drupal\khartasia_core\Service\EntityReviewCalculator

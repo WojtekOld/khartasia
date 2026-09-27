@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * khartasia_core.module
+ *
+ * hook_node_presave() appelle EntityReviewCalculator sur TOUTE sauvegarde
+ * d'attestation, pas seulement depuis le bloc dispute du formulaire —
+ * sans ça, les six autres points de création dans PapierAttestationsForm
+ * (Datation, Composition x4, Usage) ne recalculeraient jamais
+ * source_sans_type, et le compteur du hub resterait faux pour tout ce
+ * qui ne passe pas par le bloc dispute.
+ */
+function khartasia_core_node_presave(\Drupal\node\NodeInterface $node) {
+  if ($node->bundle() !== 'attestation') {
+    return;
+  }
+  \Drupal::service('khartasia_core.review_calculator')->updateReviewStatus($node);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function khartasia_core_theme($existing, $type, $theme, $path) {
+  return [
+    'khartasia_dossier_card' => [
+      'variables' => [
+        'title' => NULL,
+        'url' => NULL,
+        'summary' => NULL,
+      ],
+      'template' => 'khartasia-dossier-card',
+      'path' => $path . '/templates',
+    ],
+  ];
+}
