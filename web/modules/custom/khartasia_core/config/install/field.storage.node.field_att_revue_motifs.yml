@@ -9,8 +9,12 @@ entity_type: node
 type: list_string
 settings:
   allowed_values:
-    dispute_signalee: 'Dispute signalée (contributeur)'
-    source_sans_type: 'Source renseignée sans type de source'
+    -
+      value: dispute_signalee
+      label: 'Dispute signalée (contributeur)'
+    -
+      value: source_sans_type
+      label: 'Source renseignée sans type de source'
   allowed_values_function: ''
 module: core
 locked: false
