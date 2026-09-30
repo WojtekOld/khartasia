@@ -1,0 +1,21 @@
+uuid: 5b5f7d47-48cc-472d-94f8-a3166afb4ac2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_statut_presence
+    - node.type.attestation
+  module:
+    - options
+id: node.attestation.field_att_statut_presence
+field_name: field_att_statut_presence
+entity_type: node
+bundle: attestation
+label: 'Statut de présence'
+description: 'Nature de la présence de la plante dans ce lieu (indigène, introduite, naturalisée, cultivée).'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

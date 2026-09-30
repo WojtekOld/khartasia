@@ -1,0 +1,9 @@
+uuid: f0554741-f1ea-4311-8b14-bb97f3aa672e
+langcode: en
+status: true
+dependencies: {  }
+name: 'Type de nom de papier'
+vid: type_de_nom_papier
+description: null
+weight: 0
+new_revision: false

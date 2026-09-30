@@ -1,0 +1,21 @@
+uuid: a4616813-64ef-4ac5-a804-9c325824cee9
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_romanisation
+    - node.type.nom_papier
+id: node.nom_papier.field_np_romanisation
+field_name: field_np_romanisation
+entity_type: node
+bundle: nom_papier
+label: 'Système (si couche = romanisation)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings: {  }
+field_type: entity_reference

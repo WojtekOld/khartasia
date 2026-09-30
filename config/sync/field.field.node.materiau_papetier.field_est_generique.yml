@@ -1,0 +1,21 @@
+uuid: 26e45b62-9919-4491-8702-df08ec3d3153
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_est_generique
+    - node.type.materiau_papetier
+id: node.materiau_papetier.field_est_generique
+field_name: field_est_generique
+entity_type: node
+bundle: materiau_papetier
+label: 'Est générique'
+description: 'Coché : ce nœud représente le niveau générique du genre (ex. "Broussonetia sp."), utilisé quand l''identification ne dépasse pas le genre.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

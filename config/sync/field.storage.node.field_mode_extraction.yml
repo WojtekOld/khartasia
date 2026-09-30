@@ -1,0 +1,30 @@
+uuid: c291ac3a-ae08-48c4-90c8-077a0b9d7929
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_mode_extraction
+field_name: field_mode_extraction
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: trempage_froid
+      label: 'trempage à froid'
+    -
+      value: pilage_frais
+      label: 'pilage frais'
+    -
+      value: decoction
+      label: décoction
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

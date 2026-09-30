@@ -1,0 +1,24 @@
+uuid: 0746b27b-83ca-4255-939f-e5b518cc556c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_papier
+    - node.type.attestation
+    - node.type.papers
+id: node.attestation.field_att_papier
+field_name: field_att_papier
+entity_type: node
+bundle: attestation
+label: 'Papier concerné'
+description: 'Le papier (content type "papers") auquel cette attestation se rapporte. Une Attestation porte sur UN SEUL papier (cardinalité 1) — comparer plusieurs papiers est le rôle du moteur d''identification, pas de l''entité elle-même.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      papers: papers
+field_type: entity_reference

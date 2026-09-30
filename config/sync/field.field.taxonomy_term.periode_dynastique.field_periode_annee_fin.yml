@@ -1,0 +1,23 @@
+uuid: be65a722-a77b-440d-b277-ed487ccacabc
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_periode_annee_fin
+    - taxonomy.vocabulary.periode_dynastique
+id: taxonomy_term.periode_dynastique.field_periode_annee_fin
+field_name: field_periode_annee_fin
+entity_type: taxonomy_term
+bundle: periode_dynastique
+label: 'Année de fin'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

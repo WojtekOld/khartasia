@@ -1,0 +1,19 @@
+uuid: 0c094a77-6597-4bd0-b4b4-627e0df86e98
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_saison_recolte
+    - node.type.article
+id: node.article.field_saison_recolte
+field_name: field_saison_recolte
+entity_type: node
+bundle: article
+label: 'Saison de récolte (usage papetier)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,21 @@
+uuid: 8fe5adc9-f7f2-4c1a-bdfb-8c27f119f309
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_canonique
+    - node.type.nom_papier
+id: node.nom_papier.field_np_canonique
+field_name: field_np_canonique
+entity_type: node
+bundle: nom_papier
+label: 'Nom canonique (seule source de vérité)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

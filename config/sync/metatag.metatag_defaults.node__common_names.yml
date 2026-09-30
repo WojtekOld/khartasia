@@ -1,0 +1,14 @@
+uuid: 52b48df7-5993-4256-a79c-4de79a4495ba
+langcode: en
+status: true
+dependencies: {  }
+id: node__common_names
+label: 'Noms communs'
+tags:
+  title: '[node:title] — Nom vernaculaire | Khartasia'
+  description: '[node:title] — nom vernaculaire documenté dans le répertoire scientifique Khartasia sur les papiers asiatiques artisanaux.'
+  og_title: '[node:title] — Nom vernaculaire | Khartasia'
+  og_description: '[node:title] — nom vernaculaire documenté dans le répertoire scientifique Khartasia sur les papiers asiatiques artisanaux.'
+  og_type: article
+  schema_web_page_type: WebPage
+  schema_web_page_description: '[node:title] — nom vernaculaire documenté dans le répertoire scientifique Khartasia sur les papiers asiatiques artisanaux.'

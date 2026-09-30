@@ -1,0 +1,25 @@
+uuid: 609a7245-44ab-4a5a-a222-496a7871a542
+langcode: en
+status: true
+dependencies:
+  module:
+    - language
+    - system
+  theme:
+    - khartasia_ui
+id: khartasia_ui_language_switcher
+theme: khartasia_ui
+region: header
+weight: 0
+provider: null
+plugin: 'language_block:language_interface'
+settings:
+  id: 'language_block:language_interface'
+  label: Langue
+  label_display: '0'
+  provider: language
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: '<front>'

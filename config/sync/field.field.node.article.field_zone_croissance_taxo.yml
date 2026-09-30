@@ -1,0 +1,24 @@
+uuid: df1d5356-4074-439f-8a5a-f574cd347b0c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_zone_croissance_taxo
+    - node.type.article
+    - taxonomy.vocabulary.zone_croissance
+id: node.article.field_zone_croissance_taxo
+field_name: field_zone_croissance_taxo
+entity_type: node
+bundle: article
+label: 'Zone de croissance (structurée)'
+description: "Extraction automatique de field_aire_croissance vers le vocabulaire zone_croissance. Le champ texte original n'est pas modifié ni supprimé."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      zone_croissance: zone_croissance
+field_type: entity_reference

@@ -1,0 +1,36 @@
+uuid: 3e2ca92f-d5ca-4e4f-adb9-80a5a1b7e831
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_att_statut_presence
+field_name: field_att_statut_presence
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: indigene
+      label: Indigène
+    -
+      value: introduit
+      label: Introduit
+    -
+      value: naturalise
+      label: Naturalisé
+    -
+      value: cultive
+      label: Cultivé
+    -
+      value: introduit_hybride
+      label: 'Introduit (hybride)'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,21 @@
+uuid: a33af109-0cd3-4108-984a-844fad912ac3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_langue
+    - node.type.nom_papier
+id: node.nom_papier.field_np_langue
+field_name: field_np_langue
+entity_type: node
+bundle: nom_papier
+label: Langue
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings: {  }
+field_type: entity_reference

@@ -1,0 +1,70 @@
+uuid: c36b7b77-0fe8-458c-995d-997789f4c256
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.materiau_papetier.field_est_generique
+    - field.field.node.materiau_papetier.field_identifiants_locaux
+    - field.field.node.materiau_papetier.field_nom_vernaculaire
+    - field.field.node.materiau_papetier.field_region_culture
+    - field.field.node.materiau_papetier.field_taxon_parent
+    - node.type.materiau_papetier
+  module:
+    - user
+id: node.materiau_papetier.default
+targetEntityType: node
+bundle: materiau_papetier
+mode: default
+content:
+  field_est_generique:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_identifiants_locaux:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+      link_rel: canonical
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_nom_vernaculaire:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+      link_rel: canonical
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_region_culture:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_taxon_parent:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true

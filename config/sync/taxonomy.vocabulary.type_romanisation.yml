@@ -1,0 +1,9 @@
+uuid: 8b2a98a3-d36a-439d-a777-549e8467376e
+langcode: en
+status: true
+dependencies: {  }
+name: 'Système de romanisation'
+vid: type_romanisation
+description: null
+weight: 0
+new_revision: false

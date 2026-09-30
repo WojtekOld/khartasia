@@ -1,0 +1,24 @@
+uuid: 682013f4-0448-4837-b384-5e7bbc0839fe
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_taxon_parent
+    - node.type.materiau_papetier
+    - taxonomy.vocabulary.classification_botanique
+id: node.materiau_papetier.field_taxon_parent
+field_name: field_taxon_parent
+entity_type: node
+bundle: materiau_papetier
+label: 'Taxon parent'
+description: "Le genre ou l'espèce dont ce matériau dérive. Pour un matériau générique (field_est_generique = 1), cibler le terme de genre."
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      classification_botanique: classification_botanique
+field_type: entity_reference

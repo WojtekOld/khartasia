@@ -1,0 +1,21 @@
+uuid: 712b50a2-2eec-4a65-bfd2-87c6cfedf98c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_couche
+    - node.type.nom_papier
+  module:
+    - options
+id: node.nom_papier.field_np_couche
+field_name: field_np_couche
+entity_type: node
+bundle: nom_papier
+label: Couche
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

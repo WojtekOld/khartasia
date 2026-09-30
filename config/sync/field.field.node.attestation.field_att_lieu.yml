@@ -1,0 +1,27 @@
+uuid: 3543c72b-ab00-4a0a-8910-859596af9868
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_lieu
+    - node.type.attestation
+    - taxonomy.vocabulary.zone_croissance
+    - taxonomy.vocabulary.zone_historique_production
+id: node.attestation.field_att_lieu
+field_name: field_att_lieu
+entity_type: node
+bundle: attestation
+label: Lieu
+description: 'Zone historique de production concernée (voir vocabulaire zone_historique_production — PAS field_origin_taxo, qui reste réservé à la zone de croissance des plantes).'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      zone_historique_production: zone_historique_production
+      zone_croissance: zone_croissance
+    auto_create: false
+field_type: entity_reference

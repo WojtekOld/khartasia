@@ -1,0 +1,19 @@
+uuid: df1dd5db-351f-40fe-981a-f9647323caa7
+langcode: en
+status: true
+dependencies:
+  module:
+    - link
+    - node
+id: node.field_carte_region
+field_name: field_carte_region
+entity_type: node
+type: link
+settings: {  }
+module: link
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

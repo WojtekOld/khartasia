@@ -1,0 +1,21 @@
+uuid: dd0c25f2-09a7-4dda-862a-6830ebfd50cf
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_approx
+    - node.type.attestation
+id: node.attestation.field_att_approx
+field_name: field_att_approx
+entity_type: node
+bundle: attestation
+label: 'Dates approximatives'
+description: 'Coché si les années ci-dessus sont des estimations, pas des dates précises.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

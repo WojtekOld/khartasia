@@ -1,0 +1,9 @@
+uuid: 3db91905-8465-4a2a-8f2d-a8be08e77e79
+langcode: en
+status: true
+dependencies: {  }
+name: 'Zone historique de production'
+vid: zone_historique_production
+description: "Lieu de fabrication attesté d'un papier — distinct de la zone de croissance naturelle de la plante (field_origin_taxo, sur Plantes)."
+weight: 0
+new_revision: false

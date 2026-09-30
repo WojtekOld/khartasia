@@ -12,13 +12,19 @@ dependencies:
     - field.field.node.article.field_image
     - field.field.node.article.field_image_gallery_1
     - field.field.node.article.field_image_gallery_2
+    - field.field.node.article.field_mode_extraction
+    - field.field.node.article.field_nom_accepte_powo
     - field.field.node.article.field_paper_name
+    - field.field.node.article.field_saison_recolte
+    - field.field.node.article.field_statut_identification
     - field.field.node.article.field_synonymes_bot
     - field.field.node.article.field_tax_family
     - field.field.node.article.field_tax_genus
     - field.field.node.article.field_tax_order
+    - field.field.node.article.field_taxon_cultigene
     - field.field.node.article.field_use_paper_making
     - field.field.node.article.field_used_part_plant
+    - field.field.node.article.field_zone_croissance_taxo
     - field.field.node.article.field_zones_geo
     - image.style.medium
     - node.type.article
@@ -62,13 +68,19 @@ hidden:
   field_ident_fibre: true
   field_image_gallery_1: true
   field_image_gallery_2: true
+  field_mode_extraction: true
+  field_nom_accepte_powo: true
   field_paper_name: true
+  field_saison_recolte: true
+  field_statut_identification: true
   field_synonymes_bot: true
   field_tax_family: true
   field_tax_genus: true
   field_tax_order: true
+  field_taxon_cultigene: true
   field_use_paper_making: true
   field_used_part_plant: true
+  field_zone_croissance_taxo: true
   field_zones_geo: true
   langcode: true
   search_api_excerpt: true

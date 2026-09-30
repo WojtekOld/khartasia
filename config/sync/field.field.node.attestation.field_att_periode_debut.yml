@@ -1,0 +1,23 @@
+uuid: 0ee882a6-d000-4244-9c48-98d5861d8940
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_periode_debut
+    - node.type.attestation
+id: node.attestation.field_att_periode_debut
+field_name: field_att_periode_debut
+entity_type: node
+bundle: attestation
+label: 'Période — début (année)'
+description: 'Année de début de validité de cette affirmation.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

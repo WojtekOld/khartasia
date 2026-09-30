@@ -1,0 +1,21 @@
+uuid: 781069f6-453b-4747-ba1c-6b3442b8b7f9
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mode_extraction
+    - node.type.article
+  module:
+    - options
+id: node.article.field_mode_extraction
+field_name: field_mode_extraction
+entity_type: node
+bundle: article
+label: 'Mode d’extraction'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

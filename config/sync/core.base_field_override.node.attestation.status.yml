@@ -1,0 +1,22 @@
+uuid: 1a9c3c8c-1989-4eee-9d15-6595ab5e0f03
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.attestation
+id: node.attestation.status
+field_name: status
+entity_type: node
+bundle: attestation
+label: Publié
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Activé
+  off_label: Désactivé
+field_type: boolean

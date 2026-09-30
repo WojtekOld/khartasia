@@ -1,0 +1,24 @@
+uuid: c53625f6-82a2-46f7-a6cf-dbac6adcbf51
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_type
+    - node.type.attestation
+    - taxonomy.vocabulary.attestation_type
+id: node.attestation.field_att_type
+field_name: field_att_type
+entity_type: node
+bundle: attestation
+label: "Type d'attestation"
+description: "Le grand axe concerné : usage, géographie, composition, circuit commercial, dégradation matérielle, ou critère morphologique. Vocabulaire extensible depuis l'interface."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      attestation_type: attestation_type
+field_type: entity_reference

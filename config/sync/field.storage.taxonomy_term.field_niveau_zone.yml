@@ -1,0 +1,33 @@
+uuid: 2e9a864a-b128-4c83-b4a9-911725c35db8
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - taxonomy
+id: taxonomy_term.field_niveau_zone
+field_name: field_niveau_zone
+entity_type: taxonomy_term
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: pays
+      label: Pays
+    -
+      value: region
+      label: 'Région (regroupement, ex. Chūbu)'
+    -
+      value: province_prefecture_do
+      label: 'Province / Préfecture / Do — niveau usuel de zone de production'
+    -
+      value: zone_production_specifique
+      label: 'Zone de production spécifique (xian, vallée, bassin, ville)'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

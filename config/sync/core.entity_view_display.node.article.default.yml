@@ -11,13 +11,19 @@ dependencies:
     - field.field.node.article.field_image
     - field.field.node.article.field_image_gallery_1
     - field.field.node.article.field_image_gallery_2
+    - field.field.node.article.field_mode_extraction
+    - field.field.node.article.field_nom_accepte_powo
     - field.field.node.article.field_paper_name
+    - field.field.node.article.field_saison_recolte
+    - field.field.node.article.field_statut_identification
     - field.field.node.article.field_synonymes_bot
     - field.field.node.article.field_tax_family
     - field.field.node.article.field_tax_genus
     - field.field.node.article.field_tax_order
+    - field.field.node.article.field_taxon_cultigene
     - field.field.node.article.field_use_paper_making
     - field.field.node.article.field_used_part_plant
+    - field.field.node.article.field_zone_croissance_taxo
     - field.field.node.article.field_zones_geo
     - image.style.medium
     - node.type.article
@@ -79,7 +85,7 @@ content:
     region: content
   field_paper_name:
     type: text_default
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     weight: 16
@@ -117,7 +123,7 @@ content:
     region: content
   field_use_paper_making:
     type: entity_reference_label
-    label: inline
+    label: hidden
     settings:
       link: false
     third_party_settings: {  }
@@ -125,7 +131,7 @@ content:
     region: content
   field_used_part_plant:
     type: entity_reference_label
-    label: inline
+    label: hidden
     settings:
       link: false
     third_party_settings: {  }
@@ -145,6 +151,12 @@ hidden:
   field_gen_cult_thai: true
   field_ident_fibre: true
   field_image_gallery_2: true
+  field_mode_extraction: true
+  field_nom_accepte_powo: true
+  field_saison_recolte: true
+  field_statut_identification: true
+  field_taxon_cultigene: true
+  field_zone_croissance_taxo: true
   langcode: true
   links: true
   search_api_excerpt: true

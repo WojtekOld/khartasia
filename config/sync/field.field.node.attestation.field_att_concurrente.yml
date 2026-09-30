@@ -1,0 +1,23 @@
+uuid: fda035d5-df11-4d46-882a-891c3760f6a0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_concurrente
+    - node.type.attestation
+id: node.attestation.field_att_concurrente
+field_name: field_att_concurrente
+entity_type: node
+bundle: attestation
+label: 'Attestation(s) concurrente(s)'
+description: 'Lien vers une autre Attestation portant sur le MÊME fait (pas juste un fait similaire). Réservé au désaccord de sources, pas à la ressemblance entre espèces différentes (voir field_att_comparaison_ref ci-dessous pour ça).'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      attestation: attestation
+field_type: entity_reference

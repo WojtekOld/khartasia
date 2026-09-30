@@ -1,0 +1,18 @@
+uuid: f741e091-b8ad-405d-8c05-85d3c23655d6
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: Attestation
+type: attestation
+description: 'Affirmation sourcée, datée, avec statut de certitude explicite. Patron générique réutilisable pour tout nouvel axe analytique (composition, usage, géographie, circuit, dégradation, critères morphologiques...).'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

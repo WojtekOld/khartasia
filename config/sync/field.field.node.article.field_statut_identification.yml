@@ -1,0 +1,21 @@
+uuid: a78162d8-43bf-41f3-9161-8d34dce36d0c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_statut_identification
+    - node.type.article
+  module:
+    - options
+id: node.article.field_statut_identification
+field_name: field_statut_identification
+entity_type: node
+bundle: article
+label: 'Statut d’identification'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

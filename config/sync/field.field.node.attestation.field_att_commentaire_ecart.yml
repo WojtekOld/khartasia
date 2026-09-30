@@ -1,0 +1,19 @@
+uuid: 1a4610ac-426a-403e-9679-52e306513fff
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_commentaire_ecart
+    - node.type.attestation
+id: node.attestation.field_att_commentaire_ecart
+field_name: field_att_commentaire_ecart
+entity_type: node
+bundle: attestation
+label: "Commentaire sur l'écart"
+description: 'Le "pourquoi" de la divergence/contradiction — une donnée de première importance, pas un détail annexe.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

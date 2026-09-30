@@ -1,0 +1,19 @@
+uuid: 44541418-a1e8-4caa-9e6f-af1297da44d5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_nom_vernaculaire
+    - node.type.materiau_papetier
+id: node.materiau_papetier.field_nom_vernaculaire
+field_name: field_nom_vernaculaire
+entity_type: node
+bundle: materiau_papetier
+label: 'Nom(s) vernaculaire(s)'
+description: 'Ex. kōzo, dak — les noms sous lesquels ce matériau est connu chez les papetiers.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

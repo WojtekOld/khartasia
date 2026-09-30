@@ -1,0 +1,21 @@
+uuid: 12d07515-123d-4197-8d62-a3f10adc0bb8
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_ecriture
+    - node.type.nom_papier
+id: node.nom_papier.field_np_ecriture
+field_name: field_np_ecriture
+entity_type: node
+bundle: nom_papier
+label: 'Écriture (si couche = graphie)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings: {  }
+field_type: entity_reference

@@ -1,0 +1,14 @@
+uuid: 85823e29-633d-4a4e-92f7-640d08763d5e
+langcode: en
+status: true
+dependencies: {  }
+id: node__papers
+label: Papiers
+tags:
+  title: '[node:title] — Papier | Khartasia'
+  description: '[node:title] — fiche du répertoire scientifique Khartasia : papier artisanal asiatique, origine, composition et usage documentés.'
+  og_title: '[node:title] — Papier | Khartasia'
+  og_description: '[node:title] — fiche du répertoire scientifique Khartasia : papier artisanal asiatique, origine, composition et usage documentés.'
+  og_type: article
+  schema_web_page_type: WebPage
+  schema_web_page_description: '[node:title] — fiche du répertoire scientifique Khartasia : papier artisanal asiatique, origine, composition et usage documentés.'

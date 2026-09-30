@@ -1,0 +1,21 @@
+uuid: ae9c6272-4352-4321-9186-d92078004b20
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_a_revoir
+    - node.type.nom_papier
+id: node.nom_papier.field_np_a_revoir
+field_name: field_np_a_revoir
+entity_type: node
+bundle: nom_papier
+label: 'À re-typer / re-vérifier (workflow migration)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

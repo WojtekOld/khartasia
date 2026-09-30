@@ -1,0 +1,21 @@
+uuid: 5e6be89f-19ae-4ac2-ab3f-10dec85c0d64
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_niveau_zone
+    - taxonomy.vocabulary.zone_croissance
+  module:
+    - options
+id: taxonomy_term.zone_croissance.field_niveau_zone
+field_name: field_niveau_zone
+entity_type: taxonomy_term
+bundle: zone_croissance
+label: 'Niveau logique'
+description: 'Permet d''interroger "tous les niveaux province-équivalents" indépendamment de la profondeur réelle dans l''arbre (le Japon a un niveau "région" que la Chine et la Corée n''ont pas).'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,21 @@
+uuid: 04c7053b-2f2f-4d0c-8004-77cc1fe118e3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_taxon_cultigene
+    - node.type.article
+id: node.article.field_taxon_cultigene
+field_name: field_taxon_cultigene
+entity_type: node
+bundle: article
+label: 'Taxon cultigène'
+description: "Coché si ce taxon (ou la variété/sous-espèce retenue) n'existe essentiellement que par la culture, sans aire native propre documentée. Change l'interprétation de toutes les attestations géographiques de cette fiche : « Indigène » devient sans objet, seule une aire de domestication probable a un sens."
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: Oui
+  off_label: Non
+field_type: boolean

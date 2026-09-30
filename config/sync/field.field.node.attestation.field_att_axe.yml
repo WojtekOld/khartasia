@@ -1,0 +1,24 @@
+uuid: e1b8e303-dfb4-4606-882c-a10a3721ba63
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_axe
+    - node.type.attestation
+    - taxonomy.vocabulary.attestation_axe
+id: node.attestation.field_att_axe
+field_name: field_att_axe
+entity_type: node
+bundle: attestation
+label: 'Axe précis'
+description: 'Sous-catégorie à l''intérieur du type (ex : "Longueur" si type=critere_morphologique). Voir vocabulaire attestation_axe.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      attestation_axe: attestation_axe
+field_type: entity_reference

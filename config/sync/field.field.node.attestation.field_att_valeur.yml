@@ -1,0 +1,19 @@
+uuid: 91ce191d-eaf8-4a4a-b5c5-251fea327a91
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_valeur
+    - node.type.attestation
+id: node.attestation.field_att_valeur
+field_name: field_att_valeur
+entity_type: node
+bundle: attestation
+label: 'Valeur observée'
+description: 'Le contenu de l''affirmation elle-même. Reste un texte libre (pas de champ numérique strict) : le format varie selon l''axe ("6-20mm, moyenne 10mm" pour une longueur ; "Bleu foncé" pour une coloration) et forcer un type unique casserait des cas réels déjà rencontrés ce soir.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

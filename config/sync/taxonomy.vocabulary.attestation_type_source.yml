@@ -1,0 +1,9 @@
+uuid: 062a92d7-a954-40e8-9d16-5fd71bfef5ec
+langcode: en
+status: true
+dependencies: {  }
+name: 'Type de source'
+vid: attestation_type_source
+description: null
+weight: 0
+new_revision: false

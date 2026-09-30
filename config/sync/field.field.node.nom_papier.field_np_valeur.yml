@@ -1,0 +1,19 @@
+uuid: 9b7e2809-4b6a-4690-a439-2e54ffbf8d32
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_valeur
+    - node.type.nom_papier
+id: node.nom_papier.field_np_valeur
+field_name: field_np_valeur
+entity_type: node
+bundle: nom_papier
+label: 'Valeur (forme du nom)'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

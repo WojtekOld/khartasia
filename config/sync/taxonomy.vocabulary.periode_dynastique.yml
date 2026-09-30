@@ -1,0 +1,9 @@
+uuid: 6480c4ad-7b00-4d46-a5b0-f614eb7f674c
+langcode: en
+status: true
+dependencies: {  }
+name: 'Période dynastique'
+vid: periode_dynastique
+description: 'Périodes historiques par pays, avec bornes chronologiques, pour datation des attestations. Organisé par pays parent — pas de liste plate.'
+weight: 0
+new_revision: false

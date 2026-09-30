@@ -1,0 +1,33 @@
+uuid: fd091af0-12c4-4664-9163-e2effd451ada
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_np_statut
+field_name: field_np_statut
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: atteste
+      label: attesté
+    -
+      value: courant
+      label: courant
+    -
+      value: historique
+      label: historique
+    -
+      value: rejete
+      label: 'rejeté (non documenté)'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

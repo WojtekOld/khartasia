@@ -1,0 +1,21 @@
+uuid: 9a3a27a8-28fb-4a17-8f1f-2d59dd67d43e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_papier
+    - node.type.nom_papier
+id: node.nom_papier.field_np_papier
+field_name: field_np_papier
+entity_type: node
+bundle: nom_papier
+label: 'Papier (fiche canonique)'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings: {  }
+field_type: entity_reference

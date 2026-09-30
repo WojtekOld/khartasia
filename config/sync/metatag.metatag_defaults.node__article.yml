@@ -1,0 +1,14 @@
+uuid: be0af886-050e-4130-a556-a5adc6e5d954
+langcode: en
+status: true
+dependencies: {  }
+id: node__article
+label: 'Plantes (article)'
+tags:
+  title: '[node:title] — Plante à papier | Khartasia'
+  description: '[node:title] — fiche du répertoire scientifique Khartasia sur les plantes à papier utilisées dans la fabrication artisanale asiatique (Chine, Japon, Corée).'
+  og_title: '[node:title] — Plante à papier | Khartasia'
+  og_description: '[node:title] — fiche du répertoire scientifique Khartasia sur les plantes à papier utilisées dans la fabrication artisanale asiatique (Chine, Japon, Corée).'
+  og_type: article
+  schema_web_page_type: WebPage
+  schema_web_page_description: '[node:title] — fiche du répertoire scientifique Khartasia sur les plantes à papier utilisées dans la fabrication artisanale asiatique (Chine, Japon, Corée).'

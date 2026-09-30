@@ -1,0 +1,20 @@
+uuid: 1eb61835-a479-46e8-8e84-a43b8f3569f5
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_att_periode_debut
+field_name: field_att_periode_debut
+entity_type: node
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

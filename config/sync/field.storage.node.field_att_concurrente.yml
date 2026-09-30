@@ -1,0 +1,19 @@
+uuid: ac2a3dbd-dc38-472c-bf9c-0e1217cf56e1
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_att_concurrente
+field_name: field_att_concurrente
+entity_type: node
+type: entity_reference
+settings:
+  target_type: node
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

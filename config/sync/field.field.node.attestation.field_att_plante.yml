@@ -1,0 +1,24 @@
+uuid: 8fd39c46-c7a3-40bf-97d5-f6c1d96fd5f0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_plante
+    - node.type.article
+    - node.type.attestation
+id: node.attestation.field_att_plante
+field_name: field_att_plante
+entity_type: node
+bundle: attestation
+label: 'Plante concernée'
+description: 'La plante (content type "article") concernée, si applicable (notamment pour composition et critère morphologique).'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      article: article
+field_type: entity_reference

@@ -1,0 +1,23 @@
+uuid: 31689568-956d-471b-8fcf-0b0fad0f97e2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_periode_annee_debut
+    - taxonomy.vocabulary.periode_dynastique
+id: taxonomy_term.periode_dynastique.field_periode_annee_debut
+field_name: field_periode_annee_debut
+entity_type: taxonomy_term
+bundle: periode_dynastique
+label: 'Année de début'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

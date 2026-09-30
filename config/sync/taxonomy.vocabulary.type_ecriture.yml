@@ -1,0 +1,9 @@
+uuid: 27c99d27-a1bd-40e1-9599-c2ef143358b9
+langcode: en
+status: true
+dependencies: {  }
+name: "Type d'écriture"
+vid: type_ecriture
+description: "Système d'écriture d'une variante de nom vernaculaire — distinct de la langue (field_language_taxo_vern). Une langue peut avoir plusieurs écritures légitimes (ex. chinois : simplifié/traditionnel/pinyin)."
+weight: 0
+new_revision: false

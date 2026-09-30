@@ -1,0 +1,9 @@
+uuid: 2fd49be6-5eb0-4bca-92a0-f98a583a8a81
+langcode: en
+status: true
+dependencies: {  }
+name: "Type d'attestation"
+vid: attestation_type
+description: null
+weight: 0
+new_revision: false

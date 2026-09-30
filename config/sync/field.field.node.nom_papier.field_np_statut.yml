@@ -1,0 +1,21 @@
+uuid: cbe0622f-c162-4486-8346-ae0585225a26
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_statut
+    - node.type.nom_papier
+  module:
+    - options
+id: node.nom_papier.field_np_statut
+field_name: field_np_statut
+entity_type: node
+bundle: nom_papier
+label: 'Statut épistémique'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

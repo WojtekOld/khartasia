@@ -1,0 +1,190 @@
+uuid: d6bd90b3-aad1-4f4c-8309-8955ad29499a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.attestation.field_att_a_revoir
+    - field.field.node.attestation.field_att_approx
+    - field.field.node.attestation.field_att_axe
+    - field.field.node.attestation.field_att_commentaire_ecart
+    - field.field.node.attestation.field_att_comparaison_note
+    - field.field.node.attestation.field_att_comparaison_ref
+    - field.field.node.attestation.field_att_concept_taxo
+    - field.field.node.attestation.field_att_concurrente
+    - field.field.node.attestation.field_att_lieu
+    - field.field.node.attestation.field_att_nom_vernaculaire
+    - field.field.node.attestation.field_att_note_interne
+    - field.field.node.attestation.field_att_papier
+    - field.field.node.attestation.field_att_periode
+    - field.field.node.attestation.field_att_periode_debut
+    - field.field.node.attestation.field_att_periode_fin
+    - field.field.node.attestation.field_att_plante
+    - field.field.node.attestation.field_att_relation_ecart
+    - field.field.node.attestation.field_att_revue_motifs
+    - field.field.node.attestation.field_att_source
+    - field.field.node.attestation.field_att_statut
+    - field.field.node.attestation.field_att_statut_presence
+    - field.field.node.attestation.field_att_type
+    - field.field.node.attestation.field_att_type_ecriture
+    - field.field.node.attestation.field_att_type_source
+    - field.field.node.attestation.field_att_valeur
+    - node.type.attestation
+  module:
+    - options
+    - user
+id: node.attestation.default
+targetEntityType: node
+bundle: attestation
+mode: default
+content:
+  field_att_approx:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 10
+    region: content
+  field_att_axe:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_att_commentaire_ecart:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 14
+    region: content
+  field_att_comparaison_note:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 16
+    region: content
+  field_att_comparaison_ref:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 15
+    region: content
+  field_att_concurrente:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  field_att_lieu:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 11
+    region: content
+  field_att_papier:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_att_periode_debut:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_att_periode_fin:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 9
+    region: content
+  field_att_plante:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_att_relation_ecart:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 13
+    region: content
+  field_att_source:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_att_statut:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_att_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_att_type_source:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_att_valeur:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  field_att_a_revoir: true
+  field_att_concept_taxo: true
+  field_att_nom_vernaculaire: true
+  field_att_note_interne: true
+  field_att_periode: true
+  field_att_revue_motifs: true
+  field_att_statut_presence: true
+  field_att_type_ecriture: true
+  langcode: true
+  search_api_excerpt: true

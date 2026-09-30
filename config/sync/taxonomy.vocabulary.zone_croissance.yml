@@ -1,0 +1,9 @@
+uuid: 1bd78b1c-bcc2-4968-a81c-1fbaaf297c46
+langcode: en
+status: true
+dependencies: {  }
+name: 'Zone de croissance'
+vid: zone_croissance
+description: "Aire de répartition naturelle ou cultivée d'une plante (field_aire_croissance) — distinct de zone_historique_production (fabrication du papier) et de pays (origine du papier)."
+weight: 0
+new_revision: false

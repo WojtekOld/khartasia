@@ -1,0 +1,21 @@
+uuid: 18970a99-7362-4423-99d7-f4fbd63693fd
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_source
+    - node.type.nom_papier
+id: node.nom_papier.field_np_source
+field_name: field_np_source
+entity_type: node
+bundle: nom_papier
+label: Source
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:bibcite_reference'
+  handler_settings: {  }
+field_type: entity_reference

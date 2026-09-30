@@ -1,0 +1,250 @@
+uuid: 41442db8-d757-4ffc-a014-5b3e8053e78a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.attestation.field_att_a_revoir
+    - field.field.node.attestation.field_att_approx
+    - field.field.node.attestation.field_att_axe
+    - field.field.node.attestation.field_att_commentaire_ecart
+    - field.field.node.attestation.field_att_comparaison_note
+    - field.field.node.attestation.field_att_comparaison_ref
+    - field.field.node.attestation.field_att_concept_taxo
+    - field.field.node.attestation.field_att_concurrente
+    - field.field.node.attestation.field_att_lieu
+    - field.field.node.attestation.field_att_nom_vernaculaire
+    - field.field.node.attestation.field_att_note_interne
+    - field.field.node.attestation.field_att_papier
+    - field.field.node.attestation.field_att_periode
+    - field.field.node.attestation.field_att_periode_debut
+    - field.field.node.attestation.field_att_periode_fin
+    - field.field.node.attestation.field_att_plante
+    - field.field.node.attestation.field_att_relation_ecart
+    - field.field.node.attestation.field_att_revue_motifs
+    - field.field.node.attestation.field_att_source
+    - field.field.node.attestation.field_att_statut
+    - field.field.node.attestation.field_att_statut_presence
+    - field.field.node.attestation.field_att_type
+    - field.field.node.attestation.field_att_type_ecriture
+    - field.field.node.attestation.field_att_type_source
+    - field.field.node.attestation.field_att_valeur
+    - node.type.attestation
+  module:
+    - path
+id: node.attestation.default
+targetEntityType: node
+bundle: attestation
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_att_approx:
+    type: boolean_checkbox
+    weight: 10
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_att_axe:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_commentaire_ecart:
+    type: string_textarea
+    weight: 14
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_comparaison_note:
+    type: string_textarea
+    weight: 16
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_comparaison_ref:
+    type: entity_reference_autocomplete
+    weight: 15
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_concurrente:
+    type: entity_reference_autocomplete
+    weight: 12
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_lieu:
+    type: entity_reference_autocomplete
+    weight: 11
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_papier:
+    type: entity_reference_autocomplete
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_periode_debut:
+    type: number
+    weight: 8
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_periode_fin:
+    type: number
+    weight: 9
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_plante:
+    type: entity_reference_autocomplete
+    weight: 3
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_relation_ecart:
+    type: options_select
+    weight: 13
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_att_source:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_statut:
+    type: options_select
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_att_type:
+    type: entity_reference_autocomplete
+    weight: 0
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_type_source:
+    type: entity_reference_autocomplete
+    weight: 1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_valeur:
+    type: string_textarea
+    weight: 4
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  simple_sitemap:
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 120
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: -5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  url_redirects:
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_att_a_revoir: true
+  field_att_concept_taxo: true
+  field_att_nom_vernaculaire: true
+  field_att_note_interne: true
+  field_att_periode: true
+  field_att_revue_motifs: true
+  field_att_statut_presence: true
+  field_att_type_ecriture: true
+  promote: true
+  sticky: true

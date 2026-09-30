@@ -1,0 +1,24 @@
+uuid: 499dcc7b-316e-4a42-8b66-4d5d0f073adc
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_periode
+    - node.type.attestation
+    - taxonomy.vocabulary.periode_dynastique
+id: node.attestation.field_att_periode
+field_name: field_att_periode
+entity_type: node
+bundle: attestation
+label: Période(s)
+description: 'Période(s) dynastique(s) couvertes par cette attestation.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      periode_dynastique: periode_dynastique
+field_type: entity_reference

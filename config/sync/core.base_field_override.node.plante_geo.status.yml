@@ -1,0 +1,22 @@
+uuid: a2c15376-87b4-4b26-810b-41bc3caea804
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.plante_geo
+id: node.plante_geo.status
+field_name: status
+entity_type: node
+bundle: plante_geo
+label: Publié
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Activé
+  off_label: Désactivé
+field_type: boolean

@@ -1,0 +1,21 @@
+uuid: dfeda81f-a542-4e3b-9e7d-9233c0199f73
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_niveau_zone
+    - taxonomy.vocabulary.zone_historique_production
+  module:
+    - options
+id: taxonomy_term.zone_historique_production.field_niveau_zone
+field_name: field_niveau_zone
+entity_type: taxonomy_term
+bundle: zone_historique_production
+label: 'Niveau logique'
+description: "Permet d'interroger uniformément à travers les profondeurs différentes selon les pays."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

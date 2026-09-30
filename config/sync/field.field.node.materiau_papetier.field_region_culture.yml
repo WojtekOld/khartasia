@@ -1,0 +1,24 @@
+uuid: d6678f4e-c8bb-4409-b9b5-6252c98a3d85
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_region_culture
+    - node.type.materiau_papetier
+    - taxonomy.vocabulary.zone_historique_production
+id: node.materiau_papetier.field_region_culture
+field_name: field_region_culture
+entity_type: node
+bundle: materiau_papetier
+label: 'Région de culture'
+description: "Où ce matériau est cultivé/sélectionné — pas l'aire de répartition naturelle de la plante (zone_croissance), la géographie de la pratique papetière."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      zone_historique_production: zone_historique_production
+field_type: entity_reference

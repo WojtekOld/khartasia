@@ -1,0 +1,21 @@
+uuid: 8c088abe-bda1-4c0b-8762-60f497433354
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_statut
+    - node.type.attestation
+  module:
+    - options
+id: node.attestation.field_att_statut
+field_name: field_att_statut
+entity_type: node
+bundle: attestation
+label: 'Statut épistémique'
+description: 'Degré de certitude de cette affirmation. OBLIGATOIRE — c''est le garde-fou qui aurait empêché une valeur comme "variable" de se répandre sur 49 fiches sans que personne ne s''en aperçoive (cas réel : field_pf_graff_c).'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

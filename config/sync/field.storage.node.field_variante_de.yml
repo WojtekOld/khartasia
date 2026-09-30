@@ -1,0 +1,19 @@
+uuid: b5fcaa09-0dbc-4281-afe9-c1dd2010c0f1
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_variante_de
+field_name: field_variante_de
+entity_type: node
+type: entity_reference
+settings:
+  target_type: node
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

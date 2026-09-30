@@ -1,0 +1,24 @@
+uuid: 05a29ad1-5cab-487c-8ed0-93829cd59e5c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_type_source
+    - node.type.attestation
+    - taxonomy.vocabulary.attestation_type_source
+id: node.attestation.field_att_type_source
+field_name: field_att_type_source
+entity_type: node
+bundle: attestation
+label: 'Type de source'
+description: "Nature de la source de cette affirmation. Vocabulaire extensible depuis l'interface."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      attestation_type_source: attestation_type_source
+field_type: entity_reference

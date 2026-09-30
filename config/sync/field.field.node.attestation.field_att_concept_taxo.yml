@@ -1,0 +1,21 @@
+uuid: 03bb59df-448b-4bcd-80a1-35b674ffc7af
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_concept_taxo
+    - node.type.attestation
+  module:
+    - options
+id: node.attestation.field_att_concept_taxo
+field_name: field_att_concept_taxo
+entity_type: node
+bundle: attestation
+label: 'Concept taxonomique'
+description: 'Référentiel taxonomique suivi pour cette ligne (obligatoire — POWO et GRIN peuvent délimiter un taxon différemment).'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

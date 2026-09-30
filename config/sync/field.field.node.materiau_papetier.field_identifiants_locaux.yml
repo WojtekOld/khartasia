@@ -1,0 +1,19 @@
+uuid: cce5c83f-86c7-43db-bebd-9d1a92b5d0a2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_identifiants_locaux
+    - node.type.materiau_papetier
+id: node.materiau_papetier.field_identifiants_locaux
+field_name: field_identifiants_locaux
+entity_type: node
+bundle: materiau_papetier
+label: 'Identifiants locaux'
+description: "Codes de localité ou de clone tels qu'employés dans les sources (ex. codes de localité coréens) — pas des cultivars nommés sauf preuve contraire."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

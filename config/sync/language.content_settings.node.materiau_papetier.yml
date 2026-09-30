@@ -1,0 +1,11 @@
+uuid: 617870ec-6b1f-4840-a3fc-a9615b843ab0
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.materiau_papetier
+id: node.materiau_papetier
+target_entity_type_id: node
+target_bundle: materiau_papetier
+default_langcode: site_default
+language_alterable: false

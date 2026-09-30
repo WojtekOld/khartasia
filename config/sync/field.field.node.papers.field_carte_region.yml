@@ -1,0 +1,23 @@
+uuid: e58ef923-f437-4c8f-9cd8-835267989b34
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_carte_region
+    - node.type.papers
+  module:
+    - link
+id: node.papers.field_carte_region
+field_name: field_carte_region
+entity_type: node
+bundle: papers
+label: 'Carte de la région'
+description: 'Lien vers une carte (Google Maps) situant la zone de production analysée sur cette fiche.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 1
+  link_type: 17
+field_type: link

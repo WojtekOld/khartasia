@@ -4,6 +4,9 @@ status: true
 dependencies: {  }
 name: 'Classification botanique'
 vid: classification_botanique
-description: 'Genre dans la Classification botanique'
+description: |-
+  Genre dans la Classification botanique
+
+  Note (ajoutée le 08/09/2026) : quatre termes de genre (Broussonetia, Phyllostachys, Edgeworthia, Wikstroemia) ont été insérés entre espèce et famille, uniquement pour ces quatre genres, pour porter les matériaux papetiers génériques du chantier materiau_papetier. Le reste du vocabulaire reste à plat (espèce directement sous famille) — asymétrie volontaire, pas une incohérence.
 weight: -10
 new_revision: false

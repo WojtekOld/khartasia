@@ -1,0 +1,24 @@
+uuid: b700ac4c-aba7-418b-a3e4-d3c9c6b4b984
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_type_ecriture
+    - node.type.attestation
+    - taxonomy.vocabulary.type_ecriture
+id: node.attestation.field_att_type_ecriture
+field_name: field_att_type_ecriture
+entity_type: node
+bundle: attestation
+label: "Type d'écriture"
+description: "Système d'écriture de cette variante précise (ex. Hanzi traditionnel), distinct de la langue elle-même."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      type_ecriture: type_ecriture
+field_type: entity_reference

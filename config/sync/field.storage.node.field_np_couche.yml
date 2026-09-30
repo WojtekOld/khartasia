@@ -1,0 +1,30 @@
+uuid: 4b2cb861-ae3a-4d7c-bb01-ee46a962de88
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_np_couche
+field_name: field_np_couche
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: graphie
+      label: 'Graphie (sinogrammes)'
+    -
+      value: romanisation
+      label: Romanisation
+    -
+      value: traduction
+      label: Traduction
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

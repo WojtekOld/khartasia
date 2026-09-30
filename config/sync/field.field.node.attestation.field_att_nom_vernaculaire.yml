@@ -1,0 +1,26 @@
+uuid: bb24e083-f4ad-482e-ada4-18c77cc33050
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_nom_vernaculaire
+    - node.type.attestation
+    - node.type.common_names
+    - node.type.nom_papier
+id: node.attestation.field_att_nom_vernaculaire
+field_name: field_att_nom_vernaculaire
+entity_type: node
+bundle: attestation
+label: 'Nom vernaculaire concerné'
+description: "Le nom vernaculaire (fiche common_names) dont cette attestation documente une variante d'écriture."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      common_names: common_names
+      nom_papier: nom_papier
+field_type: entity_reference

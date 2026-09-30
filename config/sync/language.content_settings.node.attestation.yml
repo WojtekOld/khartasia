@@ -1,0 +1,11 @@
+uuid: 14a8aac9-3c6c-4c55-860e-602e47e19b32
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.attestation
+id: node.attestation
+target_entity_type_id: node
+target_bundle: attestation
+default_langcode: site_default
+language_alterable: false

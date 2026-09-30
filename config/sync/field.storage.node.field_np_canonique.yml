@@ -1,0 +1,18 @@
+uuid: 6c18edc6-089e-42d0-8274-1bcd5a9a7658
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_np_canonique
+field_name: field_np_canonique
+entity_type: node
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

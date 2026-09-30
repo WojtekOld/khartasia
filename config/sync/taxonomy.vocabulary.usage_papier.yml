@@ -1,0 +1,9 @@
+uuid: bcb61ee6-1e77-46e8-968d-22c1b21a10c4
+langcode: en
+status: true
+dependencies: {  }
+name: 'Usage du papier'
+vid: usage_papier
+description: "Usage final du papier fabriqué — distinct de utilisation_dans_la_fabricatio (rôle d'un composant DANS la fabrication). Amorcé uniquement avec les cas réellement rencontrés dans le corpus (Shan theng, Misugami, Udagami, Hakuuchigami, Maniaigami...), pas une liste générique."
+weight: 0
+new_revision: false

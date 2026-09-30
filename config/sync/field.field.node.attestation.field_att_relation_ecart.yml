@@ -1,0 +1,21 @@
+uuid: 8ecf2625-ab07-4d08-a0cc-44b8e90d84b5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_relation_ecart
+    - node.type.attestation
+  module:
+    - options
+id: node.attestation.field_att_relation_ecart
+field_name: field_att_relation_ecart
+entity_type: node
+bundle: attestation
+label: "Nature de l'écart"
+description: 'Comment cette attestation se positionne par rapport à sa concurrente.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,20 @@
+uuid: 6037b9a3-c579-40be-acf2-02737d2066e6
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_att_periode_fin
+field_name: field_att_periode_fin
+entity_type: node
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -4,14 +4,19 @@ status: true
 dependencies:
   config:
     - field.field.node.papers.body
+    - field.field.node.papers.field_carte_region
     - field.field.node.papers.field_famille_fibreuse
     - field.field.node.papers.field_genus_pap_entity
     - field.field.node.papers.field_genus_taxo_pap
+    - field.field.node.papers.field_image
     - field.field.node.papers.field_origin_taxo
     - field.field.node.papers.field_pap_local_scripture
     - field.field.node.papers.field_pap_synonyme
+    - field.field.node.papers.field_variante_de
+    - image.style.thumbnail
     - node.type.papers
   module:
+    - image
     - path
     - text
 id: node.papers.default
@@ -51,6 +56,14 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_image:
+    type: image_image
+    weight: -10
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
   field_pap_local_scripture:
     type: string_textarea
     weight: 1
@@ -86,6 +99,11 @@ content:
     region: content
     settings:
       display_label: true
+    third_party_settings: {  }
+  simple_sitemap:
+    weight: 10
+    region: content
+    settings: {  }
     third_party_settings: {  }
   status:
     type: boolean_checkbox
@@ -125,5 +143,7 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  field_carte_region: true
   field_genus_taxo_pap: true
   field_origin_taxo: true
+  field_variante_de: true

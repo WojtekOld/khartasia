@@ -1,0 +1,21 @@
+uuid: 14bf231d-5184-4745-b239-ac4dba3c6886
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_np_relation
+    - node.type.nom_papier
+id: node.nom_papier.field_np_relation
+field_name: field_np_relation
+entity_type: node
+bundle: nom_papier
+label: 'Type de relation (vide si canonique)'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings: {  }
+field_type: entity_reference

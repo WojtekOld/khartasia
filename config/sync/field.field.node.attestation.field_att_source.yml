@@ -1,0 +1,21 @@
+uuid: 34e7966d-7638-4d71-bbe6-29107541ff80
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_source
+    - node.type.attestation
+id: node.attestation.field_att_source
+field_name: field_att_source
+entity_type: node
+bundle: attestation
+label: Source
+description: 'Référence bibliographique Bibcite. OBLIGATOIRE — toute attestation doit être sourcée.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:bibcite_reference'
+  handler_settings: {  }
+field_type: entity_reference

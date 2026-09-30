@@ -1,0 +1,22 @@
+uuid: 2e39956f-80e2-40e9-91a0-5bdfb8706a55
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.materiau_papetier
+id: node.materiau_papetier.status
+field_name: status
+entity_type: node
+bundle: materiau_papetier
+label: Publié
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Activé
+  off_label: Désactivé
+field_type: boolean

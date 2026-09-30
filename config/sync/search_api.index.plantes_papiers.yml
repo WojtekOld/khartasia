@@ -9,6 +9,7 @@ dependencies:
     - field.storage.node.field_tax_family
     - search_api.server.khartasia_search
   module:
+    - khartasia_search
     - node
 id: plantes_papiers
 name: 'Plantes et Papiers'
@@ -47,6 +48,11 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_tax_family
+  khartasia_synonymes_powo:
+    label: 'Synonymes botaniques (POWO)'
+    datasource_id: 'entity:node'
+    property_path: khartasia_synonymes_powo
+    type: text
   title:
     label: Titre
     datasource_id: 'entity:node'
@@ -76,6 +82,9 @@ processor_settings:
   aggregated_field: {  }
   custom_value: {  }
   entity_type: {  }
+  khartasia_synonymes_powo:
+    plugin_id: khartasia_synonymes_powo
+    settings: {  }
   language_with_fallback: {  }
   rendered_item: {  }
 tracker_settings:

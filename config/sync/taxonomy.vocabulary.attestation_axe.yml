@@ -1,0 +1,9 @@
+uuid: e3abe6ed-ee05-4681-b2db-d26089413247
+langcode: en
+status: true
+dependencies: {  }
+name: "Axe d'attestation"
+vid: attestation_axe
+description: 'Sous-catégorie précise à l''intérieur d''un type d''Attestation (ex : "longueur" pour un critère morphologique, "colorant" pour une composition).'
+weight: 0
+new_revision: false

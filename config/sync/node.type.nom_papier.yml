@@ -1,0 +1,11 @@
+uuid: e947eb40-b97b-4334-ab19-f8b749e5b27a
+langcode: en
+status: true
+dependencies: {  }
+name: 'Nom de papier'
+type: nom_papier
+description: null
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

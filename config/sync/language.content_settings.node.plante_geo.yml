@@ -1,0 +1,11 @@
+uuid: 38907d1d-4b9e-4ec6-9226-7710546a1730
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.plante_geo
+id: node.plante_geo
+target_entity_type_id: node
+target_bundle: plante_geo
+default_langcode: site_default
+language_alterable: false

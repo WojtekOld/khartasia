@@ -1,0 +1,9 @@
+uuid: 6f59049d-65f2-4edc-82e1-acacb37470ef
+langcode: en
+status: true
+dependencies: {  }
+name: 'Étape de fabrication'
+vid: etape_fabrication
+description: "Étapes génériques du procédé de fabrication du papier, réutilisables d'un papier à l'autre (chaque attestation Composition/Méthode de fabrication choisit les étapes qui s'appliquent, avec un détail propre à ce papier). Amorcé à partir du procédé du papier de bambou (Liansi, Jiangxi)."
+weight: 0
+new_revision: false

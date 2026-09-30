@@ -1,0 +1,33 @@
+uuid: 9074ff1f-75ca-42b1-9490-850ccf2424a3
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_att_relation_ecart
+field_name: field_att_relation_ecart
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: convergence
+      label: Convergence
+    -
+      value: divergence
+      label: Divergence
+    -
+      value: contradiction
+      label: Contradiction
+    -
+      value: silence
+      label: 'Silence (absence attendue)'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

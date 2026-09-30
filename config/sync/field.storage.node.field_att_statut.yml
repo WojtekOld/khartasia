@@ -1,0 +1,36 @@
+uuid: a9a49a4d-f653-4e10-9f62-55ef83bde705
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_att_statut
+field_name: field_att_statut
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: atteste
+      label: Attesté
+    -
+      value: probable
+      label: Probable
+    -
+      value: hypothetique
+      label: Hypothétique
+    -
+      value: refute
+      label: Réfuté
+    -
+      value: inconnu
+      label: 'Inconnu / à vérifier'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

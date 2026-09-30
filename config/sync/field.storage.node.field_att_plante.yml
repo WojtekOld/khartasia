@@ -1,0 +1,19 @@
+uuid: fa0915bd-dea2-4868-a2f2-c72d2993882d
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_att_plante
+field_name: field_att_plante
+entity_type: node
+type: entity_reference
+settings:
+  target_type: node
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

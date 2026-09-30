@@ -1,0 +1,23 @@
+uuid: f95a35f7-1bda-4d0d-abfe-260c044123c9
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_periode_fin
+    - node.type.attestation
+id: node.attestation.field_att_periode_fin
+field_name: field_att_periode_fin
+entity_type: node
+bundle: attestation
+label: 'Période — fin (année)'
+description: 'Année de fin, vide si toujours en vigueur ou non déterminée.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer
