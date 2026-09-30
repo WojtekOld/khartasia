@@ -15,6 +15,9 @@ settings:
     -
       value: source_sans_type
       label: 'Source renseignée sans type de source'
+    -
+      value: source_absente
+      label: 'Attestation d''un papier sans source'
   allowed_values_function: ''
 module: core
 locked: false

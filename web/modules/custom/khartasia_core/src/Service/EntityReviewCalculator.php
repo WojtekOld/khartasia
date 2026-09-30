@@ -40,6 +40,15 @@ class EntityReviewCalculator {
       $motifs[] = 'source_sans_type';
     }
 
+    // --- source_absente : attestation d'un papier sans aucune source ---
+    // (hors perimetre : les attestations sans papier, ex. caracterisations de plantes)
+    $source_absente = $entity->hasField('field_att_papier') && $entity->hasField('field_att_source')
+      && !$entity->get('field_att_papier')->isEmpty()
+      && $entity->get('field_att_source')->isEmpty();
+    if ($source_absente) {
+      $motifs[] = 'source_absente';
+    }
+
     // --- dispute_signalee : préservé tant que non résolu ---
     $dispute_resolue = $entity->hasField('field_att_concurrente')
       && !$entity->get('field_att_concurrente')->isEmpty();

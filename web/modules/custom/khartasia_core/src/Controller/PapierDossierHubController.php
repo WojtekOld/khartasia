@@ -58,6 +58,13 @@ final class PapierDossierHubController extends ControllerBase {
     if ($etat['attestations']['sources_sans_type_source'] > 0) {
       $backlog_items[] = $this->t('@count attestations sourcées sans type de source', ['@count' => $etat['attestations']['sources_sans_type_source']]);
     }
+    if ($etat['attestations']['sources_absentes'] > 0) {
+      $backlog_items[] = $this->formatPlural(
+        $etat['attestations']['sources_absentes'],
+        '1 attestation sans source',
+        '@count attestations sans source'
+      );
+    }
     if ($etat['attestations']['contradictions_non_resolues'] > 0) {
       $backlog_items[] = $this->t('@count contradictions non tranchées', ['@count' => $etat['attestations']['contradictions_non_resolues']]);
     }

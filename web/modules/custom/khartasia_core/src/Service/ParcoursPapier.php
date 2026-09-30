@@ -44,6 +44,9 @@ final class ParcoursPapier {
     $etat['attestations']['sources_sans_type_source'] = (clone $attQueryBase)
       ->condition('field_att_revue_motifs', 'source_sans_type')
       ->count()->execute();
+    $etat['attestations']['sources_absentes'] = (clone $attQueryBase)
+      ->condition('field_att_revue_motifs', 'source_absente')
+      ->count()->execute();
     $etat['attestations']['contradictions_non_resolues'] = (clone $attQueryBase)
       ->condition('field_att_revue_motifs', 'dispute_signalee')
       ->count()->execute();
