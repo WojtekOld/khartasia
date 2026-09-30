@@ -1,6 +1,9 @@
 /**
  * khartasia-home.css
- * Page d'accueil Khartasia
+ * Page d'accueil Khartasia — version éclaircie : le vert sombre devient
+ * un accent rare (CTA final uniquement), les blocs Stats et Thématiques
+ * passent sur les tons clairs déjà définis (--kh-ocre-l, --kh-brun-l),
+ * cohérent avec la palette existante, sans nouvelle couleur importée.
  */
 
 :root {
@@ -103,68 +106,91 @@
   font-size: 20px; font-weight: 400; color: #F5F0E5;
 }
 
-/* ── Stats ── */
+/* ── Stats — éclairci : fond ocre clair, un seul accent sombre possible
+   via .kh-stat--accent (à ajouter manuellement au premier bloc si voulu,
+   sinon les trois restent uniformément clairs) ── */
 .kh-stats {
   display: grid; grid-template-columns: repeat(3, 1fr);
   border-top: .5px solid var(--kh-sep);
 }
 .kh-stat {
-  padding: 48px; border-right: .5px solid rgba(255,255,255,.08);
-  background: var(--kh-vert-f); text-align: center;
+  padding: 48px; border-right: .5px solid var(--kh-sep);
+  background: var(--kh-ocre-l); text-align: center;
 }
 .kh-stat:last-child { border-right: none; }
 .kh-stat__label {
   font-size: 9px; font-weight: 500; letter-spacing: .14em;
-  color: rgba(232,223,200,.45); text-transform: uppercase;
+  color: var(--kh-ocre); text-transform: uppercase;
   display: block; margin-bottom: 12px;
 }
 .kh-stat__num {
   font-family: var(--wp-font-serif, Georgia, serif);
-  font-size: 56px; font-weight: 400; color: var(--kh-brun-l);
+  font-size: 56px; font-weight: 400; color: var(--kh-noir);
   line-height: 1; display: block; margin-bottom: 8px;
 }
 .kh-stat__sub {
   font-size: 9px; letter-spacing: .1em;
-  color: rgba(232,223,200,.38); text-transform: uppercase;
+  color: var(--kh-gris); text-transform: uppercase;
 }
+/* Accent sombre optionnel — à ajouter en plus de .kh-stat sur un bloc
+   précis si on veut reproduire le motif "France" de la capture. */
+.kh-stat--accent {
+  background: var(--kh-vert-f);
+}
+.kh-stat--accent .kh-stat__label { color: rgba(232,223,200,.45); }
+.kh-stat--accent .kh-stat__num { color: var(--kh-brun-l); }
+.kh-stat--accent .kh-stat__sub { color: rgba(232,223,200,.38); }
 
-/* ── Blocs thématiques ── */
+/* ── Blocs thématiques — éclairci : alternance entre les deux tons
+   clairs déjà existants (ocre-clair / brun-clair) ── */
 .kh-blocks {
   display: grid; grid-template-columns: 1fr 1fr;
   border-top: .5px solid var(--kh-sep);
 }
 .kh-block {
   padding: 52px 48px;
-  border-right: .5px solid rgba(255,255,255,.06);
-  border-bottom: .5px solid rgba(255,255,255,.06);
-  background: var(--kh-vert-f);
+  border-right: .5px solid var(--kh-sep);
+  border-bottom: .5px solid var(--kh-sep);
+  background: var(--kh-ocre-l);
   text-decoration: none;
   display: flex; flex-direction: column; justify-content: space-between;
   min-height: 260px;
   transition: background .2s;
 }
-.kh-block:nth-child(even) { background: #3A4D2E; border-right: none; }
-.kh-block:hover { background: #384828; }
+.kh-block:nth-child(even) { background: var(--kh-brun-l); border-right: none; }
+.kh-block:hover { background: #EDE0C4; }
 .kh-block__eyebrow {
   font-size: 9px; font-weight: 500; letter-spacing: .14em;
-  color: rgba(232,223,200,.45); text-transform: uppercase;
+  color: var(--kh-ocre); text-transform: uppercase;
   display: block; margin-bottom: 16px;
 }
 .kh-block__title {
   font-family: var(--wp-font-serif, Georgia, serif);
-  font-size: 30px; font-weight: 400; color: var(--kh-brun-l);
+  font-size: 30px; font-weight: 400; color: var(--kh-noir);
   line-height: 1.1; margin-bottom: 14px;
 }
 .kh-block__desc {
   font-size: 13px; line-height: 1.7;
-  color: rgba(232,223,200,.62); flex: 1; margin-bottom: 28px;
+  color: var(--kh-gris); flex: 1; margin-bottom: 28px;
 }
 .kh-block__arrow {
   font-size: 10px; font-weight: 500; letter-spacing: .1em;
-  color: var(--kh-ocre); text-transform: uppercase;
+  color: var(--kh-brun); text-transform: uppercase;
 }
+/* Accent sombre optionnel — à ajouter en plus de .kh-block sur un seul
+   bloc (le cinquième, "Techniques", isolé sur sa ligne dans la grille à
+   deux colonnes, est la position la plus naturelle) pour casser la
+   monotonie du clair uniforme, sans réintroduire tout le vert sombre. */
+.kh-block--accent {
+  background: var(--kh-vert-f) !important;
+}
+.kh-block--accent .kh-block__eyebrow { color: rgba(232,223,200,.45); }
+.kh-block--accent .kh-block__title { color: var(--kh-brun-l); }
+.kh-block--accent .kh-block__desc { color: rgba(232,223,200,.62); }
+.kh-block--accent .kh-block__arrow { color: var(--kh-ocre); }
+.kh-block--accent:hover { background: #384828 !important; }
 
-/* ── Blocs secondaires ── */
+/* ── Blocs secondaires — déjà clairs, inchangés ── */
 .kh-secondary {
   display: grid; grid-template-columns: repeat(3, 1fr);
   border-top: .5px solid var(--kh-sep);
@@ -196,7 +222,7 @@
   color: var(--kh-brun); text-transform: uppercase;
 }
 
-/* ── CTA ── */
+/* ── CTA — inchangé, reste sombre (cohérent avec la capture) ── */
 .kh-cta {
   padding: 56px 48px;
   background: var(--kh-noir);

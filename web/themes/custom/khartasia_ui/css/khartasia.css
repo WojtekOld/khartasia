@@ -549,3 +549,115 @@ body {
 .kh-plante__col-right h3.node-title {
   display: none !important;
 }
+
+/* ============================================================
+   Glossaire alphabétique — résumé Views en rangée horizontale
+   ============================================================ */
+.view-summary,
+.view-summary ul,
+.view-summary .item-list__unordered-list {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  list-style: none !important;
+  padding: 0;
+  margin: 0 0 var(--space-lg, 24px);
+}
+
+.view-summary li {
+  display: inline-block;
+  list-style: none;
+}
+
+.view-summary a {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink, #1a1a1a);
+}
+
+.view-summary a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Glossaire alphabétique — correctif v2, basé sur le vrai HTML
+   (le <ul> du résumé n'a aucune classe propre — on cible via
+   le conteneur de la Vue, ajouté systématiquement par Views)
+   ============================================================ */
+.view-id-glossaire_plantes ul,
+.view-id-glossaire_noms ul,
+.view-id-glossaire_papiers ul {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 0 var(--space-lg, 24px) !important;
+}
+
+.view-id-glossaire_plantes li,
+.view-id-glossaire_noms li,
+.view-id-glossaire_papiers li {
+  display: inline-block !important;
+  list-style: none !important;
+}
+
+.view-id-glossaire_plantes ul a,
+.view-id-glossaire_noms ul a,
+.view-id-glossaire_papiers ul a {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink, #1a1a1a);
+  white-space: nowrap;
+}
+
+.view-id-glossaire_plantes ul a:hover,
+.view-id-glossaire_noms ul a:hover,
+.view-id-glossaire_papiers ul a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Glossaire — réduire l'espacement entre les lignes de résultats
+   ============================================================ */
+.view-id-glossaire_plantes .views-row,
+.view-id-glossaire_noms .views-row,
+.view-id-glossaire_papiers .views-row {
+  padding: 4px 0 !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--border, #e2ddd4);
+}
+
+.view-id-glossaire_plantes .views-row .field,
+.view-id-glossaire_noms .views-row .field,
+.view-id-glossaire_papiers .views-row .field {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.view-id-glossaire_plantes .view-content,
+.view-id-glossaire_noms .view-content,
+.view-id-glossaire_papiers .view-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Lien de téléchargement PDF — premier élément de la colonne de droite,
+   style de bouton discret cohérent avec les jetons de conception existants. */
+.kh-meta-card__pdf-link {
+  display: block;
+  text-align: center;
+  background: var(--accent-dark);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  transition: background 0.15s;
+}
+.kh-meta-card__pdf-link:hover {
+  background: var(--accent);
+}

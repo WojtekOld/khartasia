@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Template pour la vue des noms vernaculaires.
+ * Regroupement par langue.
+ * Vue ID: plante_noms_communs
+ * Display: block_1
+ */
+#}
+
+{% set rows = view.style_plugin.render_grouping(rows) %}
+
+<div class="kh-noms-list">
+  {% if rows is empty %}
+    <div class="kh-noms-empty">
+      <p>Aucun nom vernaculaire associé à ce genre.</p>
+    </div>
+  {% else %}
+    {% for group in rows %}
+      {% set group_title = group.grouping.value|striptags|trim %}
+      <div class="kh-noms-group">
+        <h3 class="kh-noms-group__title">
+          {% if group_title %}
+            🌐 {{ group_title }}
+          {% else %}
+            🌐 Langue non spécifiée
+          {% endif %}
+          <span class="kh-noms-group__count">({{ group.rows|length }})</span>
+        </h3>
+        <ul class="kh-noms-group__list">
+          {% for row in group.rows %}
+            <li class="kh-noms-group__item">
+              {{ row.content }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>

@@ -27,8 +27,9 @@
     <a href="/bibliographie" class="kh-nav__link">{{ 'Bibliographie'|t }}</a>
   </div>
   <div class="kh-nav__lang">
-    <a href="/fr" class="kh-nav__lng kh-nav__lng--active">FR</a>
-    <a href="/en" class="kh-nav__lng">EN</a>
+    {% for langue in kh_langues %}
+      <a href="{{ langue.url }}" class="kh-nav__lng{% if langue.active %} kh-nav__lng--active{% endif %}">{{ langue.label }}</a>
+    {% endfor %}
   </div>
 </nav>
 

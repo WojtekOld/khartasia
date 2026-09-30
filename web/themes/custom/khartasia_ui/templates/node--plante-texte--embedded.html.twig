@@ -1,0 +1,27 @@
+{# node--plante-texte--embedded.html.twig #}
+<div class="kh-geo-item">
+  {% if node.field_aire_utilis_ml.value %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Aire d'utilisation</h4>
+      <div class="kh-geo__content">{% if node.field_aire_utilis_ml.value %}<div class="field__item">{{ node.field_aire_utilis_ml.value|raw }}</div>{% endif %}</div>
+    </div>
+  {% endif %}
+  {% if node.field_gen_culture_ml.value %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Culture et usage</h4>
+      <div class="kh-geo__content"><div class="field__item">{{ node.field_gen_culture_ml.value|raw }}</div></div>
+    </div>
+  {% endif %}
+  {% if node.field_intr_paper_ml.value %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Introduction papier</h4>
+      <div class="kh-geo__content"><div class="field__item">{{ node.field_intr_paper_ml.value|raw }}</div></div>
+    </div>
+  {% endif %}
+  {% if node.field_mode_prep_ml.value %}
+    <div class="kh-geo__block">
+      <h4 class="kh-geo__label">Mode de préparation</h4>
+      <div class="kh-geo__content"><div class="field__item">{{ node.field_mode_prep_ml.value|raw }}</div></div>
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,35 @@
+/* Protection basique du contenu — désactivation de la sélection pour les
+   visiteurs non connectés. Exploite la classe user-logged-in déjà posée
+   par Drupal sur le <body> (html.html.twig), sans JS nécessaire ici. */
+body:not(.user-logged-in) {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+body:not(.user-logged-in) a,
+body:not(.user-logged-in) button {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+/* Mention de copyright — visible uniquement à l'impression, invisible à
+   l'écran, pour tous les utilisateurs. */
+.kh-copyright-print {
+  display: none;
+}
+@media print {
+  .kh-copyright-print {
+    display: block !important;
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+  }
+  .kh-copyright-print::before {
+    content: "© Copyright Khartasia / C. Laroque — " attr(data-date);
+  }
+}

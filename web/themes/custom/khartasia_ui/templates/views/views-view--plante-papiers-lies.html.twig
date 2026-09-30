@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Template pour la vue des papiers liés à une plante.
+ * Regroupement par pays.
+ * Vue ID: plante_papiers_lies
+ * Display: block_1
+ */
+#}
+
+{% set rows = view.style_plugin.render_grouping(rows) %}
+
+<div class="kh-papers-list">
+  {% if rows is empty %}
+    <div class="kh-papers-empty">
+      <p>Aucun papier associé à cette plante.</p>
+    </div>
+  {% else %}
+    {% for group in rows %}
+      {% set group_title = group.grouping.value|striptags|trim %}
+      <div class="kh-papers-group">
+        <h3 class="kh-papers-group__title">
+          {% if group_title %}
+            📍 {{ group_title }}
+          {% else %}
+            📍 Pays non spécifié
+          {% endif %}
+          <span class="kh-papers-group__count">({{ group.rows|length }})</span>
+        </h3>
+        <ul class="kh-papers-group__list">
+          {% for row in group.rows %}
+            <li class="kh-papers-group__item">
+              {{ row.content }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>

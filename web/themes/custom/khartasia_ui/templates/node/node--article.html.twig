@@ -1,26 +1,33 @@
-{# node--article.html.twig — Fiche plante Khartasia v3 #}
+{#
+/**
+ * @file
+ * Template pour la fiche plante Khartasia
+ * Utilise les données préparées dans khartasia_ui_preprocess_node()
+ */
+#}
+
 {{ attach_library('khartasia_ui/kh-plante') }}
+{{ attach_library('khartasia_ui/kh-gallery') }}
+
 <article class="kh-plante">
 
-  {# TITRE + SYNONYMES — pleine largeur #}
+  {# TITRE #}
   <header class="kh-plante__header">
     <h1 class="kh-plante__title">{{ node.label }}</h1>
     {% if node.field_synonymes_bot.value %}
-      <div class="kh-plante__synonymes">
-        {{ node.field_synonymes_bot.value|raw }}
-      </div>
+      <div class="kh-plante__synonymes">{{ node.field_synonymes_bot.value|raw }}</div>
     {% endif %}
   </header>
 
-  {# CORPS — deux colonnes égales #}
+  {# CORPS #}
   <div class="kh-plante__body">
 
-    {# COLONNE GAUCHE — image + textes #}
+    {# COLONNE GAUCHE #}
     <div class="kh-plante__col-left">
 
-      {# Image principale en haut #}
-      {% if content.field_image|render %}
-        <div class="kh-plante__main-image">
+      {# Image vedette — juste sous le titre, avant Aire de croissance (comme Wallpaper) #}
+      {% if node.field_image.target_id %}
+        <div class="kh-vedette">
           {{ content.field_image }}
         </div>
       {% endif %}
@@ -33,108 +40,154 @@
         </section>
       {% endif %}
 
-      {# Textes multilingues #}
+      {# Synonymes botaniques sourcés (POWO) — additif au texte libre de l'en-tête #}
+      {% if synonymes_powo|length %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Synonymes POWO ({{ synonymes_total }})</h2>
+          <ul class="kh-papers-group__list">
+            {% for syn in synonymes_powo %}
+              <li class="kh-papers-group__item">
+                <em>{{ syn.nom }}</em>
+                {% if syn.type %}
+                  <span class="kh-badge kh-badge--langue">{{ syn.type }}</span>
+                {% endif %}
+                {% if syn.source_url %}
+                  <a href="{{ syn.source_url }}" target="_blank" rel="noopener" class="kh-nom-scripture">({{ syn.source|upper }})</a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          {{ synonymes_pager }}
+        </section>
+      {% endif %}
+
+      {# === PAPIERS LIÉS (regroupés par pays) === #}
       <section class="kh-plante__section">
-        <h2 class="kh-plante__section-title">Données par pays de fabrication</h2>
-        <div class="kh-lang-tabs">
-          <div class="kh-lang-tabs__nav">
-            <button class="kh-lang-tab active" data-lang="fr">Français</button>
-            <button class="kh-lang-tab" data-lang="zh">中文</button>
-            <button class="kh-lang-tab" data-lang="ja">日本語</button>
-            <button class="kh-lang-tab" data-lang="ko">한국어</button>
-            <button class="kh-lang-tab" data-lang="th">ภาษาไทย</button>
-          </div>
-          <div class="kh-lang-tabs__content">
-            {{ drupal_view('plante_textes_multilingues', 'block_1', node.id) }}
-          </div>
-        </div>
+        <h2 class="kh-plante__section-title">Papiers fabriqués depuis cette plante ({{ papers_total }})</h2>
+
+        {% if papers_by_country_paged %}
+          {% for country, papers in papers_by_country_paged %}
+            <div class="kh-papers-group">
+              <h4 class="kh-papers-group__title">
+                📍 {{ country }}
+                <span class="kh-papers-group__count">({{ papers|length }})</span>
+              </h4>
+              <ul class="kh-papers-group__list">
+                {% for paper in papers %}
+                  <li class="kh-papers-group__item">
+                    <a href="{{ paper.url }}">{{ paper.titre }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+
+          {{ papers_pager }}
+
+        {% else %}
+          <p>Aucun papier associé à cette plante.</p>
+        {% endif %}
       </section>
 
-      {# Zones géographiques #}
-      {% if node.field_zones_geo|length %}
+      {# === NOMS VERNACULAIRES (regroupés par langue) === #}
+      <section class="kh-plante__section">
+        <h2 class="kh-plante__section-title">Noms vernaculaires ({{ noms_total }})</h2>
+
+        {% if noms_by_langue_paged %}
+          {% for langue, noms in noms_by_langue_paged %}
+            <div class="kh-noms-group">
+              <h4 class="kh-noms-group__title">
+                🌐 {{ langue }}
+                <span class="kh-noms-group__count">({{ noms|length }})</span>
+              </h4>
+              <ul class="kh-noms-group__list">
+                {% for nom in noms %}
+                  <li class="kh-noms-group__item">
+                    <a href="{{ nom.url }}">{{ nom.titre }}</a>
+                    {% if nom.scripture %}
+                      <span class="kh-nom-scripture">({{ nom.scripture }})</span>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+
+          {{ noms_pager }}
+
+        {% else %}
+          <p>Aucun nom vernaculaire associé à ce genre.</p>
+        {% endif %}
+      </section>
+
+      {# Zones de production — reconstruit à partir de plante_texte, la
+         structure consolidée (plante_geo, doublon du même contenu organisé
+         par pays plutôt que par langue, a été retiré). #}
+      {% if textes_multilingues %}
         <section class="kh-plante__section">
           <h2 class="kh-plante__section-title">Zones de production</h2>
           <div class="kh-accordion">
-            {% for item in node.field_zones_geo %}
-              {% set geo = item.entity %}
-              {% if geo %}
-                {% set pays = geo.field_pg_pays.entity %}
-                <div class="kh-accordion__item">
-                  <button class="kh-accordion__trigger" aria-expanded="false">
-                    <span>{{ pays ? pays.label : geo.label }}</span>
-                    <span class="kh-accordion__icon" aria-hidden="true">+</span>
-                  </button>
-                  <div class="kh-accordion__panel" hidden>
-                    {{ drupal_entity('node', geo.id, 'embedded') }}
-                  </div>
+            {% for texte in textes_multilingues %}
+              <div class="kh-accordion__item">
+                <button class="kh-accordion__trigger" aria-expanded="false">
+                  <span>{{ texte.label }}</span>
+                  <span class="kh-accordion__icon">+</span>
+                </button>
+                <div class="kh-accordion__panel" hidden>
+                  {{ drupal_entity('node', texte.nid, 'embedded') }}
                 </div>
-              {% endif %}
+              </div>
             {% endfor %}
           </div>
         </section>
       {% endif %}
 
-      {# Papers liés #}
-      <section class="kh-plante__section">
-        <div class="kh-accordion">
-          <div class="kh-accordion__item">
-            <button class="kh-accordion__trigger" aria-expanded="false">
-              <span>Papiers fabriqués depuis cette plante</span>
-              <span class="kh-accordion__icon" aria-hidden="true">+</span>
-            </button>
-            <div class="kh-accordion__panel" hidden>
-              {% for paper in papers_lies %}<div class='kh-paper-item'><a href='{{ paper.url }}'>{{ paper.titre }}</a>{% if paper.origin %} - {{ paper.origin }}{% endif %}</div>{% endfor %}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {# Noms vernaculaires #}
-      <section class="kh-plante__section">
-        <div class="kh-accordion">
-          <div class="kh-accordion__item">
-            <button class="kh-accordion__trigger" aria-expanded="false">
-              <span>Noms vernaculaires</span>
-              <span class="kh-accordion__icon" aria-hidden="true">+</span>
-            </button>
-            <div class="kh-accordion__panel" hidden>
-              {% if noms_communs %}<table class='kh-noms-table'><thead><tr><th>Nom</th><th>Langue</th><th>Ecriture locale</th></tr></thead><tbody>{% for nom in noms_communs %}<tr><td><a href='{{ nom.url }}'>{{ nom.titre }}</a></td><td>{{ nom.langue }}</td><td>{{ nom.scripture }}</td></tr>{% endfor %}</tbody></table>{% endif %}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {# Galeries #}
-      {% if content.field_image_gallery_1|render %}
+      {# Attestations Géographie — statut de présence sourcé (POWO/GRIN),
+         distinct du texte libre ci-dessus et des coordonnées plante_geo. #}
+      {% if attestations_geo|length %}
         <section class="kh-plante__section">
-          <h2 class="kh-plante__section-title">Galerie</h2>
-          {{ content.field_image_gallery_1 }}
-          {% if content.field_image_gallery_2|render %}
-            {{ content.field_image_gallery_2 }}
-          {% endif %}
+          <h2 class="kh-plante__section-title">Statut géographique attesté ({{ attestations_geo|length }})</h2>
+          <ul class="kh-papers-group__list">
+            {% for att in attestations_geo %}
+              <li class="kh-papers-group__item">
+                <strong>{{ att.lieu }}</strong>
+                <span class="kh-badge">{{ att.statut_presence }}</span>
+                {% if att.valeur %}
+                  <div class="kh-prose">{{ att.valeur }}</div>
+                {% endif %}
+                {% if att.source %}
+                  <span class="kh-nom-scripture">Source : {{ att.source }}</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
         </section>
       {% endif %}
 
     </div>{# fin col-left #}
 
-    {# COLONNE DROITE — métadonnées #}
+    {# COLONNE DROITE #}
     <div class="kh-plante__col-right">
 
-      {# Classification botanique #}
+      {# Classification #}
       <div class="kh-meta-card">
         <h3 class="kh-meta-card__title">Classification botanique</h3>
+        
         <dl class="kh-meta-card__dl">
-          {% if content.field_tax_order|render %}
-            <dt>Ordre</dt>
-            <dd>{{ content.field_tax_order }}</dd>
+          {% if node.field_tax_order.target_id %}
+            <dt>Ordre</dt><dd>{{ content.field_tax_order }}</dd>
           {% endif %}
-          {% if content.field_tax_family|render %}
-            <dt>Famille</dt>
-            <dd>{{ content.field_tax_family }}</dd>
+          {% if node.field_tax_family.target_id %}
+            <dt>Famille</dt><dd>{{ content.field_tax_family }}</dd>
           {% endif %}
-          {% if content.field_tax_genus|render %}
-            <dt>Genre</dt>
-            <dd>{{ content.field_tax_genus }}</dd>
+          {% if node.field_tax_genus.target_id %}
+            <dt>Genre</dt><dd>{{ content.field_tax_genus }}</dd>
+          {% endif %}
+          {% if att_nom_accepte_powo %}
+            <dt>Nom accepté (POWO)</dt><dd>{{ att_nom_accepte_powo }}</dd>
+          {% endif %}
+          {% if att_taxon_cultigene %}
+            <dt>Taxon cultigène</dt><dd><span class="kh-badge">Oui — pas d'aire native au sens classique</span></dd>
           {% endif %}
         </dl>
       </div>
@@ -143,35 +196,73 @@
       <div class="kh-meta-card">
         <h3 class="kh-meta-card__title">Usage papetier</h3>
         <dl class="kh-meta-card__dl">
-          {% if content.field_used_part_plant|render %}
-            <dt>Partie utilisée</dt>
-            <dd>{{ content.field_used_part_plant }}</dd>
+          {% if node.field_used_part_plant.target_id %}
+            <dt>Partie utilisée</dt><dd>{{ content.field_used_part_plant }}</dd>
           {% endif %}
-          {% if content.field_use_paper_making|render %}
-            <dt>Usage</dt>
-            <dd>{{ content.field_use_paper_making }}</dd>
+          {% if node.field_use_paper_making.target_id %}
+            <dt>Usage</dt><dd>{{ content.field_use_paper_making }}</dd>
           {% endif %}
           {% if node.field_paper_name.value %}
-            <dt>Nom du papier</dt>
-            <dd>{{ node.field_paper_name.value|striptags }}</dd>
+            <dt>Nom du papier</dt><dd>{{ node.field_paper_name.value|striptags }}</dd>
           {% endif %}
         </dl>
       </div>
 
-      {# Identification fibres #}
-      {# Identification fibres #}
-      {% if node.field_fibres.entity %}
+      {% if criteres_morpho %}
         <div class="kh-meta-card">
-          <h3 class="kh-meta-card__title">Identification des fibres</h3>
-          {{ drupal_entity('node', node.field_fibres.entity.id, 'embedded') }}
+          <h3 class="kh-meta-card__title">Éléments pour l'identification des fibres</h3>
+          <table class="kh-criteres-table">
+            <tbody>
+              {% for c in criteres_morpho %}
+                <tr>
+                  <td class="kh-criteres-table__label">{{ c.critere }}</td>
+                  <td class="kh-criteres-table__valeur">
+                    {{ c.valeur }}
+                    {% if c.statut == 'hypothetique' %}
+                      <span class="kh-badge kh-badge--hypothese" title="Statut : hypothétique">?</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       {% endif %}
 
     </div>{# fin col-right #}
 
   </div>{# fin body #}
+
+  {# === GALERIE EN FOOTER (test) — rangée gauche à droite, retour à la ligne si trop d'images === #}
+  {% set gallery_images = [] %}
+  {% for item in node.field_image_gallery_1 %}
+    {% if item.entity %}
+      {% set gallery_images = gallery_images|merge([{
+        url: file_url(item.entity.uri.value),
+        alt: item.alt|default(''),
+      }]) %}
+    {% endif %}
+  {% endfor %}
+  {% for item in node.field_image_gallery_2 %}
+    {% if item.entity %}
+      {% set gallery_images = gallery_images|merge([{
+        url: file_url(item.entity.uri.value),
+        alt: item.alt|default(''),
+      }]) %}
+    {% endif %}
+  {% endfor %}
+
+  {% if gallery_images|length %}
+    <footer class="kh-plante__footer">
+      <h2 class="kh-plante__section-title">Galerie ({{ gallery_images|length }})</h2>
+      <div class="kh-gallery-footer">
+        {% for img in gallery_images %}
+          <a class="kh-gallery-footer__item" href="{{ img.url }}" target="_blank" rel="noopener" title="{{ img.alt }}">
+            <img src="{{ img.url }}" alt="{{ img.alt }}" loading="lazy">
+          </a>
+        {% endfor %}
+      </div>
+    </footer>
+  {% endif %}
+
 </article>
-
-
-
-

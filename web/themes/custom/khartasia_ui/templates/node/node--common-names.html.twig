@@ -1,0 +1,90 @@
+{#
+/**
+ * @file
+ * Template pour les fiches Noms vernaculaires.
+ * Répond à la question réelle d'un utilisateur qui tape "kozo" :
+ * quelle plante, quelle famille botanique, quels papiers l'utilisent —
+ * pas une liste de champs bruts sans contexte.
+ */
+#}
+
+{{ attach_library('khartasia_ui/kh-plante') }}
+
+<article class="kh-plante">
+
+  <header class="kh-plante__header">
+    <h1 class="kh-plante__title">{{ node.label }}</h1>
+    {% if node.field_ver_local_scripture.value %}
+      <div class="kh-plante__synonymes">{{ node.field_ver_local_scripture.value }}</div>
+    {% endif %}
+  </header>
+
+  <div class="kh-plante__body">
+
+    <div class="kh-plante__col-left">
+
+      {% if plante_liee %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Qu'est-ce que c'est ?</h2>
+          <div class="kh-prose">
+            <p>
+              <strong>{{ node.label }}</strong>
+              {% if langue_nom %}
+                est le nom employé en {{ langue_nom }}
+              {% else %}
+                est un nom vernaculaire
+              {% endif %}
+              pour désigner
+              <a href="{{ plante_liee.url }}"><em>{{ plante_liee.titre }}</em></a>{% if plante_liee.famille %}, de la famille des <strong>{{ plante_liee.famille }}</strong>{% if plante_liee.ordre %} (ordre des {{ plante_liee.ordre }}){% endif %}{% endif %}.
+            </p>
+            {% if node.field_vern_syn.value %}
+              <p>Autres formes attestées : {{ node.field_vern_syn.value|raw }}</p>
+            {% endif %}
+          </div>
+        </section>
+
+        {% if papiers_meme_plante_total %}
+          <section class="kh-plante__section">
+            <h2 class="kh-plante__section-title">Papiers fabriqués à partir de cette plante ({{ papiers_meme_plante_total }})</h2>
+            <ul class="kh-papers-group__list">
+              {% for p in papiers_meme_plante %}
+                <li class="kh-papers-group__item">
+                  <a href="{{ p.url }}">{{ p.titre }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+            {{ papiers_meme_plante_pager }}
+          </section>
+        {% endif %}
+      {% else %}
+        <p class="kh-prose">Aucune plante associée à ce nom pour l'instant.</p>
+      {% endif %}
+
+      {% if ecritures_vernaculaires %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Écriture</h2>
+          <ul class="kh-papers-group__list">
+            {% for e in ecritures_vernaculaires %}
+              <li class="kh-papers-group__item">
+                {% if e.type %}<strong>{{ e.type }}</strong> — {% endif %}
+                {{ e.valeur }}
+                {% if e.statut and e.statut != 'attesté' %}<em class="kh-fibre__notes">[{{ e.statut }}]</em>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+    </div>
+
+    <div class="kh-plante__col-right">
+      {% if plante_liee %}
+        <div class="kh-meta-card">
+          <h3 class="kh-meta-card__title">Fiche complète</h3>
+          <p class="kh-prose"><a href="{{ plante_liee.url }}">Voir {{ plante_liee.titre }} →</a></p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</article>

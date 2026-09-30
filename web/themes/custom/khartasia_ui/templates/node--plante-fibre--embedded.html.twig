@@ -1,0 +1,68 @@
+{#
+/**
+ * @file
+ * Template pour les fibres (embedded)
+ */
+#}
+<div class="kh-fibre-item">
+  <dl class="kh-aside__dl">
+    {% if node.field_pf_type.value %}
+      <dt>Type</dt>
+      <dd>{{ node.field_pf_type.value }}</dd>
+    {% endif %}
+    
+    {% if node.field_pf_long_min.value %}
+      <dt>Longueur (mm)</dt>
+      <dd>{{ node.field_pf_long_min.value }} – {{ node.field_pf_long_max.value }}</dd>
+    {% endif %}
+    
+    {% if node.field_pf_larg_min.value %}
+      <dt>Largeur (mm)</dt>
+      <dd>{{ node.field_pf_larg_min.value }} – {{ node.field_pf_larg_max.value }}</dd>
+    {% endif %}
+    
+    {% if node.field_pf_herzberg.value %}
+      <dt>Herzberg</dt>
+      <dd>{{ node.field_pf_herzberg.value }}</dd>
+    {% endif %}
+    
+    {% if node.field_pf_graff_c.value %}
+      <dt>Graff C</dt>
+      <dd>{{ node.field_pf_graff_c.value }}</dd>
+    {% endif %}
+  </dl>
+
+  {% if content.field_pf_extremites|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Extrémités</h4>
+      <div class="field__item">{{ content.field_pf_extremites }}</div>
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_striations|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Striations</h4>
+      <div class="field__item">{{ content.field_pf_striations }}</div>
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_cellules|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Cellules associées</h4>
+      <div class="field__item">{{ content.field_pf_cellules }}</div>
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_particularites|render %}
+    <div class="kh-fibre__block">
+      <h4 class="kh-geo__label">Caractéristiques particulières</h4>
+      <div class="field__item">{{ content.field_pf_particularites }}</div>
+    </div>
+  {% endif %}
+
+  {% if content.field_pf_notes|render %}
+    <div class="kh-fibre__notes">
+      <div class="field__item">{{ content.field_pf_notes }}</div>
+    </div>
+  {% endif %}
+</div>

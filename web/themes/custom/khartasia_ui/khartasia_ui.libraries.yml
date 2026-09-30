@@ -8,13 +8,19 @@ global-styling:
   css:
     theme:
       css/khartasia.css: {}
+      css/kh-protection.css: {}
+  js:
+    js/kh-protection.js: {}
   dependencies:
     - khartasia_ui/fonts
+    - core/drupal
 
 kh-home:
   css:
     theme:
       css/khartasia-home.css: {}
+  js:
+    js/kh-home.js: {}
   dependencies:
     - core/drupal
     - khartasia_ui/fonts
@@ -28,3 +34,12 @@ kh-plante:
   dependencies:
     - core/drupal
     - khartasia_ui/fonts
+
+kh-gallery:
+  css:
+    theme:
+      css/kh-gallery.css: {}
+  js:
+    js/kh-gallery.js: {}
+  dependencies:
+    - core/drupal

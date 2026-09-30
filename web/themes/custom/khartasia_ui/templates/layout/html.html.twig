@@ -1,0 +1,43 @@
+{#
+/**
+ * @file
+ * Khartasia UI's theme implementation for the basic structure of a single
+ * Drupal page — copie fidèle de core/themes/olivero/templates/layout/html.html.twig,
+ * avec une seule ligne ajoutée : le marqueur de build (deploy/wc_deploy.py),
+ * imprimé directement en Twig plutôt que via une manipulation incertaine de
+ * page_bottom dans le préprocesseur PHP.
+ */
+#}
+{%
+  set body_classes = [
+    logged_in ? 'user-logged-in',
+    not root_path ? 'path-frontpage' : 'path-' ~ root_path|clean_class,
+    node_type ? 'page-node-type-' ~ node_type|clean_class,
+    db_offline ? 'db-offline',
+  ]
+%}
+<!DOCTYPE html>
+<html{{ html_attributes }}>
+  <head>
+    <head-placeholder token="{{ placeholder_token }}">
+    <title>{{ head_title|safe_join(' | ') }}</title>
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+    {{ noscript_styles }}
+  </head>
+  <body{{ attributes.addClass(body_classes) }}>
+    {#
+      Keyboard navigation/accessibility link to main content section in
+      page.html.twig.
+    #}
+    <a href="#main-content" class="visually-hidden focusable skip-link">
+      {{ 'Skip to main content'|t }}
+    </a>
+    {{ page_top }}
+    {{ page }}
+    {{ page_bottom }}
+    {% if wc_build_marker %}<!-- wc-build:{{ wc_build_marker }} -->{% endif %}
+    <div class="kh-copyright-print" data-date="{{ 'now'|date('d/m/Y') }}"></div>
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+  </body>
+</html>
