@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Hooks du module Khartasia Techniques.
+ */
+
+/**
+ * Implémente hook_theme().
+ */
+function khartasia_techniques_theme($existing, $type, $theme, $path) {
+  return [
+    'khartasia_techniques_page' => [
+      'variables' => ['papiers' => []],
+      'template' => 'khartasia-techniques-page',
+    ],
+  ];
+}

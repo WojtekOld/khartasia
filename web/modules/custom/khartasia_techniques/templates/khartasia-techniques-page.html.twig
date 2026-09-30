@@ -1,0 +1,22 @@
+<div class="kh-techniques-page" style="max-width:900px;margin:60px auto;padding:0 24px;">
+  <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8a7a4f;">Fabrication artisanale</span>
+  <h1 style="font-family:'Playfair Display',serif;font-size:34px;margin:8px 0 24px;">Techniques de fabrication</h1>
+  <p style="color:#555;margin-bottom:40px;">Procédés de fabrication attestés, papier par papier — extraits des fiches du répertoire, avec leurs sources.</p>
+
+  {% if papiers %}
+    {% for entree in papiers %}
+      <section style="margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid #e8dfc8;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:12px;">
+          <a href="{{ path('entity.node.canonical', {'node': entree.papier.id}) }}" style="color:inherit;text-decoration:none;">{{ entree.papier.label }}</a>
+        </h2>
+        <ol style="padding-left:20px;color:#333;line-height:1.6;">
+          {% for etape in entree.etapes %}
+            <li style="margin-bottom:8px;">{{ etape }}</li>
+          {% endfor %}
+        </ol>
+      </section>
+    {% endfor %}
+  {% else %}
+    <p style="color:#777;">Aucune méthode de fabrication documentée pour l'instant.</p>
+  {% endif %}
+</div>

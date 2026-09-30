@@ -1,0 +1,5 @@
+name: Khartasia PDF Export
+type: module
+description: 'Export PDF protégé (copie/impression désactivées au niveau du fichier) pour les fiches Papiers, avec mention de copyright.'
+core_version_requirement: ^11
+package: Khartasia

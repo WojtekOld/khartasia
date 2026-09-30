@@ -1,0 +1,7 @@
+name: Khartasia Search
+type: module
+description: 'Extensions de recherche pour Khartasia — synonymes botaniques POWO indexés.'
+package: Custom
+core_version_requirement: ^10 || ^11
+dependencies:
+  - search_api:search_api

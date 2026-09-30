@@ -1,0 +1,5 @@
+name: Khartasia Techniques
+type: module
+description: 'Page rassemblant les attestations de Méthode de fabrication de tous les Papiers, groupées par fiche.'
+core_version_requirement: ^11
+package: Khartasia

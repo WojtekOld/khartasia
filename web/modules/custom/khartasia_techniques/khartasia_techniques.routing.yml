@@ -1,0 +1,7 @@
+khartasia_techniques.page:
+  path: '/methode/fabrication'
+  defaults:
+    _controller: '\Drupal\khartasia_techniques\Controller\TechniquesController::page'
+    _title: 'Techniques de fabrication'
+  requirements:
+    _permission: 'access content'

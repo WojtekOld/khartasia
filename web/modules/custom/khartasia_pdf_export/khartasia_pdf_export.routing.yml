@@ -1,0 +1,11 @@
+khartasia_pdf_export.papier_pdf:
+  path: '/papier/{node}/pdf'
+  defaults:
+    _controller: '\Drupal\khartasia_pdf_export\Controller\PapierPdfController::export'
+  requirements:
+    _permission: 'access content'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node
