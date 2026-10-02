@@ -34,3 +34,17 @@ function khartasia_core_theme($existing, $type, $theme, $path) {
     ],
   ];
 }
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Enregistre sur les nœuds deux règles de validation (voir src/Plugin/Validation/Constraint) :
+ * un nom vernaculaire sans plante doit préciser sa portée ; une attestation liée à une plante doit
+ * indiquer son concept taxonomique. Chaque règle ne s'applique qu'à son type de contenu.
+ */
+function khartasia_core_entity_type_alter(array &$entity_types) {
+  if (isset($entity_types['node'])) {
+    $entity_types['node']->addConstraint('KhartasiaNomSansPlante');
+    $entity_types['node']->addConstraint('KhartasiaAttestationConcept');
+  }
+}
