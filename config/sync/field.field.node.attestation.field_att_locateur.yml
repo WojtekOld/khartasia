@@ -1,0 +1,19 @@
+uuid: a2631b96-59db-488c-a803-78c19ee7c90e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_locateur
+    - node.type.attestation
+id: node.attestation.field_att_locateur
+field_name: field_att_locateur
+entity_type: node
+bundle: attestation
+label: 'Localisation dans la source'
+description: 'Page, planche ou entrée précise de la source (par exemple « p. 127 »). Laisser vide si la source est citée dans son ensemble.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,9 @@
+uuid: 0f5edd57-0272-4a6f-9226-6f6f290e1e3b
+langcode: fr
+status: true
+dependencies: {  }
+name: 'Matériau (intrants non végétaux et préparations)'
+vid: materiau
+description: "Substances citées dans les recettes de fabrication qui ne sont pas une plante à l'état brut : colle animale, suie, kaolin, chaux, amidon préparé, mucilage préparé… Un intrant végétal BRUT n'a pas sa place ici : il reste une fiche Plante. La FONCTION de l'intrant (fibre, adhésif, colorant, charge…) ne se saisit jamais ici : elle appartient à l'attestation, car une même substance peut être charge dans un papier et adhésif dans un autre."
+weight: 0
+new_revision: false

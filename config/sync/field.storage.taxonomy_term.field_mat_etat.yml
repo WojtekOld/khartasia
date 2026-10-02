@@ -1,0 +1,27 @@
+uuid: 881c53b6-e84f-4338-bf29-0148f9d002de
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - taxonomy
+id: taxonomy_term.field_mat_etat
+field_name: field_mat_etat
+entity_type: taxonomy_term
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: brut
+      label: Brut
+    -
+      value: prepare
+      label: Préparé
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,33 @@
+uuid: 6f51e28a-bc8d-407d-a289-ef23609a3f77
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - taxonomy
+id: taxonomy_term.field_mat_nature
+field_name: field_mat_nature
+entity_type: taxonomy_term
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: vegetal
+      label: 'Végétal (préparation seulement)'
+    -
+      value: animal
+      label: Animal
+    -
+      value: mineral
+      label: Minéral
+    -
+      value: mixte
+      label: Mixte
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

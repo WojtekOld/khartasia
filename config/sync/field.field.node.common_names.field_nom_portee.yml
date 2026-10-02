@@ -1,0 +1,21 @@
+uuid: b195e679-076e-4840-ba12-f2352c5bb04a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_nom_portee
+    - node.type.common_names
+  module:
+    - options
+id: node.common_names.field_nom_portee
+field_name: field_nom_portee
+entity_type: node
+bundle: common_names
+label: 'Portée du nom'
+description: 'À renseigner seulement si le nom ne désigne aucune fiche Plante : taxon supérieur (genre ou famille), appellatif générique (une fonction) ou nom sans référent papetier (faux nom).'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

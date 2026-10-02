@@ -1,0 +1,21 @@
+uuid: 300e1f69-0e46-460f-be7c-7ba4d64a5814
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_mat_etat
+    - taxonomy.vocabulary.materiau
+  module:
+    - options
+id: taxonomy_term.materiau.field_mat_etat
+field_name: field_mat_etat
+entity_type: taxonomy_term
+bundle: materiau
+label: État
+description: 'Brut : tel que prélevé (kaolin, suie). Préparé : transformé avant emploi (amidon cuit, colle de peau, mucilage préparé).'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,33 @@
+uuid: 8c5fbec2-5a2a-4965-b42a-b2be6280285d
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_nom_portee
+field_name: field_nom_portee
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: espece
+      label: 'Espèce (fiche Plante)'
+    -
+      value: taxon_superieur
+      label: 'Taxon supérieur (genre, famille)'
+    -
+      value: fonction
+      label: 'Appellatif générique (fonction)'
+    -
+      value: sans_referent_papetier
+      label: 'Sans référent papetier (faux nom)'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

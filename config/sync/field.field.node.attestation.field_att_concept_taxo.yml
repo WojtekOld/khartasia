@@ -12,8 +12,8 @@ field_name: field_att_concept_taxo
 entity_type: node
 bundle: attestation
 label: 'Concept taxonomique'
-description: 'Référentiel taxonomique suivi pour cette ligne (obligatoire — POWO et GRIN peuvent délimiter un taxon différemment).'
-required: true
+description: 'Référentiel taxonomique suivi pour cette ligne (« sensu » : au sens de POWO, de GRIN, de Flora of China ou autre), car ces référentiels peuvent délimiter un taxon différemment. Exigé pour toute attestation liée à une plante.'
+required: false
 translatable: true
 default_value: {  }
 default_value_callback: ''

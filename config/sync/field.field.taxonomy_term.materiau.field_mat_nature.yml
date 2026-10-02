@@ -1,0 +1,21 @@
+uuid: 65ef9cdd-b1cc-47ca-8144-230ad2838f0e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_mat_nature
+    - taxonomy.vocabulary.materiau
+  module:
+    - options
+id: taxonomy_term.materiau.field_mat_nature
+field_name: field_mat_nature
+entity_type: taxonomy_term
+bundle: materiau
+label: Nature
+description: "Origine de la substance. « Végétal » n'a de sens qu'avec l'état « préparé » : un végétal brut reste une plante."
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string
