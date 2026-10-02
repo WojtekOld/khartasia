@@ -3,12 +3,18 @@
  * @file
  * Template pour les fiches Noms vernaculaires.
  * Répond à la question réelle d'un utilisateur qui tape "kozo" :
- * quelle plante, quelle famille botanique, quels papiers l'utilisent —
- * pas une liste de champs bruts sans contexte.
+ * quelle plante, quelle famille botanique, quels papiers l'utilisent,
+ * et ce que disent les sources — pas une liste de champs bruts sans contexte.
+ *
+ * Un nom peut viser plusieurs plantes (polysémie) ou aucune : dans ce cas sa
+ * « portée » dit à quoi il se rapporte (fonction, taxon supérieur, sans
+ * référent papetier). Seules les attestations publiées sont affichées.
  */
 #}
 
 {{ attach_library('khartasia_ui/kh-plante') }}
+
+{% set kh_statuts = {'probable': 'probable', 'hypothetique': 'hypothétique', 'refute': 'réfuté', 'inconnu': 'à vérifier'} %}
 
 <article class="kh-plante">
 
@@ -23,7 +29,7 @@
 
     <div class="kh-plante__col-left">
 
-      {% if plante_liee %}
+      {% if plantes_liees %}
         <section class="kh-plante__section">
           <h2 class="kh-plante__section-title">Qu'est-ce que c'est ?</h2>
           <div class="kh-prose">
@@ -35,7 +41,9 @@
                 est un nom vernaculaire
               {% endif %}
               pour désigner
-              <a href="{{ plante_liee.url }}"><em>{{ plante_liee.titre }}</em></a>{% if plante_liee.famille %}, de la famille des <strong>{{ plante_liee.famille }}</strong>{% if plante_liee.ordre %} (ordre des {{ plante_liee.ordre }}){% endif %}{% endif %}.
+              {% for p in plantes_liees %}
+                <a href="{{ p.url }}"><em>{{ p.titre }}</em></a>{% if p.famille %}, de la famille des <strong>{{ p.famille }}</strong>{% if p.ordre %} (ordre des {{ p.ordre }}){% endif %}{% endif %}{% if not loop.last %} ;{% endif %}
+              {%- endfor %}.
             </p>
             {% if node.field_vern_syn.value %}
               <p>Autres formes attestées : {{ node.field_vern_syn.value|raw }}</p>
@@ -45,7 +53,7 @@
 
         {% if papiers_meme_plante_total %}
           <section class="kh-plante__section">
-            <h2 class="kh-plante__section-title">Papiers fabriqués à partir de cette plante ({{ papiers_meme_plante_total }})</h2>
+            <h2 class="kh-plante__section-title">Papiers fabriqués à partir de {% if plantes_liees|length > 1 %}ces plantes{% else %}cette plante{% endif %} ({{ papiers_meme_plante_total }})</h2>
             <ul class="kh-papers-group__list">
               {% for p in papiers_meme_plante %}
                 <li class="kh-papers-group__item">
@@ -57,7 +65,40 @@
           </section>
         {% endif %}
       {% else %}
-        <p class="kh-prose">Aucune plante associée à ce nom pour l'instant.</p>
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Qu'est-ce que c'est ?</h2>
+          <div class="kh-prose">
+            {% if portee %}
+              <p>
+                <strong>{{ node.label }}</strong>
+                {% if langue_nom %}(nom employé en {{ langue_nom }}){% endif %}
+                {{ portee.definition }}
+              </p>
+            {% else %}
+              <p>Aucune plante associée à ce nom pour l'instant.</p>
+            {% endif %}
+            {% if node.field_vern_syn.value %}
+              <p>Autres formes attestées : {{ node.field_vern_syn.value|raw }}</p>
+            {% endif %}
+          </div>
+        </section>
+      {% endif %}
+
+      {% if designations %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Ce que disent les sources</h2>
+          <ul class="kh-papers-group__list">
+            {% for d in designations %}
+              <li class="kh-papers-group__item">
+                {{ d.valeur }}
+                {% if d.referents %}<span class="kh-nom-scripture">→ {% for r in d.referents %}<a href="{{ r.url }}"><em>{{ r.titre }}</em></a>{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}
+                {% if d.lieu %}<span class="kh-nom-scripture">— {{ d.lieu }}</span>{% endif %}
+                {% if d.source %}<span class="kh-fibre__notes">[source : {{ d.source }}{% if d.locateur %}, {{ d.locateur }}{% endif %}]</span>{% endif %}
+                {% if d.statut and d.statut != 'atteste' %}<em class="kh-fibre__notes">[{{ kh_statuts[d.statut]|default(d.statut) }}]</em>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
       {% endif %}
 
       {% if ecritures_vernaculaires %}
@@ -68,7 +109,24 @@
               <li class="kh-papers-group__item">
                 {% if e.type %}<strong>{{ e.type }}</strong> — {% endif %}
                 {{ e.valeur }}
-                {% if e.statut and e.statut != 'attesté' %}<em class="kh-fibre__notes">[{{ e.statut }}]</em>{% endif %}
+                {% if e.source %}<span class="kh-fibre__notes">[source : {{ e.source }}{% if e.locateur %}, {{ e.locateur }}{% endif %}]</span>{% endif %}
+                {% if e.statut and e.statut != 'atteste' %}<em class="kh-fibre__notes">[{{ kh_statuts[e.statut]|default(e.statut) }}]</em>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {% if autres_attestations %}
+        <section class="kh-plante__section">
+          <h2 class="kh-plante__section-title">Autres attestations</h2>
+          <ul class="kh-papers-group__list">
+            {% for a in autres_attestations %}
+              <li class="kh-papers-group__item">
+                {% if a.type %}<strong>{{ a.type }}</strong> — {% endif %}
+                {{ a.valeur }}
+                {% if a.source %}<span class="kh-fibre__notes">[source : {{ a.source }}{% if a.locateur %}, {{ a.locateur }}{% endif %}]</span>{% endif %}
+                {% if a.statut and a.statut != 'atteste' %}<em class="kh-fibre__notes">[{{ kh_statuts[a.statut]|default(a.statut) }}]</em>{% endif %}
               </li>
             {% endfor %}
           </ul>
@@ -78,12 +136,12 @@
     </div>
 
     <div class="kh-plante__col-right">
-      {% if plante_liee %}
+      {% for p in plantes_liees %}
         <div class="kh-meta-card">
           <h3 class="kh-meta-card__title">Fiche complète</h3>
-          <p class="kh-prose"><a href="{{ plante_liee.url }}">Voir {{ plante_liee.titre }} →</a></p>
+          <p class="kh-prose"><a href="{{ p.url }}">Voir {{ p.titre }} →</a></p>
         </div>
-      {% endif %}
+      {% endfor %}
     </div>
 
   </div>
