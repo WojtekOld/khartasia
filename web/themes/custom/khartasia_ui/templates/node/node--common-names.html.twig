@@ -23,6 +23,9 @@
     {% if node.field_ver_local_scripture.value %}
       <div class="kh-plante__synonymes">{{ node.field_ver_local_scripture.value }}</div>
     {% endif %}
+    {%- if node.field_ver_translitteration.value %}
+      <div class="kh-plante__synonymes">{{ node.field_ver_translitteration.value }} <span class="kh-fibre__notes">(translittération)</span></div>
+    {% endif %}
   </header>
 
   <div class="kh-plante__body">
