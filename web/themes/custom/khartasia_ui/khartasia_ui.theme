@@ -281,7 +281,7 @@ function khartasia_ui_preprocess_node_article(&$variables, $node) {
     usort($all_noms, fn($a, $b) => strcmp($a['langue'], $b['langue']));
 
     // === PAGINATION NOMS ===
-    $noms_per_page = 10;
+    $noms_per_page = 30;
     $total_noms = count($all_noms);
 
     $pager_noms = \Drupal::service('pager.manager')->createPager($total_noms, $noms_per_page, 1);
