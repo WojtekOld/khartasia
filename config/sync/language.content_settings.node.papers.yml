@@ -1,0 +1,11 @@
+uuid: 33dabc90-0758-417b-8903-7941ea093ffd
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.papers
+id: node.papers
+target_entity_type_id: node
+target_bundle: papers
+default_langcode: site_default
+language_alterable: false

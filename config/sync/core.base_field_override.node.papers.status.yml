@@ -1,0 +1,22 @@
+uuid: 5b4dde9e-99c7-4b69-86dc-b39a0e635961
+langcode: fr
+status: true
+dependencies:
+  config:
+    - node.type.papers
+id: node.papers.status
+field_name: status
+entity_type: node
+bundle: papers
+label: Publié
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Activé
+  off_label: Désactivé
+field_type: boolean

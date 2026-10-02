@@ -12,6 +12,7 @@ dependencies:
     - field.field.node.attestation.field_att_concept_taxo
     - field.field.node.attestation.field_att_concurrente
     - field.field.node.attestation.field_att_lieu
+    - field.field.node.attestation.field_att_locateur
     - field.field.node.attestation.field_att_nom_vernaculaire
     - field.field.node.attestation.field_att_note_interne
     - field.field.node.attestation.field_att_papier
@@ -180,6 +181,7 @@ content:
 hidden:
   field_att_a_revoir: true
   field_att_concept_taxo: true
+  field_att_locateur: true
   field_att_nom_vernaculaire: true
   field_att_note_interne: true
   field_att_periode: true
