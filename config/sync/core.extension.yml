@@ -56,6 +56,7 @@ module:
   khartasia_guided_forms: 0
   khartasia_migrate: 0
   khartasia_noms: 0
+  khartasia_pdf: 0
   khartasia_pdf_export: 0
   khartasia_search: 0
   khartasia_techniques: 0

@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Export PDF des fiches Khartasia.
+ */
+
+/**
+ * Implements hook_theme().
+ *
+ * Déclare les trois gabarits du dossier PDF (corps, en-tête, pied de page). Le nom d'un gabarit est celui du « thème » avec des
+ * tirets : khartasia_pdf_dossier => templates/khartasia-pdf-dossier.html.twig.
+ */
+function khartasia_pdf_theme(): array {
+  $variables = ['d' => [], 'L' => [], 'relecture' => FALSE, 'url' => '', 'date' => ''];
+  return [
+    'khartasia_pdf_dossier' => ['variables' => $variables],
+    'khartasia_pdf_header' => ['variables' => $variables],
+    'khartasia_pdf_footer' => ['variables' => $variables],
+  ];
+}

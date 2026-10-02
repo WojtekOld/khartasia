@@ -1,0 +1,4 @@
+{# Pied de chaque page du PDF : copyright, mention de relecture, pagination (mPDF remplace {PAGENO} et {nbpg}), date et adresse de la fiche. #}
+<table width="100%" style="border-top:1px solid #d4c48a; font-size:7.5pt; color:#666666;"><tr>
+<td width="40%">{{ L.footer_l }}</td><td width="30%" align="center">{% if relecture %}{{ L.draft }}{% endif %}</td><td width="30%" align="right">{{ L.page }} {PAGENO} / {nbpg}</td></tr>
+<tr><td colspan="3" style="font-size:7pt; color:#8a948f;">{{ L.gen }} {{ date }} · {{ url }}</td></tr></table>

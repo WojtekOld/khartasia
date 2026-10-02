@@ -1,0 +1,12 @@
+khartasia_pdf.dossier:
+  path: '/node/{node}/dossier-pdf'
+  defaults:
+    _controller: '\Drupal\khartasia_pdf\Controller\PdfController::dossier'
+    _title: 'Dossier PDF'
+  requirements:
+    _custom_access: '\Drupal\khartasia_pdf\Controller\PdfController::access'
+    node: '\d+'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'

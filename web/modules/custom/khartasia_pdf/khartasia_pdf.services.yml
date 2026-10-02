@@ -1,0 +1,10 @@
+services:
+  khartasia_pdf.citation:
+    class: Drupal\khartasia_pdf\Service\CitationFormatter
+    arguments: ['@entity_type.manager']
+  khartasia_pdf.dossier_builder:
+    class: Drupal\khartasia_pdf\Service\DossierBuilder
+    arguments: ['@entity_type.manager', '@khartasia_pdf.citation']
+  khartasia_pdf.renderer:
+    class: Drupal\khartasia_pdf\Service\PdfRenderer
+    arguments: ['@renderer', '@file_system']

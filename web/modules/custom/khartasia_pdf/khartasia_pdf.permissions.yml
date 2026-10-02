@@ -1,0 +1,4 @@
+view khartasia review pdf:
+  title: 'Voir le dossier PDF en relecture'
+  description: "Génère le dossier PDF avec les contenus non publiés et les notes de travail (mode relecture)."
+  restrict access: true

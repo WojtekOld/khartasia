@@ -1,0 +1,69 @@
+{#
+/**
+ * @file
+ * Corps du dossier PDF (mPDF : tables et blocs simples, pas de grille CSS ni de flexbox).
+ *
+ * Variables : d (données du dossier), L (libellés), relecture (booléen), url, date.
+ */
+#}
+<html><head><meta charset="utf-8"><style>
+body { font-family: dejavusans; font-size: 9pt; color: #222222; }
+h1 { font-family: dejavuserif; font-style: italic; font-weight: normal; font-size: 22pt; color: #1f2d28; margin: 0; }
+.sub { font-size: 10.5pt; color: #55605b; margin-top: 2px; }
+.meta1 { font-size: 8.5pt; color: #55605b; }
+.sect { font-size: 7.5pt; letter-spacing: 1.2px; text-transform: uppercase; color: #666666; border-bottom: 1px solid #d4c48a; padding-bottom: 3px; margin-top: 14px; margin-bottom: 8px; }
+.read { background-color: #f3f6f4; border-left: 3px solid #3b524a; padding: 7px 10px; margin-top: 12px; font-size: 8.5pt; color: #33403b; }
+.card { border: 1px solid #cdd7d1; border-radius: 4px; padding: 8px 11px; margin-bottom: 9px; }
+.nom { font-family: dejavuserif; font-size: 13.5pt; font-weight: bold; color: #1f2d28; }
+.ecr { font-size: 11pt; color: #1f2d28; }
+.tr { color: #55605b; font-size: 9.5pt; }
+.small { font-size: 7.5pt; color: #7a8580; }
+.k { color: #7a8580; font-size: 8pt; width: 24%; padding: 1px 0; }
+.v { font-size: 8.5pt; padding: 1px 0; }
+.lab { font-size: 7.5pt; letter-spacing: 0.8px; text-transform: uppercase; color: #7a8580; margin-top: 7px; }
+.stmt { font-size: 9.5pt; padding: 2px 0 4px 0; }
+.note { background-color: #f4f4f2; border-left: 3px solid #b8b3a2; padding: 4px 8px; font-size: 8pt; color: #444444; margin-top: 6px; }
+.b-att { background-color: #d1fae5; color: #065f46; font-weight: bold; font-size: 8pt; }
+.b-prob { background-color: #fef3c7; color: #92400e; font-weight: bold; font-size: 8pt; }
+.b-oth { background-color: #e5e7eb; color: #374151; font-weight: bold; font-size: 8pt; }
+</style></head><body>
+<h1>{{ d.plante.titre }}</h1>
+<div class="sub">{{ L.sub }}</div>
+{% if d.plante.famille %}<div class="meta1">{{ L.fam }} : {{ d.plante.famille }}</div>{% endif %}
+<div class="read"><b>{{ L.read_t }}.</b> {{ L.read_p|raw }}</div>
+{% if d.groupes %}
+{% for g in d.groupes %}
+<div class="sect">{{ g.langue ? g.langue : L.lang_unknown }} ({{ g.noms|length }})</div>
+{% for n in g.noms %}
+<div class="card" style="page-break-inside: avoid;">
+<table width="100%"><tr><td width="66%"><span class="nom">{{ n.titre }}</span>{% if n.ecriture %}<br><span class="ecr">{{ n.ecriture }}</span>{% endif %}{% if n.translit %}<br><span class="tr">{{ n.translit }}</span> <span class="small">({{ L.transl }})</span>{% endif %}</td>
+<td width="34%" align="right">{% if relecture and not n.publie %}<span class="b-oth">&nbsp;{{ L.unpub }}&nbsp;</span> {% endif %}{% for b in n.badges %}<span class="b-{{ b.classe }}">&nbsp;{{ b.label }}&nbsp;</span> {% endfor %}</td></tr></table>
+<table width="100%" style="margin-top:4px;">
+<tr><td class="k">{{ L.lang }}</td><td class="v">{{ n.langue ? n.langue : L.lang_unknown }}</td></tr>
+{% if n.plantes %}<tr><td class="k">{{ L.designates }}</td><td class="v">{{ n.plantes|join(', ') }}</td></tr>{% endif %}
+{% if n.parent %}<tr><td class="k">{{ L.variant_of }}</td><td class="v">{{ n.parent }}</td></tr>{% endif %}
+</table>
+{% for a in n.attestations %}
+<div class="lab">{{ L.stmt }}{% if a.type %} — {{ a.type }}{% endif %}{% if n.attestations|length > 1 %} · {{ a.statut_label }}{% endif %}{% if relecture and not a.publie %} · {{ L.unpub }}{% endif %}</div>
+<div class="stmt">{{ a.valeur }}</div>
+<table width="100%">
+{% if a.source %}<tr><td class="k">{{ L.source }}</td><td class="v">{{ a.source }}</td></tr>{% endif %}
+{% if a.concept %}<tr><td class="k">{{ L.concept }}</td><td class="v">{{ a.concept }}</td></tr>{% endif %}
+</table>
+{% if relecture and a.note %}<div class="note"><b>{{ L.note }}</b> {{ a.note }}</div>{% endif %}
+{% else %}
+<div class="stmt small">{{ L.no_att }}</div>
+{% endfor %}
+</div>
+{% endfor %}
+{% endfor %}
+{% else %}
+<div class="stmt">{{ L.none }}</div>
+{% endif %}
+{% if d.refs %}
+<div class="sect">{{ L.sec_refs }}</div>
+{% for r in d.refs %}
+<div class="stmt" style="font-size:8.5pt;">{{ r.html|raw }}</div>
+{% endfor %}
+{% endif %}
+</body></html>

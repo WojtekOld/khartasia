@@ -1,0 +1,9 @@
+name: 'Khartasia PDF'
+type: module
+description: "Export PDF des fiches Khartasia : dossier d'une plante (noms vernaculaires et attestations), avec mPDF."
+package: Khartasia
+core_version_requirement: ^11
+dependencies:
+  - drupal:node
+  - drupal:taxonomy
+  - bibcite:bibcite_entity
