@@ -1,0 +1,237 @@
+{
+  "meta": {
+    "jeu": "helman-wazny-2025-stellera",
+    "version": 2,
+    "description": "Six noms tibétains de Stellera chamaejasme (Helman-Ważny 2025, p. 127, d'après l'extraction de la synthèse d'octobre 2026). Données à valider par l'auteure ; rien n'est publié.",
+    "conventions": [
+      "Le lieu cité par la source reste dans le texte de l'affirmation ; le champ « lieu » est laissé vide (vocabulaire de lieux différé).",
+      "La chaîne de provenance (qui rapporte qui) est dans la note interne, jamais dans le texte de l'affirmation.",
+      "La forme romanisée d'usage est le titre ; la translittération savante (Wylie) a son propre champ ; l'écriture tibétaine n'est pas fournie par la source extraite."
+    ],
+    "a_saisir": [
+      {
+        "sujet": "Stellera chamaejasme (la plante)",
+        "type": "Usage",
+        "source": "helman-wazny-2025",
+        "locateur": "p. 127",
+        "affirmation": "La plante est attestée comme plante à papier dans les régions culturelles tibétaines et dans les hautes vallées népalaises du Dolpo et du Mustang.",
+        "pourquoi_pas_encore": "Affirmation sur la plante, non sur un nom : le chargeur ne charge que des attestations de nom. Elle était fondue dans l'attestation de rechakpa (version 1), ce que la règle « une attestation, une affirmation » interdit."
+      },
+      {
+        "sujet": "rechakpa",
+        "source": "boesi-2016",
+        "locateur": "p. 516",
+        "affirmation": "L'identification est confirmée par les materia medica.",
+        "pourquoi_pas_encore": "Source non consultée : une attestation qui cite Boesi ne se crée qu'après lecture directe du passage. Ce maillon n'est donc pas un enregistrement : il est consigné dans la note interne de l'attestation de rechakpa."
+      }
+    ]
+  },
+  "sources": {
+    "helman-wazny-2025": {
+      "motifs": [
+        "Helman",
+        "What makes"
+      ]
+    },
+    "boesi-2016": {
+      "motifs": [
+        "Boesi",
+        "Paper Plants"
+      ]
+    }
+  },
+  "plantes": {
+    "stellera": {
+      "nid": 1835,
+      "titre_contient": "Stellera"
+    }
+  },
+  "enregistrements": [
+    {
+      "cle": "rechakpa",
+      "nom": {
+        "titre": "rechakpa",
+        "ecriture_locale": null,
+        "translitteration": "re lcag pa",
+        "langue": "tibétain",
+        "plantes": [
+          "stellera"
+        ],
+        "parent": null
+      },
+      "attestations": [
+        {
+          "type": "Désignation",
+          "statut": "probable",
+          "source": "helman-wazny-2025",
+          "locateur": "p. 127",
+          "texte": "Nom tibétain commun de Stellera chamaejasme, employé dans les régions culturelles tibétaines (Amdo, Kham, Ü Tsang).",
+          "concept": "powo",
+          "lieu": null,
+          "note_interne": "Statut probable : identification confirmée par les materia medica d'après Boesi 2016 (p. 516), non consulté. La même phrase de la source énonce aussi l'usage papetier de la plante : attestation d'usage distincte, à saisir (meta.a_saisir)."
+        }
+      ],
+      "validation": {
+        "etat": "a_valider",
+        "par": null,
+        "date": null,
+        "commentaire": null
+      }
+    },
+    {
+      "cle": "gore-chakre",
+      "nom": {
+        "titre": "gore chakré",
+        "ecriture_locale": null,
+        "translitteration": "mgo re lcag re",
+        "langue": "tibétain",
+        "plantes": [
+          "stellera"
+        ],
+        "parent": "rechakpa"
+      },
+      "attestations": [
+        {
+          "type": "Désignation",
+          "statut": "probable",
+          "source": "helman-wazny-2025",
+          "locateur": "p. 127",
+          "texte": "Variante de rechakpa employée à Lithang (Kham) pour Stellera chamaejasme.",
+          "concept": "powo",
+          "lieu": null,
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+        }
+      ],
+      "validation": {
+        "etat": "a_valider",
+        "par": null,
+        "date": null,
+        "commentaire": null
+      }
+    },
+    {
+      "cle": "gonara",
+      "nom": {
+        "titre": "gonara",
+        "ecriture_locale": null,
+        "translitteration": "mgo na ra",
+        "langue": "tibétain",
+        "plantes": [
+          "stellera"
+        ],
+        "parent": "rechakpa"
+      },
+      "attestations": [
+        {
+          "type": "Désignation",
+          "statut": "probable",
+          "source": "helman-wazny-2025",
+          "locateur": "p. 127",
+          "texte": "Variante de rechakpa employée dans le Dolpo népalais pour Stellera chamaejasme.",
+          "concept": "powo",
+          "lieu": null,
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+        }
+      ],
+      "validation": {
+        "etat": "a_valider",
+        "par": null,
+        "date": null,
+        "commentaire": null
+      }
+    },
+    {
+      "cle": "gowo-roldang",
+      "nom": {
+        "titre": "gowo röldang",
+        "ecriture_locale": null,
+        "translitteration": "mgo bo rol gdangs",
+        "langue": "tibétain",
+        "plantes": [
+          "stellera"
+        ],
+        "parent": "rechakpa"
+      },
+      "attestations": [
+        {
+          "type": "Désignation",
+          "statut": "probable",
+          "source": "helman-wazny-2025",
+          "locateur": "p. 127",
+          "texte": "Variante de rechakpa employée dans le bas Mustang (Népal) pour Stellera chamaejasme.",
+          "concept": "powo",
+          "lieu": null,
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+        }
+      ],
+      "validation": {
+        "etat": "a_valider",
+        "par": null,
+        "date": null,
+        "commentaire": null
+      }
+    },
+    {
+      "cle": "rama-racho",
+      "nom": {
+        "titre": "rama racho",
+        "ecriture_locale": null,
+        "translitteration": "ra ma rwa co",
+        "langue": "tibétain",
+        "plantes": [
+          "stellera"
+        ],
+        "parent": "rechakpa"
+      },
+      "attestations": [
+        {
+          "type": "Désignation",
+          "statut": "probable",
+          "source": "helman-wazny-2025",
+          "locateur": "p. 127",
+          "texte": "Variante de rechakpa employée dans la région de Xining (Qinghai, RPC) pour Stellera chamaejasme.",
+          "concept": "powo",
+          "lieu": null,
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+        }
+      ],
+      "validation": {
+        "etat": "a_valider",
+        "par": null,
+        "date": null,
+        "commentaire": null
+      }
+    },
+    {
+      "cle": "sedri-metok",
+      "nom": {
+        "titre": "sedri metok",
+        "ecriture_locale": null,
+        "translitteration": "se dri me tog",
+        "langue": "tibétain",
+        "plantes": [
+          "stellera"
+        ],
+        "parent": "rechakpa"
+      },
+      "attestations": [
+        {
+          "type": "Désignation",
+          "statut": "atteste",
+          "source": "helman-wazny-2025",
+          "locateur": "p. 127",
+          "texte": "Nom de Stellera chamaejasme (littéralement « fleur à l'odeur désagréable de transpiration »), relevé sur le terrain par l'auteure à Muktinath, Jharkot, Khingar et aux environs de Lo Monthang (Mustang, Népal).",
+          "concept": "powo",
+          "lieu": null,
+          "note_interne": "Statut atteste : relevé de terrain de l'auteure, rapporté directement par la source."
+        }
+      ],
+      "validation": {
+        "etat": "a_valider",
+        "par": null,
+        "date": null,
+        "commentaire": null
+      }
+    }
+  ]
+}
