@@ -7,6 +7,7 @@ khartasia_pdf.dossier:
     _custom_access: '\Drupal\khartasia_pdf\Controller\PdfController::access'
     node: '\d+'
   options:
+    no_cache: TRUE
     parameters:
       node:
         type: 'entity:node'
