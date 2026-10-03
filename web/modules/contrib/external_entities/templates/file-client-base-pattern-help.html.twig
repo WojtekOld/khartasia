@@ -1,0 +1,99 @@
+{#
+/**
+ * @file
+ * File storage client file name pattern help.
+ *
+ * Available variables:
+ * - file_ext: the default file extension to use (including dot prefix).
+*/
+#}
+
+<p>
+  The file name or pattern field is used to <b>filter files</b> used by a file
+  storage client. When using a single file, its name can simply be specified
+  here. When working with multiple files, it is possible to provide a specific
+  pattern to restrict files used.
+</p>
+<p>
+  Furthermore, a file name pattern can also be used to <b>gather pieces of the
+  path as data fields</b> (field patterns) and vice-versa* (*: when using
+  multiple storage clients, a previous storage client may provide a part of the
+  path name in a field value that could be used to change the file path on
+  saving for instance).
+</p>
+<p>
+  The field pattern format uses <b>curly braces</b> "<code>{...}</code>" to
+  delimit entity fields to use. It is possible to use substrings of fields by
+  specifying an offset and a length the following way:
+  "<code>{[offset[,length]:]field_name}</code>". Negative values can be used the
+  same way as for the PHP function substr(). It is also possible to specify a
+  <a href="https://www.php.net/manual/en/pcre.pattern.php">regular
+  expression</a> to match the given path part by enclosing it into hash tags
+  after the field name: "<code>{field_name#SOME_REGEXP#}</code>". So, any part
+  of the path could be matched using the general syntax:
+  <b>"<code>{[offset[,length]:]field_name[#SOME_REGEXP#]}</code>"</b>
+  where square brackets indicate optional elements.<br/>
+  <b>Note:</b> regular expression special/meta characters are not
+  interpreted outside field patterns using regexp (ie. you can use
+  "{{file_ext}}" to match text files without matching "ztxt" for instance if
+  used outside curly braces).
+</p>
+<p>
+  <b>Here is a set of examples:</b><br/>
+  <dl>
+    <dt>"<code>toto{{file_ext}}</code>"</dt>
+    <dd>
+      It only match the "toto{{file_ext}}" file in the base directory.<br/>
+      <b>Note:</b> if you used "<code>*{{file_ext}}</code>", it will NOT match
+      any "{{file_ext}}" file as you may have expected. Neither
+      "<code>.txt</code>" alone would (it would just match a file called
+      "{{file_ext}}"). File patterns used here are NOT similar to shell file
+      matching expressions. To match multiple "{{file_ext}}" files, you must
+      define a field pattern that will hold the file name like this one:
+      "<code>{somefieldname}{{file_ext}}</code>".
+    </dd>
+    <dt>"<code>{group}/{project}{{file_ext}}</code>"</dt>
+    <dd>
+      It would only match files with the "{{file_ext}}" extension located in a
+      sub-directory (1 level deep) of the given base path. The file name will be
+      set as the "<code>project</code>" field of the raw source entity data
+      while its directory will be set as the "<code>group</code>" field. This
+      pattern will not match "{{file_ext}}" files directly in the base path nor
+      files in sub-directories of sub-directories. Both "<code>group</code>" and
+      "<code>project</code>" field will only contain "word" characters,
+      underscores and dashes (ie. "a-z", "A-Z", "0-9" and "_") which means the
+      files "<code>subdir/some<b>.</b>file{{file_ext}}</code>" and
+      "<code>subdir/some<b>~</b>file{{file_ext}}</code>" will NOT be matched. To
+      match those, the "<code>{project}</code>" pattern should be turned into:
+      <code>{project#[\w.~\-]#}</code>.
+    </dd>
+    <dt>"<code>{image_name}.{ext#jpg|jpeg|png|gif#}</code>"</dt>
+    <dd>
+      It will match any file with a file name usin alpha-numeric characters,
+      underscores and dashs (but not dots) with the file extensions ".jpg",
+      ".jpeg", ".png" or ".gif" (case sensitive) located in the base
+      directory.<br/>
+      Matched: "somefile.jpeg", "other_image-1.gif"<br/>
+      Not matched: "some<b>.</b>file.jpeg", "other_image-1.<b>GIF</b>"
+    </dd>
+    <dt>"<code>{image_name#[\w\.\-]+#}.{ext#(?i:jpg|jpeg|png|gif)#}</code>"</dt>
+    <dd>
+      Same as the previous example but will also match files with dots in their
+      names like "some.image-file_1.jpg" and any case combination in the file
+      extension like ".GIF" or ".Jpeg".
+    </dd>
+    <dt>"<code>{-4:id}/{0,3:id}{{file_ext}}</code>"</dt>
+    <dd>
+      With the entity field id value "12345678_ABCD" will generate the sub-path
+      "ABCD/123{{file_ext}}" for that entity. However, such patterns <b>can not
+      be reversed</b> from the file name to generate the id (for instance, the
+      system does not know it has to add an underscore between the 2 parts).
+      Therefore, the association between the "12345678_ABCD" and the
+      corresponding file should be set in an "<b>entity-file index</b>" (see
+      below in "Performances" section) to allow file listing in lists and query
+      results.
+    </dd>
+  </dl>
+</p>
+<b>Note:</b> if this field is left empty, a default free file name will be
+generated and used to store external entities.

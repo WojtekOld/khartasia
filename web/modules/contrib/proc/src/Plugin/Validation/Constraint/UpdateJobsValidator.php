@@ -9,6 +9,7 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 
 /**
  * Validates the UpdateJobs constraint.
@@ -24,12 +25,20 @@ class UpdateJobsValidator extends ConstraintValidator {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * UpdateJobsValidator constructor.
    *
-   * EntityTypeManagerInterface is injected by the service container.
+   * Dependencies are injected by the service container.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, RecipientStorageBrokerInterface $recipient_storage) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -90,14 +99,14 @@ class UpdateJobsValidator extends ConstraintValidator {
         }
       }
 
-      $wished = $proc->get('field_wished_recipients_set')->getValue();
+      $wished = $this->recipientStorage->getWishedRecipients($proc);
       if (empty($wished)) {
         $this->context->addViolation($constraint->messageEmptyWished, ['%value' => $item]);
         return;
       }
 
       if ($owner_uid !== NULL) {
-        $recipients = $proc->get('field_recipients_set')->getValue();
+        $recipients = $this->recipientStorage->getRecipients($proc);
         $owner_found = FALSE;
         foreach ($recipients as $recipient) {
           if ((int) $recipient['target_id'] === (int) $owner_uid) {

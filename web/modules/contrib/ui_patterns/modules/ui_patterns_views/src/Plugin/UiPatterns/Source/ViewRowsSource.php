@@ -12,19 +12,23 @@ use Drupal\views\Plugin\views\style\StylePluginBase;
 use Drupal\views\ViewExecutable;
 
 /**
- * Plugin implementation of the source_provider.
+ * The rows of a view.
+ *
+ * Used by the Component style plugin, it gives the rows the plugin received.
+ * Used for a whole display, it gives the rows rendered by the style plugin of
+ * the view.
  */
 #[Source(
   id: 'view_rows',
   label: new TranslatableMarkup('[View] Rows'),
   description: new TranslatableMarkup('View rows results.'),
   prop_types: ['slot'],
-  context_requirements: ['views:style'],
+  context_requirements: [['views:style', 'views:display']],
   context_definitions: [
     'ui_patterns_views:view_entity' => new EntityContextDefinition('entity:view', label: new TranslatableMarkup('View')),
   ]
 )]
-class ViewRowsSource extends ViewsSourceBase {
+class ViewRowsSource extends ViewsDisplaySourceBase {
 
   /**
    * Get Prop Value When views has no rows.
@@ -49,11 +53,54 @@ class ViewRowsSource extends ViewsSourceBase {
   /**
    * {@inheritdoc}
    */
-  public function getPropValue(): mixed {
-    $view = $this->getView();
-    if (!$view) {
+  protected function renderFromView(ViewExecutable $view): mixed {
+    return $this->inStylePlugin() ? $this->renderRawRows($view) : $this->renderStyledRows($view);
+  }
+
+  /**
+   * Whether the source is used by the Component style plugin.
+   *
+   * @return bool
+   *   TRUE when the style plugin gave its rows in context.
+   */
+  protected function inStylePlugin(): bool {
+    return isset($this->context['ui_patterns_views:rows']);
+  }
+
+  /**
+   * The rows rendered by the style plugin of the view.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   *   The executed view.
+   *
+   * @return array
+   *   The output of the style plugin.
+   */
+  protected function renderStyledRows(ViewExecutable $view): array {
+    $style = $view->getStyle();
+    if (!$style) {
       return [];
     }
+    // Same preparation as ViewExecutable::render() before rendering the style.
+    if ($style->usesFields()) {
+      foreach ($view->field as $field) {
+        $field->preRender($view->result);
+      }
+    }
+    $style->preRender($view->result);
+    return (!empty($view->result) || $style->evenEmpty()) ? $style->render() : [];
+  }
+
+  /**
+   * The rows received by the Component style plugin.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   *   The view.
+   *
+   * @return mixed
+   *   The rows, or the empty area when there are none.
+   */
+  protected function renderRawRows(ViewExecutable $view): mixed {
     $rows = $this->getContextValue('ui_patterns_views:rows');
     if (!\is_array($rows) || \count($rows) < 1) {
       return $this->getPropValueViewsWithEmptyRows($view);
@@ -139,7 +186,8 @@ class ViewRowsSource extends ViewsSourceBase {
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
-    $field_options = self::getViewsFieldOptions($this->getView());
+    // Picking a field only makes sense on the rows received by the plugin.
+    $field_options = $this->inStylePlugin() ? self::getViewsFieldOptions($this->getView()) : NULL;
     if (\is_array($field_options)) {
       $form['ui_patterns_views_field'] = [
         '#type' => 'select',

@@ -1,2 +1,9 @@
 parameters:
   ui_patterns_views.skip_procedural_hook_scan: true
+
+services:
+  _defaults:
+    autoconfigure: true
+    autowire: true
+
+  Drupal\ui_patterns_views\Hook\UiPatternsViewsHooks: ~

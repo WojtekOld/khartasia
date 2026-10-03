@@ -1,0 +1,4 @@
+xnttmanager:
+  css:
+    theme:
+      css/xnttmanager.css: {}

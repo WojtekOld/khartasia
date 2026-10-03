@@ -23,3 +23,8 @@ views.row.ui_patterns:
     ui_patterns:
       type:  ui_patterns_component
       label: 'The component'
+
+# The component itself is a display option, see UiPatternsViewsHooks.
+views.display_extender.ui_patterns:
+  type: views_display_extender
+  label: 'Component display extender'

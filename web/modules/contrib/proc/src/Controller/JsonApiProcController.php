@@ -9,6 +9,7 @@ use Drupal\Core\Path\CurrentPathStack;
 use Drupal\proc\Entity\Proc;
 use Drupal\proc\ProcKeyManagerInterface;
 use Drupal\proc\Service\ProcUpdateJobsCountService;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Drupal\proc\Traits\ProcCsvTrait;
 use Drupal\proc\Traits\ProcRecipientTrait;
 use Drupal\proc_reporting\Service\ProcReportingService;
@@ -77,6 +78,13 @@ class JsonApiProcController extends ControllerBase {
   protected ProcKeyManagerInterface $procKeyManager;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * JsonApiProcController constructor.
    *
    * @param \Drupal\Core\Path\CurrentPathStack $current_path
@@ -100,6 +108,7 @@ class JsonApiProcController extends ControllerBase {
     ProcUpdateJobsCountService $update_jobs_count_service,
     PrivateTempStoreFactory $temp_store_factory,
     ProcKeyManagerInterface $proc_key_manager,
+    RecipientStorageBrokerInterface $recipient_storage,
     ?ProcReportingService $reportingService = NULL,
     ?LoggerChannelInterface $logger = NULL,
   ) {
@@ -110,6 +119,7 @@ class JsonApiProcController extends ControllerBase {
     $this->updateJobsCountService = $update_jobs_count_service;
     $this->procKeyManager = $proc_key_manager;
     $this->tempStoreFactory = $temp_store_factory;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -127,6 +137,7 @@ class JsonApiProcController extends ControllerBase {
       $container->get('proc.update_jobs_count_service'),
       $container->get('tempstore.private'),
       $container->get('proc.key_manager'),
+      $container->get('proc.recipient_storage'),
       $container->has('proc_reporting.service')
         ? $container->get('proc_reporting.service')
         : NULL,
@@ -323,9 +334,9 @@ class JsonApiProcController extends ControllerBase {
       'source_file_size' => $proc->get('meta')->getValue()[0]['source_file_size'],
       'cipher_cid' => $proc_id,
       'proc_owner_uid' => $proc->get('user_id')->getValue()[0]['target_id'],
-      'proc_recipients' => $proc->get('field_recipients_set')->getValue(),
+      'proc_recipients' => $this->recipientStorage->getRecipients($proc),
       'changed' => $proc->get('changed')->getValue()[0]['value'],
-      'wished_recipients' => $proc->get('field_wished_recipients_set')?->getValue() ?? [],
+      'wished_recipients' => $this->recipientStorage->getWishedRecipients($proc),
     ];
     if (isset($proc->get('meta')->getValue()[0]['source_input_mode'])) {
       $data['source_input_mode'] = $proc->get('meta')->getValue()[0]['source_input_mode'];
@@ -585,7 +596,7 @@ class JsonApiProcController extends ControllerBase {
     if ($uid <= 0) {
       return FALSE;
     }
-    foreach ($proc->get('field_recipients_set')->getValue() as $recipient) {
+    foreach ($this->recipientStorage->getRecipients($proc) as $recipient) {
       if ((int) ($recipient['target_id'] ?? 0) === $uid) {
         return TRUE;
       }

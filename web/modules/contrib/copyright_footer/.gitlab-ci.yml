@@ -1,0 +1,155 @@
+################
+# DrupalCI GitLabCI template
+#
+# Gitlab-ci.yml to replicate DrupalCI testing for Contrib
+#
+# With thanks to:
+#   * The GitLab Acceleration Initiative participants
+#   * DrupalSpoons
+################
+
+################
+# Guidelines
+#
+# This template is designed to give any Contrib maintainer everything they need to test, without requiring modification. It is also designed to keep up to date with Core Development automatically through the use of include files that can be centrally maintained.
+#
+# However, you can modify this template if you have additional needs for your project.
+################
+
+################
+# Includes
+#
+# Additional configuration can be provided through includes.
+# One advantage of include files is that if they are updated upstream, the changes affect all pipelines using that include.
+#
+# Includes can be overridden by re-declaring anything provided in an include, here in gitlab-ci.yml
+# https://docs.gitlab.com/ee/ci/yaml/includes.html#override-included-configuration-values
+################
+
+include:
+  ################
+  # DrupalCI includes:
+  # As long as you include this, any future includes added by the Drupal Association will be accessible to your pipelines automatically.
+  # View these include files at https://git.drupalcode.org/project/gitlab_templates/
+  ################
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+################
+# Pipeline configuration variables
+#
+# These are the variables provided to the Run Pipeline form that a user may want to override.
+#
+# Docs at https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml
+################
+variables:
+  _GITLAB_TEMPLATES_REPO: project/gitlab_templates
+  _GITLAB_TEMPLATES_REF: main
+  _CURL_TEMPLATES_REF: main
+  _CSPELL_WORDS: 'Kiritimati,Naoi'
+  OPT_IN_TEST_NEXT_MAJOR: 1
+#   SKIP_ESLINT: '1'
+
+# Validate version-controlled documentation.
+mkdocs:
+  image: python:3.12-alpine
+  stage: test
+  needs: []
+  rules:
+    - changes:
+        - mkdocs.yml
+        - docs/**/*
+        - README.md
+      when: on_success
+    - when: never
+  script:
+    - pip install --no-cache-dir mkdocs-material
+    - mkdocs build --strict
+
+# Publish one documentation site per supported branch.
+pages:
+  image: python:3.12-alpine
+  stage: .post
+  needs: []
+  variables:
+    PAGES_PATH_PREFIX: "$CI_COMMIT_BRANCH"
+    PAGES_EXPIRE_IN: never
+  artifacts:
+    paths:
+      - public
+  pages:
+    path_prefix: "$PAGES_PATH_PREFIX"
+    expire_in: "$PAGES_EXPIRE_IN"
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^[0-9]+\.x$/'
+      changes:
+        - mkdocs.yml
+        - docs/**/*
+        - README.md
+        - .gitlab-ci.yml
+      when: on_success
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^[0-9]+\.x$/'
+      variables:
+        PAGES_PATH_PREFIX: "mr-$CI_MERGE_REQUEST_IID"
+        PAGES_EXPIRE_IN: 1 week
+      changes:
+        - mkdocs.yml
+        - docs/**/*
+        - README.md
+        - .gitlab-ci.yml
+      when: on_success
+    - when: never
+  script:
+    - pip install --no-cache-dir mkdocs-material
+    - mkdocs build --strict --site-dir public
+
+
+###################################################################################
+#
+#                                        *
+#                                       /(
+#                                      ((((,
+#                                    /(((((((
+#                                   ((((((((((*
+#                                ,(((((((((((((((
+#                              ,(((((((((((((((((((
+#                            ((((((((((((((((((((((((*
+#                         *(((((((((((((((((((((((((((((
+#                       ((((((((((((((((((((((((((((((((((*
+#                    *((((((((((((((((((  .((((((((((((((((((
+#                  ((((((((((((((((((.       /(((((((((((((((((*
+#                /(((((((((((((((((            .(((((((((((((((((,
+#             ,((((((((((((((((((                 ((((((((((((((((((
+#           .((((((((((((((((((((                   .(((((((((((((((((
+#          (((((((((((((((((((((((                     ((((((((((((((((/
+#        (((((((((((((((((((((((((((/                    ,(((((((((((((((*
+#      .((((((((((((((/  /(((((((((((((.                   ,(((((((((((((((
+#     *((((((((((((((      ,(((((((((((((/                   *((((((((((((((.
+#    ((((((((((((((,          /(((((((((((((.                  ((((((((((((((,
+#   (((((((((((((/              ,(((((((((((((*                 ,(((((((((((((,
+#  *(((((((((((((                .(((((((((((((((                ,(((((((((((((
+#  ((((((((((((/                /((((((((((((((((((.              ,((((((((((((/
+# (((((((((((((              *(((((((((((((((((((((((*             *((((((((((((
+# (((((((((((((            ,(((((((((((((..(((((((((((((           *((((((((((((
+# ((((((((((((,          /((((((((((((*      /((((((((((((/         ((((((((((((
+# (((((((((((((        /((((((((((((/          (((((((((((((*       ((((((((((((
+# (((((((((((((/     /((((((((((((               ,((((((((((((,    *((((((((((((
+#  ((((((((((((((  *(((((((((((/                   *((((((((((((.  ((((((((((((/
+#  *((((((((((((((((((((((((((,                      /(((((((((((((((((((((((((
+#   (((((((((((((((((((((((((                         ((((((((((((((((((((((((,
+#   .(((((((((((((((((((((((/                         ,(((((((((((((((((((((((
+#     ((((((((((((((((((((((/                         ,(((((((((((((((((((((/
+#      *(((((((((((((((((((((                         (((((((((((((((((((((,
+#       ,(((((((((((((((((((((,                      ((((((((((((((((((((/
+#         ,(((((((((((((((((((((*                  /((((((((((((((((((((
+#            ((((((((((((((((((((((,           ,/((((((((((((((((((((,
+#              ,(((((((((((((((((((((((((((((((((((((((((((((((((((
+#                 .(((((((((((((((((((((((((((((((((((((((((((((
+#                     .((((((((((((((((((((((((((((((((((((,.
+#                          .,(((((((((((((((((((((((((.
+#
+###################################################################################

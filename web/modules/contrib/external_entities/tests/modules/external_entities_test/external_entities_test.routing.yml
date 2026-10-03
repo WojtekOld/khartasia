@@ -1,0 +1,65 @@
+external_entities_test.list:
+  methods: [GET]
+  path: '/external-entities-test'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::listDatasets'
+    _title: 'Dataset list (JSON)'
+  requirements:
+    _permission: 'access content'
+external_entities_test.add:
+  methods: [POST]
+  path: '/external-entities-test/{dataset}'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::addDataset'
+    _title: 'Add a new dataset (JSON)'
+  requirements:
+    _permission: 'access content'
+external_entities_test.remove:
+  methods: [DELETE]
+  path: '/external-entities-test/{dataset}'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::removeDataset'
+    _title: 'Remove a dataset (JSON)'
+  requirements:
+    _permission: 'access content'
+external_entities_test.count_items:
+  methods: [GET]
+  path: '/external-entities-test/count/{dataset}'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::countItems'
+    _title: 'Dataset count (JSON)'
+  requirements:
+    _permission: 'access content'
+external_entities_test.list_items:
+  methods: [GET]
+  path: '/external-entities-test/{dataset}'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::listItems'
+    _title: 'Dataset item list (JSON)'
+  requirements:
+    _permission: 'access content'
+external_entities_test.get_item:
+  methods: [GET]
+  path: '/external-entities-test/{dataset}/{id}'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::getItem'
+    _title: 'Get single item JSON'
+  requirements:
+    _permission: 'access content'
+external_entities_test.set_item:
+  methods: [POST, PUT, PATCH]
+  path: '/external-entities-test/{dataset}/{id}'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::setItem'
+    _title: 'Set single item JSON'
+    id: null
+  requirements:
+    _permission: 'access content'
+external_entities_test.delete_item:
+  methods: [DELETE]
+  path: '/external-entities-test/{dataset}/{id}'
+  defaults:
+    _controller: '\Drupal\external_entities_test\Controller\ExternalEntitiesJsonController::deleteItem'
+    _title: 'Delete single item JSON'
+  requirements:
+    _permission: 'access content'

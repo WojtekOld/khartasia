@@ -11,6 +11,7 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\proc\ProcKeyManager;
 use Drupal\proc\Service\CleanUpExpiredUpdateJobService;
 use Drupal\proc\Service\ProcJsonFileService;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Drupal\proc\Traits\ProcCsvTrait;
 use Random\RandomException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -61,6 +62,13 @@ class ProcCipherTextEditController extends ControllerBase {
   protected CleanUpExpiredUpdateJobService $cleanUpExpiredUpdateJob;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * ProcCipherTextEditController constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -73,6 +81,8 @@ class ProcCipherTextEditController extends ControllerBase {
    *   The JSON file service.
    * @param \Drupal\proc\Service\CleanUpExpiredUpdateJobService $clean_up_expired_update_job
    *   The cleanup expired update job service.
+   * @param \Drupal\proc\Service\RecipientStorageBrokerInterface $recipient_storage
+   *   The recipient storage broker.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
@@ -80,12 +90,14 @@ class ProcCipherTextEditController extends ControllerBase {
     ProcKeyManager $key_manager,
     ProcJsonFileService $json_file_service,
     CleanUpExpiredUpdateJobService $clean_up_expired_update_job,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $logger;
     $this->keyManager = $key_manager;
     $this->jsonFileService = $json_file_service;
     $this->cleanUpExpiredUpdateJob = $clean_up_expired_update_job;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -102,7 +114,8 @@ class ProcCipherTextEditController extends ControllerBase {
       $container->get('logger.factory')->get('proc'),
       $container->get('proc.key_manager'),
       $container->get('proc.proc_json_file_service'),
-      $container->get('proc.clean_up_expired_update_job')
+      $container->get('proc.clean_up_expired_update_job'),
+      $container->get('proc.recipient_storage')
     );
   }
 
@@ -224,7 +237,7 @@ class ProcCipherTextEditController extends ControllerBase {
     $cipher_fid = $files['file_id'] ?? $files['json_fids'] ?? '';
     $cipher = !empty($cipher_fid) ? ['cipher_fid' => $cipher_fid] : '';
 
-    $prev_recs = $entity->get('field_recipients_set')->getValue();
+    $prev_recs = $this->recipientStorage->getRecipients($entity);
     $prev_rec_ids = [];
     foreach ($prev_recs as $prev_rec_id) {
       $prev_rec_ids[] = $prev_rec_id['target_id'];
@@ -245,9 +258,12 @@ class ProcCipherTextEditController extends ControllerBase {
     $prev_changed = $entity->get('changed')->getValue()[0]['value'];
 
     $entity->set('armored', $cipher)
-      ->set('field_recipients_set', $recipients_field_set)
-      ->set('field_wished_recipients_set', [])
       ->set('meta', $metadata);
+    // Route the recipients and wished recipients writes through the bound
+    // recipient storage plugin (meta is set above so the binding resolves
+    // correctly).
+    $this->recipientStorage->setRecipients($entity, $recipients_field_set);
+    $this->recipientStorage->setWishedRecipients($entity, []);
 
     $entity->save();
 
@@ -299,6 +315,9 @@ class ProcCipherTextEditController extends ControllerBase {
       ]);
     }
 
+    // Also remove the concluded job from the CURRENT user's own keyring.
+    $this->removeJobFromCurrentUserKeyring($entity_id);
+
     $response = [
       'status' => 'success',
       'message' => [
@@ -310,6 +329,68 @@ class ProcCipherTextEditController extends ControllerBase {
       ],
     ];
     return new JsonResponse($response);
+  }
+
+  /**
+   * Removes a concluded job from the current user's latest keyring update_jobs.
+   *
+   * @param int $entity_id
+   *   The proc cipher entity ID that was just re-encrypted.
+   */
+  protected function removeJobFromCurrentUserKeyring(int $entity_id): void {
+    try {
+      $keyring = $this->keyManager->getKeys((string) $this->currentUser()->id(), 'user_id');
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error loading current user keyring while clearing update job @job: @error', [
+        '@job' => $entity_id,
+        '@error' => $e->getMessage(),
+      ]);
+      return;
+    }
+
+    /** @var \Drupal\proc\ProcInterface|null $keyring_entity */
+    $keyring_entity = $keyring['keyring_entity'] ?? NULL;
+    if ($keyring_entity === NULL) {
+      // The current user has no keyring; nothing to clean.
+      return;
+    }
+
+    $meta = $keyring_entity->get('meta')->getValue()[0] ?? [];
+    $update_jobs = $meta['update_jobs'] ?? [];
+    if (!is_array($update_jobs) || empty($update_jobs)) {
+      return;
+    }
+
+    // Drop the concluded job (compare loosely to tolerate int/string storage).
+    $filtered = array_values(array_filter(
+      $update_jobs,
+      static fn ($job): bool => (int) $job !== $entity_id
+    ));
+
+    if (count($filtered) === count($update_jobs)) {
+      // The job was not present on this keyring; nothing to change.
+      return;
+    }
+
+    $meta['update_jobs'] = $filtered;
+
+    try {
+      $keyring_entity->set('meta', [$meta]);
+      $keyring_entity->save();
+      $this->entityTypeManager->getStorage('proc')->resetCache([$keyring_entity->id()]);
+      $this->logger->info('Removed concluded job @job from current user keyring @keyring.', [
+        '@job' => $entity_id,
+        '@keyring' => $keyring_entity->id(),
+      ]);
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error clearing update job @job from keyring @keyring: @error', [
+        '@job' => $entity_id,
+        '@keyring' => $keyring_entity->id(),
+        '@error' => $e->getMessage(),
+      ]);
+    }
   }
 
 }

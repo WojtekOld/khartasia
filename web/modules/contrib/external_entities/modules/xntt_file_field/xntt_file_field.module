@@ -1,0 +1,129 @@
+<?php
+
+/**
+ * @file
+ * External Entities Files Storage Client module file.
+ */
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\xntt_file_field\Hook\XnttFileFieldHooks;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\field\FieldConfigInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+
+/**
+ * @file
+ * External Entitites Files Storage Client plugin for External Entities.
+ */
+
+/**
+ * Implements hook_entity_preload().
+ *
+ * This implementation enables the use of external entity identifiers prefixed
+ * with "xntt-<content type machine name>-<content identifier>-
+ * <uri drupal field machine name>#<file number>" as file identifiers in order
+ * to use those external entities as Drupal managed files.
+ * The matching external entities must return at least a non-empty 'uri' field
+ * in order to be taken into account.
+ */
+#[LegacyHook]
+function xntt_file_field_entity_preload(array $ids, string $entity_type_id) {
+  return \Drupal::service(XnttFileFieldHooks::class)->entityPreload($ids, $entity_type_id);
+}
+
+/**
+ * Implements hook_entity_storage_load().
+ *
+ * Only update external entity file or image fields that have been mapped.
+ * Sets the correct external file virtual identifier so it could be loaded later
+ * on when the system will try to access it through "xntt://" stream.
+ */
+#[LegacyHook]
+function xntt_file_field_entity_storage_load(array $entities, $entity_type_id) {
+  return \Drupal::service(XnttFileFieldHooks::class)->entityStorageLoad($entities, $entity_type_id);
+}
+
+/**
+ * Implements hook_field_widget_single_element_form_alter().
+ */
+#[LegacyHook]
+function xntt_file_field_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context) {
+  \Drupal::service(XnttFileFieldHooks::class)->fieldWidgetSingleElementFormAlter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_info_alter().
+ */
+#[LegacyHook]
+function xntt_file_field_field_info_alter(&$info) {
+  \Drupal::service(XnttFileFieldHooks::class)->fieldInfoAlter($info);
+}
+
+/**
+ * Implements hook_entity_field_storage_info_alter().
+ */
+#[LegacyHook]
+function xntt_file_field_entity_field_storage_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  \Drupal::service(XnttFileFieldHooks::class)->entityFieldStorageInfoAlter($fields, $entity_type);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for 'field_config_edit_form'.
+ */
+#[LegacyHook]
+function xntt_file_field_form_field_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  \Drupal::service(XnttFileFieldHooks::class)->formFieldConfigEditFormAlter($form, $form_state, $form_id);
+}
+
+/**
+ * Entity form builder for file field config edit form.
+ *
+ * This function will check if current form entity is a field config for an
+ * external entity type and check if that field is mapped using the external
+ * entity file field mapper. If so, it will adjust the field target type to
+ * "xnttfile" instead of "file".
+ *
+ * @param string $entity_type_id
+ *   The entity type identifier.
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity updated with the submitted values.
+ * @param array $form
+ *   The complete form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ */
+function xntt_file_field_form_field_config_edit_form_entity_builder(
+  $entity_type_id,
+  $entity,
+  &$form,
+  FormStateInterface $form_state,
+): void {
+  assert($entity instanceof FieldConfigInterface);
+  // Only work on file or image fields.
+  if (!in_array($entity->getType(), ['file', 'image'])) {
+    return;
+  }
+  // The $entity_type_id is 'field_config', so get the bundle which is the
+  // entity type.
+  [$content_type, $bundle, $field_name] = explode('.', $entity->id());
+  if (!$field_name || ($content_type != $bundle)) {
+    // Not an external entity. External entities don't have bundles.
+    return;
+  }
+  $xntt_type = \Drupal::entityTypeManager()->getStorage('external_entity_type')->load($bundle);
+  if (empty($xntt_type)) {
+    // Not an external entity.
+    return;
+  }
+
+  // $field_name = $entity->getName();
+  $field_mapper_id = $xntt_type->getFieldMapperId($field_name);
+  if (empty($field_mapper_id) || ($field_mapper_id !== 'file')) {
+    return;
+  }
+
+  // Set the target_type to 'xnttfile'.
+  if ('file' === $entity->getFieldStorageDefinition()->getSetting('target_type')) {
+    $entity->getFieldStorageDefinition()->setSetting('target_type', 'xnttfile');
+  }
+}

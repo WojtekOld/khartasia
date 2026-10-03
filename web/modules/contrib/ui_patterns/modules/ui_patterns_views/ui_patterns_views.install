@@ -21,3 +21,38 @@ function ui_patterns_views_update_last_removed(): int {
   }
   return 0;
 }
+
+/**
+ * Implements hook_install().
+ */
+function ui_patterns_views_install(): void {
+  \_ui_patterns_views_enable_display_extender();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function ui_patterns_views_uninstall(): void {
+  $config = Drupal::configFactory()->getEditable('views.settings');
+  $extenders = \array_values(\array_diff((array) $config->get('display_extenders'), ['ui_patterns']));
+  $config->set('display_extenders', $extenders)->save();
+}
+
+/**
+ * Enables the "Component (UI Patterns)" display extender.
+ */
+function ui_patterns_views_update_10201(): void {
+  \_ui_patterns_views_enable_display_extender();
+}
+
+/**
+ * Lists the display extender in the views settings.
+ */
+function _ui_patterns_views_enable_display_extender(): void {
+  $config = Drupal::configFactory()->getEditable('views.settings');
+  $extenders = (array) $config->get('display_extenders');
+  if (!\in_array('ui_patterns', $extenders, TRUE)) {
+    $extenders[] = 'ui_patterns';
+    $config->set('display_extenders', $extenders)->save();
+  }
+}

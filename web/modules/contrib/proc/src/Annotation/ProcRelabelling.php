@@ -15,7 +15,7 @@ use Drupal\Core\Annotation\Translation;
  */
 class ProcRelabelling extends Plugin {
   /**
-   * ProcRelabelling allow the relabeling of a file cipher text just created.
+   * ProcRelabelling allows the relabeling of a file cipher text just created.
    *
    * By default, the label of the proc entity is the source file's name.
    * However, you might want to change this in order to not reveal the source

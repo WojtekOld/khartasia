@@ -11,6 +11,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
+use Drupal\ui_patterns_views_test\Hook\UiPatternsViewsTestHooks;
 use Drupal\views\Entity\View;
 use Drupal\views_ui\ViewUI;
 use PHPUnit\Framework\Attributes\Group;
@@ -49,6 +50,7 @@ final class ViewsSourceContextsTest extends KernelTestBase {
     'views_ui',
     'ui_patterns',
     'ui_patterns_views',
+    'ui_patterns_views_test',
   ];
 
   /**
@@ -107,12 +109,17 @@ final class ViewsSourceContextsTest extends KernelTestBase {
    * A source with a views requirement is offered only under that requirement.
    */
   public function testDefinitionsFilteredByViewsRequirements(): void {
+    // view_rows is also offered in a style context.
+    $display_sources = \array_values(UiPatternsViewsTestHooks::SLOT_SOURCES);
+    $display_only = \array_values(\array_diff($display_sources, ['view_rows']));
     $cases = [
-      [NULL, 'slot', [], ['view_rows', 'view_field']],
-      ['views:style', 'slot', ['view_rows'], ['view_field']],
-      ['views:row', 'slot', ['view_field'], ['view_rows']],
+      [NULL, 'slot', [], ['view_field', ...$display_sources]],
+      ['views:style', 'slot', ['view_rows'], ['view_field', ...$display_only]],
+      ['views:row', 'slot', ['view_field'], $display_sources],
+      ['views:display', 'slot', $display_sources, ['view_field']],
       ['views:style', 'string', ['view_title'], []],
       ['views:row', 'string', ['view_title'], []],
+      ['views:display', 'string', ['view_title'], []],
     ];
     foreach ($cases as [$requirement, $prop_type_id, $present, $absent]) {
       $definition_ids = \array_keys($this->sourcePluginManager->getDefinitionsForPropType($prop_type_id, $this->viewContexts($requirement)));
@@ -123,10 +130,18 @@ final class ViewsSourceContextsTest extends KernelTestBase {
   }
 
   /**
+   * The saved view is what the sources read.
+   */
+  public function testSavedView(): void {
+    self::assertSame('saved view title', $this->getViewTitle());
+  }
+
+  /**
    * A view being edited in the views UI wins over its saved configuration.
+   *
+   * Set before the first resolution: the executable is kept for the request.
    */
   public function testUnsavedViewFromTempstore(): void {
-    self::assertSame('saved view title', $this->getViewTitle());
     $unsaved = clone View::load('test');
     $display = $unsaved->get('display');
     $display['default']['display_options']['title'] = 'unsaved view title';

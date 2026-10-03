@@ -169,7 +169,7 @@ export default class LinkitEditing extends Plugin {
               return;
             }
             range = updateLinkTextIfNeeded(range, displayedText);
-            updateAttributes(range, true);
+            updateAttributes(range, typeof displayedText !== 'object');
           } else {
             const ranges = model.schema.getValidRanges(selection.getRanges(), 'linkDataEntityType');
             for (const range of ranges) {

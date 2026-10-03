@@ -104,7 +104,7 @@ class LinkitHelper {
 
     $entity = self::getEntityFromUserInput($input);
     if ($entity) {
-      return 'entity:' . $entity->getEntityTypeId() . '/' . $entity->id() . static::getQueryAndFragment($input);
+      return 'entity:' . $entity->getEntityTypeId() . '/' . $entity->id();
     }
 
     // It's a relative link. If it's a file, store it as `base:`. Otherwise it's

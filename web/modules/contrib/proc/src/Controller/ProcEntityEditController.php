@@ -9,7 +9,9 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\proc\ProcInterface;
 use Drupal\proc\ProcKeyManager;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -48,6 +50,13 @@ class ProcEntityEditController extends ControllerBase {
   protected ImmutableConfig $procSettings;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * ProcEntityEditController constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -58,17 +67,21 @@ class ProcEntityEditController extends ControllerBase {
    *   The proc key manager.
    * @param \Drupal\Core\Config\ImmutableConfig $proc_settings
    *   The proc module settings.
+   * @param \Drupal\proc\Service\RecipientStorageBrokerInterface $recipient_storage
+   *   The recipient storage broker.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     LoggerChannelInterface $logger,
     ProcKeyManager $key_manager,
     ImmutableConfig $proc_settings,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $logger;
     $this->keyManager = $key_manager;
     $this->procSettings = $proc_settings;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -85,6 +98,7 @@ class ProcEntityEditController extends ControllerBase {
       $container->get('logger.factory')->get('proc'),
       $container->get('proc.key_manager'),
       $container->get('config.factory')->get('proc.settings'),
+      $container->get('proc.recipient_storage'),
     );
   }
 
@@ -156,7 +170,12 @@ class ProcEntityEditController extends ControllerBase {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function updateEntityWishedRecipients(EntityInterface $entity, array $wished_recipients): void {
-    $entity->set('field_wished_recipients_set', $wished_recipients);
+    if ($entity instanceof ProcInterface) {
+      $this->recipientStorage->setWishedRecipients($entity, $wished_recipients);
+    }
+    else {
+      $entity->set('field_wished_recipients_set', $wished_recipients);
+    }
     $entity->save();
     try {
       $this->entityTypeManager
@@ -181,13 +200,10 @@ class ProcEntityEditController extends ControllerBase {
    *   An array of recipient IDs.
    */
   private function extractRecipientIds(EntityInterface $entity): array {
-    $recipient_ids = [];
-    foreach ($entity->get('field_recipients_set')->getValue() as $recipient) {
-      if (isset($recipient['target_id'])) {
-        $recipient_ids[] = $recipient['target_id'];
-      }
+    if (!$entity instanceof ProcInterface) {
+      return [];
     }
-    return $recipient_ids;
+    return $this->recipientStorage->getRecipientIds($entity);
   }
 
   /**

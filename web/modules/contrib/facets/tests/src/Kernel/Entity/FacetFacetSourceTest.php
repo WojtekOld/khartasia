@@ -9,6 +9,7 @@ use Drupal\facets\FacetSourceInterface;
 use Drupal\facets\Plugin\facets\facet_source\SearchApiDisplay;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\facets\Exception\Exception;
+use Drupal\views\Entity\View;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
@@ -98,6 +99,24 @@ class FacetFacetSourceTest extends EntityKernelTestBase {
     $this->assertInstanceOf(FacetSourceInterface::class, $entity->getFacetSourceConfig());
     $this->assertEquals($display_name, $entity->getFacetSourceConfig()->getName());
     $this->assertEquals('f', $entity->getFacetSourceConfig()->getFilterKey());
+  }
+
+  /**
+   * Tests facet source discovery after duplicating a View.
+   */
+  public function testDuplicatedViewFacetSource() {
+    $facet_source_manager = $this->container
+      ->get('plugin.manager.facets.facet_source');
+    $facet_source_manager->getDefinitions();
+
+    $view = View::load('search_api_test_view');
+    $duplicate = $view->createDuplicate();
+    $duplicate->set('id', 'duplicated_search_api_test_view');
+    $duplicate->set('label', 'Duplicated Search API Test View');
+    $duplicate->save();
+
+    $facet_source_id = 'search_api:views_page__duplicated_search_api_test_view__page_1';
+    $this->assertTrue($facet_source_manager->hasDefinition($facet_source_id));
   }
 
   /**

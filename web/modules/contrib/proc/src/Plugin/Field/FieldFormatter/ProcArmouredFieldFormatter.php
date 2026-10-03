@@ -14,6 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountProxy;
 use Drupal\proc\ProcKeyManagerInterface;
 use Drupal\proc\Service\ProcUpdateJobsCountService;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -74,6 +75,13 @@ class ProcArmouredFieldFormatter extends EntityReferenceLabelFormatter {
   protected LoggerInterface $logger;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * Constructs a ProcArmouredFieldFormatter object.
    *
    * @param string $plugin_id
@@ -120,6 +128,7 @@ class ProcArmouredFieldFormatter extends EntityReferenceLabelFormatter {
     ConfigFactoryInterface $config_factory,
     ProcUpdateJobsCountService $update_jobs_count_service,
     LoggerInterface $logger,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     parent::__construct(
       $plugin_id,
@@ -142,6 +151,7 @@ class ProcArmouredFieldFormatter extends EntityReferenceLabelFormatter {
     $this->configFactory = $config_factory;
     $this->updateJobsCountService = $update_jobs_count_service;
     $this->logger = $logger;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -161,7 +171,8 @@ class ProcArmouredFieldFormatter extends EntityReferenceLabelFormatter {
       $container->get('current_user'),
       $container->get('config.factory'),
       $container->get('proc.update_jobs_count_service'),
-      $container->get('logger.factory')->get('proc')
+      $container->get('logger.factory')->get('proc'),
+      $container->get('proc.recipient_storage')
     );
   }
 
@@ -190,7 +201,7 @@ class ProcArmouredFieldFormatter extends EntityReferenceLabelFormatter {
     $template_file_label = $module_path . '/templates/proc.label_formatter.html.twig';
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
-      $recipients = $entity->get('field_recipients_set')->getValue();
+      $recipients = $this->recipientStorage->getRecipients($entity);
       $label = $entity->label();
 
       $elements[$delta]['placeholder'] = [

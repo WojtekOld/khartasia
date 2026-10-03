@@ -119,6 +119,7 @@ interface ProcInterface extends ContentEntityInterface, EntityOwnerInterface, En
     'host_page_url',
     'fetcher_endpoint',
     'proc_re_encryption_plugin',
+    'proc_recipients_storage_plugin',
   ];
 
   /**

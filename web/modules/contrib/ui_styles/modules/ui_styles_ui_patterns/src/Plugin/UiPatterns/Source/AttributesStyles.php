@@ -10,7 +10,9 @@ use Drupal\Core\Template\Attribute;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\AttributesTrait;
 use Drupal\ui_patterns\SourcePluginBase;
+use Drupal\ui_styles\StylePluginManagerInterface;
 use Drupal\ui_styles\UiStylesUtility;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the source.
@@ -24,6 +26,59 @@ use Drupal\ui_styles\UiStylesUtility;
 class AttributesStyles extends SourcePluginBase {
 
   use AttributesTrait;
+
+  /**
+   * The styles manager.
+   */
+  protected StylePluginManagerInterface $stylesManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->stylesManager = $container->get('plugin.manager.ui_styles');
+    return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsSummary(): array {
+    $styles = $this->getSetting('styles');
+    if (!\is_array($styles)) {
+      return [];
+    }
+
+    // Old config structure.
+    // @todo to remove in UI Styles 2.
+    if (isset($styles['_ui_styles_extra'])) {
+      /** @var array<string, string> $selected */
+      // @phpstan-ignore-next-line
+      $selected = UiStylesUtility::extractSelectedStyles($styles);
+    }
+    else {
+      /** @var array<string, string> $selected */
+      $selected = $styles['selected'] ?? [];
+    }
+
+    $summary = [];
+    foreach ($selected as $style_id => $option_id) {
+      $definition = $this->stylesManager->getDefinition($style_id, FALSE);
+      if ($definition === NULL) {
+        continue;
+      }
+      /** @var array<string, \Drupal\Core\StringTranslation\TranslatableMarkup> $options */
+      $options = $definition->getOptionsAsOptions();
+      $option = (string) ($options[$option_id] ?? $option_id);
+      $label = (string) $definition->getLabel();
+      // A style with a single option names itself, and its option carries
+      // that same name: "Clearfix: Clearfix" says it twice.
+      $summary[] = ($label === $option) ? $label : $label . ': ' . $option;
+    }
+
+    return $summary;
+  }
 
   /**
    * {@inheritdoc}

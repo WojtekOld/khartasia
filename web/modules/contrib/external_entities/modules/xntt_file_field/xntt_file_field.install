@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the xntt_file_field module.
+ */
+
+/**
+ * Upgrade file field mapper configs.
+ */
+function xntt_file_field_update_10301(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade file field mapper settings by transfering the mapping of the
+    // value of the URI field to the new real_uri property mapping.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable(
+      "external_entities.external_entity_type.{$entity_type_id}"
+    );
+    $need_update = FALSE;
+    $fm_configs = $config->get('field_mappers') ?? [];
+    foreach ($fm_configs as $field_id => $fm_config) {
+      // Only process file field mappers.
+      if ($fm_config['id'] === 'file') {
+        // Add 'property_mappings' key if not present.
+        if (!isset($fm_config['config']['property_mappings'])) {
+          $fm_config['config']['property_mappings'] = [
+            'real_uri' => [],
+          ];
+          $need_update = TRUE;
+        }
+        // Get file URI field mapping.
+        $uri_field = $fm_config['config']['uri'] ?? '';
+        if (!empty($uri_field)
+            && !empty($fm_configs[$uri_field]['id'])
+            && empty($fm_config['config']['property_mappings']['real_uri'])
+        ) {
+          // We got a mapped field for URI, get its value mapping (either
+          // 'value' or 'uri' in case of LinkItem fields).
+          $uri_mapping =
+            $fm_configs[$uri_field]['config']['property_mappings']['value']
+            ?? $fm_configs[$uri_field]['config']['property_mappings']['uri']
+            ?? [];
+          $fm_config['config']['property_mappings']['real_uri'] = $uri_mapping;
+          unset($fm_config['config']['uri']);
+          $need_update = TRUE;
+        }
+        unset($fm_config['config']['fid']);
+      }
+      $fm_configs[$field_id] = $fm_config;
+    }
+
+    if ($need_update) {
+      $config->set('field_mappers', $fm_configs);
+      $config->save();
+    }
+  }
+}

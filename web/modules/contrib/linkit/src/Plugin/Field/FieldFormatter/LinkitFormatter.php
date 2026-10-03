@@ -122,18 +122,25 @@ class LinkitFormatter extends LinkFormatter {
         if ($url instanceof CacheableDependencyInterface) {
           $cacheable_url = $url;
         }
+
         // Keep query and fragment.
         $parsed_url = parse_url($link_item->uri);
         if (!empty($parsed_url['query'])) {
           $parsed_query = [];
           parse_str($parsed_url['query'], $parsed_query);
-          if (!empty($parsed_query)) {
-            $url->setOption('query', $parsed_query);
-          }
+          $url->setOption('query', $parsed_query);
         }
+        elseif (!empty($link_item->options['query'])) {
+          $url->setOption('query', $link_item->options['query']);
+        }
+
         if (!empty($parsed_url['fragment'])) {
           $url->setOption('fragment', $parsed_url['fragment']);
         }
+        elseif (!empty($link_item->options['fragment'])) {
+          $url->setOption('fragment', $link_item->options['fragment']);
+        }
+
         $attributes = (array) $url->getOption('attributes');
         $attributes = array_merge($item_url_attributes ?: [], $attributes ?: []);
         // Restore rel and target options.

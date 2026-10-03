@@ -1,0 +1,10 @@
+diff --git a/geocoder_autocomplete.info.yml b/geocoder_autocomplete.info.yml
+index 648ed7e..6d3bc37 100644
+--- a/geocoder_autocomplete.info.yml
++++ b/geocoder_autocomplete.info.yml
+@@ -1,4 +1,4 @@
+ name: 'Geocoder Autocomplete'
+ description: 'Provides a text field widget with autocomplete via the Google Geocoding API.'
+-core_version_requirement: ^8 || ^9
++core_version_requirement: ^8 || ^9 || ^10 || ^11
+ type: module

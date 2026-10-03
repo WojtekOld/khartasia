@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * UI Patterns Views test module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\ui_patterns_views_test\Hook\UiPatternsViewsTestHooks;
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+#[LegacyHook]
+function ui_patterns_views_test_preprocess_views_view(array &$variables): void {
+  Drupal::service(UiPatternsViewsTestHooks::class)->preprocessViewsView($variables);
+}
+
+/**
+ * Implements hook_views_post_execute().
+ */
+#[LegacyHook]
+function ui_patterns_views_test_views_post_execute(ViewExecutable $view): void {
+  Drupal::service(UiPatternsViewsTestHooks::class)->viewsPostExecute($view);
+}

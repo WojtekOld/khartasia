@@ -1,0 +1,20 @@
+parameters:
+  level: 0
+  reportUnmatchedIgnoredErrors: false
+  fileExtensions:
+    - php
+    - module
+    - inc
+    - install
+    - theme
+    - profile
+  ignoreErrors:
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"
+    # DebugClient overrides a final class by design for debugging purposes.
+    - 
+      message: "#^Class Drupal\\\\external_entities\\\\GuzzleHttp\\\\DebugClient extends @final class GuzzleHttp\\\\Client\\.$#"
+      path: src/GuzzleHttp/DebugClient.php
+    - 
+      message: "#^Parameter \\$filter_format_repository of method Drupal\\\\external_entities\\\\Plugin\\\\ExternalEntities\\\\FieldMapper\\\\TextFieldMapper::__construct\\(\\) has invalid type Drupal\\\\filter\\\\FilterFormatRepositoryInterface\\.$#"
+      path: src/Plugin/ExternalEntities/FieldMapper/TextFieldMapper.php

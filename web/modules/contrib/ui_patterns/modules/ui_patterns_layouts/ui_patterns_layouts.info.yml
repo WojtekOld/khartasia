@@ -7,7 +7,7 @@ dependencies:
   - drupal:layout_discovery
   - ui_patterns:ui_patterns
 
-# Information added by Drupal.org packaging script on 2026-08-28
-version: '2.0.20'
+# Information added by Drupal.org packaging script on 2026-09-04
+version: '2.0.21'
 project: 'ui_patterns'
-datestamp: 1787936640
+datestamp: 1788535900

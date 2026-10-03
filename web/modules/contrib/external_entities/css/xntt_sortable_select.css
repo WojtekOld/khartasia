@@ -1,0 +1,23 @@
+.xntt-sortable-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.xntt-sortable-select-wrapper select {
+  width: 200px;
+  background: none;
+}
+
+.xntt-sortable-select-wrapper select:focus {
+  background: none;
+}
+
+.xntt-sortable-select-wrapper button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.xntt-sortable-select-wrapper button:focus {
+  box-shadow: none;
+}

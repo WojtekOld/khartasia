@@ -1,0 +1,29 @@
+name: "UI Patterns Views Test view"
+description: "A whole view assembled from its parts, one slot per part, in views-view.html.twig order."
+props:
+  type: object
+  properties:
+    title:
+      title: "Title"
+      type: "string"
+slots:
+  header:
+    title: "Header"
+  exposed:
+    title: "Exposed form"
+  attachment_before:
+    title: "Attachment before"
+  rows:
+    title: "Rows"
+  empty:
+    title: "Empty"
+  pager:
+    title: "Pager"
+  attachment_after:
+    title: "Attachment after"
+  more:
+    title: "More link"
+  footer:
+    title: "Footer"
+  feed_icons:
+    title: "Feed icons"

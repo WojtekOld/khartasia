@@ -1,0 +1,4 @@
+services:
+  Drupal\ui_patterns_views_test\Hook\UiPatternsViewsTestHooks:
+    class: Drupal\ui_patterns_views_test\Hook\UiPatternsViewsTestHooks
+    autowire: true

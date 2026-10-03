@@ -6,7 +6,6 @@ namespace Drupal\Tests\linkit\Kernel;
 
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
-
 /**
  * Tests the entity matcher deriver.
  *

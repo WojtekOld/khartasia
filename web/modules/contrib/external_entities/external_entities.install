@@ -1,0 +1,1341 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the external_entities module.
+ */
+
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+use Drupal\Core\Database\Statement\FetchAs;
+use Drupal\Core\Database\Database;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\external_entities\Plugin\ExternalEntities\DataAggregator\GroupAggregator;
+use Drupal\external_entities\Plugin\ExternalEntities\StorageClient\FileClientInterface;
+use Drupal\user\UserInterface;
+use JsonPath\JsonObject;
+
+/**
+ * Implements hook_requirements().
+ */
+#[LegacyRequirementsHook]
+function external_entities_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'install' || $phase === 'runtime') {
+    if (!class_exists(JsonObject::class)) {
+      $requirements['external_entities_jsonpath'] = [
+        'title' => t('Galbar JSONPath library'),
+        'description' => t("External entities requires the galbar/jsonpath library."),
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Error, fn() => REQUIREMENT_ERROR),
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function external_entities_uninstall() {
+  $db_connection = \Drupal::database();
+  $db_connection->schema()->dropTable('xntt_rest_queries');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function external_entities_schema() {
+  $schema['xntt_rest_queries'] = [
+    'description' => 'Stores REST queries to handle limitations.',
+    'fields' => [
+      'qid' => [
+        'description' => 'The primary identifier for a query set.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'endpoint' => [
+        'description' => 'Holds the endpoint URL',
+        'type' => 'varchar',
+        'length' => 2083,
+        'not null' => TRUE,
+      ],
+      // MD5 hash added for issue #3475768 as unique key on long string is not
+      // supported by all databases.
+      'ephash' => [
+        'description' => 'MD5 hash of the endpoint URL. Used as a unique key for query limiting and upserts.',
+        'type' => 'char',
+        'length' => 32,
+        'not null' => TRUE,
+      ],
+      'qtimes' => [
+        'description' => 'Sorted array of query times',
+        'type' => 'text',
+        'not null' => TRUE,
+      ],
+      'xntt_type' => [
+        'description' => 'Holds used external entity type for the query',
+        'type' => 'varchar',
+        'length' => EntityTypeInterface::ID_MAX_LENGTH,
+        'not null' => TRUE,
+      ],
+      'username' => [
+        'description' => 'Holds name of the user which issued the query',
+        'type' => 'varchar',
+        'length' => UserInterface::USERNAME_MAX_LENGTH,
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['qid'],
+    'unique keys' => ['ephash' => ['ephash']],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Create the database schema for external entity types.
+ */
+function external_entities_update_8201() {
+  // Prior to https://www.drupal.org/project/external_entities/issues/3056426
+  // the database schema for external entity types was not created. This update
+  // script creates the database schema for all existing external entity types.
+  $external_entity_type_config = \Drupal::entityTypeManager()->getDefinition('external_entity_type');
+
+  $external_entity_types = \Drupal::entityTypeManager()->createHandlerInstance(
+    $external_entity_type_config->getHandlerClass('storage'),
+    $external_entity_type_config
+  )->loadMultiple();
+
+  foreach ($external_entity_types as $id => $entity_type) {
+    $entity_type = \Drupal::entityTypeManager()->getDefinition($id);
+    \Drupal::service('entity_type.listener')
+      ->onEntityTypeCreate($entity_type);
+  }
+}
+
+/**
+ * Enable submodule for installations that were relying on it.
+ */
+function external_entities_update_8202() {
+  \Drupal::service('module_installer')->install(['external_entities_pathauto']);
+}
+
+/**
+ * Migrate (simple) field mappings to the new pluggable field mapper.
+ */
+function external_entities_update_8203() {
+  $external_entity_type_config = \Drupal::entityTypeManager()->getDefinition('external_entity_type');
+  $external_entity_types = \Drupal::entityTypeManager()->createHandlerInstance(
+    $external_entity_type_config->getHandlerClass('storage'),
+    $external_entity_type_config
+  )->loadMultiple();
+
+  foreach ($external_entity_types as $entity_type_id => $entity_type) {
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+
+    $field_mappings = $config->get('field_mappings');
+    if (!empty($field_mappings)) {
+      $config->set('field_mapper_id', 'simple');
+      $config->set('field_mapper_config.field_mappings', $field_mappings);
+    }
+
+    $config->clear('field_mappings');
+    $config->save();
+  }
+}
+
+/**
+ * Upgrades REST storage client settings.
+ */
+function external_entities_update_9304(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  // Loop on external entity types to check the ones using REST clients.
+  foreach ($xntt_types as $entity_type_id) {
+    // This will only update native modules. Other derived modules or xnttmulti
+    // configs will not be updated but it is not a big deal since editing and
+    // saving the config from the UI will do the job and the system will work
+    // with not updated configs anyway.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+
+    $storage_client_id = $config->get('storage_client_id') ?? '';
+    if (in_array($storage_client_id, ['rest', 'wiki', 'jsonapi'])) {
+      $storage_config = $config->get('storage_client_config');
+      // Upgrade authentication settings.
+      if (!isset($storage_config['api_key']['type'])) {
+        if (!empty($storage_config['api_key']['key'])
+            && !empty($storage_config['api_key']['header_name'])) {
+          $storage_config['api_key']['type'] = 'custom';
+        }
+        else {
+          $storage_config['api_key']['type'] = 'none';
+        }
+        $config->set('storage_client_config', $storage_config);
+        $config->save();
+      }
+    }
+  }
+  return t('REST, Wiki and JsonAPI external entity storage client configs were updated. If you have external entities using other REST-derivative storage clients, consider manually re-saving their config from the UI for update.');
+}
+
+/**
+ * Add query limiting table.
+ */
+function external_entities_update_9305(&$sandbox) {
+  // We don't call external_entities_schema() on purpose.
+  $xntt_rest_queries = [
+    'description' => 'Stores REST queries to handle limitations.',
+    'fields' => [
+      'qid' => [
+        'description' => 'The primary identifier for a query set.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'endpoint' => [
+        'description' => 'Holds the endpoint URL',
+        'type' => 'varchar',
+        'length' => 2083,
+        'not null' => TRUE,
+      ],
+      // MD5 hash added for issue #3475768 as unique key on long string is not
+      // supported by all databases.
+      'ephash' => [
+        'description' => 'MD5 hash of the endpoint URL. Used as a unique key for query limiting and upserts.',
+        'type' => 'char',
+        'length' => 32,
+        'not null' => TRUE,
+      ],
+      'qtimes' => [
+        'description' => 'Sorted array of query times',
+        'type' => 'text',
+        'not null' => TRUE,
+      ],
+      'xntt_type' => [
+        'description' => 'Holds used external entity type for the query',
+        'type' => 'varchar',
+        'length' => EntityTypeInterface::ID_MAX_LENGTH,
+        'not null' => TRUE,
+      ],
+      'username' => [
+        'description' => 'Holds name of the user which issued the query',
+        'type' => 'varchar',
+        'length' => UserInterface::USERNAME_MAX_LENGTH,
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['qid'],
+    'unique keys' => ['ephash' => ['ephash']],
+  ];
+  $schema = Database::getConnection()->schema();
+  // If the table exists, remove it.
+  if ($schema->tableExists('xntt_rest_queries')) {
+    $schema->dropTable('xntt_rest_queries');
+  }
+  // Create table.
+  $schema->createTable('xntt_rest_queries', $xntt_rest_queries);
+}
+
+/**
+ * Update field mapper configs to new structure.
+ */
+function external_entities_update_9306(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade field mapper configs.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+
+    $fm_id = $config->get('field_mapper_id');
+    if (in_array($fm_id, ['simple', 'jsonpath'])) {
+      $fm_config = $config->get('field_mapper_config');
+      foreach ($fm_config['field_mappings'] as &$properties) {
+        foreach ($properties as &$mapping) {
+          if (is_string($mapping)) {
+            $mapping_type = 4;
+            if ('+' == $mapping[0]) {
+              $mapping = substr($mapping, 1);
+              $mapping_type = 1;
+            }
+            elseif ('simple' == $fm_id) {
+              $mapping_type = 2;
+            }
+            elseif ('jsonpath' == $fm_id) {
+              $mapping_type = 4;
+            }
+            $mapping = [
+              'type' => $mapping_type,
+              'mapping' => $mapping,
+            ];
+          }
+        }
+      }
+      $config->set('field_mapper_config', $fm_config);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Update external entity settings to support multiple plugins by type.
+ */
+function external_entities_update_9307(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade storage client settings.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+
+    $sc_id = $config->get('storage_client_id');
+    $sc_config = $config->get('storage_client_config') ?? [];
+    if (!empty($sc_id)) {
+      $config->set('storage_clients', [['id' => $sc_id, 'config' => $sc_config]]);
+      $config->clear('storage_client_id');
+      $config->clear('storage_client_config');
+      $config->save();
+    }
+
+    $fm_id = $config->get('field_mapper_id');
+    $fm_config = $config->get('field_mapper_config') ?? [];
+    if (!empty($fm_id)) {
+      $config->set('field_mappers', [['id' => $fm_id, 'config' => $fm_config]]);
+      $config->clear('field_mapper_id');
+      $config->clear('field_mapper_config');
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Install external entity language field definition.
+ */
+function external_entities_update_9308(&$sandbox) {
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  $schema_repo = \Drupal::service('entity.last_installed_schema.repository');
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Get field definitions.
+    $field_defs = $entity_field_manager
+      ->getFieldDefinitions($entity_type_id, $entity_type_id);
+    foreach (['langcode', 'default_langcode'] as $field_id) {
+      // Update last installed field storage definition to remove warnings on
+      // site report page.
+      $fsd = $field_defs[$field_id]->getFieldStorageDefinition();
+      $schema_repo->setLastInstalledFieldStorageDefinition($fsd);
+      // We don't trigger listeners as ExternalEntityType is not an
+      // EntityType but a ConfigEntityBase.
+    }
+  }
+}
+
+/**
+ * Upgrade file storage clients.
+ */
+function external_entities_update_93010(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade file storage client ids.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+
+    $scs = $config->get('storage_clients');
+    $need_update = FALSE;
+    foreach ($scs as &$sc) {
+      if ($sc['id'] == 'xnttfiles') {
+        $sc['id'] = 'files';
+        $need_update = TRUE;
+        $sc['config']['performances']['use_index'] = $sc['config']['use_index'];
+        unset($sc['config']['use_index']);
+        $sc['config']['performances']['index_file'] = $sc['config']['index_file'];
+        unset($sc['config']['index_file']);
+        $sc['config']['data_fields']['index_file'] = $sc['config']['field_list'];
+        unset($sc['config']['field_list']);
+      }
+    }
+    if ($need_update) {
+      $config->set('storage_clients', $scs);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Upgrade field mapping config.
+ */
+function external_entities_update_93011(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  $messages = '';
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+
+    $fms = $config->get('field_mappers');
+    // Check if already up-to-date.
+    if (!array_key_exists('id', $fms)
+        && !empty($fms[0]['config']['field_mappings'])
+    ) {
+      $fms_new = [];
+      $field_definitions = \Drupal::service('entity_field.manager')
+        ->getFieldDefinitions($entity_type_id, $entity_type_id);
+
+      foreach ($fms[0]['config']['field_mappings'] as $field_name => $fm) {
+        if (empty($field_definitions[$field_name])) {
+          // Warn.
+          $messages .= t(
+            "WARNING: Missing field definition for external entity type '@xntt', field '@field' (not updated). Edit the external entity type manually to fix the mapping.<br/>\n",
+            [
+              '@xntt' => $entity_type_id,
+              '@field' => $field_name,
+            ]
+          );
+          continue;
+        }
+        $fms_new[$field_name] = [
+          'id' => 'generic',
+          'config' => [
+            'property_mappings' => [],
+          ],
+        ];
+        $main_property = $field_definitions[$field_name]->getFieldStorageDefinition()->getMainPropertyName();
+        foreach ($fm as $property_name => $pm) {
+          if (is_string($pm)) {
+            $pm = [
+              'type' => 3,
+              'mapping' => $pm,
+            ];
+          }
+          $required = in_array($property_name, ['id', 'title']);
+          $main = ($property_name == $main_property);
+          switch ($pm['type']) {
+            case 1:
+              // Mapping type "MAPPING_CONSTANT".
+              $fms_new[$field_name]['config']['property_mappings'][$property_name] = [
+                'id' => 'constant',
+                'config' => [
+                  'mapping' => $pm['mapping'] ?? '',
+                  'required_field' => $required,
+                  'main_property' => $main,
+                ],
+              ];
+              break;
+
+            case 2:
+              // Mapping type "MAPPING_DIRECT".
+              $fms_new[$field_name]['config']['property_mappings'][$property_name] = [
+                'id' => 'direct',
+                'config' => [
+                  'mapping' => $pm['mapping'] ?? '',
+                  'required_field' => $required,
+                  'main_property' => $main,
+                  'data_processors' => [
+                    [
+                      'id' => 'default',
+                      'config' => [],
+                    ],
+                  ],
+                ],
+              ];
+              break;
+
+            case 3:
+              // Mapping type "MAPPING_SIMPLE".
+              $fms_new[$field_name]['config']['property_mappings'][$property_name] = [
+                'id' => 'simple',
+                'config' => [
+                  'mapping' => $pm['mapping'] ?? '',
+                  'required_field' => $required,
+                  'main_property' => $main,
+                  'data_processors' => [
+                    [
+                      'id' => 'default',
+                      'config' => [],
+                    ],
+                  ],
+                ],
+              ];
+              break;
+
+            case 4:
+              // Mapping type "MAPPING_EXPRESSION".
+              $mapper_id = $fms[0]['id'];
+              // Only use supported mappers.
+              if (!in_array($mapper_id, ['simple', 'jsonpath', 'stringjsonpath'])) {
+                // Warn.
+                $messages .= t(
+                  "WARNING: Unsupported field mapper (@fm) for external entity type '@xntt', field '@field', and property '@property'. Using 'Simple' property mapper instead. Edit the external entity type manually to adjust the mapping.<br/>\n",
+                  [
+                    '@xntt' => $entity_type_id,
+                    '@field' => $field_name,
+                    '@property' => $property_name,
+                    '@fm' => $mapper_id,
+                  ]
+                );
+                $mapper_id = 'simple';
+              }
+              $fms_new[$field_name]['config']['property_mappings'][$property_name] = [
+                'id' => $mapper_id,
+                'config' => [
+                  'mapping' => $pm['mapping'] ?? '',
+                  'required_field' => $required,
+                  'main_property' => $main,
+                  'data_processors' => [
+                    [
+                      'id' => 'default',
+                      'config' => [],
+                    ],
+                  ],
+                ],
+              ];
+              break;
+
+            default:
+              // Warn.
+              $messages .= t(
+                "WARNING: Unsupported mapping type (@type) for external entity type '@xntt', field '@field', and property '@property' (not updated). Edit the external entity type manually to fix the mapping.<br/>\n",
+                [
+                  '@xntt' => $entity_type_id,
+                  '@field' => $field_name,
+                  '@property' => $property_name,
+                  '@type' => $pm['type'],
+                ]
+              );
+          }
+        }
+      }
+      $config->set('field_mappers', $fms_new);
+      $config->save();
+    }
+  }
+
+  return $messages;
+}
+
+/**
+ * Upgrade database storage clients.
+ */
+function external_entities_update_93012(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  $updated = [];
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade database storage client ids.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $field_definitions = \Drupal::service('entity_field.manager')
+      ->getFieldDefinitions($entity_type_id, $entity_type_id);
+    $scs = $config->get('storage_clients');
+    $fms = $config->get('field_mappers');
+    $need_update = FALSE;
+    foreach ($scs as &$sc) {
+      if ($sc['id'] == 'xnttdb') {
+        $need_update = TRUE;
+        $sc['id'] = 'sql';
+        $sc['config']['queries']['create'] = $sc['config']['qcreate'];
+        unset($sc['config']['qcreate']);
+        $sc['config']['queries']['read'] = $sc['config']['qread'];
+        unset($sc['config']['qread']);
+        $sc['config']['queries']['update'] = $sc['config']['qupdate'];
+        unset($sc['config']['qupdate']);
+        $sc['config']['queries']['delete'] = $sc['config']['qdelete'];
+        unset($sc['config']['qdelete']);
+        $sc['config']['queries']['list'] = $sc['config']['qlist'];
+        unset($sc['config']['qlist']);
+        $sc['config']['queries']['count'] = $sc['config']['qcount'];
+        unset($sc['config']['qcount']);
+        $filter_mappings = [];
+        foreach (($sc['config']['filter_mappings'] ?? []) as $field_name => $expression) {
+          if (empty($field_definitions[$field_name])) {
+            continue;
+          }
+          $main_property = $field_definitions[$field_name]->getFieldStorageDefinition()->getMainPropertyName();
+          $alias = $fms[$field_name]['config']['property_mappings'][$main_property]['config']['mapping'] ?? '';
+          if (!empty($alias) && !empty($expression)) {
+            $filter_mappings[] = [
+              'alias' => $alias,
+              'expression' => $expression,
+            ];
+          }
+        }
+        $sc['config']['filter_mappings'] = $filter_mappings;
+      }
+    }
+    if ($need_update) {
+      $config->set('storage_clients', $scs);
+      $config->save();
+      $updated[] = $entity_type_id;
+    }
+  }
+  if (!empty($updated)) {
+    return t(
+      'You may need to review the SQL storage client configs for the following external entity types: @types',
+      ['@types' => implode(', ', $updated)]
+    );
+  }
+}
+
+/**
+ * Upgrade data aggregation settings.
+ */
+function external_entities_update_93013(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade storage client aggregation settings.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $scs = $config->get('storage_clients') ?? [];
+    $multi = (1 < count($scs));
+    $ag = $config->get('data_aggregator') ?? ['id' => ($multi ? 'group' : 'single'), 'config' => []];
+    unset($ag['config']['global_config']);
+    if ($multi || ('group' == $ag['id'])) {
+      $ag['id'] = 'group';
+      foreach ($scs as $sc_index => &$storage_client) {
+        $storage_client['aggr'] =
+          ($ag['config']['storage_client_config'][$sc_index] ?? [])
+          + [
+            'groups' => [],
+            'group_prefix_strip' => FALSE,
+            'id_field' => '',
+            'merge' => 'keep',
+            'merge_as_member' => '',
+            'merge_join' => '',
+            'readonly' => TRUE,
+          ];
+      }
+    }
+    else {
+      $ag['id'] = 'single';
+    }
+    unset($ag['config']['storage_client_config']);
+    $ag['config']['storage_clients'] = $scs;
+    $config->set('data_aggregator', $ag);
+    $config->clear('storage_clients');
+    $config->save();
+  }
+}
+
+/**
+ * Change simple property mapper separator from slash to dot.
+ */
+function external_entities_update_93014(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade field mapper settings.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $fms = $config->get('field_mappers');
+    $need_update = FALSE;
+    foreach ($fms as &$fm) {
+      foreach ($fm['config']['property_mappings'] as &$property_mapping) {
+        if ('simple' == ($property_mapping['id'] ?? '')) {
+          $need_update = TRUE;
+          $property_mapping['config']['mapping'] =
+            str_replace('/', '.', $property_mapping['config']['mapping']);
+        }
+      }
+    }
+    if ($need_update) {
+      $config->set('field_mappers', $fms);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Add hash column to endpoint limitation table (issue #3475768).
+ */
+function external_entities_update_93015(&$sandbox) {
+  $connection = Database::getConnection();
+  $schema = $connection->schema();
+  if ($schema->fieldExists('xntt_rest_queries', 'ephash')) {
+    return;
+  }
+
+  $ephash = [
+    'description' => 'MD5 hash of the endpoint URL. Used as a unique key for query limiting and upserts.',
+    'type' => 'char',
+    'length' => 32,
+    'not null' => TRUE,
+  ];
+  // First we get all current entries and remove them from the table to allow
+  // adding a new column with a "NOT NULL" constraint.
+  $qtimes = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => $connection
+    ->select('xntt_rest_queries', 'q')
+    ->fields('q')
+    ->execute()
+    ->fetchAll(FetchAs::Associative), fn() => $connection
+    ->select('xntt_rest_queries', 'q')
+    ->fields('q')
+    ->execute()
+    ->fetchAll(PDO::FETCH_ASSOC));
+  $connection->delete('xntt_rest_queries')->execute();
+  // Add the new column.
+  $schema->addField('xntt_rest_queries', 'ephash', $ephash);
+  // Remove previous constraint (if one).
+  $schema->dropUniqueKey('xntt_rest_queries', 'endpoint');
+  // Add constraint on epash column.
+  $schema->addUniqueKey('xntt_rest_queries', 'ephash', ['ephash']);
+  // Put back entries.
+  foreach ($qtimes as $qtime) {
+    $qtime['ephash'] = md5($qtime['endpoint']);
+    $connection
+      ->insert('xntt_rest_queries')
+      ->fields($qtime)
+      ->execute();
+  }
+}
+
+/**
+ * Turn group data aggregator readonly setting into a mode setting.
+ */
+function external_entities_update_93016(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade storage client aggregation settings.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $need_update = FALSE;
+    $ag = $config->get('data_aggregator') ?? [];
+    if ('group' == ($ag['id'] ?? '')) {
+      $ag['config']['storage_clients'] ??= [];
+      foreach ($ag['config']['storage_clients'] as &$sc) {
+        if (is_array($sc['aggr'])
+          && !array_key_exists('mode', $sc['aggr'])
+        ) {
+          $sc['aggr']['mode'] = $sc['aggr']['readonly']
+            ? GroupAggregator::STORAGE_CLIENT_MODE_READONLY
+            : GroupAggregator::STORAGE_CLIENT_MODE_READWRITE;
+          unset($sc['aggr']['readonly']);
+          $need_update = TRUE;
+        }
+      }
+    }
+    if ($need_update) {
+      $config->set('data_aggregator', $ag);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Upgrade file storage client settings.
+ */
+function external_entities_update_93017(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  $storage_client_manager = \Drupal::service('plugin.manager.external_entities.storage_client');
+  $storage_clients = $storage_client_manager->getDefinitions();
+  $file_storage_client_ids = [];
+  foreach ($storage_clients as $storage_client_id => $definition) {
+    $config = [];
+    $storage_client = $storage_client_manager
+      ->createInstance($storage_client_id, $config);
+    if ($storage_client instanceof FileClientInterface) {
+      $file_storage_client_ids[] = $storage_client_id;
+    }
+  }
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade file storage client settings.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $need_update = FALSE;
+    $ag = $config->get('data_aggregator') ?? [];
+    if (!empty($ag['id'])) {
+      $ag['config']['storage_clients'] ??= [];
+      foreach ($ag['config']['storage_clients'] as &$sc) {
+        if (in_array($sc['id'], $file_storage_client_ids)
+          && !empty($sc['config'])
+          && !isset($sc['config']['record_type'])
+        ) {
+          if (empty($sc['config']['multi_records'])) {
+            $sc['config']['record_type'] = FileClientInterface::RECORD_TYPE_SINGLE;
+          }
+          else {
+            $sc['config']['record_type'] = FileClientInterface::RECORD_TYPE_MULTI;
+          }
+          unset($sc['config']['multi_records']);
+          unset($sc['config']['info']);
+          $need_update = TRUE;
+        }
+      }
+    }
+    if ($need_update) {
+      $config->set('data_aggregator', $ag);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Convert "inherits_annotation_fields" to "annotation_inherited_fields".
+ */
+function external_entities_update_93018(&$sandbox) {
+  /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  /** @var \Drupal\external_entities\Entity\ExternalEntityTypeInterface[] $external_entity_types */
+  $external_entity_types = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type')
+    ->loadMultiple();
+  foreach ($external_entity_types as $external_entity_type) {
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$external_entity_type->id()}");
+    if (empty($config->get('annotation_inherited_fields'))) {
+      $config->set('annotation_inherited_fields', []);
+      if ($config->get('inherits_annotation_fields')
+        && $config->get('annotation_entity_type_id')
+        && $config->get('annotation_bundle_id')
+      ) {
+        $field_definitions = $entity_field_manager->getFieldDefinitions($config->get('annotation_entity_type_id'), $config->get('annotation_bundle_id'));
+        $config->set('annotation_inherited_fields', array_keys($field_definitions));
+      }
+    }
+    $config->clear('inherits_annotation_fields');
+    $config->save();
+  }
+}
+
+/**
+ * Remove 'generate_aliases' settings if not external_entities_pathauto module.
+ */
+function external_entities_update_93019(&$sandbox) {
+  // Check if external_entities_pathauto sub-module is disabled.
+  $module_handler = \Drupal::moduleHandler();
+  if (!$module_handler->moduleExists('external_entities_pathauto')) {
+    // Module is disabled, remove 'generate_aliases' setting.
+    $xntt_storage = \Drupal::entityTypeManager()
+      ->getStorage('external_entity_type');
+    $xntt_types = $xntt_storage
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->execute();
+    // Loop on external entity types.
+    foreach ($xntt_types as $entity_type_id) {
+      /** @var \Drupal\Core\Config\Config $config */
+      $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+      $generate_aliases = $config->get('generate_aliases');
+      if (isset($generate_aliases)) {
+        $config->clear('generate_aliases');
+        $config->save();
+      }
+    }
+  }
+}
+
+/**
+ * Re-apply update 9305 if needed. See Issue #3526917.
+ */
+function external_entities_update_93020(&$sandbox) {
+  external_entities_update_9305($sandbox);
+}
+
+/**
+ * Adds "base_path" property.
+ */
+function external_entities_update_93021(&$sandbox) {
+  /** @var \Drupal\external_entities\Entity\ExternalEntityTypeInterface[] $external_entity_types */
+  $external_entity_types = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type')
+    ->loadMultiple();
+  foreach ($external_entity_types as $external_entity_type) {
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$external_entity_type->id()}");
+    if (empty($config->get('base_path'))) {
+      $config->set('base_path', $external_entity_type->id());
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Move lock settings from state to config.
+ */
+function external_entities_update_93022(&$sandbox) {
+  $locked = \Drupal::state()->get('external_entities.type.locked');
+  if (!empty($locked) && is_array($locked)) {
+    foreach ($locked as $xntt_type_id => $lock_settings) {
+      $external_entity_type = \Drupal::entityTypeManager()
+        ->getStorage('external_entity_type')
+        ->load($xntt_type_id);
+      if (!$external_entity_type) {
+        continue;
+      }
+      /** @var \Drupal\Core\Config\Config $config */
+      $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$external_entity_type->id()}");
+      $config->set('locks', $lock_settings);
+      $config->save();
+    }
+    \Drupal::state()->delete('external_entities.type.locked');
+  }
+}
+
+/**
+ * Turn group data aggregator id_field setting into a property mapping.
+ */
+function external_entities_update_93023(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade storage client aggregation settings.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $need_update = FALSE;
+    $ag = $config->get('data_aggregator') ?? [];
+    if (in_array(($ag['id'] ?? ''), ['group', 'horizontal', 'vertical'])) {
+      $ag['config']['storage_clients'] ??= [];
+      foreach ($ag['config']['storage_clients'] as &$sc) {
+        if (is_array($sc['aggr'])
+          && array_key_exists('id_field', $sc['aggr'])
+        ) {
+          if (empty($sc['aggr']['id_field'])) {
+            $sc['aggr']['id_mapper'] = [
+              'id' => '',
+              'config' => [],
+            ];
+          }
+          else {
+            $sc['aggr']['id_mapper'] = [
+              'id' => 'direct',
+              'config' => [
+                'field_name' => 'id',
+                'property_name' => 'value',
+                'main_property' => TRUE,
+                'required_field' => TRUE,
+                'mapping' => $sc['aggr']['id_field'],
+              ],
+            ];
+            $sc['aggr']['join_mapper'] = [
+              'id' => 'direct',
+              'config' => [
+                'field_name' => 'title',
+                'property_name' => 'value',
+                'main_property' => TRUE,
+                'required_field' => TRUE,
+                'mapping' => $sc['aggr']['id_field'],
+              ],
+            ];
+          }
+          unset($sc['aggr']['id_field']);
+          $need_update = TRUE;
+        }
+      }
+    }
+    if ($need_update) {
+      $config->set('data_aggregator', $ag);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Upgrade external-entity field plugin in views configs.
+ */
+function external_entities_update_93024(&$sandbox) {
+  $config_storage = \Drupal::service('config.storage');
+  $config_names = $config_storage->listAll('views.view.');
+  $count = 0;
+
+  foreach ($config_names as $config_name) {
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable($config_name);
+    $displays = $config->get('display') ?? [];
+    $changed = FALSE;
+    foreach ($displays as $display_id => $display) {
+      foreach (($display['display_options']['fields'] ?? []) as $field_id => $field_settings) {
+        if (($field_settings['plugin_id'] ?? '') === 'xnttfield') {
+          $displays[$display_id]['display_options']['fields'][$field_id] = array_diff_key(
+            $field_settings,
+            [
+              'click_sort_column' => TRUE,
+              'type' => TRUE,
+              'settings' => TRUE,
+              'group_column' => TRUE,
+              'group_columns' => TRUE,
+              'group_rows' => TRUE,
+              'delta_limit' => TRUE,
+              'delta_offset' => TRUE,
+              'delta_reversed' => TRUE,
+              'delta_first_last' => TRUE,
+              'multi_type' => TRUE,
+              'separator' => TRUE,
+              'field_api_classes' => TRUE,
+            ]
+          );
+          $displays[$display_id]['display_options']['fields'][$field_id]['plugin_id'] = 'external_entity_field';
+          $changed = TRUE;
+        }
+      }
+    }
+
+    if ($changed) {
+      $config->set('display', $displays)->save();
+      $count++;
+      \Drupal::logger('external_entities')->notice('Updated view config @name', ['@name' => $config_name]);
+    }
+  }
+  return t('@n view configuration(s) updated to use external_entity_field.', ['@n' => $count]);
+}
+
+/**
+ * Upgrades REST storage client settings.
+ */
+function external_entities_update_93025(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  // Loop on external entity types to check the ones using REST clients.
+  foreach ($xntt_types as $entity_type_id) {
+    // This will only update native modules.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+
+    $storage_client_id = $config->get('storage_client_id') ?? '';
+    if (in_array($storage_client_id, ['rest', 'jsonapi'])) {
+      $storage_config = $config->get('storage_client_config');
+      // Add dynamic_count settings.
+      if (!isset($storage_config['endpoint_options']['dynamic_count'])) {
+        $storage_config['endpoint_options']['dynamic_count'] = FALSE;
+        $config->set('storage_client_config', $storage_config);
+        $config->save();
+      }
+    }
+  }
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    // Upgrade REST storage client settings.
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $need_update = FALSE;
+    $ag = $config->get('data_aggregator') ?? [];
+    if (!empty($ag['id'])) {
+      $ag['config']['storage_clients'] ??= [];
+      foreach ($ag['config']['storage_clients'] as &$sc) {
+        if (in_array($sc['id'], ['rest', 'jsonapi'])) {
+          // Add dynamic_count settings.
+          if (!isset($sc['config']['endpoint_options']['dynamic_count'])) {
+            $sc['config']['endpoint_options']['dynamic_count'] = FALSE;
+            $need_update = TRUE;
+          }
+        }
+      }
+    }
+    if ($need_update) {
+      $config->set('data_aggregator', $ag);
+      $config->save();
+    }
+  }
+
+  return t('REST and JsonAPI external entity storage client configs were updated. If you have external entities using other REST-derivative storage clients, consider manually re-saving their config from the UI for update.');
+}
+
+/**
+ * Warn about default data processor configuration changes.
+ */
+function external_entities_update_93026() {
+  return t('If you are using the default data processor plugin in your external entity configurations, you need to reconfigure it as the default data type encoding in configuration has been changed. It was using numbers instead of string values, leading to inconsistencies when extensions add new data types. Please review and update your external entity type configurations accordingly.');
+}
+
+/**
+ * Update lock settings.
+ */
+function external_entities_update_93027() {
+
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  $updated = [];
+
+  // Recursive converter: TRUE -> ['default'], FALSE -> NULL.
+  $convert = function ($value) use (&$convert) {
+    if (is_array($value)) {
+      foreach ($value as $k => $v) {
+        $value[$k] = $convert($v);
+      }
+      return $value;
+    }
+
+    if ($value === TRUE || $value === 'TRUE' || $value === 'true') {
+      return ['default'];
+    }
+    if ($value === FALSE || $value === 'FALSE' || $value === 'false') {
+      return NULL;
+    }
+    return $value;
+  };
+
+  foreach ($xntt_types as $entity_type_id) {
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable("external_entities.external_entity_type.{$entity_type_id}");
+    $locks = $config->get('locks');
+    if (empty($locks) || !is_array($locks)) {
+      continue;
+    }
+
+    $need_update = FALSE;
+    $new_locks = [];
+    foreach ($locks as $lock_key => $lock_settings) {
+      $converted = $convert($lock_settings);
+      if ($converted !== $lock_settings) {
+        $need_update = TRUE;
+      }
+      $new_locks[$lock_key] = $converted;
+    }
+
+    if ($need_update) {
+      $config->set('locks', $new_locks);
+      $config->save();
+      $updated[] = $entity_type_id;
+    }
+  }
+
+  if (!empty($updated)) {
+    return t('Updated lock settings for external entity types: @types', ['@types' => implode(', ', $updated)]);
+  }
+  return t('No lock settings needed updating.');
+}
+
+/**
+ * Upgrade multi-property mapper config.
+ */
+function external_entities_update_93028(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  $updated_types = [];
+  $type_updated = FALSE;
+
+  // Recursive function to convert numeric indices to prefixed keys.
+  $convert_property_mappers = function (&$value) use (&$convert_property_mappers, &$type_updated) {
+    if (is_array($value)) {
+      // Check if this is a property_mapper configuration with type 'multi'.
+      if (isset($value['id'])
+          && ($value['id'] === 'multi')
+          && isset($value['config'])
+      ) {
+        $mapper_config = &$value['config'];
+
+        // Convert property_mappers array from numeric to prefixed keys.
+        if (isset($mapper_config['property_mappers'])
+            && is_array($mapper_config['property_mappers'])
+        ) {
+          // First pass: create mapping of old numeric keys to new prefixed
+          // keys.
+          $key_mapping = [];
+          $numeric_index = 1;
+
+          foreach ($mapper_config['property_mappers'] as $key => $property_mapper_conf) {
+            if (is_numeric($key)) {
+              $key_mapping[$key] = 'm' . $numeric_index;
+              ++$numeric_index;
+            }
+          }
+
+          // If we found numeric keys to convert, apply the mapping.
+          if (!empty($key_mapping)) {
+            $new_property_mappers = [];
+            foreach ($mapper_config['property_mappers'] as $key => $property_mapper_conf) {
+              $new_key = $key_mapping[$key] ?? $key;
+              $new_property_mappers[$new_key] = $property_mapper_conf;
+            }
+            $mapper_config['property_mappers'] = $new_property_mappers;
+            $type_updated = TRUE;
+
+            // Convert load list using the mapping.
+            if (isset($mapper_config['load'])
+                && is_array($mapper_config['load'])
+            ) {
+              $new_load = [];
+              foreach ($mapper_config['load'] as $load_key) {
+                $new_load[] = $key_mapping[$load_key] ?? $load_key;
+              }
+              $mapper_config['load'] = $new_load;
+            }
+
+            // Convert save list using the mapping.
+            if (isset($mapper_config['save'])
+                && is_array($mapper_config['save'])
+            ) {
+              $new_save = [];
+              foreach ($mapper_config['save'] as $save_key) {
+                $new_save[] = $key_mapping[$save_key] ?? $save_key;
+              }
+              $mapper_config['save'] = $new_save;
+            }
+          }
+
+          // Recursively process nested property mappers.
+          foreach ($mapper_config['property_mappers'] as &$nested_mapper) {
+            $convert_property_mappers($nested_mapper);
+          }
+        }
+      }
+      else {
+        // Recursively process nested arrays.
+        foreach ($value as &$nested_value) {
+          $convert_property_mappers($nested_value);
+        }
+      }
+    }
+  };
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable(
+      "external_entities.external_entity_type.{$entity_type_id}"
+    );
+    $field_mappers = $config->get('field_mappers') ?? [];
+    $type_updated = FALSE;
+
+    // Process field mappers.
+    foreach ($field_mappers as &$field_mapper) {
+      if (isset($field_mapper['config']['property_mappings'])) {
+        foreach ($field_mapper['config']['property_mappings'] as &$property_mapping) {
+          $convert_property_mappers($property_mapping);
+        }
+      }
+    }
+
+    if ($type_updated) {
+      $config->set('field_mappers', $field_mappers);
+      $config->save();
+      $updated_types[] = $entity_type_id;
+    }
+  }
+
+  if (!empty($updated_types)) {
+    return t(
+      'Updated multi-property mapper configuration for external entity types: @types',
+      ['@types' => implode(', ', $updated_types)]
+    );
+  }
+  return t('No multi-property mapper configuration needed updating.');
+}
+
+/**
+ * Upgrade storage client indexing in data aggregators.
+ */
+function external_entities_update_93029(&$sandbox) {
+  $xntt_storage = \Drupal::entityTypeManager()
+    ->getStorage('external_entity_type');
+  $xntt_types = $xntt_storage
+    ->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+
+  $updated_types = [];
+
+  // Loop on external entity types.
+  foreach ($xntt_types as $entity_type_id) {
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = \Drupal::configFactory()->getEditable(
+      "external_entities.external_entity_type.{$entity_type_id}"
+    );
+    $ag = $config->get('data_aggregator') ?? [];
+    if (in_array($ag['id'] ?? '', ['group', 'vertical', 'horizontal'])) {
+      $storage_clients = $ag['config']['storage_clients'] ?? [];
+      if (is_array($storage_clients)) {
+        $new_storage_clients = [];
+        $index = 1;
+        foreach ($storage_clients as $sc) {
+          $new_storage_clients['sc' . $index] = $sc;
+          $index++;
+        }
+        $ag['config']['storage_clients'] = $new_storage_clients;
+        $config->set('data_aggregator', $ag);
+        $config->save();
+        $updated_types[] = $entity_type_id;
+      }
+    }
+  }
+
+  if (!empty($updated_types)) {
+    return t(
+      'Updated storage client indexing for external entity types: @types',
+      ['@types' => implode(', ', $updated_types)]
+    );
+  }
+  return t('No storage client indexing needed updating.');
+}

@@ -4,7 +4,7 @@ import config from '../playwright.config.loader'
 import { openAllDetails, select } from '../objects/ComponentForm'
 import { resetArticlesView, seedArticles } from '../objects/TestContent'
 import { Audit } from '../objects/Audit'
-import { enableModules } from '../objects/Setup'
+import { enableModules, enableViewsDisplayExtender } from '../objects/Setup'
 import type { Drupal } from '../objects/Drupal'
 
 // The three places views uses components: the style plugin around the rows,
@@ -27,6 +27,7 @@ const formatSettingsLink = 'a[href$="/page_1/style_options"]'
 const showLink = 'a[href$="/page_1/row"]'
 const showSettingsLink = 'a[href$="/page_1/row_options"]'
 const tagsFieldLink = 'a[href$="/field/field_test_tags"]'
+const componentLink = 'a[href$="/page_1/ui_patterns"]'
 
 /** Modules, content and a view with the shipped settings. */
 async function setup(drupal: Drupal, audit: Audit): Promise<void> {
@@ -48,10 +49,10 @@ async function apply(page: Page): Promise<void> {
  * The request that event triggers fails in the style and row dialogs; the
  * value still travels with the form when the dialog is applied.
  */
-async function pickComponentQuietly(page: Page, name: string): Promise<void> {
+async function pickComponentQuietly(page: Page, name: string, componentId: string = config.testComponentId): Promise<void> {
   await select(page, name).evaluate((el, id) => {
     ;(el as HTMLSelectElement).value = id
-  }, config.testComponentId)
+  }, componentId)
 }
 
 async function saveView(page: Page, drupal: Drupal): Promise<void> {
@@ -339,6 +340,90 @@ test('Views: an unsaved view edit reaches the sources', { tag: ['@base', '@views
   })
 
   await test.step('5. No PHP error in watchdog, no JS error in console', async () => {
+    await audit.expectClean()
+  })
+})
+
+test('Views display: a component around the whole display', { tag: ['@base', '@views'] }, async ({ page, drupal }) => {
+  const audit = new Audit(page, drupal, url => url.includes('/admin/'))
+  const base = 'ui_patterns'
+  const viewComponentId = 'ui_patterns_views_test:test-view'
+  // Slot => source, a few of the parts the display offers.
+  const parts: Record<string, string> = {
+    header: 'view_header',
+    rows: 'view_rows',
+    pager: 'view_pager',
+    footer: 'view_footer',
+  }
+
+  await test.step('0. Setup: modules, content, a fresh view, the extender, admin login', async () => {
+    await setup(drupal, audit)
+    await enableViewsDisplayExtender(drupal)
+  })
+
+  await test.step('1. Advanced: the Component dialog, pick the component, apply, reopen', async () => {
+    await page.goto('admin/structure/views/view/test_articles')
+    await openAllDetails(page)
+    await page.locator(componentLink).click()
+    await select(page, `${base}[component_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    // The dialog holding a component form takes nearly the whole window.
+    const box = await page.locator(dialog).boundingBox()
+    expect(box?.width ?? 0).toBeGreaterThan((page.viewportSize()?.width ?? 0) * 0.9)
+    await pickComponentQuietly(page, `${base}[component_id]`, viewComponentId)
+    await apply(page)
+    await openAllDetails(page)
+    await page.locator(componentLink).click()
+    await select(page, `${base}[props][title][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await expect(select(page, `${base}[component_id]`)).toHaveValue(viewComponentId)
+  })
+
+  await test.step('2. The display context: its parts are offered, the style and row sources are not', async () => {
+    await openAllDetails(page)
+    const options = await select(page, `${base}[slots][rows][add_more_button]`)
+      .locator('option')
+      .evaluateAll(list => list.map(o => (o as HTMLOptionElement).value))
+    expect(options).toEqual(expect.arrayContaining(['view_header', 'view_rows', 'view_pager', 'view_more', 'view_feed_icons']))
+    expect(options).not.toEqual(expect.arrayContaining(['view_field']))
+  })
+
+  await test.step('3. Configure over AJAX: the title, one part per slot', async () => {
+    await select(page, `${base}[props][title][source_id]`).selectOption('view_title')
+    await page.locator(`input[name="${base}[props][title][source][value]"]`).waitFor({ state: 'detached', timeout: 20_000 })
+    for (const [slot, sourceId] of Object.entries(parts)) {
+      await openAllDetails(page)
+      await select(page, `${base}[slots][${slot}][add_more_button]`).selectOption(sourceId)
+      await page.locator(`[name="${base}[slots][${slot}][sources][0][source_id]"]`).waitFor({ state: 'attached', timeout: 20_000 })
+    }
+    await drupal.ajaxReady()
+    await apply(page)
+  })
+
+  await test.step('4. Save, reopen the dialog: everything is kept', async () => {
+    await saveView(page, drupal)
+    await openAllDetails(page)
+    await page.locator(componentLink).click()
+    await select(page, `${base}[props][title][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await openAllDetails(page)
+    await expect(select(page, `${base}[component_id]`)).toHaveValue(viewComponentId)
+    await expect(select(page, `${base}[props][title][source_id]`)).toHaveValue('view_title')
+    for (const [slot, sourceId] of Object.entries(parts)) {
+      await expect(page.locator(`[name="${base}[slots][${slot}][sources][0][source_id]"]`)).toHaveValue(sourceId)
+    }
+  })
+
+  await test.step('5. The page is the component, wrapper classes included, rows inside', async () => {
+    await page.goto('test-articles')
+    const component = page.locator('.test-view.view.view-id-test_articles.view-display-id-page_1[class*="js-view-dom-id-"]')
+    await expect(component).toHaveCount(1)
+    await expect(component.locator('.test-view__title')).toContainText('Test articles')
+    const rows = component.locator('.test-view__rows')
+    await expect(rows).toContainText('First article')
+    await expect(rows).toContainText('Second article')
+    // Nothing prints twice: no views-view template around the component.
+    await expect(page.locator('.views-element-container .view')).toHaveCount(1)
+  })
+
+  await test.step('6. No PHP error in watchdog, no JS error in console', async () => {
     await audit.expectClean()
   })
 })

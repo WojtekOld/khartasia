@@ -36,6 +36,7 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "default" = "Drupal\proc\Form\ProcForm",
  *       "delete" = "Drupal\proc\Form\ProcDeleteForm",
+ *       "delete-multiple-confirm" = "Drupal\Core\Entity\Form\DeleteMultipleForm",
  *       "generate-keys" = "Drupal\proc\Form\ProcKeysGenerationForm",
  *       "encrypt" = "Drupal\proc\Form\ProcEncryptForm",
  *       "decrypt" = "Drupal\proc\Form\ProcDecryptForm"
@@ -57,6 +58,7 @@ use Drupal\user\UserInterface;
  *     "canonical" = "/proc/{proc}",
  *     "edit-form" = "/proc/{proc}/edit",
  *     "delete-form" = "/proc/{proc}/delete",
+ *     "delete-multiple-form" = "/admin/content/procs/delete",
  *     "collection" = "/admin/content/procs",
  *     "decrypt" = "/proc/{proc}"
  *   },

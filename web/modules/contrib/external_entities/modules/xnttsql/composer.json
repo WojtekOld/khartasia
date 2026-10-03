@@ -1,0 +1,29 @@
+{
+  "name": "drupal/xnttsql",
+  "description": "External Entities SQL Database plugin",
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/external_entities",
+  "authors": [
+    {
+      "name": "Valentin Guignon",
+      "homepage": "https://www.drupal.org/u/guignonv",
+      "role": "Maintainer"
+    }
+  ],
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/external_entities",
+    "source": "https://git.drupalcode.org/project/external_entities"
+  },
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "repositories": {
+    "drupal": {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  },
+  "require": {
+    "drupal/external_entities": "^3.0@beta",
+    "drupal/dbxschema": "^1.0@dev || ^2.0@dev"
+  }
+}

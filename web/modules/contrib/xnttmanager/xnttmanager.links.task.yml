@@ -1,0 +1,28 @@
+xnttmanager.collection:
+  route_name: entity.external_entity_type.collection
+  title: 'Types'
+  base_route: entity.external_entity_type.collection
+
+xnttmanager.management:
+  route_name: xnttmanager.management
+  title: 'Manage'
+  base_route: entity.external_entity_type.collection
+  weight: 1
+
+xnttmanager.sync:
+  route_name: xnttmanager.sync
+  title: 'Synchronize'
+  base_route: entity.external_entity_type.collection
+  weight: 2
+
+xnttmanager.sync.collection:
+  route_name: entity.xnttsync.list
+  title: 'Crons'
+  base_route: entity.external_entity_type.collection
+  weight: 3
+
+xnttmanager.integrity:
+  route_name: xnttmanager.integrity
+  title: 'Integrity'
+  base_route: entity.external_entity_type.collection
+  weight: 4

@@ -204,6 +204,12 @@ class FacetsFilter extends FilterPluginBase implements ContainerFactoryPluginInt
       return $form;
     }
 
+    // A separate exposed-filter block instance has no Views query to process.
+    // Empty facets should remain hidden rather than dereferencing a NULL query.
+    if (!$processed_facet && $this->query === NULL) {
+      return $form;
+    }
+
     if ($processed_facet) {
       $facet = $processed_facet;
     }

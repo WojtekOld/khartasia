@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\facets_exposed_filters\Unit;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\ResultInterface;
+use Drupal\facets_exposed_filters\FacetsExposedFiltersHelper;
 use Drupal\facets_exposed_filters\Plugin\views\filter\FacetsFilter;
 use Drupal\Tests\UnitTestCase;
+use Drupal\views\ViewExecutable;
 
 /**
  * Tests exposed-filter value handling for facet results.
@@ -15,6 +18,35 @@ use Drupal\Tests\UnitTestCase;
  * @group facets
  */
 final class FacetsFilterTest extends UnitTestCase {
+
+  /**
+   * Tests that an exposed-filter block without a Views query remains empty.
+   */
+  public function testValueFormWithoutViewsQueryReturnsEmptyForm(): void {
+    $filter = (new \ReflectionClass(FacetsFilter::class))->newInstanceWithoutConstructor();
+    $filter->options = [
+      'id' => 'facets_keywords',
+      'facet' => [
+        'depends_on_exposed_filter' => '',
+      ],
+    ];
+
+    $view = $this->createMock(ViewExecutable::class);
+    $view->method('id')->willReturn('test_no_views_query');
+    $view->current_display = 'default';
+    $view->filter = ['facets_keywords' => $filter];
+    $filter->view = $view;
+
+    FacetsExposedFiltersHelper::markViewPostExecuted('test_no_views_query', 'default');
+
+    $form = [];
+    $form_state = $this->createMock(FormStateInterface::class);
+
+    self::assertSame(
+      ['value' => []],
+      $filter->valueForm($form, $form_state),
+    );
+  }
 
   /**
    * Tests that missing results use the encoded missing-filter syntax.

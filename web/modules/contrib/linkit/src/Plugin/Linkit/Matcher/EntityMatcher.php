@@ -346,6 +346,12 @@ class EntityMatcher extends ConfigurableMatcherBase {
 
       $entity = $this->entityRepository->getTranslationFromContext($entity);
       $suggestion = $this->createSuggestion($entity);
+      if ($query = parse_url($string, PHP_URL_QUERY)) {
+        $suggestion->setPath($suggestion->getPath() . '?' . $query);
+      }
+      if ($fragment = parse_url($string, PHP_URL_FRAGMENT)) {
+        $suggestion->setPath($suggestion->getPath() . '#' . $fragment);
+      }
       $suggestions->addSuggestion($suggestion);
     }
 

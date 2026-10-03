@@ -1,0 +1,203 @@
+langcode: en
+status: true
+dependencies: {  }
+id: drupalorg_rest_issue
+label: 'Drupal.org issue - REST'
+label_plural: 'Drupal.org issues - REST'
+description: 'Drupal.org issues via REST.'
+content_class: Drupal\external_entities\Entity\ExternalEntity
+read_only: true
+debug_level: 0
+field_mappers:
+  field_body:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: body.value
+            required_field: false
+            main_property: true
+            data_processors: {  }
+            description: ''
+        format:
+          id: constant
+          config:
+            mapping: full_html
+            required_field: false
+            main_property: false
+            description: ''
+        summary:
+          id: simple
+          config:
+            mapping: body.sumary
+            required_field: false
+            main_property: false
+            data_processors: {  }
+            description: ''
+  field_issue_category:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: field_issue_category
+            required_field: false
+            main_property: true
+            data_processors:
+              -
+                id: mapping
+                config:
+                  mapping:
+                    1: 'Bug report'
+                    2: Task
+                    3: 'Feature request'
+                    4: 'Support request'
+                    5: Plan
+            description: ''
+  field_issue_priority:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: field_issue_priority
+            required_field: false
+            main_property: true
+            data_processors:
+              -
+                id: mapping
+                config:
+                  mapping:
+                    400: Critical
+                    300: Major
+                    200: Normal
+                    100: Minor
+            description: ''
+  field_issue_status:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: field_issue_status
+            required_field: false
+            main_property: true
+            data_processors:
+              -
+                id: mapping
+                config:
+                  mapping:
+                    1: active
+                    2: fixed
+                    3: 'closed (duplicate)'
+                    4: postponed
+                    5: "closed (won't fix)"
+                    6: 'closed (works as designed)'
+                    7: 'closed (fixed)'
+                    8: 'needs review'
+                    13: 'needs work'
+                    14: 'reviewed & tested by the community'
+                    15: 'patch (to be ported)'
+                    16: 'postponed (maintainer needs more info)'
+                    17: 'closed (outdated)'
+                    18: 'closed (cannot reproduce)'
+            description: ''
+  id:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: nid
+            required_field: true
+            main_property: true
+            data_processors: {  }
+            description: ''
+  status:
+    id: null
+    config: {  }
+  title:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: title
+            required_field: true
+            main_property: true
+            data_processors: {  }
+            description: ''
+  uid:
+    id: null
+    config: {  }
+  uuid:
+    id: null
+    config: {  }
+field_mapping_notes: ''
+data_aggregator:
+  id: single
+  config:
+    storage_clients:
+      -
+        id: rest
+        config:
+          endpoint: 'https://www.drupal.org/api-d7/node'
+          endpoint_options:
+            single: 'https://www.drupal.org/api-d7/node'
+            count: ''
+            count_mode: entities
+            dynamic_count: true
+            cache: true
+            limit_qcount: 100
+            limit_qtime: 0
+            requests_by_user: false
+          response_format: json
+          data_path:
+            list: '$.list.*'
+            single: '$.list.*'
+            keyed_by_id: false
+            count: ''
+          pager:
+            default_limit: 50
+            type: pagination
+            page_parameter: page
+            page_parameter_type: pagenum
+            page_start_one: false
+            always_query: true
+            page_size_parameter: limit
+            page_size_parameter_type: pagesize
+          api_key:
+            type: none
+            header_name: ''
+            key: ''
+          http:
+            headers: 'Accept: application/json'
+          parameters:
+            list:
+              type: project_issue
+              sort: changed
+              direction: DESC
+            list_param_mode: query
+            single:
+              nid: '{id}'
+            single_param_mode: query
+          filtering:
+            drupal: false
+            basic: false
+            basic_fields: {  }
+            list_support: none
+            list_join: ''
+data_aggregator_notes: ''
+language_settings: null
+persistent_cache_max_age: 86400
+annotation_entity_type_id: null
+annotation_bundle_id: null
+annotation_field_name: null
+annotation_inherited_fields: {  }

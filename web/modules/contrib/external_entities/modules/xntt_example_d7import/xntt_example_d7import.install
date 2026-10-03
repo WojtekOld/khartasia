@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the external_entities module.
+ */
+
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+
+/**
+ * Implements hook_requirements().
+ */
+#[LegacyRequirementsHook]
+function xntt_example_d7import_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'install') {
+    $xntt_storage = \Drupal::entityTypeManager()->getStorage('external_entity_type');
+    $xntt_types = $xntt_storage
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('id', ['d7import'], 'IN')
+      ->execute();
+
+    if (!empty($xntt_types)) {
+      $requirements['xntt_example_d7import_extypes'] = [
+        'title' => t('External entity type Drupal 7 import example'),
+        'description' => t("The 'Drupal 7 content' external entity content type already exists and should be removed to install this module."),
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Error, fn() => REQUIREMENT_ERROR),
+      ];
+    }
+  }
+
+  return $requirements;
+}

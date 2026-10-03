@@ -171,8 +171,17 @@ const PROC_FIELD_VERSION = '10.1.99';
       const items = typeof result === 'object' ? Object.values(result) : result;
 
       const ids = items
-        .map(item => item.id || item.uid)
-        .filter(Boolean)
+        // Support both accepted endpoint formats: a flat list of IDs
+        // ("[1,2,3]", where each item is a number or numeric string) and a
+        // list of objects keyed by "id" or "uid"
+        // ("[{"id":1}]" / "[{"uid":1}]").
+        .map(item => {
+          if (item !== null && typeof item === 'object') {
+            return item.id ?? item.uid;
+          }
+          return item;
+        })
+        .filter(value => value !== undefined && value !== null && value !== '')
         // Convert to number and filter out non-integers
         .map(id => Number(id))
         // Filter out negatives and the anonymous user (ID 0)

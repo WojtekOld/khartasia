@@ -1,0 +1,5 @@
+
+services:
+  Drupal\external_entities_pathauto\Hook\ExternalEntitiesPathautoHooks:
+    class: Drupal\external_entities_pathauto\Hook\ExternalEntitiesPathautoHooks
+    autowire: true

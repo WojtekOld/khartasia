@@ -1,0 +1,20 @@
+external_entities_data_aggregator:
+  label: External entities data aggregator
+  plugin_manager_service_id: plugin.manager.external_entities.data_aggregator
+  plugin_definition_decorator_class: \Drupal\plugin\PluginDefinition\ArrayPluginDefinitionDecorator
+external_entities_storage_client:
+  label: External entities storage client
+  plugin_manager_service_id: plugin.manager.external_entities.storage_client
+  plugin_definition_decorator_class: \Drupal\plugin\PluginDefinition\ArrayPluginDefinitionDecorator
+external_entities_field_mapper:
+  label: External entities field mapper
+  plugin_manager_service_id: plugin.manager.external_entities.field_mapper
+  plugin_definition_decorator_class: \Drupal\plugin\PluginDefinition\ArrayPluginDefinitionDecorator
+external_entities_property_mapper:
+  label: External entities property mapper
+  plugin_manager_service_id: plugin.manager.external_entities.property_mapper
+  plugin_definition_decorator_class: \Drupal\plugin\PluginDefinition\ArrayPluginDefinitionDecorator
+external_entities_data_processor:
+  label: External entities data processor
+  plugin_manager_service_id: plugin.manager.external_entities.data_processor
+  plugin_definition_decorator_class: \Drupal\plugin\PluginDefinition\ArrayPluginDefinitionDecorator

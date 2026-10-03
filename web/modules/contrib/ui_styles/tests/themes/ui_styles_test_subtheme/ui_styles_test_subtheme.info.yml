@@ -4,7 +4,7 @@ description: 'UI Styles test theme.'
 base theme: ui_styles_test_theme1
 package: 'Testing'
 
-# Information added by Drupal.org packaging script on 2026-07-25
-version: '8.x-1.21'
+# Information added by Drupal.org packaging script on 2026-09-05
+version: '8.x-1.22'
 project: 'ui_styles'
-datestamp: 1784988870
+datestamp: 1788615523

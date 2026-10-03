@@ -1,0 +1,18 @@
+services:
+  stream_wrapper.xnttfiles:
+    class: Drupal\xntt_file_field\StreamWrapper\XnttStream
+    tags:
+      - { name: stream_wrapper, scheme: xntt }
+  entity.query.xntt_file_field:
+    class: Drupal\xntt_file_field\Entity\Query\QueryFactory
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: backend_overridable }
+  xntt_file_field.file.usage:
+    class: Drupal\xntt_file_field\FileUsage\ExternalFileUsageBackend
+    decorates: file.usage
+    arguments: ['@xntt_file_field.file.usage.inner']
+
+  Drupal\xntt_file_field\Hook\XnttFileFieldHooks:
+    class: Drupal\xntt_file_field\Hook\XnttFileFieldHooks
+    autowire: true

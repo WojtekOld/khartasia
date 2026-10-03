@@ -14,6 +14,7 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 
 /**
  * Form controller for the proc entity edit forms.
@@ -37,6 +38,13 @@ class ProcForm extends ContentEntityForm implements ContainerInjectionInterface 
   protected $entityTypeManager;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * ProcForm constructor.
    *
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
@@ -49,6 +57,8 @@ class ProcForm extends ContentEntityForm implements ContainerInjectionInterface 
    *   The date formatter service.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager service.
+   * @param \Drupal\proc\Service\RecipientStorageBrokerInterface $recipient_storage
+   *   The recipient storage broker.
    */
   public function __construct(
     EntityRepositoryInterface $entity_repository,
@@ -56,6 +66,7 @@ class ProcForm extends ContentEntityForm implements ContainerInjectionInterface 
     TimeInterface $time,
     DateFormatterInterface $date_formatter,
     EntityTypeManagerInterface $entity_type_manager,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     // Ensure parent initialization is executed.
     parent::__construct(
@@ -66,6 +77,7 @@ class ProcForm extends ContentEntityForm implements ContainerInjectionInterface 
 
     $this->dateFormatter = $date_formatter;
     $this->entityTypeManager = $entity_type_manager;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -77,7 +89,8 @@ class ProcForm extends ContentEntityForm implements ContainerInjectionInterface 
       $container->get('entity_type.bundle.info'),
       $container->get('datetime.time'),
       $container->get('date.formatter'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('proc.recipient_storage')
     );
   }
 
@@ -100,6 +113,9 @@ class ProcForm extends ContentEntityForm implements ContainerInjectionInterface 
         '#disabled' => TRUE,
         '#weight' => 1,
       ];
+    }
+    else {
+      $this->buildEffectiveRecipientsDisplay($form, $entity);
     }
 
     $form['created_display'] = [
@@ -220,6 +236,66 @@ class ProcForm extends ContentEntityForm implements ContainerInjectionInterface 
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void { // phpcs:ignore
     parent::validateForm($form, $form_state);
+  }
+
+  /**
+   * Renders a read-only "effective recipients" display for a cipher.
+   *
+   * @param array $form
+   *   The form render array, altered by reference.
+   * @param \Drupal\proc\ProcInterface $entity
+   *   The cipher proc entity being edited.
+   */
+  protected function buildEffectiveRecipientsDisplay(array &$form, $entity): void {
+    // If the standard database-backed storage already holds actual recipients,
+    // leave the native entity-reference widget in place: it renders and edits
+    // the recipients as usual.
+    $stored_ids = [];
+    if ($entity->hasField('field_recipients_set')) {
+      foreach ($entity->get('field_recipients_set')->getValue() as $item) {
+        if (isset($item['target_id']) && $item['target_id'] !== '' && $item['target_id'] !== NULL) {
+          $stored_ids[] = (int) $item['target_id'];
+        }
+      }
+    }
+    if (!empty($stored_ids)) {
+      return;
+    }
+
+    // No values are stored. Resolve the effective recipients through the broker
+    // (which routes to the plugin bound to this cipher). When there are none
+    // either, there is nothing to add and the empty native widget can stay.
+    $recipient_ids = $this->recipientStorage->getRecipientIds($entity);
+    if (empty($recipient_ids)) {
+      return;
+    }
+
+    // Build human-readable labels "Name (uid)" for the resolved recipients.
+    $labels = [];
+    try {
+      $users = $this->entityTypeManager->getStorage('user')->loadMultiple($recipient_ids);
+    }
+    catch (\Exception) {
+      $users = [];
+    }
+    foreach ($recipient_ids as $uid) {
+      $labels[] = isset($users[$uid])
+        ? $users[$uid]->label() . ' (' . $uid . ')'
+        : (string) $uid;
+    }
+
+    // Hide the (empty) native recipients widget and show a read-only display of
+    // the effective, plugin-computed recipients in its place.
+    $weight = $form['field_recipients_set']['#weight'] ?? 0;
+    $form['field_recipients_set']['#access'] = FALSE;
+    $form['proc_effective_recipients'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Recipient Name'),
+      '#default_value' => implode(', ', $labels),
+      '#disabled' => TRUE,
+      '#weight' => $weight,
+      '#description' => $this->t('Recipients are provided by the recipient storage plugin bound to this content and are not stored per recipient in the database. This list is read-only.'),
+    ];
   }
 
   /**

@@ -1,0 +1,9 @@
+.xntt-inline > .form-item,
+.xntt-inline .xntt-field,
+.xntt-inline .xntt-label {
+  display: inline-block;
+}
+
+.xntt-inline .xntt-label {
+  margin-left: 1em;
+}

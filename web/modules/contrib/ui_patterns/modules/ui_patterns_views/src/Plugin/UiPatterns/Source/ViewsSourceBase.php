@@ -10,8 +10,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\SharedTempStore;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\ui_patterns\SourcePluginBase;
-use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
+use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewExecutable;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -24,6 +24,16 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * The views temp store.
    */
   protected ?SharedTempStore $tempStore = NULL;
+
+  /**
+   * The view executables resolved from the entity in context, per request.
+   *
+   * Keyed by view and display. The Views UI tempstore gives a new copy on
+   * every read; without this, each source would run its own copy.
+   *
+   * @var \Drupal\views\ViewExecutable[]
+   */
+  protected static array $executables = [];
 
   /**
    * {@inheritdoc}
@@ -49,6 +59,8 @@ abstract class ViewsSourceBase extends SourcePluginBase {
   /**
    * Returns the view from context.
    *
+   * A running view wins over the view entity.
+   *
    * @return \Drupal\views\ViewExecutable|null
    *   The view executable.
    */
@@ -58,7 +70,7 @@ abstract class ViewsSourceBase extends SourcePluginBase {
         return $this->getContextValue('ui_patterns_views:view');
       }
       if (isset($this->context['ui_patterns_views:view_entity'])) {
-        return $this->getViewExecutable($this->getContextValue('ui_patterns_views:view_entity'));
+        return $this->getViewFromEntity($this->getContextValue('ui_patterns_views:view_entity'));
       }
     }
     catch (ContextException) {
@@ -67,9 +79,33 @@ abstract class ViewsSourceBase extends SourcePluginBase {
   }
 
   /**
+   * Returns the view of the entity, once per request.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view_entity
+   *   The view entity.
+   *
+   * @return \Drupal\views\ViewExecutable|null
+   *   The view on the display from context, or NULL when that display does
+   *   not exist.
+   */
+  protected function getViewFromEntity(ViewEntityInterface $view_entity): ?ViewExecutable {
+    $display_id = isset($this->context['ui_patterns_views:display']) ? $this->getContextValue('ui_patterns_views:display') : NULL;
+    $display_id = \is_string($display_id) && $display_id !== '' ? $display_id : NULL;
+    $key = $view_entity->id() . ':' . ($display_id ?? '');
+    if (isset(self::$executables[$key])) {
+      return self::$executables[$key];
+    }
+    $view = $this->getViewExecutable($view_entity);
+    if ($view === NULL || ($display_id !== NULL && !$view->setDisplay($display_id))) {
+      return NULL;
+    }
+    return self::$executables[$key] = $view;
+  }
+
+  /**
    * Get the view executable.
    *
-   * @param \Drupal\views\Entity\View|ViewExecutable $view
+   * @param \Drupal\views\ViewEntityInterface|\Drupal\views\ViewExecutable $view
    *   The view entity or view executable.
    *
    * @return \Drupal\views\ViewExecutable|null
@@ -79,7 +115,7 @@ abstract class ViewsSourceBase extends SourcePluginBase {
     if ($view && $this->tempStore && ($view_in_edition = $this->tempStore->get((string) $view->id()))) {
       return $view_in_edition->getExecutable();
     }
-    return ($view instanceof View) ? $view->getExecutable() : $view;
+    return ($view instanceof ViewEntityInterface) ? $view->getExecutable() : $view;
   }
 
   /**

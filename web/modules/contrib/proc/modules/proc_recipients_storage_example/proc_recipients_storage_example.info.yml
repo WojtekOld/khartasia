@@ -1,0 +1,11 @@
+name: 'Proc Recipients Storage Example'
+type: module
+description: 'Example skeleton showing how to delegate the storage of a cipher''s recipients to the implementing application through a proc RecipientStorage plugin.'
+core_version_requirement: ^10 || ^11
+dependencies:
+  - proc:proc
+
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '10.1.126'
+project: 'proc'
+datestamp: 1790339819

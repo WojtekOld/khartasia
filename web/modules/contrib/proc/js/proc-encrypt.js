@@ -124,6 +124,7 @@ import {procEncrypt} from "./modules/atomics/proc-encrypt-module.js";
               $('input[name=signed]')[0].value = 0;
               $('input[name=fetcher_endpoint]')[0].value = drupalSettings.proc.fetcher_endpoint;
               $('input[name=proc_re_encryption_plugin]')[0].value = drupalSettings.proc.proc_re_encryption_plugin;
+              $('input[name=proc_recipients_storage_plugin]')[0].value = drupalSettings.proc.proc_recipients_storage_plugin;
               document
                 .querySelector('[id^="edit-submit-proc"]')
                 .removeAttribute('disabled');

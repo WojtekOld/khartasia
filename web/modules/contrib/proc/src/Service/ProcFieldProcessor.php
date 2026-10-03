@@ -15,6 +15,7 @@ use Drupal\proc\Element\ProcField;
 use Drupal\proc\Entity\Proc;
 use Drupal\proc\ProcInterface;
 use Drupal\proc\ProcKeyManager;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -79,6 +80,13 @@ class ProcFieldProcessor implements ContainerInjectionInterface {
   protected $logger;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -114,6 +122,7 @@ class ProcFieldProcessor implements ContainerInjectionInterface {
     ProcKeyManager $key_manager,
     EntityTypeManagerInterface $entity_type_manager,
     LoggerInterface $logger,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     $this->moduleHandler = $module_handler;
     $this->pathCurrent = $path_current;
@@ -123,6 +132,7 @@ class ProcFieldProcessor implements ContainerInjectionInterface {
     $this->keyManager = $key_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -137,7 +147,8 @@ class ProcFieldProcessor implements ContainerInjectionInterface {
       $container->get('current_user'),
       $container->get('proc.key_manager'),
       $container->get('entity_type.manager'),
-      $container->get('logger.factory')->get('proc')
+      $container->get('logger.factory')->get('proc'),
+      $container->get('proc.recipient_storage')
     );
   }
 
@@ -247,26 +258,14 @@ class ProcFieldProcessor implements ContainerInjectionInterface {
     if ($default_value && $fetcher) {
       $element['target_id']['#attributes']['data-proc-fetcher'] = $fetcher;
       // Get the current list of recipients:
-      $current_recipients = $element['target_id']['#default_value']->get('field_recipients_set')->getValue();
-      $recipient_ids = [];
-      foreach ($current_recipients as $current_recipient) {
-        $recipient_ids[] = $current_recipient['target_id'];
-      }
+      $recipient_ids = $this->recipientStorage->getRecipientIds($element['target_id']['#default_value']);
       if (!empty($recipient_ids)) {
         $element['target_id']['#attributes']['data-proc-recipients'] = implode(',', $recipient_ids);
         $element['target_id']['#attributes']['data-proc-id'] = $element['target_id']['#default_value']->id();
       }
       // Get the list of wished recipients, if any:
-      $wished_recipients = [];
-      $wished_recipient_ids = [];
-      if (isset($element['target_id']['#default_value']->toArray()['field_wished_recipients_set'])) {
-        $wished_recipients = $element['target_id']['#default_value']->get('field_wished_recipients_set')->getValue();
-      }
-      foreach ($wished_recipients as $wished_recipient) {
-        if (!in_array($wished_recipient['target_id'], $wished_recipient_ids)) {
-          $wished_recipient_ids[] = $wished_recipient['target_id'];
-        }
-      }
+      $wished_recipient_ids = $this->recipientStorage->getWishedRecipientIds($element['target_id']['#default_value']);
+      $wished_recipient_ids = array_values(array_unique($wished_recipient_ids));
       if (!empty($wished_recipient_ids)) {
         $wished_recipient_ids = array_map('intval', $wished_recipient_ids);
         sort($wished_recipient_ids, SORT_NUMERIC);
@@ -374,6 +373,7 @@ class ProcFieldProcessor implements ContainerInjectionInterface {
         'trigger_fields' => $element['#proc-settings']['trigger_fields'],
         'proc_field_decryption_mode' => $element['#proc-settings']['proc_field_decryption_mode'] ?? '0',
         'proc_re_encryption_plugin' => $element['#proc-settings']['proc_re_encryption_plugin'] ?? '0',
+        'proc_recipients_storage_plugin' => $element['#proc-settings']['proc_recipients_storage_plugin'] ?? '0',
         'proc_recipients_delivery_override' => $element['#proc-settings']['proc_recipients_delivery_override'] ?? '',
       ];
     }
@@ -530,13 +530,17 @@ let endpoint_recipients_csv = endpoint_response.then(async function(result) {
   if (typeof result === 'object') {
     result = Object.values(result);
   }
-  // Suppose this is a flat list of IDs:
-  let result_map = result.map(item => item.id);
-  if (!result_map[0]) {
-    // Use 'uid' as standard UIDs key:
-    return result.map(obj => obj['uid']).filter(value => value !== undefined).join();
-  }
-  return result_map.join();
+  return result.map(function(item) {
+    // Format 1: a flat list of scalar user IDs, e.g. [1, 2, 3].
+    if (item !== null && typeof item !== 'object') {
+      return item;
+    }
+    // Format 2: a list of objects keyed by 'uid', e.g. [{"uid": 1}].
+    if (item !== null && typeof item === 'object') {
+      return item['uid'];
+    }
+    return undefined;
+  }).filter(value => value !== undefined && value !== null).join();
 });
 
 endpoint_recipients_csv.then(async function(result) {
@@ -658,6 +662,7 @@ let proc_path_suffix =
   "&proc_field_name={$settings['proc_field_name']}&proc_in_mode=" + field_input_mode +
   "&field-default-proc-id=" + default_value +
   "&proc_re_encryption_plugin={$settings['proc_re_encryption_plugin']}" +
+  "&proc_recipients_storage_plugin={$settings['proc_recipients_storage_plugin']}" +
   "&host_page_url={$settings['current_path']}";
 
 {$value}
@@ -861,7 +866,7 @@ JS;
   private function getCurrentUserRecipient(array $element): string|bool {
     $current_user_id = $this->currentUser->id();
     if (!in_array($current_user_id, array_column(
-      $element['target_id']['#default_value']->get('field_recipients_set')->getValue(),
+      $this->recipientStorage->getRecipients($element['target_id']['#default_value']),
       'target_id'))
     ) {
       return FALSE;

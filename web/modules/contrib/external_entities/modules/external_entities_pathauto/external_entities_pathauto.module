@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * Hooks for external_entities_pathauto.
+ */
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\external_entities_pathauto\Hook\ExternalEntitiesPathautoHooks;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\external_entities\Entity\ConfigurableExternalEntityTypeInterface;
+
+/**
+ * Implements hook_pathauto_alias_types_alter().
+ */
+#[LegacyHook]
+function external_entities_pathauto_pathauto_alias_types_alter(&$types) {
+  \Drupal::service(ExternalEntitiesPathautoHooks::class)->pathautoAliasTypesAlter($types);
+}
+
+/**
+ * Implements hook_config_schema_info_alter().
+ */
+#[LegacyHook]
+function external_entities_pathauto_config_schema_info_alter(&$definitions) {
+  \Drupal::service(ExternalEntitiesPathautoHooks::class)->configSchemaInfoAlter($definitions);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+#[LegacyHook]
+function external_entities_pathauto_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  \Drupal::service(ExternalEntitiesPathautoHooks::class)->formAlter($form, $form_state, $form_id);
+}
+
+/**
+ * Saves 'generate_aliases' property added to ExternalEntityTypeForm form.
+ *
+ * @param string $entity_type
+ *   Entity type.
+ * @param \Drupal\external_entities\Entity\ConfigurableExternalEntityTypeInterface $entity
+ *   External entity type (config entity).
+ * @param array &$form
+ *   External entity type config form.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form state.
+ */
+function external_entities_pathauto_xntt_form_builder(
+  string $entity_type,
+  ConfigurableExternalEntityTypeInterface $entity,
+  array &$form,
+  FormStateInterface $form_state,
+) {
+  // Property saved as a third party setting.
+  $entity->setThirdPartySetting(
+    'external_entities_pathauto',
+    'generate_aliases',
+    $form_state->getValue('generate_aliases')
+  );
+}
+
+/**
+ * Implements hook_entity_storage_load().
+ */
+#[LegacyHook]
+function external_entities_pathauto_entity_storage_load(array $entities, $entity_type) {
+  \Drupal::service(ExternalEntitiesPathautoHooks::class)->entityStorageLoad($entities, $entity_type);
+}

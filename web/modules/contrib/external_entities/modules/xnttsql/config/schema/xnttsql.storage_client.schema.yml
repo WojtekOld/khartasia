@@ -1,0 +1,80 @@
+plugin.plugin_configuration.external_entities_storage_client.sql:
+  type: mapping
+  label: 'External entities SQL database storage client settings'
+  mapping:
+    queries:
+      type: mapping
+      label: 'Queries'
+      mapping:
+        create:
+          type: sequence
+          label: 'SQL query to create a new object'
+          sequence:
+            type: string
+        read:
+          type: sequence
+          label: 'SQL query to get a full object'
+          sequence:
+            type: string
+        update:
+          type: sequence
+          label: 'SQL query to update an existing object'
+          sequence:
+            type: string
+        delete:
+          type: sequence
+          label: 'SQL query to delete an object'
+          sequence:
+            type: string
+        list:
+          type: sequence
+          label: 'SQL query to list objects'
+          sequence:
+            type: string
+        count:
+          type: sequence
+          label: 'SQL query to count objects'
+          sequence:
+            type: string
+    connection:
+      type: mapping
+      label: 'Connection settings'
+      mapping:
+        dbkey:
+          type: string
+          label: 'Database key'
+        schemas:
+          type: sequence
+          label: 'List of schema names'
+          sequence:
+            type: string
+            label: 'Schema name'
+    placeholders:
+      type: sequence
+      label: 'Set of placeholders'
+      sequence:
+        type: mapping
+        mapping:
+          placeholder:
+            type: string
+            label: 'Placeholder name'
+          query:
+            type: string
+            label: 'Query that returns placeholder value'
+            nullable: true
+          constant:
+            type: string
+            label: 'Constant value to use'
+            nullable: true
+    filter_mappings:
+      type: sequence
+      label: 'Filter mappings'
+      sequence:
+        type: mapping
+        mapping:
+          alias:
+            type: string
+            label: 'Alias name (AS)'
+          expression:
+            type: string
+            label: 'Replacement SQL expression'

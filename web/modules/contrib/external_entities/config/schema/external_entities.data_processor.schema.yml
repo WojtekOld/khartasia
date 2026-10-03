@@ -1,0 +1,176 @@
+plugin.plugin_configuration.external_entities_data_processor.:
+  # Used when no processor is set.
+  type: mapping
+
+plugin.plugin_configuration.external_entities_data_processor.default:
+  type: mapping
+  label: 'External entities default data processor config'
+  mapping:
+    datatype:
+      type: string
+      label: 'Forced data type'
+    default:
+      type: string
+      label: 'Default value'
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.boolean:
+  type: mapping
+  label: 'External entities boolean data processor config'
+  mapping:
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.datetime:
+  type: mapping
+  label: 'External entities date and time data processor config'
+  mapping:
+    source_format:
+      type: string
+      label: 'Source date format'
+    save_format:
+      type: string
+      label: 'Save format'
+    drupal_format:
+      type: string
+      label: 'Drupal date format to use'
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.hash:
+  type: mapping
+  label: 'External entities hash data processor config'
+  mapping:
+    hash:
+      type: string
+      label: 'Hash algorithm'
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.numeric:
+  type: mapping
+  label: 'External entities numeric data processor config'
+  mapping:
+    position:
+      label: 'Position of the number in the text'
+      type: string
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.numericunit:
+  type: mapping
+  label: 'External entities numeric unit data processor config'
+  mapping:
+    metric:
+      type: string
+      label: 'Base unit symbol'
+    prefix:
+      type: string
+      label: 'Expected multiples or submultiples prefix'
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.stringcase:
+  type: mapping
+  label: 'External entities string character case altering data processor config'
+  mapping:
+    non_word:
+      type: string
+      label: 'Non-word character handling'
+    format:
+      type: string
+      label: 'Case altering'
+    prefix:
+      type: string
+      label: 'Prefix string'
+      nullable: true
+    suffix:
+      type: string
+      label: 'Suffix string'
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.mapping:
+  type: mapping
+  label: 'External entities value mapping data processor config'
+  mapping:
+    mapping:
+      type: sequence
+      label: 'Mapping'
+      sequence:
+        type: string
+    keep_unmapped:
+      type: boolean
+      label: 'Keep unmapped entries'
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.version:
+  type: mapping
+  label: 'External entities version data processor config'
+  mapping:
+    elements:
+      type: sequence
+      label: 'Version element to keep'
+      sequence:
+        type: string
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.readonly:
+  type: mapping
+  label: 'External entities read-only data processor config'
+  mapping:
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_processor.filter:
+  type: mapping
+  label: 'External entities filter data processor config'
+  mapping:
+    filtered:
+      type: sequence
+      label: 'Filters'
+      orderby: key
+      sequence:
+        type: string
+    filter_empty:
+      type: string
+      label: 'What to remove'
+      constraints:
+        - AllowedValues: ['', 'null', 'empty', 'zerook']
+      nullable: true
+    filter_mode:
+      type: string
+      label: ''
+      constraints:
+        - AllowedValues: ['keep_matching', 'keep_start', 'keep_end', 'remove_matching', 'remove_start', 'remove_end']
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true

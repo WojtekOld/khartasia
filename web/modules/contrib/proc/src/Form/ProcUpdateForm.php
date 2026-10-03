@@ -519,7 +519,7 @@ class ProcUpdateForm extends ProcOpFormBase {
         $cipher_fid = $files['file_id'] ?? $files['json_fids'] ?? '';
         $cipher = !empty($cipher_fid) ? ['cipher_fid' => $cipher_fid] : '';
 
-        $prev_recs = $proc->get('field_recipients_set')->getValue();
+        $prev_recs = $this->recipientStorage()->getRecipients($proc);
 
         $prev_meta_cipher = $proc->getMeta();
         if ($updated_fields[$proc_id]['browser_fingerprint'] && $updated_fields[$proc_id]['browser_fingerprint'] != $prev_meta_cipher[0]['browser_fingerprint']) {
@@ -533,9 +533,12 @@ class ProcUpdateForm extends ProcOpFormBase {
         }
 
         $proc->set('armored', $cipher)
-          ->set('field_recipients_set', $recipients)
-          ->set('meta', $prev_meta_cipher[0])
-          ->set('field_wished_recipients_set', []);
+          ->set('meta', $prev_meta_cipher[0]);
+        // Route the recipients and wished recipients writes through the bound
+        // recipient storage plugin (meta is set above so the binding resolves
+        // correctly).
+        $this->recipientStorage()->setRecipients($proc, $recipients);
+        $this->recipientStorage()->setWishedRecipients($proc, []);
         $proc->save();
 
         if (isset($meta['update_jobs'])) {

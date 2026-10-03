@@ -1,0 +1,198 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - xntt_example_d7import
+id: d7import
+label: 'Drupal 7 content'
+label_plural: 'Drupal 7 contents'
+base_path: null
+description: 'Programmatic external entity type used to import Drupal 7 content.'
+content_class: Drupal\external_entities\Entity\ExternalEntity
+read_only: true
+debug_level: 0
+field_mappers:
+  default_langcode:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: direct
+          config:
+            mapping: default_langcode
+            required_field: false
+            main_property: true
+            data_processors: {  }
+      debug_level: 0
+  field_d7_body:
+    id: text
+    config:
+      property_mappings:
+        value:
+          id: jsonpath
+          config:
+            mapping: $.body.value
+            required_field: false
+            main_property: true
+            data_processors: {  }
+      format: full_html
+      debug_level: 0
+  id:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: direct
+          config:
+            mapping: nid
+            required_field: true
+            main_property: true
+            data_processors: {  }
+      debug_level: 0
+  langcode:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: direct
+          config:
+            mapping: langcode
+            required_field: false
+            main_property: true
+            data_processors: {  }
+      debug_level: 0
+  title:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: direct
+          config:
+            mapping: title
+            required_field: true
+            main_property: true
+            data_processors: {  }
+      debug_level: 0
+  uuid:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: direct
+          config:
+            mapping: uuid
+            required_field: false
+            main_property: true
+            data_processors: {  }
+      debug_level: 0
+field_mapping_notes: 'Depending on the Drupal 7 content type you want to import, you should add fields to suite your needs.'
+data_aggregator:
+  id: single
+  config:
+    storage_clients:
+      -
+        id: rest
+        config:
+          endpoint: 'https://www.drupal.org/api-d7/node.json?type=page'
+          endpoint_options:
+            single: 'https://www.drupal.org/api-d7/node/{id}.json'
+            count: '1000'
+            count_mode: entities
+            dynamic_count: false
+            cache: true
+            limit_qcount: 10
+            limit_qtime: 1
+            requests_by_user: false
+          response_format: json
+          data_path:
+            list: '$.list.*'
+            single: ''
+            keyed_by_id: false
+            count: ''
+          pager:
+            default_limit: 50
+            type: pagination
+            page_parameter: page
+            page_parameter_type: pagenum
+            page_start_one: false
+            always_query: false
+            page_size_parameter: ''
+            page_size_parameter_type: pagesize
+          api_key:
+            type: none
+            header_name: ''
+            key: ''
+          http:
+            headers: ''
+          parameters:
+            list: {  }
+            list_param_mode: query
+            single: {  }
+            single_param_mode: query
+          filtering:
+            drupal: false
+            basic: true
+            basic_fields: {  }
+            list_support: none
+            list_join: ''
+data_aggregator_notes: 'This is an example of external entity type that can be used to import content from a Drupal 7 site. This example is using Drupal.org which is running Drupal 7 at the time this example is being created but you should replace both the "Endpoint URL" and the "Endpoint URL for a single entity" (and maybe other settings) with your own Drupal 7 site URL.'
+language_settings: {  }
+persistent_cache_max_age: 0
+annotation_entity_type_id: null
+annotation_bundle_id: null
+annotation_field_name: null
+annotation_inherited_fields: {  }
+locks:
+  lock_annotations: []
+  lock_base_path: [d7import]
+  lock_data_aggregator:
+    allow_plugins:
+      single: [d7import]
+    hide_config: []
+    lock_config: []
+    lock_storage_clients:
+      -
+        allow_plugins:
+          rest: [d7import]
+        lock_config: []
+        hide_config: []
+  lock_delete: [d7import]
+  lock_display: []
+  lock_edit: []
+  lock_field_mappers:
+    '*':
+      allow_plugins: {  }
+      lock_config: []
+      hide_config: []
+    default_langcode:
+      allow_plugins:
+        generic: [d7import]
+      lock_config: [d7import]
+      hide_config: []
+    id:
+      allow_plugins:
+        generic: [d7import]
+      lock_config: [d7import]
+      hide_config: []
+    langcode:
+      allow_plugins:
+        generic: [d7import]
+      lock_config: [d7import]
+      hide_config: []
+    status:
+      allow_plugins:
+        generic: []
+      lock_config: []
+      hide_config: []
+    uid:
+      allow_plugins: null
+      lock_config: []
+      hide_config: []
+    uuid:
+      allow_plugins:
+        generic: [d7import]
+      lock_config: [d7import]
+      hide_config: []
+  lock_fields: null
+  lock_translations: [d7import]

@@ -18,6 +18,7 @@ use Drupal\proc\Event\ProcEvents;
 use Drupal\proc\ProcInterface;
 use Drupal\proc\ProcReEncRecSetPluginManager;
 use Drupal\proc\ProcRelabellingPluginManager;
+use Drupal\proc\RecipientStoragePluginManager;
 use Drupal\proc\Service\ProcFieldProcessor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -96,6 +97,13 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
   protected ProcReEncRecSetPluginManager $reEnReSetPluginMan;
 
   /**
+   * The plugin.manager.proc_recipient_storage service.
+   *
+   * @var \Drupal\proc\RecipientStoragePluginManager
+   */
+  protected RecipientStoragePluginManager $recipientStoragePluginMan;
+
+  /**
    * Constructs a ProcEntityReferenceWidget object.
    *
    * @param string $plugin_id
@@ -124,6 +132,8 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
    *   The proc field processor.
    * @param \Drupal\proc\ProcReEncRecSetPluginManager $reEnReSetPluginMan
    *   The plugin.manager.proc_re_enc_rec_set service.
+   * @param \Drupal\proc\RecipientStoragePluginManager $recipientStoragePluginMan
+   *   The plugin.manager.proc_recipient_storage service.
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    * @SuppressWarnings(PHPMD.StaticAccess)
@@ -142,6 +152,7 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $tokenService,
     ProcFieldProcessor $proc_field_processor,
     ProcReEncRecSetPluginManager $reEnReSetPluginMan,
+    RecipientStoragePluginManager $recipientStoragePluginMan,
   ) {
     parent::__construct(
       $plugin_id,
@@ -163,6 +174,7 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $this->tokenService = $tokenService;
     $this->procFieldProcessor = $proc_field_processor;
     $this->reEnReSetPluginMan = $reEnReSetPluginMan;
+    $this->recipientStoragePluginMan = $recipientStoragePluginMan;
   }
 
   /**
@@ -182,7 +194,8 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       $container->get('config.factory'),
       $container->get('token'),
       $container->get('proc.proc_field_processor'),
-      $container->get('plugin.manager.proc_re_enc_rec_set')
+      $container->get('plugin.manager.proc_re_enc_rec_set'),
+      $container->get('plugin.manager.proc_recipient_storage')
     );
   }
 
@@ -315,6 +328,7 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       'proc_decryption_trigger_fields' => '',
       'proc_relabeling_pattern' => 0,
       'proc_re_encryption_plugin' => 0,
+      'proc_recipients_storage_plugin' => 0,
       'proc_recipients_delivery_override' => '',
     ] + parent::defaultSettings();
   }
@@ -349,7 +363,7 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $element['proc_field_recipients_fetcher_endpoint'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Endpoint for fetching user IDs of recipients'),
-      '#description' => $this->t('Example: https://example.com/api/get/users/param-a/param-b/param-c?param-d=1&#38;param-e=2. Accepted json formats: 1. a flat list of user IDs as in [1,2,3] 2. a list of objects with user IDs keyed buy uid as in [{"uid":1},{"uid":2},{"uid":3}]'),
+      '#description' => $this->t('Example: https://example.com/api/get/users/param-a/param-b/param-c?param-d=1&#38;param-e=2. Accepted json formats: 1. a flat list of user IDs as in [1,2,3] 2. a list of objects with user IDs keyed by uid as in [{"uid":1},{"uid":2},{"uid":3}]'),
       '#default_value' => $this->getSetting('proc_field_recipients_fetcher_endpoint') ?? '',
       '#disabled' => FALSE,
     ];
@@ -445,6 +459,13 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       '#description' => $this->t('Select a plugin for defining the set of wished recipients.'),
       '#default_value' => $this->getSetting('proc_re_encryption_plugin') ?? ProcInterface::TRIGGER_FORMAT_BUTTONS,
       '#options' => $this->getPluginOptions($this->reEnReSetPluginMan),
+    ];
+    $element['proc_recipients_storage_plugin'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Recipients storage plugin'),
+      '#description' => $this->t('Select the plugin responsible for storing and retrieving the set of recipients of the ciphers created with this field. Leave as "- None -" to use the standard database storage. A custom plugin may delegate recipient storage to the implementing application (e.g. computing recipients from a business rule), avoiding one database row per recipient. This choice is stored on each created cipher and cannot be changed retroactively for existing ciphers.'),
+      '#default_value' => $this->getSetting('proc_recipients_storage_plugin') ?? 0,
+      '#options' => $this->getPluginOptions($this->recipientStoragePluginMan),
     ];
     $element['proc_recipients_delivery_override'] = [
       '#type' => 'select',
@@ -545,6 +566,12 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
         '@proc_re_encryption_plugin' => $this->getPluginOptions($this->reEnReSetPluginMan)[$re_encryption_plugin],
       ]);
     }
+    $recipients_storage_plugin = $this->getSetting('proc_recipients_storage_plugin') ?? '0';
+    if (!empty($recipients_storage_plugin)) {
+      $summary[] = $this->t('Recipients storage plugin: @proc_recipients_storage_plugin', [
+        '@proc_recipients_storage_plugin' => $this->getPluginOptions($this->recipientStoragePluginMan)[$recipients_storage_plugin] ?? $recipients_storage_plugin,
+      ]);
+    }
     $delivery_override = $this->getSetting('proc_recipients_delivery_override') ?? '';
     $summary[] = $this->t('Recipients delivery: @mode', [
       '@mode' => $delivery_override === 'csv' ? $this->t('Force CSV') : $this->t('Use global setting'),
@@ -580,6 +607,7 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       'proc_field_mode' => $this->getSetting('proc_field_mode') ?? ProcInterface::FIELD_OPS_DISABLED,
       'proc_relabeling_pattern' => $this->getSetting('proc_relabeling_pattern') ?? ProcInterface::TRIGGER_FORMAT_BUTTONS,
       'proc_re_encryption_plugin' => $this->getSetting('proc_re_encryption_plugin') ?? ProcInterface::TRIGGER_FORMAT_BUTTONS,
+      'proc_recipients_storage_plugin' => $this->getSetting('proc_recipients_storage_plugin') ?? '0',
       'proc_recipients_delivery_override' => $this->getSetting('proc_recipients_delivery_override') ?? '',
       'proc_field_cardinality' => $items->getFieldDefinition()
         ->getFieldStorageDefinition()

@@ -1,0 +1,33 @@
+block.settings.copyright_footer:
+  type: block_settings
+  label: 'Copyright Footer block'
+  mapping:
+    organization_name:
+      type: label
+      label: 'Organization name'
+    organization_url:
+      type: uri
+      nullable: true
+      label: 'Organization URL'
+    all_rights_reserved:
+      type: boolean
+      label: 'Deprecated All Rights Reserved setting'
+    all_rights_reserved_position:
+      type: string
+      label: 'All Rights Reserved display position'
+    year_origin:
+      type: string
+      label: 'Year origin from'
+    year_to_date:
+      type: string
+      label: 'Year to date'
+    version:
+      type: string
+      label: 'Version'
+    version_url:
+      type: uri
+      nullable: true
+      label: 'Version URL'
+    copyright_format:
+      type: text
+      label: 'Custom copyright format'

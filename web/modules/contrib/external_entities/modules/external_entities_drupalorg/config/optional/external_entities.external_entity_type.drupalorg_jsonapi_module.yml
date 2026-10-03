@@ -1,0 +1,120 @@
+langcode: en
+status: true
+dependencies: {  }
+id: drupalorg_jsonapi_module
+label: 'Drupal.org module - JSONAPI'
+label_plural: 'Drupal.org modules - JSONAPI'
+description: 'Drupal.org modules via JSONAPI.'
+content_class: Drupal\external_entities\Entity\ExternalEntity
+read_only: false
+debug_level: 0
+field_mappers:
+  id:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: attributes.drupal_internal__nid
+            required_field: true
+            main_property: true
+            data_processors: {  }
+            description: ''
+  title:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: attributes.title
+            required_field: true
+            main_property: true
+            data_processors: {  }
+            description: ''
+  field_body:
+    id: generic
+    config:
+      property_mappings:
+        value:
+          id: simple
+          config:
+            mapping: attributes.body.value
+            required_field: false
+            main_property: true
+            data_processors: {  }
+            description: ''
+        format:
+          id: constant
+          config:
+            mapping: full_html
+            required_field: false
+            main_property: false
+            description: ''
+        summary:
+          id: simple
+          config:
+            mapping: attributes.body.summary
+            required_field: false
+            main_property: false
+            data_processors: {  }
+            description: ''
+field_mapping_notes: ''
+data_aggregator:
+  id: single
+  config:
+    storage_clients:
+      -
+        id: jsonapi
+        config:
+          endpoint: 'https://www.drupal.org/jsonapi/node/project_module'
+          endpoint_options:
+            single: ''
+            count: ''
+            count_mode: entities
+            dynamic_count: true
+            cache: true
+            limit_qcount: 0
+            limit_qtime: 0
+            requests_by_user: false
+          response_format: json
+          data_path:
+            list: '$.data.*'
+            single: '$[data,included]'
+            keyed_by_id: false
+            count: ''
+          pager:
+            default_limit: 50
+            type: pagination
+            page_parameter: 'page[offset]'
+            page_parameter_type: startitem
+            page_start_one: false
+            always_query: true
+            page_size_parameter: 'page[limit]'
+            page_size_parameter_type: pagesize
+          api_key:
+            type: none
+            header_name: ''
+            key: ''
+          http:
+            headers: 'Accept: application/vnd.api+json'
+          parameters:
+            list: {  }
+            list_param_mode: query
+            single:
+              'filter[drupal_internal__nid]': '{id}'
+            single_param_mode: query
+          filtering:
+            drupal: false
+            basic: false
+            basic_fields: {  }
+            list_support: none
+            list_join: ''
+data_aggregator_notes: ''
+language_settings: {  }
+persistent_cache_max_age: 86400
+annotation_entity_type_id: null
+annotation_bundle_id: null
+annotation_field_name: null
+annotation_inherited_fields: {  }

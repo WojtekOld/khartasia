@@ -1,0 +1,71 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - external_entities_provider_test
+id: provider_test_entity
+label: 'Provider test entity'
+label_plural: 'Provider test entities'
+base_path: provider-test
+description: 'Test entity type provided by a separate module.'
+content_class: Drupal\external_entities\Entity\ExternalEntity
+read_only: true
+debug_level: 0
+field_mappers: {}
+data_aggregator:
+  id: single
+  config:
+    storage_clients:
+      -
+        id: rest
+        config:
+          endpoint: 'https://example.com/api'
+          endpoint_options:
+            single: 'https://example.com/api/{id}'
+            count: '100'
+            count_mode: entities
+            dynamic_count: false
+            cache: false
+            limit_qcount: 0
+            limit_qtime: 0
+            requests_by_user: false
+          response_format: json
+          data_path:
+            list: '$.*'
+            single: ''
+            keyed_by_id: false
+            count: ''
+          pager:
+            default_limit: 50
+            type: none
+            page_parameter: ''
+            page_parameter_type: pagenum
+            page_start_one: false
+            always_query: false
+            page_size_parameter: ''
+            page_size_parameter_type: pagesize
+          api_key:
+            type: none
+            header_name: ''
+            key: ''
+          http:
+            headers: ''
+          parameters:
+            list: {}
+            list_param_mode: query
+            single: {}
+            single_param_mode: query
+          filtering:
+            drupal: false
+            basic: false
+            basic_fields: {}
+            list_support: none
+            list_join: ''
+language_settings: {}
+persistent_cache_max_age: 0
+annotation_entity_type_id: null
+annotation_bundle_id: null
+annotation_field_name: null
+annotation_inherited_fields: {}
+locks: {}

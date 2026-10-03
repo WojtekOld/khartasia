@@ -1,0 +1,274 @@
+{#
+/**
+ * @file
+ * External entities module global help.
+ */
+#}
+
+<p>
+  This module allows you to connect to and use datasets from external sources in
+  your Drupal website. While content lives externally, Drupal sees those remote
+  entities as internal. This makes it possible to alter the field displays, add
+  references, comments, path aliases, share buttons, web-shop products and more.
+</p>
+
+<h2>External data</h2>
+<p>
+  You can use within your website museum collections, content of Wikipedia,
+  external specialised thesauri for wildlife, streetnames, members, and other
+  systems in use within an organisation. If the back-end supports updating as
+  well, you can even create, edit and delete remote entities, making Drupal a
+  central hub for content in an organisation.
+</p>
+
+<p>
+  Drupal assumes all fields of an entity are coming from the same dataset. All
+  fields within that entity type reads the data from the defined source and
+  writes data to that source. You can add fields, but they only become filled
+  when they are mapped to a field in the datasource or autofilled. To deal with
+  this, this module provides 'annotations' connected to an entity where you can
+  define your own (local) fields.
+</p>
+
+<h2>Uses</h2>
+<p>
+  To begin using an external source, you need to
+  <a href="{{ path('entity.external_entity_type.add_form') }}">create a new external entity type</a>.
+  You will need to select a data aggregator or just use a sinlge storage client
+  and then select the storage client(s) you want to use. Configure the storage
+  client and save your new external entity type. Then, you will be asked to map
+  the entity identifier and title fields to fields of the source data provided
+  by the storage client(s). To do so, for each field, use the generic field
+  mapper to select a property mapper. Usualy for such fields, a "Field" property
+  mapper should be enough: just enter there the corresponding source field
+  names. Once done, save the external entity type again and start adding the
+  needed fields using the "Manage fields" tab. Then go back to the "Edit" tab,
+  map those fields as needed and save. You can go back on the
+  <a href="{{ path('entity.external_entity_type.collection') }}">external
+  entities list page</a> and use the drop-down next to your new external entity
+  type in the "Operations" column and select the "list" operation to list the
+  available external entities. If everything went well, you should see a
+  paginated list of external entities.<br/>
+  Don't forget to
+  <a href="{{ path('user.admin_permissions.module', { modules: 'external_entities'}) }}">manage
+  permissions</a> to allow other users access them!
+</p>
+
+<h2>Plugins</h2>
+<p>
+  External Entities module comes with built-in plugins:
+  <dl>
+    <dd><b>Data Aggregation plugins</b></dd>
+    <dt>
+      <dl>
+        <dt>Single Storage Client</dt>
+        <dd>
+          This data aggregator does not aggregate data but rather provides a
+          simple interface when working with a single storage client.
+        </dd>
+
+        <dt>Group Aggregator</dt>
+        <dd>
+          This aggregator enable the aggregation of multiple storage client data
+          into one data structure. It supports grouping/separation of sources as
+          well as a control on how data elements are merged together.<br/>
+          For instance, with this plugin, it is possible to add the entities of
+          multiples sources into one bigger set of entities as well as aggregating
+          data of one source "A" to another one "B" and merge their fields to
+          generate virtual hybrid entities that contains data from both "A" and "B"
+          sources.
+        </dd>
+      </dl>
+    </dt>
+
+    <dd><b>Storage Client plugins</b></dd>
+    <dt>
+      <dl>
+        <dt>Storage client interfaces</dt>
+        <dd>
+          The provided 3 storage client interfaces should be use as base for storage
+          client implementations. The "REST" interface is dedicated to web services,
+          the "files" interface is dedicated to storage client working either with
+          file systems or file content, with data records either stored in one or
+          multiple files, and the "query language" interface deals with query
+          languages such as SQL databases, noSQL storages, SPARQL (RDF) and such.
+          <br/>
+          All those 3 interfaces come with a base implementation that can be used to
+          implement new storage clients. See DEVELOPMENT.md for more details. You
+          may also find existing extensions that extend those base classes.
+        </dd>
+
+        <dt>REST storage client</dt>
+        <dd>
+          The REST storage client provides a fullfeatured support to RESTful web
+          services. The base class can be extended for specific client needs and/or
+          to simplify the configuration interface.
+        </dd>
+
+        <dt>JSON:API storage client</dt>
+        <dd>
+          It is derived from the base REST storage client and enable the use of REST
+          services provided by Drupal JSON:API module. It supports field filtering.
+        </dd>
+
+        <dt>Files storage client</dt>
+        <dd>
+          Enables the use of local files as entities. Available fields are file
+          properties (name, size, modification date, etc.) and parts of file path
+          (when using path structure patterns).
+        </dd>
+
+        <dt>SQL storage client ("xnttsql" companion module)</dt>
+        <dd>
+          Turns SQL (MySQL/PostgreSQL) queries into external entities. An SQL column
+          becomes an entity field. It requires "Database Cross-Schema Queries"
+          Drupal extension to work with external databases. External database
+          credentials must be set in Drupal site "settings.php" file for security
+          reasons.
+        </dd>
+      </dl>
+    </dt>
+
+    <dd><b>Field Mapper plugins</b></dd>
+    <dt>
+      <dl>
+        <dt>Generic field mapper</dt>
+        <dd>
+          Provides a generic interface to map any field type.
+        </dd>
+
+        <dt>Text field mapper</dt>
+        <dd>
+          Provides an interface to map formatted text field types with simplified
+          selection for text format.
+        </dd>
+
+        <dt>File field mapper ("xntt_file_field" companion module)</dt>
+        <dd>
+          Allows to map external and local file URIs provided by external sources to
+          file or image fields just like if they were local. Image filters/styles
+          can then be used just like on any other regular image field.
+        </dd>
+      </dl>
+    </dt>
+
+    <dd><b>Property Mapper plugins</b></dd>
+    <dt>
+      <dl>
+        <dt>Constant property mapper</dt>
+        <dd>
+          Maps constant values to field properties.
+        </dd>
+
+        <dt>Field property mapper</dt>
+        <dd>
+          Maps a source field name directly to an external entity Drupal field name.
+          This property mapper does not support complex mapping expressions and
+          should only be used for 1-to-1 field (property) mapping. It can be used
+          when a source field name uses special characters that could be interpreted
+          by other property mappers as special expressions.
+        </dd>
+
+        <dt>Simple property mapper</dt>
+        <dd>
+          The simple property mapper provides a simple way to map source sub-fields
+          or multiple value fields to Drupal field properties. The syntax is quite
+          simple: a dot "." is used to go down into the data structure and the
+          jocker sign "*" is used to map a set of values to a Drupal field property.
+          <br/>
+          Note: in previous version of External Entities module, the slash "/" was
+          used to separate sub-fields. This syntax has been changed to dots for
+          multiple reasons:
+          <ul>
+            <li>
+              more similar to JSON Path to more easly switch from one property
+              mapper to the other.
+            </li>
+            <li>it is a common syntax used in computer languages.</li>
+            <li>it simplifies the code of filtering queries.</li>
+          </ul>
+        </dd>
+
+        <dt>JSONPath property mapper</dt>
+        <dd>
+          The JSONPath property mapper provides more flexibility to map complex
+          structures to Drupal field properties using the standardized
+          <a href="https://goessner.net/articles/JsonPath/">JSONPath</a> structure.
+        </dd>
+      </dl>
+    </dt>
+
+    <dd><b>Data Processor plugins</b></dd>
+    <dt>
+      <dl>
+        <dt>Autodetect datatype data processor</dt>
+        <dd>
+          In some cases, a Drupal field property requires a certain type of data
+          while the source data values are often just "strings". This data processor
+          detects the data type required by the field and tries to cast the source
+          value to that required type to avoid Drupal errors.
+        </dd>
+
+        <dt>Boolean data processor</dt>
+        <dd>
+          This data processor can translate many type of source values into
+          booleans. Values evaluated to false are: "the empty string", 0, false,
+          null, nul, nil, undef, empty, no, nothing, none, zero, and "-" (all are
+          case insensitive). Other non-empty values are evaluated to TRUE.
+        </dd>
+
+        <dt>Date and time data processor</dt>
+        <dd>
+          This data processor handles date strings in many format and adapt their
+          values to any Drupal field property type (Date-time field properties but
+          also text or integer field properties).
+        </dd>
+
+        <dt>Hash data processor</dt>
+        <dd>
+          This data processor can compute a hash value from a source field value
+          using the selected hash algorithm. The hash result can then be used in a
+          Drupal field property.
+        </dd>
+
+        <dt>Numeric value data processor</dt>
+        <dd>
+          This data processor can be used to extract the numeric part of a value in
+          a string, either at the beginning or the end of a text. Supported numeric
+          values are signed/unsigned integers, floating points, and can use
+          scientific notation. The rest of the text can be maintained when saving
+          the numeric value.
+        </dd>
+
+        <dt>Numeric value with unit data processor</dt>
+        <dd>
+          This data processor also works with numerci values, like the numeric value
+          data processor, but can be used to take into account units and includes
+          unit conversion features. Source values can use different units while
+          those values would be converted by this data processor to a selected
+          common one.
+        </dd>
+
+        <dt>String case data processor</dt>
+        <dd>
+          This data processor enables to change the character case of a source text.
+          Multiple options are available such as upper or lower casing everything or
+          using camel case notation.
+        </dd>
+
+        <dt>Value mapping data processor</dt>
+        <dd>
+          This data processor can be used to map a source value to another specified
+          one.
+        </dd>
+
+        <dt>Version data processor</dt>
+        <dd>
+          This data processor is dedicated to handle (software) versionning and extract
+          the required version part(s) of a source string.
+        </dd>
+      </dl>
+    </dt>
+  </dl>
+
+</p>

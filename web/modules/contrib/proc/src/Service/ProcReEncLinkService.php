@@ -5,6 +5,7 @@ namespace Drupal\proc\Service;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
+use Drupal\proc\ProcInterface;
 
 /**
  * Service to add a "Request re-encryption" link to forms with proc fields.
@@ -15,6 +16,23 @@ use Drupal\Core\Url;
  * link opens a modal dialog for confirmation.
  */
 class ProcReEncLinkService implements ProcReEncLinkServiceInterface {
+
+  /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
+   * Constructs a ProcReEncLinkService.
+   *
+   * @param \Drupal\proc\Service\RecipientStorageBrokerInterface $recipient_storage
+   *   The recipient storage broker.
+   */
+  public function __construct(RecipientStorageBrokerInterface $recipient_storage) {
+    $this->recipientStorage = $recipient_storage;
+  }
 
   /**
    * {@inheritdoc}
@@ -54,11 +72,8 @@ class ProcReEncLinkService implements ProcReEncLinkServiceInterface {
 
         $default = $delta['target_id']['#default_value'];
 
-        if (
-          is_object($default) && method_exists($default, 'hasField') &&
-          $default->hasField('field_wished_recipients_set')
-        ) {
-          $wished = $default->get('field_wished_recipients_set')->getValue();
+        if ($default instanceof ProcInterface) {
+          $wished = $this->recipientStorage->getWishedRecipients($default);
           if (empty($wished)) {
             continue;
           }

@@ -1,0 +1,21 @@
+plugin.plugin_configuration.external_entities_field_mapper.file:
+  type: mapping
+  label: 'External entities file field mapper settings'
+  mapping:
+    property_mappings:
+      type: sequence
+      label: 'Property mappings'
+      sequence:
+        type: external_entities.external_entities_property_mapper_settings
+    filter:
+      type: string
+      label: 'Regular expression to filter allowed URI (optional)'
+      nullable: true
+    extension:
+      type: string
+      label: 'Force file extension (optional)'
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true

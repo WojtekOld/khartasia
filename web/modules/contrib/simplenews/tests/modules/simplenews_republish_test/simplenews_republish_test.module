@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Test helper that changes a node's published state in entity presave.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_entity_presave().
+ *
+ * Node-specific hooks (hook_node_presave) run before generic entity hooks, so
+ * this runs after simplenews_node_presave(), the same ordering as the Scheduler
+ * module. Depending on the state flag set by the test it either forces a
+ * published node back to unpublished (Scheduler unpublishing a future-dated
+ * node) or publishes an unpublished node (Scheduler publishing a past-dated
+ * node immediately). Either way, simplenews must base its send decision on the
+ * final state, not the state during hook_node_presave().
+ */
+function simplenews_republish_test_entity_presave(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() !== 'node') {
+    return;
+  }
+
+  if (\Drupal::state()->get('simplenews_republish_test.unpublish') && $entity->isPublished()) {
+    $entity->setUnpublished();
+  }
+  elseif (\Drupal::state()->get('simplenews_republish_test.publish') && !$entity->isPublished()) {
+    $entity->setPublished();
+  }
+}

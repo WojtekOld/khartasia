@@ -5,6 +5,7 @@ namespace Drupal\facets\Plugin\facets\processor;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\UnchangingCacheableDependencyTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\DataReferenceDefinitionInterface;
@@ -126,7 +127,8 @@ class TermWeightWidgetOrderProcessor extends SortProcessorPluginBase implements 
     foreach ($property_definitions as $definition) {
       if ($definition instanceof DataReferenceDefinitionInterface
         && $definition->getDataType() === 'entity_reference'
-        && $definition->getConstraint('EntityType') === 'taxonomy_term'
+        && $definition->getTargetDefinition() instanceof EntityDataDefinitionInterface
+        && $definition->getTargetDefinition()->getEntityTypeId() === 'taxonomy_term'
       ) {
         return TRUE;
       }

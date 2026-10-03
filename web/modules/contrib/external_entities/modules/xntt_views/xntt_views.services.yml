@@ -1,0 +1,5 @@
+services:
+  xntt_views.event_subscriber:
+    class: Drupal\xntt_views\EventSubscriber\ExternalEntitiesSubscriber
+    tags:
+      - { name: event_subscriber }

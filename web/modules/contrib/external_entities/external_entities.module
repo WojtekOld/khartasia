@@ -1,0 +1,704 @@
+<?php
+
+/**
+ * @file
+ * Allows using remote entities, for example through a REST interface.
+ */
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\external_entities\Hook\ExternalEntitiesHooks;
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\external_entities\Entity\ExternalEntityInterface;
+use Drupal\external_entities\Entity\ExternalEntityTypeInterface;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_entity_type_build().
+ */
+#[LegacyHook]
+function external_entities_entity_type_build(array &$entity_types) {
+  \Drupal::service(ExternalEntitiesHooks::class)->entityTypeBuild($entity_types);
+}
+
+/**
+ * Implements hook_entity_operation().
+ *
+ * We need to generate Field UI operations (manage fields and displays) manually
+ * because the Field UI module only provides them for entity bundles, not entity
+ * types.
+ *
+ * @see field_ui_entity_operation()
+ */
+#[LegacyHook]
+function external_entities_entity_operation(EntityInterface $entity, CacheableMetadata $cacheability) {
+  return \Drupal::service(ExternalEntitiesHooks::class)->entityOperation($entity, $cacheability);
+}
+
+/**
+ * Implements hook_entity_operation_alter().
+ */
+#[LegacyHook]
+function external_entities_entity_operation_alter(array &$operations, EntityInterface $entity, CacheableMetadata $cacheability) {
+  \Drupal::service(ExternalEntitiesHooks::class)->entityOperationAlter($operations, $entity, $cacheability);
+}
+
+/**
+ * Implements hook_local_tasks_alter().
+ */
+#[LegacyHook]
+function external_entities_local_tasks_alter(&$local_tasks) {
+  \Drupal::service(ExternalEntitiesHooks::class)->localTasksAlter($local_tasks);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for 'field_storage_config_edit_form'.
+ *
+ * Replace the default cardinality form validation. External entity field values
+ * reside in an external storage making the higher delta checks unnecessary.
+ *
+ * @todo Not used since Drupal 10.2. Do we need a replacement?
+ */
+#[LegacyHook]
+function external_entities_form_field_storage_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  \Drupal::service(ExternalEntitiesHooks::class)->formFieldStorageConfigEditFormAlter($form, $form_state, $form_id);
+}
+
+/**
+ * Validates the cardinality form for external entities.
+ *
+ * This validates a subset of what the core cardinality validation validates.
+ *
+ * @param array $element
+ *   The cardinality form render array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ *
+ * @see \Drupal\field_ui\Form\FieldStorageConfigEditForm::validateCardinality()
+ */
+function external_entities_field_storage_config_edit_form_validate_cardinality(array &$element, FormStateInterface $form_state) {
+  if ($form_state->getValue('cardinality') === 'number' && !$form_state->getValue('cardinality_number')) {
+    $form_state->setError($element['cardinality_number'], t('Number of values is required.'));
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+#[LegacyHook]
+function external_entities_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  \Drupal::service(ExternalEntitiesHooks::class)->entityBundleFieldInfoAlter($fields, $entity_type, $bundle);
+}
+
+/**
+ * Implements hook_help().
+ */
+#[LegacyHook]
+function external_entities_help($route_name, RouteMatchInterface $route_match) {
+  return \Drupal::service(ExternalEntitiesHooks::class)->help($route_name, $route_match);
+}
+
+/**
+ * Implements hook_theme().
+ */
+#[LegacyHook]
+function external_entities_theme() {
+  return \Drupal::service(ExternalEntitiesHooks::class)->theme();
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+#[LegacyHook]
+function external_entities_theme_suggestions_external_entity(array $variables) {
+  return \Drupal::service(ExternalEntitiesHooks::class)->themeSuggestionsExternalEntity($variables);
+}
+
+/**
+ * Implements hook_preprocess_pager().
+ */
+#[LegacyHook]
+function external_entities_preprocess_pager(&$variables) {
+  \Drupal::service(ExternalEntitiesHooks::class)->preprocessPager($variables);
+}
+
+/**
+ * Implements hook_entity_view_alter().
+ */
+#[LegacyHook]
+function external_entities_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  \Drupal::service(ExternalEntitiesHooks::class)->entityViewAlter($build, $entity, $display);
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+#[LegacyHook]
+function external_entities_entity_insert(EntityInterface $entity) {
+  \Drupal::service(ExternalEntitiesHooks::class)->entityInsert($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+#[LegacyHook]
+function external_entities_entity_update(EntityInterface $entity) {
+  \Drupal::service(ExternalEntitiesHooks::class)->entityUpdate($entity);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+#[LegacyHook]
+function external_entities_entity_delete(EntityInterface $entity) {
+  \Drupal::service(ExternalEntitiesHooks::class)->entityDelete($entity);
+}
+
+/**
+ * Save the annotated external entity.
+ *
+ * Saves the external entity (if any) that the given entity is annotating. We do
+ * this because annotation changes can have indirect changes to an external
+ * entity.
+ *
+ * An example use case: an annotatable external entity is displayed (entity
+ * display) along with various inherited annotation fields. Saving
+ * the external entity on annotation change will make sure the render cache
+ * for the external entity is invalidated and the annotation changes become
+ * visible.
+ *
+ * Another example use case: a pathauto pattern is configured for an annotatable
+ * external entity, and the pattern uses an inherited annotation field. Saving
+ * the external entity on annotation change will make sure the generated path
+ * is updated.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   An entity object.
+ *
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function _external_entities_save_annotated_external_entity(EntityInterface $entity) {
+  if (!empty($entity->{ExternalEntityInterface::ANNOTATION_AUTO_SAVE_INDUCED_BY_EXTERNAL_ENTITY_CHANGE_PROPERTY})) {
+    return;
+  }
+
+  if (!$entity instanceof FieldableEntityInterface) {
+    return;
+  }
+
+  // Static index of annotatable external entity types keyed by
+  // "<annotation entity type>:<annotation bundle>". Building it once per
+  // request instead of loading and looping over every external entity type
+  // on each entity save makes saving entities that cannot be annotations
+  // cost (almost) nothing, which matters for bulk operations.
+  // The index is reset when an external entity type is saved or deleted.
+  // @see external_entities_external_entity_type_insert()
+  // @see https://www.drupal.org/project/external_entities/issues/3593699
+  $annotatable_index = &drupal_static(__FUNCTION__);
+  if (!isset($annotatable_index)) {
+    $annotatable_index = [];
+    /** @var \Drupal\external_entities\Entity\ExternalEntityTypeInterface[] $external_entity_types */
+    $external_entity_types = \Drupal::entityTypeManager()
+      ->getStorage('external_entity_type')
+      ->loadMultiple();
+    foreach ($external_entity_types as $external_entity_type) {
+      if ($external_entity_type->isAnnotatable()) {
+        $index_key = $external_entity_type->getAnnotationEntityTypeId()
+          . ':' . $external_entity_type->getAnnotationBundleId();
+        $annotatable_index[$index_key][] = $external_entity_type;
+      }
+    }
+  }
+
+  $index_key = $entity->getEntityTypeId() . ':' . $entity->bundle();
+  if (empty($annotatable_index[$index_key])) {
+    return;
+  }
+
+  /** @var \Drupal\external_entities\Entity\ExternalEntityTypeInterface $external_entity_type */
+  foreach ($annotatable_index[$index_key] as $external_entity_type) {
+    $annotation_field = $entity->get($external_entity_type->getAnnotationFieldName());
+    $original_annotation_field = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => $entity->getOriginal() !== NULL, fn() => isset($entity->original))
+      && DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => $entity->getOriginal(), fn() => $entity->original) instanceof FieldableEntityInterface
+      ? DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => $entity->getOriginal(), fn() => $entity->original)->get($external_entity_type->getAnnotationFieldName())
+      : NULL;
+
+    // Collect the external entities referenced now and, on update, the ones
+    // referenced before the save: an external entity that just got
+    // de-referenced must drop its annotation mapping too.
+    $target_ids = array_column($annotation_field->getValue(), 'target_id');
+    if ($original_annotation_field) {
+      $target_ids = array_merge(
+        $target_ids,
+        array_column($original_annotation_field->getValue(), 'target_id')
+      );
+    }
+    $target_ids = array_unique(array_filter($target_ids));
+    if (empty($target_ids)) {
+      continue;
+    }
+
+    // On update, when neither the annotation reference nor any inherited
+    // field changed, the mapped annotation values of the referenced external
+    // entities are unchanged as well: keep them cached. This matters for
+    // bulk synchronization runs that re-save mostly unchanged entities.
+    if ($original_annotation_field
+      && $annotation_field->equals($original_annotation_field)
+    ) {
+      $inherited_field_changed = FALSE;
+      foreach (array_keys($external_entity_type->getInheritedAnnotationFields()) as $field_name) {
+        if ($entity->hasField($field_name)
+          && !$entity->get($field_name)->equals(DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => $entity->getOriginal(), fn() => $entity->original)->get($field_name))
+        ) {
+          $inherited_field_changed = TRUE;
+          break;
+        }
+      }
+      if (!$inherited_field_changed) {
+        continue;
+      }
+    }
+
+    // The referenced external entities do not need to be re-saved: the
+    // annotation values they expose are computed fields mapped at load time
+    // from the annotation entity, and computed fields are excluded from the
+    // raw data sent to storage clients (see ExternalEntity::toRawData()), so
+    // a remote re-save would write back exactly the data that was loaded.
+    // The only effect such a save had was resetting the entity cache. Do
+    // just that instead: invalidate the cached external entities so their
+    // next load re-maps fresh annotation values, without any remote
+    // round-trip.
+    \Drupal::entityTypeManager()
+      ->getStorage($external_entity_type->getDerivedEntityTypeId())
+      ->resetCache($target_ids);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for 'external_entity_type'.
+ */
+#[LegacyHook]
+function external_entities_external_entity_type_insert() {
+  \Drupal::service(ExternalEntitiesHooks::class)->externalEntityTypeInsert();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for 'external_entity_type'.
+ */
+#[LegacyHook]
+function external_entities_external_entity_type_update() {
+  \Drupal::service(ExternalEntitiesHooks::class)->externalEntityTypeUpdate();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for 'external_entity_type'.
+ */
+#[LegacyHook]
+function external_entities_external_entity_type_delete() {
+  \Drupal::service(ExternalEntitiesHooks::class)->externalEntityTypeDelete();
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for external_entity.
+ */
+function external_entities_preprocess_external_entity(&$variables) {
+  $variables['external_entity'] = $variables['elements']['#entity'];
+
+  $variables['entity_type'] = $variables['external_entity']->getEntityTypeId();
+  $variables['bundle'] = $variables['external_entity']->bundle();
+
+  // Build the $content variable for templates.
+  $variables += ['content' => []];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+#[LegacyHook]
+function external_entities_field_storage_config_presave(EntityInterface $entity): void {
+  \Drupal::service(ExternalEntitiesHooks::class)->fieldStorageConfigPresave($entity);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+#[LegacyHook]
+function external_entities_field_config_presave(EntityInterface $entity): void {
+  \Drupal::service(ExternalEntitiesHooks::class)->fieldConfigPresave($entity);
+}
+
+/**
+ * Set config dependency for entity.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   Defines a common interface for all entity objects.
+ *
+ * @return void
+ *   Returns nothing.
+ */
+function external_entities_set_config_dependencies(EntityInterface $entity): void {
+  if (($entity instanceof FieldStorageConfig)
+      || ($entity instanceof FieldConfig)
+  ) {
+    try {
+      $xntt_storage = \Drupal::entityTypeManager()
+        ->getStorage('external_entity_type');
+      $xntt_type = $xntt_storage
+        ->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('id', $entity->getTargetEntityTypeId())
+        ->execute();
+      if (!empty($xntt_type)) {
+        $dependencies = $entity->get('dependencies');
+        $parent_entity_config_id = 'external_entities.external_entity_type.' . $entity->getTargetEntityTypeId();
+        if (!in_array($parent_entity_config_id, $dependencies['config'] ?? [], TRUE)) {
+          $dependencies['config'][] = $parent_entity_config_id;
+        }
+        $entity->set('dependencies', $dependencies);
+      }
+    }
+    catch (InvalidPluginDefinitionException | PluginNotFoundException $exception) {
+      \Drupal::logger('external_entities')->error($exception);
+      return;
+    }
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+#[LegacyHook]
+function external_entities_cron() {
+  \Drupal::service(ExternalEntitiesHooks::class)->cron();
+}
+
+/**
+ * Regenerate the xntt-file index file for file storage client.
+ *
+ * This is a callback function for bacth processing.
+ *
+ * @param array $params
+ *   An array of parameters.
+ * @param string $mode
+ *   Processing mode. One of 'update' or 'regenerate'.
+ *   'update' will remove unexisting entities/files and add missing ones while
+ *   'regenerate' will recreate the whole file from scratch.
+ * @param array $context
+ *   Drupal Batch API context variable.
+ */
+function external_entities_regenerate_index_file_process($params, $mode, &$context) {
+  // Check current status.
+  if (!array_key_exists('input_stack', $context['sandbox'])) {
+    // Init.
+    $context['finished'] = 0.05;
+    $context['message'] = t(
+      'Index file initialized, listing entity files in @dir...',
+      ['@dir' => $params['config']['root']]
+    );
+    $context['sandbox']['input_stack'] = [$params['config']['root']];
+    $context['sandbox']['data_file_keys'] = [];
+    $context['sandbox']['data_file_stack'] = [];
+    $context['sandbox']['entity_file_index'] = [];
+    $context['sandbox']['processed_directories'] = 0;
+    $context['sandbox']['processed_files'] = 0;
+    $context['sandbox']['loaded_entities'] = 0;
+    $index_file = $context['results']['index_file'] =
+      $params['config']['performances']['index_file'];
+    if ('update' == $mode) {
+      $context['sandbox']['new_entries'] = 0;
+      if (file_exists($index_file)) {
+        // Read current index.
+        $config =
+          $params['config']
+          + [
+            ExternalEntityTypeInterface::XNTT_TYPE_PROP => $params['xntt'],
+            'debug_level' => 0,
+          ];
+        $storage_client =
+          \Drupal::service('plugin.manager.external_entities.storage_client')
+            ->createInstance($params['plugin'], $config);
+        $context['sandbox']['entity_file_index'] =
+          $storage_client->getEntityFileIndex();
+        $context['sandbox']['cleanup'] = TRUE;
+        $context['results']['loaded_entries'] =
+          count($context['sandbox']['entity_file_index']);
+      }
+      else {
+        // Or create a new one if missing.
+        if ($fh = fopen($index_file, 'w')) {
+          fclose($fh);
+        }
+        else {
+          // Set an error.
+          $context['results']['error'] = t(
+            'Failed to create missing index file "@index_file".',
+            ['@index_file' => $index_file]
+          );
+          $context['finished'] = 1;
+        }
+      }
+    }
+    elseif ('regenerate' == $mode) {
+      // Clear existing file.
+      if ($fh = fopen($index_file, 'w')) {
+        fclose($fh);
+      }
+      else {
+        // Set an error.
+        $context['results']['error'] = t(
+          'Failed to create index file "@index_file".',
+          ['@index_file' => $index_file]
+        );
+        $context['finished'] = 1;
+      }
+    }
+    else {
+      // Unknown/unsupported mode, set an error.
+      $context['results']['error'] = t(
+        'Unsupported index modification mode: "@mode".',
+        ['@mode' => $mode]
+      );
+      $context['finished'] = 1;
+    }
+  }
+  elseif (!empty($context['sandbox']['cleanup'])) {
+    $context['message'] = t('Index entries with missing files removed...');
+    $context['finished'] = 0.15;
+    unset($context['sandbox']['cleanup']);
+    $entity_file_index = $context['sandbox']['entity_file_index'];
+    $removed_entries = 0;
+    foreach ($entity_file_index as $id => $path) {
+      if (!file_exists($path)) {
+        unset($context['sandbox']['entity_file_index'][$id]);
+        ++$removed_entries;
+      }
+    }
+    $context['results']['removed_entries'] = $removed_entries;
+  }
+  elseif (!empty($context['sandbox']['input_stack'])) {
+    // @todo Optimization: make sure 'structure' specification allows to dig
+    // deeper.
+    // Process input path stack to get all matching files.
+    // Each operation works on a single directory.
+    $dir = array_shift($context['sandbox']['input_stack']);
+    $context['message'] = t('Processed @path...', ['@path' => $dir]);
+    $context['finished'] = 0.30;
+    $context['sandbox']['processed_directories']++;
+    // Scan directory.
+    $root_length = strlen($params['config']['root']) + 1;
+    $files = scandir($dir, SCANDIR_SORT_NONE);
+    if ($files) {
+      foreach ($files as $file) {
+        $file_path = "$dir/$file";
+        // Remove leading root path.
+        $path_to_filter = substr($file_path, $root_length);
+        if (is_file($file_path)
+            && (preg_match($params['regex'], $path_to_filter))
+        ) {
+          // File matches, add to the list.
+          $context['sandbox']['data_file_keys'][$file_path] = TRUE;
+        }
+        elseif (is_dir($file_path) && !str_starts_with($file, '.')) {
+          // Add new directory for a next scan.
+          $context['sandbox']['input_stack'][] = $file_path;
+        }
+      }
+    }
+  }
+  elseif (!empty($context['sandbox']['data_file_keys'])) {
+    $context['message'] = t('Data files listed, listing related entities...');
+    $context['finished'] = 0.50;
+    // Get the list of unique files.
+    $context['sandbox']['data_file_stack'] =
+      array_keys($context['sandbox']['data_file_keys']);
+    // Clear keys.
+    $context['sandbox']['data_file_keys'] = [];
+    $context['results']['processed_directories'] =
+      $context['sandbox']['processed_directories'];
+  }
+  elseif (!empty($context['sandbox']['data_file_stack'])) {
+    // Process data files.
+    $file = array_shift($context['sandbox']['data_file_stack']);
+    $context['message'] = t(
+      'Loading entities from @file...',
+      ['@file' => $file]
+    );
+    $context['finished'] = 0.65;
+    $context['sandbox']['processed_files']++;
+    $xntt_type = \Drupal::entityTypeManager()->getStorage('external_entity_type')->load($params['xntt']);
+    $config =
+      $params['config']
+      + [
+        ExternalEntityTypeInterface::XNTT_TYPE_PROP => $xntt_type,
+        'debug_level' => 0,
+      ];
+    $storage_client =
+      \Drupal::service('plugin.manager.external_entities.storage_client')
+        ->createInstance($params['plugin'], $config);
+    $entities = $storage_client->loadFile($file, FALSE, TRUE);
+    $context['sandbox']['loaded_entities'] += count($entities);
+    $entity_file_path = substr($file, strlen($params['config']['root']) + 1);
+    // Process each entity.
+    if ('update' == $mode) {
+      foreach (array_keys($entities) as $id) {
+        if (empty($context['sandbox']['entity_file_index'][$id])) {
+          $context['sandbox']['new_entries']++;
+          $context['sandbox']['entity_file_index'][$id] = $entity_file_path;
+        }
+      }
+    }
+    else {
+      foreach (array_keys($entities) as $id) {
+        $context['sandbox']['entity_file_index'][$id] = $entity_file_path;
+      }
+    }
+  }
+  elseif (!empty($context['sandbox']['entity_file_index'])) {
+    // Finally, save the new index file.
+    $context['message'] = t('New entity-file index file saved.');
+    $context['finished'] = 1;
+    $xntt_type = \Drupal::entityTypeManager()->getStorage('external_entity_type')->load($params['xntt']);
+    $config =
+      $params['config']
+      + [
+        ExternalEntityTypeInterface::XNTT_TYPE_PROP => $xntt_type,
+        'debug_level' => 0,
+      ];
+    $storage_client =
+      \Drupal::service('plugin.manager.external_entities.storage_client')
+        ->createInstance($params['plugin'], $config);
+    $storage_client->setEntityFileIndex(
+      $context['sandbox']['entity_file_index'],
+      TRUE
+    );
+    $context['results']['processed_files'] =
+      $context['sandbox']['processed_files'];
+    $context['results']['loaded_entities'] =
+      $context['sandbox']['loaded_entities'];
+    $context['results']['indexed_entities'] =
+      count($context['sandbox']['entity_file_index']);
+    if ('update' == $mode) {
+      $context['results']['new_entries'] =
+        $context['sandbox']['new_entries'];
+    }
+  }
+  else {
+    // Done.
+    $context['finished'] = 1;
+  }
+}
+
+/**
+ * Callback function for file indexing batch process end (file storage client).
+ *
+ * @param bool $success
+ *   A boolean indicating whether the batch has completed successfully.
+ * @param array $results
+ *   The value set in $context['results'] by callback_batch_operation().
+ * @param array $operations
+ *   If $success is FALSE, contains the operations that remained unprocessed.
+ * @param string $elapsed
+ *   A string representing the elapsed time for the batch process, e.g.,
+ *   '1 min 30 secs'.
+ */
+function external_entities_regenerate_index_file_finished($success, $results, $operations, $elapsed) {
+  if ($success && empty($results['error'])) {
+    $message = '';
+    if (!empty($results['loaded_entries'])) {
+      $message .= \Drupal::translation()->formatPlural(
+        $results['loaded_entries'],
+        'Loaded 1 entry from index file.',
+        'Loaded @count entries from index file.'
+      ) . "\n";
+    }
+    if (!empty($results['removed_entries'])) {
+      $message .= \Drupal::translation()->formatPlural(
+        $results['removed_entries'],
+        'Removed 1 obsolete entry from index file.',
+        'Removed @count obsolete entries from index file.'
+      ) . "\n";
+    }
+    if (!empty($results['processed_directories'])) {
+      $message .= \Drupal::translation()->formatPlural(
+        $results['processed_directories'],
+        'Processed 1 directory.',
+        'Processed @count directories.'
+      ) . "\n";
+    }
+    if (!empty($results['processed_files'])) {
+      $message .= \Drupal::translation()->formatPlural(
+        $results['processed_files'],
+        'Processed 1 file.',
+        'Processed @count files.'
+      ) . "\n";
+    }
+    if (!empty($results['loaded_entities'])) {
+      $message .= \Drupal::translation()->formatPlural(
+        $results['loaded_entities'],
+        'Loaded 1 external entity.',
+        'Loaded @count external entities.'
+      ) . "\n";
+    }
+    if (array_key_exists('new_entries', $results)) {
+      $message .= t(
+        'Successfully updated entity-file index file @file with @count new records.',
+        ['@file' => $results['index_file'], '@count' => $results['new_entries']]
+      );
+    }
+    else {
+      $message .= t(
+        'Successfully regenerated entity-file index file @file with @count records.',
+        ['@file' => $results['index_file'], '@count' => $results['indexed_entities'] ?? 0]
+      );
+    }
+    \Drupal::logger('external_entities')->notice($message);
+    \Drupal::messenger()->addStatus($message);
+  }
+  else {
+    $message = t('Finished with an error: @error',
+      ['@error' => ($results['error'] ?? t('unexpected error'))]
+    );
+    \Drupal::logger('external_entities')->error($message);
+    \Drupal::messenger()->addError($message);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+#[LegacyHook]
+function external_entities_form_alter(array &$form, FormStateInterface $form_state, string $form_id) {
+  \Drupal::service(ExternalEntitiesHooks::class)->formAlter($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_token_info().
+ */
+#[LegacyHook]
+function external_entities_token_info(): array {
+  return \Drupal::service(ExternalEntitiesHooks::class)->tokenInfo();
+}
+
+/**
+ * Implements hook_tokens().
+ */
+#[LegacyHook]
+function external_entities_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata): array {
+  return \Drupal::service(ExternalEntitiesHooks::class)->tokens($type, $tokens, $data, $options, $bubbleable_metadata);
+}

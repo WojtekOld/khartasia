@@ -186,6 +186,9 @@ field.field_settings.proc_entity_reference_field:
     proc_re_encryption_plugin:
       type: string
       label: 'Re-encryption plugin'
+    proc_recipients_storage_plugin:
+      type: string
+      label: 'Recipients storage plugin'
 
 field.value.proc_entity_reference_field:
   type: mapping

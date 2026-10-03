@@ -1,0 +1,4 @@
+manage external entity test datasets:
+  title: 'Manage external entity test datasets'
+  description: 'Allows to create test datasets, and add, edit, and remove dataset items.'
+  restrict access: true

@@ -1,0 +1,11 @@
+name: 'Proc Recipients Storage Acme'
+type: module
+description: 'Realistic (fictional) implementation of a proc RecipientStorage plugin that resolves recipients from group membership and filters out members who joined the group after the content was encrypted.'
+core_version_requirement: ^10 || ^11
+dependencies:
+  - proc:proc
+
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '10.1.126'
+project: 'proc'
+datestamp: 1790339819

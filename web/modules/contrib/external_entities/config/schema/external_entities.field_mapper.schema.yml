@@ -1,0 +1,44 @@
+plugin.plugin_configuration.external_entities_field_mapper.:
+  # Used when no mapping is set.
+  type: mapping
+
+plugin.plugin_configuration.external_entities_field_mapper.generic:
+  type: mapping
+  label: 'External entities generic field mapper settings'
+  mapping:
+    property_mappings:
+      type: sequence
+      label: 'Property mappings'
+      sequence:
+        type: external_entities.external_entities_property_mapper_settings
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_field_mapper.text:
+  type: mapping
+  label: 'External entities formatted text field mapper settings'
+  mapping:
+    property_mappings:
+      type: sequence
+      label: 'Property mappings'
+      sequence:
+        type: external_entities.external_entities_property_mapper_settings
+    format:
+      type: string
+      label: 'Text format'
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+external_entities.external_entities_property_mapper_settings:
+  type: mapping
+  mapping:
+    id:
+      type: string
+      label: 'Property mapper plugin ID'
+    config:
+      type: plugin.plugin_configuration.external_entities_property_mapper.[%parent.id]
+      label: 'Property mapper plugin config'

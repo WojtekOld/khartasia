@@ -41,7 +41,7 @@ class PlaywrightTestSetup implements TestSetupInterface {
       'ui_patterns_ckeditor5',
     ]);
     // Test modules last, their config import needs the modules above.
-    $module_installer->install(['ui_patterns_test', 'ui_patterns_test_content']);
+    $module_installer->install(['ui_patterns_test', 'ui_patterns_test_content', 'ui_patterns_views_test']);
   }
 
 }

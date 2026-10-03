@@ -23,6 +23,7 @@ export default {
     'views',
     'views_ui',
     'ui_patterns_views',
+    'ui_patterns_views_test',
     'ckeditor5',
     'ui_patterns_ckeditor5',
     'ui_patterns_test_content',

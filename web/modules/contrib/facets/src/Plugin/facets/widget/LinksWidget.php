@@ -7,9 +7,6 @@ use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
 use Drupal\facets\Result\ResultInterface;
 use Drupal\facets\Widget\WidgetPluginBase;
-use Drupal\facets\Utility\FacetsUrlGenerator;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * The links widget.
@@ -39,24 +36,10 @@ class LinksWidget extends WidgetPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, $url_processor_manager, FacetsUrlGenerator $url_generator, RequestStack $request_stack) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $url_processor_manager);
-    $this->urlGenerator = $url_generator;
-    $this->requestStack = $request_stack;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('plugin.manager.facets.url_processor'),
-      $container->get('facets.utility.url_generator'),
-      $container->get('request_stack')
-    );
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->urlGenerator = \Drupal::service('facets.utility.url_generator');
+    $this->requestStack = \Drupal::service('request_stack');
   }
 
   /**

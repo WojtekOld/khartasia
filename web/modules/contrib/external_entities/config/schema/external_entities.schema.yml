@@ -1,0 +1,288 @@
+external_entities.external_entity_type.*:
+  type: config_entity
+  label: 'External entity type'
+  mapping:
+    id:
+      type: string
+      label: 'Identifier'
+    label:
+      type: label
+      label: 'Name'
+    label_plural:
+      type: plural_label
+      label: 'Name (plural)'
+    base_path:
+      type: string
+      label: 'Base path'
+      nullable: true
+    description:
+      type: text
+      label: 'Description'
+    content_class:
+      type: text
+      label: 'Content class'
+    read_only:
+      type: boolean
+      label: 'Read only'
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      constraints:
+        Range:
+          min: 0
+    field_mappers:
+      type: sequence
+      label: 'Field mapping'
+      orderby: key
+      sequence:
+        type: external_entities.external_entities_field_mapper_settings
+    field_save_order:
+      type: sequence
+      label: 'Field save order'
+      nullable: true
+      sequence:
+        type: string
+    field_mapping_notes:
+      type: text
+      label: 'Field mapping notes'
+      nullable: true
+    data_aggregator:
+      type: external_entities.external_entities_data_aggregator_settings
+      label: 'Data aggregator plugin settings'
+    data_aggregator_notes:
+      type: text
+      label: 'Data aggregator notes'
+      nullable: true
+    language_settings:
+      type: mapping
+      nullable: true
+      mapping:
+        overrides:
+          type: sequence
+          label: 'Language overrides'
+          orderby: key
+          sequence:
+            type: external_entities.external_entities_language_settings
+    persistent_cache_max_age:
+      type: integer
+      label: 'Persistent cache maximum age'
+    annotation_entity_type_id:
+      type: string
+      label: 'Annotation entity type'
+    annotation_bundle_id:
+      type: string
+      label: 'Annotation bundle'
+    annotation_field_name:
+      type: string
+      label: 'Entity reference field'
+    annotation_inherited_fields:
+      type: sequence
+      label: 'Annotation fields to inherit'
+      orderby: value
+      sequence:
+        type: string
+    locks:
+      type: mapping
+      label: 'Locks configuration'
+      description: 'The lock configuration can be used to restrict the management of the external entity type.'
+      orderby: key
+      nullable: true
+      mapping:
+        lock_edit:
+          type: sequence
+          label: 'Lock editing'
+          description: 'Tags identifying elements which set the edit lock (free-text). Empty array => no tags. Nullable.'
+          orderby: value
+          nullable: true
+          sequence:
+            type: string
+        lock_delete:
+          type: sequence
+          label: 'Lock deletion'
+          description: 'Tags identifying elements which set the delete lock (free-text). Empty array => no tags. Nullable.'
+          orderby: value
+          nullable: true
+          sequence:
+            type: string
+        lock_base_path:
+          type: sequence
+          label: 'Lock base path'
+          description: 'Tags identifying elements which set the base path lock (free-text). Empty array => no tags. Nullable.'
+          orderby: value
+          nullable: true
+          sequence:
+            type: string
+        lock_fields:
+          type: sequence
+          label: 'Lock field editing'
+          description: 'Tags identifying elements which set the field-edit lock (free-text). Empty array => no tags. Nullable.'
+          orderby: value
+          nullable: true
+          sequence:
+            type: string
+        lock_display:
+          type: sequence
+          label: 'Lock field display'
+          description: 'Tags identifying elements which set the field display lock (free-text). Empty array => no tags. Nullable.'
+          orderby: value
+          nullable: true
+          sequence:
+            type: string
+        lock_annotations:
+          type: sequence
+          label: 'Lock annotations'
+          description: 'Tags identifying elements which set the annotation lock (free-text). Empty array => no tags. Nullable.'
+          orderby: value
+          nullable: true
+          sequence:
+            type: string
+        lock_translations:
+          type: sequence
+          label: 'Lock translation settings'
+          description: 'Tags identifying elements which set the translation settings lock (free-text). Empty array => no tags. Nullable.'
+          orderby: value
+          nullable: true
+          sequence:
+            type: string
+        lock_field_mappers:
+          type: sequence
+          label: 'Lock field mapper settings'
+          description: 'Field mapper lock configs are keyed by field machine names. Global default lock behavior can be set using the key "*".'
+          orderby: key
+          nullable: true
+          sequence:
+            type: mapping
+            label: 'Field mapper lock config'
+            mapping:
+              allow_plugins:
+                type: sequence
+                label: 'Allowed field mappers'
+                description: 'List of field mapper plugin IDs that can be used for this field keyed by their IDs, values are arrays (see corresponding description). An empty array can be used to allow all field mappers.'
+                orderby: key
+                nullable: true
+                sequence:
+                  type: sequence
+                  description: 'Values are identifiers of elements that set the lock, usualy a module machine name. It is useful to test if a lock can be removed after uninstalling the only element that set it.'
+              lock_config:
+                type: sequence
+                label: 'Lock field mapper config'
+                description: 'Tags identifying elements which set the lock on the field mapper config (free-text). Empty array => no tags. Nullable.'
+                orderby: value
+                nullable: true
+                sequence:
+                  type: string
+              hide_config:
+                type: sequence
+                label: 'Hide field mapper config'
+                description: 'Tags identifying elements which hid the field mapper config (free-text). Empty array => no tags. Nullable.'
+                orderby: value
+                nullable: true
+                sequence:
+                  type: string
+        lock_data_aggregator:
+          type: mapping
+          label: 'Lock data aggregator'
+          description: 'Locks data aggregator settings.'
+          orderby: key
+          nullable: true
+          mapping:
+            allow_plugins:
+              type: sequence
+              label: 'Allowed data aggregator plugins'
+              description: 'List of data aggregator plugin IDs that can be used for this external entity type keyed by their IDs. An empty array can be used to allow all data aggregators.'
+              orderby: key
+              nullable: true
+              sequence:
+                type: string
+            lock_config:
+              type: sequence
+              label: 'Lock data aggregator config'
+              description: 'Tags identifying elements which set the lock on the data aggregator config (free-text). Empty array => no tags. Nullable.'
+              orderby: value
+              nullable: true
+              sequence:
+                type: string
+            hide_config:
+              type: sequence
+              label: 'Hide data aggregator config'
+              description: 'Tags identifying elements which hid the data aggregator config (free-text). Empty array => no tags. Nullable.'
+              orderby: value
+              nullable: true
+              sequence:
+                type: string
+            lock_storage_clients:
+              type: sequence
+              label: 'Lock storage clients'
+              description: 'Storage client lock configs keyed by data aggregator storage client keys (can be numeric keys). Global default lock behavior can be set using the key "*".'
+              orderby: key
+              nullable: true
+              sequence:
+                type: mapping
+                label: 'Storage client locks'
+                description: 'Restrictions to storage client plugins used by the data aggregator (for a given storage client key).'
+                mapping:
+                  allow_plugins:
+                    type: sequence
+                    label: 'Allowed storage client plugins'
+                    description: 'List of storage client plugin IDs that can be used for this storage client key keyed by their IDs. An empty array can be used to allow all storage clients.'
+                    orderby: key
+                    nullable: true
+                    sequence:
+                      type: string
+                  lock_config:
+                    type: sequence
+                    label: 'Lock storage client config'
+                    description: 'Tags identifying elements which set the lock on the storage client config (free-text). Empty array => no tags. Nullable.'
+                    orderby: value
+                    nullable: true
+                    sequence:
+                      type: string
+                  hide_config:
+                    type: sequence
+                    label: 'Hide storage client config'
+                    description: 'Tags identifying elements which hid the storage client config (free-text). Empty array => no tags. Nullable.'
+                    orderby: value
+                    nullable: true
+                    sequence:
+                      type: string
+
+external_entities.external_entities_field_mapper_settings:
+  type: mapping
+  mapping:
+    id:
+      type: string
+      label: 'Field mapper plugin ID'
+    config:
+      type: plugin.plugin_configuration.external_entities_field_mapper.[%parent.id]
+      label: 'Field mapper plugin config'
+
+plugin.plugin_configuration.external_entities_field_mapper.*:
+  type: mapping
+
+external_entities.external_entities_data_aggregator_settings:
+  type: mapping
+  mapping:
+    id:
+      type: string
+      label: 'Data aggregator plugin ID'
+    config:
+      type: plugin.plugin_configuration.external_entities_data_aggregator.[%parent.id]
+      label: 'Data aggregator storage client plugin configs'
+
+plugin.plugin_configuration.external_entities_data_aggregator.*:
+  type: mapping
+
+external_entities.external_entities_language_settings:
+  type: mapping
+  mapping:
+    field_mappers:
+      type: sequence
+      label: 'Override field mapping'
+      orderby: key
+      nullable: true
+      sequence:
+        type: external_entities.external_entities_field_mapper_settings
+    data_aggregator:
+      type: external_entities.external_entities_data_aggregator_settings
+      label: 'Override data aggregator'
+      nullable: true

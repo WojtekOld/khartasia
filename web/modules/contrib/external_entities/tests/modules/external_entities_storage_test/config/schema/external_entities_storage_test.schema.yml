@@ -1,0 +1,7 @@
+plugin.plugin_configuration.external_entities_storage_client.memory_test:
+  type: mapping
+  label: 'In-memory test storage client settings'
+  mapping:
+    store:
+      type: string
+      label: 'Named data store used by this client instance'

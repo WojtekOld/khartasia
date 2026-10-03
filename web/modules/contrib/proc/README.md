@@ -184,22 +184,26 @@ Widget configurations are available when managing the form display of an entity 
 - Trigger decryption of another encrypted field
 - Relabeling pattern
 - Re-encryption plugin
-- Recipients delivery mode override - allows a specific field to force CSV mode regardless of the global recipients delivery mode setting. Useful for fields with a direct/manual fetcher or a small static recipient list where the payload approach is unnecessary.
+- Recipients storage plugin
+- Recipients delivery mode override
 
 ## Plugin Types
 
-- Proc Re-encryption Recipients Set (ProcReEncRecSet) allows the update the wished set of recipients in case business rules requires a change in the set of recipients or keys renewal.
+- Proc Re-encryption Recipients Set (ProcReEncRecSet) allows the update of wished sets of recipients in case business rules requires a change in the set of recipients or key rotation.
 - Proc Relabelling (ProcRelabelling) allows the relabelling of the encrypted content. This is useful for avoiding final user direct exposure of sensitive file names.
+- Recipient Storage (RecipientStorage) governs how both the current and the wished (target) set of recipients of a cipher are stored and retrieved.
 
 ## Submodules
 
-proc ships with three optional submodules that can be enabled independently:
+proc ships with four optional submodules that can be enabled independently:
 
 - **proc_janitor** - Adds maintenance routines for cleaning up orphaned proc cipher entities and related managed files.
 
 - **proc_metadata_transitioner** - A maintenance tool for back-filling cipher text metadata (specifically the `fetcher_endpoint` entry) on proc cipher entities that were created before version 10.1.79. It is only needed when legacy protected content must be made compatible with the current re-encryption process. It provides both a GUI (`/admin/config/content/proc/metadata_transitioner`) and Drush commands for adding or removing the missing metadata in batches.
 
 - **proc_reporting** - Adds operational monitoring reports for admins. It takes hourly snapshots of pending re-encryption tasks per user and maintains daily counters of encrypt, cipher access/download, and re-encrypt operations per user. The reports are accessible under **Administration > Reports** and are protected by the `view proc reporting` permission.
+
+- **proc_recipients_storage_example** - A skeleton example of the `RecipientStorage` [plugin type](#plugin-types). It shows how an implementing application can take over the storage and retrieval of a cipher's recipients (for example, by computing them from a business rule) instead of keeping one row per recipient in the `field_recipients_set` table. Copy and adapt it to implement your own recipient storage plugin.
 
 ## Drush Commands
 

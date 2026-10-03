@@ -1,0 +1,8 @@
+proc_recipients_storage_acme.recipients:
+  path: '/proc_recipients_storage_acme/recipients'
+  defaults:
+    _controller: '\Drupal\proc_recipients_storage_acme\Controller\AcmeRecipientsController::recipients'
+    _title: 'Acme recipients'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'

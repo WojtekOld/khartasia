@@ -1,0 +1,30 @@
+.xnttmanager-warning {
+  padding: 1em;
+  border: 1px solid #e0ac00;
+  color: #e0ac00;
+  background-color: #ffffee;
+}
+
+.xnttmanager-warning em {
+  font-weight: bold;
+}
+
+.xnttmanager-invalid-mapping {
+  font-weight: bold;
+  color: #a51b00;
+}
+
+.xnttmanager-source-column,
+.xnttmanager-example-column {
+  min-width: 33%;
+}
+
+.xnttmanager-details summary {
+  font-weight: normal;
+}
+
+.xnttmanager-details .details-wrapper {
+  white-space: pre-wrap;
+  font-family: monospace, monospace;
+  font-size: 1em;
+}

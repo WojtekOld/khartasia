@@ -12,6 +12,7 @@ use Drush\Commands\DrushCommands;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\proc\ProcKeyManager;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Drupal\proc\Service\RemoveUpdateJobForAllKeysServiceInterface;
 use Drupal\proc\Service\UnreferencedCipherProcServiceInterface;
 
@@ -61,6 +62,13 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
   protected RemoveUpdateJobForAllKeysServiceInterface $removeUpdateJobForAllKeysService;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * Constructs a ProcCommands object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -73,6 +81,8 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
    *   Service for fetching unreferenced cipher proc IDs.
    * @param \Drupal\proc\Service\RemoveUpdateJobForAllKeysServiceInterface $removeUpdateJobForAllKeysService
    *   Service for removing a proc update job from all keyrings.
+   * @param \Drupal\proc\Service\RecipientStorageBrokerInterface $recipient_storage
+   *   The recipient storage broker.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
@@ -80,12 +90,14 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
     Connection $database,
     UnreferencedCipherProcServiceInterface $unreferencedCipherProcService,
     RemoveUpdateJobForAllKeysServiceInterface $removeUpdateJobForAllKeysService,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->keyManager = $keyManager;
     $this->database = $database;
     $this->unreferencedCipherProcService = $unreferencedCipherProcService;
     $this->removeUpdateJobForAllKeysService = $removeUpdateJobForAllKeysService;
+    $this->recipientStorage = $recipient_storage;
     parent::__construct();
   }
 
@@ -98,7 +110,8 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
       $container->get('proc.key_manager'),
       $container->get('database'),
       $container->get('proc.unreferenced_cipher_proc_service'),
-      $container->get('proc.remove_update_job_for_all_keys_service')
+      $container->get('proc.remove_update_job_for_all_keys_service'),
+      $container->get('proc.recipient_storage')
     );
   }
 
@@ -139,12 +152,12 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
       $this->logger()->warning("Entity {$proc_id} does not have field `field_wished_recipients_set`.");
       return;
     }
-    if (empty($entity->get('field_wished_recipients_set')->getValue())) {
+    if (empty($this->recipientStorage->getWishedRecipients($entity))) {
       $this->logger()->error("No wished recipients to remove for proc {$proc_id}.");
       return;
     }
-    // Reset the field to an empty state.
-    $entity->set('field_wished_recipients_set', []);
+    // Reset the wished recipients to an empty state.
+    $this->recipientStorage->setWishedRecipients($entity, []);
     try {
       $entity->save();
       $this->logger()->success("Reset field_wished_recipients_set for proc {$proc_id}.");
@@ -223,7 +236,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
     }
     // Check among the recipients if any is marked as update worker, by having
     // in the update_jobs list in the metadata of the keyring the proc ID.
-    $recipients = $entity->get('field_recipients_set')->getValue();
+    $recipients = $this->recipientStorage->getRecipients($entity);
     $update_workers = [];
     foreach ($recipients as $recipient) {
       $recipient_id = $recipient['target_id'] ?? NULL;
@@ -301,7 +314,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
       return;
     }
 
-    $recipients = $proc->get('field_recipients_set')->getValue() ?? [];
+    $recipients = $this->recipientStorage->getRecipients($proc);
     if (empty($recipients)) {
       $this->logger()->info("No recipients present on proc {$proc_id}.");
     }
@@ -317,7 +330,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
       return;
     }
     try {
-      $proc->set('field_recipients_set', $new_recipients);
+      $this->recipientStorage->setRecipients($proc, $new_recipients);
       $proc->save();
       $this->logger()->success("Removed recipient {$user_id} from proc {$proc_id}.");
     }
@@ -1018,7 +1031,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
       return;
     }
 
-    $recipients = $proc->get('field_recipients_set')->getValue() ?? [];
+    $recipients = $this->recipientStorage->getRecipients($proc);
 
     // Check for existing entry.
     foreach ($recipients as $entry) {
@@ -1033,7 +1046,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
     $recipients[] = ['target_id' => $user_id];
 
     try {
-      $proc->set('field_recipients_set', $recipients);
+      $this->recipientStorage->setRecipients($proc, $recipients);
       $proc->save();
       $this->logger()->success("Added user {$user_id} as recipient to proc {$proc_id}.");
     }
@@ -1106,7 +1119,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
       return;
     }
 
-    $wished = $proc->get('field_wished_recipients_set')->getValue() ?? [];
+    $wished = $this->recipientStorage->getWishedRecipients($proc);
 
     // Check for existing entry.
     foreach ($wished as $entry) {
@@ -1121,7 +1134,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
     $wished[] = ['target_id' => $user_id];
 
     try {
-      $proc->set('field_wished_recipients_set', $wished);
+      $this->recipientStorage->setWishedRecipients($proc, $wished);
       $proc->save();
       $this->logger()->success("Added user {$user_id} as wished recipient to proc {$proc_id}.");
     }
@@ -1236,7 +1249,7 @@ final class ProcCommands extends DrushCommands implements ProcCommandsInterface 
       return;
     }
 
-    $values = $proc->get('field_wished_recipients_set')->getValue() ?? [];
+    $values = $this->recipientStorage->getWishedRecipients($proc);
 
     if (empty($values)) {
       $this->logger()->info("No values present in field_wished_recipients_set for proc {$proc_id}.");

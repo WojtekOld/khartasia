@@ -20,6 +20,7 @@ use Drupal\file\FileUsage\DatabaseFileUsageBackend;
 use Drupal\proc\ProcInterface;
 use Drupal\proc\ProcKeyManagerInterface;
 use Drupal\proc\Service\ProcJsonFileService;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Drupal\proc\Traits\ProcCsvTrait;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -222,6 +223,21 @@ abstract class ProcOpFormBase extends FormBase {
   }
 
   /**
+   * Returns the recipient storage broker.
+   *
+   * Retrieved lazily to avoid threading the service through the constructors
+   * of every form in the ProcOpFormBase hierarchy and to keep the forms
+   * serializable.
+   *
+   * @return \Drupal\proc\Service\RecipientStorageBrokerInterface
+   *   The recipient storage broker.
+   */
+  protected function recipientStorage(): RecipientStorageBrokerInterface {
+    // phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
+    return \Drupal::service('proc.recipient_storage');
+  }
+
+  /**
    * Create or update the Proc entity.
    *
    * @param bool|int|null $default_proc
@@ -317,12 +333,12 @@ abstract class ProcOpFormBase extends FormBase {
       $this->logger('proc')->error($e->getMessage());
       return [];
     }
-    if (!$entity) {
+    if (!$entity instanceof ProcInterface) {
       return [];
     }
 
-    $recipient_id = $this->getReferencedEntityIds($entity, 'field_recipients_set');
-    $wished_id = $this->getReferencedEntityIds($entity, 'field_wished_recipients_set');
+    $recipient_id = $this->recipientStorage()->getRecipientIds($entity);
+    $wished_id = $this->recipientStorage()->getWishedRecipientIds($entity);
 
     $user_id = $this->currentUser()->id();
 
@@ -357,11 +373,10 @@ abstract class ProcOpFormBase extends FormBase {
    */
   public function getRecipientIds(object $entity): array {
     @trigger_error('getRecipientIds is deprecated in proc:10.1.82 and is removed from drupal:11.0.0. Instead, you should use \Drupal\proc\Form\ProcOpFormBase::getReferencedEntityIds(). See https://www.drupal.org/node/3479514', E_USER_DEPRECATED);
-    $recipient_id = [];
-    foreach ($entity->get('field_recipients_set')->getValue() as $recipient) {
-      $recipient_id[] = $recipient['target_id'];
+    if (!$entity instanceof ProcInterface) {
+      return [];
     }
-    return $recipient_id;
+    return $this->recipientStorage()->getRecipientIds($entity);
   }
 
   /**

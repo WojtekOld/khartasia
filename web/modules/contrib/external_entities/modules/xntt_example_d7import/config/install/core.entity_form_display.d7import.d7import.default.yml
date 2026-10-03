@@ -1,0 +1,34 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.d7import.d7import.field_d7_body
+  module:
+    - external_entities
+    - text
+    - xntt_example_d7import
+  enforced:
+    module:
+      - xntt_example_d7import
+id: d7import.d7import.default
+targetEntityType: d7import
+bundle: d7import
+mode: default
+content:
+  field_d7_body:
+    type: text_textarea
+    weight: -4
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: -5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

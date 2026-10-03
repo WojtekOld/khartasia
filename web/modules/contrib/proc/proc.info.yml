@@ -12,7 +12,7 @@ field_widget:
 config_install:
   - proc.settings
 
-# Information added by Drupal.org packaging script on 2026-08-27
-version: '10.1.125'
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '10.1.126'
 project: 'proc'
-datestamp: 1787857473
+datestamp: 1790339819

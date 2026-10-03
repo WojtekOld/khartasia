@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for SQL Database Storage Client.
+ */
+
+use Drupal\Component\Utility\DeprecationHelper;
+
+/**
+ * Removes stray keys from saved SQL storage client configurations.
+ *
+ * Earlier versions saved unused top-level "create", "read", "update",
+ * "delete", "list" and "count" keys (leftover plugin defaults, the real
+ * queries live under "queries") as well as the display-only "debug" form
+ * item into the storage client configuration, which triggered "missing
+ * schema" warnings on configuration save.
+ *
+ * @see https://www.drupal.org/project/external_entities/issues/3591794
+ */
+function xnttsql_update_93001() {
+  $stray_keys = [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'list',
+    'count',
+    'debug',
+  ];
+  $config_factory = \Drupal::configFactory();
+  $updated = [];
+  foreach ($config_factory->listAll('external_entities.external_entity_type.') as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    $storage_clients = $config->get('data_aggregator.config.storage_clients');
+    if (!is_array($storage_clients)) {
+      continue;
+    }
+    $changed = FALSE;
+    foreach ($storage_clients as $delta => $storage_client) {
+      if (($storage_client['id'] ?? '') !== 'sql') {
+        continue;
+      }
+      foreach ($stray_keys as $stray_key) {
+        if (array_key_exists($stray_key, $storage_client['config'] ?? [])) {
+          unset($storage_clients[$delta]['config'][$stray_key]);
+          $changed = TRUE;
+        }
+      }
+    }
+    if ($changed) {
+      $config->set('data_aggregator.config.storage_clients', $storage_clients);
+      DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => $config->save(), fn() => $config->save(TRUE));
+      $updated[] = $config_name;
+    }
+  }
+  if ($updated) {
+    return t(
+      'Removed stray SQL storage client configuration keys from: @names.',
+      ['@names' => implode(', ', $updated)]
+    );
+  }
+  return t('No SQL storage client configuration needed cleaning.');
+}

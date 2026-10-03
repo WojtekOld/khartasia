@@ -31,6 +31,7 @@ services:
       - '@logger.channel.proc'
       - '@entity_type.manager'
       - '@request_stack'
+      - '@proc.recipient_storage'
     tags:
       - { name: access_check, applies_to: _proc_dec_access_check }
   proc.pubkey_access_checker:
@@ -65,6 +66,7 @@ services:
       - '@proc.key_manager'
       - '@entity_type.manager'
       - '@logger.channel.proc'
+      - '@proc.recipient_storage'
   logger.channel.proc:
     class: Drupal\Core\Logger\LoggerChannel
     factory: ['@logger.factory', 'get']
@@ -83,12 +85,22 @@ services:
   plugin.manager.proc_re_enc_rec_set:
     class: Drupal\proc\ProcReEncRecSetPluginManager
     parent: default_plugin_manager
+  plugin.manager.proc_recipient_storage:
+    class: Drupal\proc\RecipientStoragePluginManager
+    parent: default_plugin_manager
+  proc.recipient_storage:
+    class: Drupal\proc\Service\RecipientStorageBroker
+    arguments:
+      - '@plugin.manager.proc_recipient_storage'
+      - '@entity_type.manager'
+      - '@logger.channel.proc'
   proc.environment:
     class: Drupal\Component\Utility\Environment
   proc.update_jobs_validator:
     class: Drupal\proc\Plugin\Validation\Constraint\UpdateJobsValidator
     arguments:
       - '@entity_type.manager'
+      - '@proc.recipient_storage'
     tags:
       - { name: validator.constraint_validator }
   proc.proc_json_file_service:
@@ -105,6 +117,8 @@ services:
       - '@entity_type.manager'
   proc.re_re_enc_link_service:
     class: Drupal\proc\Service\ProcReEncLinkService
+    arguments:
+      - '@proc.recipient_storage'
   proc.unreferenced_cipher_proc_service:
     class: Drupal\proc\Service\UnreferencedCipherProcService
     arguments:

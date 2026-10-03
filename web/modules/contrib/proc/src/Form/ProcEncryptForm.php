@@ -569,7 +569,7 @@ class ProcEncryptForm extends ProcOpFormBase {
 
     $this->label = $label;
 
-    if (!$proc) {
+    if (!$proc instanceof ProcInterface) {
       return;
     }
 
@@ -577,9 +577,14 @@ class ProcEncryptForm extends ProcOpFormBase {
       ->set('meta', $meta)
       ->set('langcode', 'en')
       ->set('label', htmlspecialchars($label, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'))
-      ->set('type', 'cipher')
-      ->set('field_recipients_set', $recipient_users)
-      ->save();
+      ->set('type', 'cipher');
+    // Store the recipients through the recipient storage plugin bound to this
+    // cipher. The binding lives in the cipher meta set just above, so this must
+    // run after meta is set and before the entity is saved. The standard
+    // plugin sets field_recipients_set in-memory (historical behavior); a
+    // proxy plugin may persist recipients elsewhere and keep the field empty.
+    $this->recipientStorage()->setRecipients($proc, $recipient_users);
+    $proc->save();
 
     $proc_id = $proc->id();
 
@@ -884,12 +889,12 @@ class ProcEncryptForm extends ProcOpFormBase {
   private function getProcForEditing(string &$proc_id, mixed $proc_entity, string $edited_proc_id): void {
     // In order to be able to edit, the current user has to be among the
     // recipients or be the owner of the proc:
-    if ($proc_entity) {
+    if ($proc_entity instanceof ProcInterface) {
       if ($proc_entity->getOwnerId() == $this->currentUser->id()) {
         $proc_id = $edited_proc_id;
         return;
       }
-      $recipients = $proc_entity->get('field_recipients_set')->getValue();
+      $recipients = $this->recipientStorage()->getRecipients($proc_entity);
       foreach ($recipients as $recipient) {
         if ($recipient['target_id'] == $this->currentUser->id()) {
           $proc_id = $edited_proc_id;

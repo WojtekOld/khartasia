@@ -1,0 +1,11 @@
+name: "UI Patterns Views Test"
+type: module
+description: "Provides a component assembling a whole view from its parts."
+package: "Testing"
+dependencies:
+  - ui_patterns:ui_patterns_views
+
+# Information added by Drupal.org packaging script on 2026-09-04
+version: '2.0.21'
+project: 'ui_patterns'
+datestamp: 1788535900

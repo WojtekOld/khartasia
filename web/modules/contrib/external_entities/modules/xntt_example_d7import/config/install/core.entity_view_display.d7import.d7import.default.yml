@@ -1,0 +1,35 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.d7import.d7import.field_d7_body
+  module:
+    - external_entities
+    - text
+    - xntt_example_d7import
+  enforced:
+    module:
+      - xntt_example_d7import
+id: d7import.d7import.default
+targetEntityType: d7import
+bundle: d7import
+mode: default
+content:
+  field_d7_body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  title:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  langcode: true
+  search_api_excerpt: true

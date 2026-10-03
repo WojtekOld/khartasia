@@ -8,8 +8,12 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RedirectDestinationInterface;
 use Drupal\Core\StringTranslation\TranslationManager;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\proc\ByteSizeFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -18,7 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ingroup proc
  */
-class ProcListBuilder extends EntityListBuilder {
+class ProcListBuilder extends EntityListBuilder implements FormInterface {
 
   /**
    * The date formatter service.
@@ -42,6 +46,27 @@ class ProcListBuilder extends EntityListBuilder {
   protected ByteSizeFormatter $byteSizeFormatter;
 
   /**
+   * The form builder.
+   *
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected FormBuilderInterface $formBuilder;
+
+  /**
+   * The private temp store factory.
+   *
+   * @var \Drupal\Core\TempStore\PrivateTempStoreFactory
+   */
+  protected PrivateTempStoreFactory $tempStoreFactory;
+
+  /**
+   * The entities being listed, keyed by ID.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface[]
+   */
+  protected array $entities = [];
+
+  /**
    * Constructs a new ProcListBuilder object.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -56,6 +81,10 @@ class ProcListBuilder extends EntityListBuilder {
    *   The string translation service.
    * @param \Drupal\proc\ByteSizeFormatter $byteSizeFormatter
    *   The byte size formatter service.
+   * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
+   *   The form builder.
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
+   *   The private temp store factory.
    */
   public function __construct(
     EntityTypeInterface $entity_type,
@@ -64,6 +93,8 @@ class ProcListBuilder extends EntityListBuilder {
     RedirectDestinationInterface $redirect_destination,
     TranslationManager $stringTranslation,
     ByteSizeFormatter $byteSizeFormatter,
+    FormBuilderInterface $form_builder,
+    PrivateTempStoreFactory $temp_store_factory,
   ) {
     parent::__construct(
       $entity_type,
@@ -73,6 +104,8 @@ class ProcListBuilder extends EntityListBuilder {
     $this->redirectDestination = $redirect_destination;
     $this->stringTranslation = $stringTranslation;
     $this->byteSizeFormatter = $byteSizeFormatter;
+    $this->formBuilder = $form_builder;
+    $this->tempStoreFactory = $temp_store_factory;
   }
 
   /**
@@ -88,7 +121,9 @@ class ProcListBuilder extends EntityListBuilder {
       $container->get('date.formatter'),
       $container->get('redirect.destination'),
       $container->get('string_translation'),
-      $container->get('proc.byte_size_formatter')
+      $container->get('proc.byte_size_formatter'),
+      $container->get('form_builder'),
+      $container->get('tempstore.private')
     );
   }
 
@@ -142,7 +177,7 @@ class ProcListBuilder extends EntityListBuilder {
     }
     $content_row = [];
     $content_row['id'] = $entity->id();
-    $content_row['title']['data'] = [
+    $content_row['label']['data'] = [
       '#type' => 'link',
       '#title' => $entity->label(),
       '#suffix' => ' ' . $age_flag,
@@ -160,6 +195,97 @@ class ProcListBuilder extends EntityListBuilder {
         : $this->byteSizeFormatter->formatSize(intval($entity->getMeta()[0]['key_size']));
     }
     return $content_row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Render the listing as a form so bulk operations (delete) are available.
+   */
+  public function render(): array {
+    return $this->formBuilder->getForm($this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'proc_admin_overview_form';
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Builds the overview table with a selection checkbox per row and a "Delete"
+   * bulk action, matching the core admin/content pattern.
+   */
+  public function buildForm(array $form, FormStateInterface $form_state): array {
+    $this->entities = $this->load();
+
+    $options = [];
+    foreach ($this->entities as $id => $entity) {
+      $options[$id] = $this->buildRow($entity);
+    }
+
+    $form['procs'] = [
+      '#type' => 'tableselect',
+      '#header' => $this->buildHeader(),
+      '#options' => $options,
+      '#empty' => $this->t('There are no @label yet.', ['@label' => $this->entityType->getPluralLabel()]),
+    ];
+
+    $form['actions'] = [
+      '#type' => 'actions',
+    ];
+    $form['actions']['delete'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Delete'),
+      '#button_type' => 'primary',
+    ];
+
+    // Provide the standard pager below the actions.
+    $form['pager'] = [
+      '#type' => 'pager',
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    $selected = array_filter((array) $form_state->getValue('procs'));
+    if (empty($selected)) {
+      $form_state->setErrorByName('procs', $this->t('No items selected. Select one or more items to delete.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Stages the selected proc entities in the shared temp store and redirects to
+   * the generic entities deletion confirmation form, exactly as core does for
+   * content entities.
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
+    $selected_ids = array_keys(array_filter((array) $form_state->getValue('procs')));
+
+    $entity_type_id = $this->entityType->id();
+    $selection = [];
+    $entities = $this->storage->loadMultiple($selected_ids);
+    foreach ($entities as $id => $entity) {
+      $langcode = $entity->language()->getId();
+      $selection[$id][$langcode] = $langcode;
+    }
+
+    $this->tempStoreFactory
+      ->get('entity_delete_multiple_confirm')
+      ->set(\Drupal::currentUser()->id() . ':' . $entity_type_id, $selection);
+
+    $form_state->setRedirect('entity.' . $entity_type_id . '.delete_multiple_form', [
+      'entity_type_id' => $entity_type_id,
+    ]);
   }
 
 }

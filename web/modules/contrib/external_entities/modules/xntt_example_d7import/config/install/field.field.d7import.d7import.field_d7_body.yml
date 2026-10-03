@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.d7import.field_d7_body
+    - external_entities.external_entity_type.d7import
+  module:
+    - external_entities
+    - text
+    - xntt_example_d7import
+  enforced:
+    module:
+      - xntt_example_d7import
+id: d7import.field_d7_body
+field_name: field_d7_body
+entity_type: d7import
+bundle: d7import
+label: 'Drupal 7 Page Body'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

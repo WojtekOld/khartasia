@@ -1,0 +1,230 @@
+plugin.plugin_configuration.external_entities_storage_client.:
+  # Used when no client is set.
+  type: mapping
+
+plugin.plugin_configuration.external_entities_storage_client.file_base:
+  type: mapping
+  label: 'External entities file base storage client settings'
+  mapping:
+    root:
+      type: string
+      label: 'Directory where the @file_type files are stored (base path)'
+    structure:
+      type: string
+      label: 'Main file name or file name pattern'
+    matching_only:
+      type: boolean
+      label: 'Enforce file name pattern'
+    record_type:
+      type: integer
+      label: 'How to process file data'
+    record_path:
+      type: string
+      label: 'JSONPath to entity records'
+      nullable: true
+    performances:
+      type: mapping
+      label: 'Performances'
+      mapping:
+        use_index:
+          type: boolean
+          label: 'Only use index file to list files (no directory listing)'
+        index_file:
+          type: string
+          label: 'Index file'
+    data_fields:
+      type: mapping
+      label: 'Fields'
+      mapping:
+        field_list:
+          type: sequence
+          label: 'List of entity field names to store in files'
+          sequence:
+            type: string
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_storage_client.files:
+  type: plugin.plugin_configuration.external_entities_storage_client.file_base
+  label: 'External entities Files storage client settings'
+  mapping:
+    save_mode:
+      type: integer
+      label: 'Save behavior'
+      nullable: true
+    data_fields:
+      type: mapping
+      label: 'Fields'
+      mapping:
+        field_list:
+          type: sequence
+          label: 'List of entity field names to store in files'
+          nullable: true
+          sequence:
+            type: string
+        md5_checksum:
+          type: boolean
+          label: 'Compute SHA1 checksum'
+        sha1_checksum:
+          type: boolean
+          label: 'Generate SHA1 checksum'
+
+plugin.plugin_configuration.external_entities_storage_client.jsonapi:
+  type: plugin.plugin_configuration.external_entities_storage_client.rest
+
+plugin.plugin_configuration.external_entities_storage_client.rest:
+  type: mapping
+  label: 'External entities REST storage client settings'
+  mapping:
+    endpoint:
+      type: string
+      label: 'Endpoint URL'
+    endpoint_options:
+      type: mapping
+      label: 'Endpoint options'
+      mapping:
+        single:
+          type: string
+          label: 'Endpoint URL for a single entity'
+        count:
+          type: string
+          label: 'Endpoint URL to get the total number of available entities or pages'
+        count_mode:
+          type: string
+          label: 'Type of total number of items returned'
+        dynamic_count:
+          type: boolean
+          label: 'Use dynamic total number of available entities'
+        cache:
+          type: boolean
+          label: 'The main endpoint provides full entities in a list'
+        limit_qcount:
+          type: integer
+          label: 'Maximum number of query per amount of time given below'
+        limit_qtime:
+          type: integer
+          label: 'Amount of time given to limit queries (in seconds)'
+        concurrency:
+          type: integer
+          label: 'Number of concurrent requests for loadMultiple'
+          nullable: true
+        requests_by_user:
+          type: boolean
+          label: 'Run REST request from user browser'
+    response_format:
+      type: string
+      label: 'Endpoint data encoding format'
+    data_path:
+      type: mapping
+      label: 'Data path settings'
+      mapping:
+        list:
+          type: string
+          label: 'JSONPath leading to the list of entities'
+        single:
+          type: string
+          label: 'JSONPath leading to the content of a single entity'
+        keyed_by_id:
+          type: boolean
+          label: 'Entities are keyed by their ID in a list'
+        count:
+          type: string
+          label: 'JSONPath leading to the total number of available entities'
+    pager:
+      type: mapping
+      label: 'Pager settings'
+      mapping:
+        default_limit:
+          type: integer
+          label: 'Default number of items per page used by the endpoint or maximum number of entities supported in a single query'
+        type:
+          type: string
+          label: 'Paging type'
+        page_parameter:
+          type: string
+          label: 'Page parameter'
+        page_parameter_type:
+          type: string
+          label: 'Page parameter type'
+        page_start_one:
+          type: boolean
+          label: 'Page numbers and entity numbers start from one'
+        always_query:
+          type: boolean
+          label: 'Page parameters are provided in query string'
+        page_size_parameter:
+          type: string
+          label: 'Page size parameter'
+        page_size_parameter_type:
+          type: string
+          label: 'Page size parameter type'
+    api_key:
+      type: mapping
+      label: 'Authentication'
+      mapping:
+        type:
+          type: string
+          label: 'Authentication type'
+        header_name:
+          type: string
+          label: 'Header name/key name'
+        key:
+          type: string
+          label: 'API key'
+    http:
+      type: mapping
+      label: 'HTTP protocol'
+      mapping:
+        headers:
+          type: string
+          label: 'Additional HTTP headers'
+    parameters:
+      type: mapping
+      label: 'Additional parameters'
+      mapping:
+        list:
+          type: sequence
+          sequence:
+            type: string
+            label: 'List parameters'
+        list_param_mode:
+          type: string
+          label: 'Add list parameters to'
+        single:
+          type: sequence
+          sequence:
+            type: string
+            label: 'Single entity parameters'
+        single_param_mode:
+          type: string
+          label: 'Add single entity parameters to'
+    filtering:
+      type: mapping
+      label: 'Filtering'
+      mapping:
+        drupal:
+          type: boolean
+          label: 'Enable Drupal-side filtering'
+        basic:
+          type: boolean
+          label: 'Basic filtering'
+        basic_fields:
+          type: sequence
+          label: 'List of supported fields'
+          nullable: true
+          sequence:
+            type: string
+        list_support:
+          type: string
+          label: 'List support'
+          nullable: true
+        list_join:
+          type: string
+          label: 'Join string for lists'
+          nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true

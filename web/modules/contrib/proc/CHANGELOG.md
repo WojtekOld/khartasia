@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [10.1.126] - 25 Sep 2026
+
+- Added recipients storage plugin type.
+- Added get and set methods for wished recipients in RecipientStorage plugin type.
+- Added getWishedRecipients to ProcCommands.
+- Added acme example module for a realistic demo of RecipientStorage plugin type.
+- Added bulk deletion of items in admin/content/procs.
+- Added section about limitation on the removal of recipients by re-encryption when recipients are not being stored per proc.
+- Fixed the clean up of update jobs.
+- Fixed flat list of recipients in the fetcher endpoint configuration.
+- Fixed typo; fixed format of flat list of user IDs for encryption.
+- Normalized timestamps of acme group membership.
+
 ## [10.1.125] - 27 Aug 2026
 
 - Fixed proc_update_10005 failing with "The user_id column cannot have NOT NULL constraints as it holds NULL values".

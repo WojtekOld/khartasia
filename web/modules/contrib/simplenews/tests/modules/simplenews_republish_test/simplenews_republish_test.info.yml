@@ -1,0 +1,13 @@
+name: 'Simplenews republish test'
+type: module
+description: 'Test helper: unpublishes a node in entity presave, simulating Scheduler.'
+package: Testing
+core_version_requirement: ^10 || ^11
+hidden: true
+dependencies:
+  - drupal:node
+
+# Information added by Drupal.org packaging script on 2026-07-27
+version: '4.1.3'
+project: 'simplenews'
+datestamp: 1785161023

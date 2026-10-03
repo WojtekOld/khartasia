@@ -6,18 +6,15 @@ use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
 use Drupal\facets\Result\ResultInterface;
-use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * A base class for widgets that implements most of the boilerplate.
  */
-abstract class WidgetPluginBase extends PluginBase implements WidgetPluginInterface, ContainerFactoryPluginInterface {
+abstract class WidgetPluginBase extends PluginBase implements WidgetPluginInterface {
 
   /**
    * Show the amount of results next to the result.
@@ -43,22 +40,10 @@ abstract class WidgetPluginBase extends PluginBase implements WidgetPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, UrlProcessorPluginManager $url_processor_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->urlProcessorManager = $url_processor_manager;
+    $this->urlProcessorManager = \Drupal::service('plugin.manager.facets.url_processor');
     $this->setConfiguration($configuration);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('plugin.manager.facets.url_processor')
-    );
   }
 
   /**

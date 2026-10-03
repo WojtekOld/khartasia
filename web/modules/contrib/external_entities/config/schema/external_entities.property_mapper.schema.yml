@@ -1,0 +1,244 @@
+plugin.plugin_configuration.external_entities_property_mapper.:
+  # Used when no mapping is set.
+  type: mapping
+
+plugin.plugin_configuration.external_entities_property_mapper.conditional:
+  type: mapping
+  label: 'External entities conditional property mapper settings'
+  mapping:
+    mapping:
+      type: string
+      label: 'Raw field to test'
+    required_field:
+      type: boolean
+      label: 'Property of a required field'
+      nullable: true
+    main_property:
+      type: boolean
+      label: 'Main property'
+      nullable: true
+    condition:
+      type: integer
+      label: 'Only apply mapping if tested raw field fulfills condition'
+    condition_value:
+      type: string
+      label: 'Value to compare to'
+      nullable: true
+    save_option:
+      type: integer
+      label: 'Save option'
+      nullable: true
+    property_mappers:
+      type: sequence
+      label: 'Conditioned property mappers'
+      orderby: key
+      sequence:
+        type: external_entities.external_entities_property_mapper_settings
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+    description:
+      type: string
+      label: 'Description'
+
+plugin.plugin_configuration.external_entities_property_mapper.constant:
+  type: mapping
+  label: 'External entities constant property value settings'
+  mapping:
+    mapping:
+      type: string
+      label: 'Constant value'
+    required_field:
+      type: boolean
+      label: 'Property of a required field'
+      nullable: true
+    main_property:
+      type: boolean
+      label: 'Main property'
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+    description:
+      type: string
+      label: 'Description'
+
+plugin.plugin_configuration.external_entities_property_mapper.direct:
+  type: mapping
+  label: 'External entities raw field property mapper settings'
+  mapping:
+    mapping:
+      type: string
+      label: 'Raw field name'
+    required_field:
+      type: boolean
+      label: 'Property of a required field'
+      nullable: true
+    main_property:
+      type: boolean
+      label: 'Main property'
+      nullable: true
+    data_processors:
+      type: sequence
+      sequence:
+        type: external_entities.external_entities_data_processor_settings
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+    description:
+      type: string
+      label: 'Description'
+
+plugin.plugin_configuration.external_entities_property_mapper.jsonpath:
+  type: mapping
+  label: 'External entities JSONPath field mapper settings'
+  mapping:
+    mapping:
+      type: string
+      label: 'Mapping'
+    required_field:
+      type: boolean
+      label: 'Property of a required field'
+      nullable: true
+    main_property:
+      type: boolean
+      label: 'Main property'
+      nullable: true
+    data_processors:
+      type: sequence
+      sequence:
+        type: external_entities.external_entities_data_processor_settings
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+    description:
+      type: string
+      label: 'Description'
+
+plugin.plugin_configuration.external_entities_property_mapper.multi:
+  type: mapping
+  label: 'External entities multiple mapping property mapper settings'
+  mapping:
+    required_field:
+      type: boolean
+      label: 'Property of a required field'
+      nullable: true
+    main_property:
+      type: boolean
+      label: 'Main property'
+      nullable: true
+    load:
+      type: sequence
+      label: 'Property mappers used for loading'
+      sequence:
+        type: string
+    save:
+      type: sequence
+      label: 'Property mappers used for saving'
+      sequence:
+        type: string
+    aggregation:
+      type: string
+      label: 'How to handle multiple mapping when loading'
+      enum:
+        - 'merge'
+        - 'first'
+    property_mappers:
+      type: sequence
+      label: 'Property mappers'
+      sequence:
+        type: external_entities.external_entities_property_mapper_settings
+    data_processors:
+      type: sequence
+      sequence:
+        type: external_entities.external_entities_data_processor_settings
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+    description:
+      type: string
+      label: 'Description'
+
+plugin.plugin_configuration.external_entities_property_mapper.pattern:
+  type: mapping
+  label: 'External entities pattern property mapper settings'
+  mapping:
+    mapping:
+      type: string
+      label: 'Mapping'
+    reversible:
+      type: boolean
+      label: 'Reversible mapping'
+    reverse_pattern:
+      type: string
+      label: 'Reverse pattern'
+      nullable: true
+    array_handling :
+      type: string
+      label: 'Array handling'
+    required_field:
+      type: boolean
+      label: 'Property of a required field'
+      nullable: true
+    main_property:
+      type: boolean
+      label: 'Main property'
+      nullable: true
+    data_processors:
+      type: sequence
+      sequence:
+        type: external_entities.external_entities_data_processor_settings
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+    description:
+      type: string
+      label: 'Description'
+
+plugin.plugin_configuration.external_entities_property_mapper.simple:
+  type: mapping
+  label: 'External entities simple property mapper settings'
+  mapping:
+    mapping:
+      type: string
+      label: 'Mapping'
+    required_field:
+      type: boolean
+      label: 'Property of a required field'
+      nullable: true
+    main_property:
+      type: boolean
+      label: 'Main property'
+      nullable: true
+    data_processors:
+      type: sequence
+      sequence:
+        type: external_entities.external_entities_data_processor_settings
+      nullable: true
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+    description:
+      type: string
+      label: 'Description'
+
+external_entities.external_entities_data_processor_settings:
+  type: mapping
+  mapping:
+    id:
+      type: string
+      label: 'Data processor plugin ID'
+    config:
+      type: plugin.plugin_configuration.external_entities_data_processor.[%parent.id]
+      label: 'Data processor plugin config'

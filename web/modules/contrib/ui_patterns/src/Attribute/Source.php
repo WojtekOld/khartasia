@@ -37,7 +37,8 @@ class Source extends Plugin {
    * @param ?array $tags
    *   Array of tags.
    * @param ?array $context_requirements
-   *   Array of tags.
+   *   Requirements the contexts must carry. A list of strings means one of
+   *   them is enough.
    * @param ?array $metadata
    *   Array of metadata.
    * @param ?array $context_definitions

@@ -1,0 +1,19 @@
+{#
+/**
+ * @file
+ * Template to display token information.
+ */
+#}
+<div class="token-info">
+  <h3>{{ title }}</h3>
+  <dl class="xntt-token-list">
+    {% for token, token_data in tokens %}
+      <dt>
+        <code class="xntt-token-code">[xntt:{{ token }}]</code>: <span class="xntt-token-name">{{ token_data.name }}</span>
+      </dt>
+      <dd>
+        <pre class="xntt-token-description">{{ token_data.description }}</pre>
+      </dd>
+    {% endfor %}
+  </dl>
+</div>

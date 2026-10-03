@@ -1,0 +1,121 @@
+plugin.plugin_configuration.external_entities_data_aggregator.single:
+  type: mapping
+  label: 'External entities single storage client aggregation settings'
+  mapping:
+    storage_clients:
+      type: sequence
+      sequence:
+        type: external_entities.external_entities_storage_client_settings
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_aggregator.group:
+  type: mapping
+  label: 'External entities group aggregator settings'
+  mapping:
+    storage_clients:
+      type: sequence
+      sequence:
+        type: external_entities.external_entities_aggr_storage_client_settings
+    debug_level:
+      type: integer
+      label: 'Debug level'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_data_aggregator.horizontal:
+  type: plugin.plugin_configuration.external_entities_data_aggregator.group
+
+plugin.plugin_configuration.external_entities_data_aggregator.vertical:
+  type: plugin.plugin_configuration.external_entities_data_aggregator.group
+
+external_entities.external_entities_storage_client_settings:
+  type: mapping
+  mapping:
+    id:
+      type: string
+      label: 'Storage client plugin ID'
+    config:
+      type: plugin.plugin_configuration.external_entities_storage_client.[%parent.id]
+      label: 'Storage client plugin config'
+    notes:
+      type: text
+      label: 'Notes'
+      nullable: true
+
+external_entities.external_entities_aggr_storage_client_settings:
+  type: mapping
+  mapping:
+    id:
+      type: string
+      label: 'Storage client plugin ID'
+    config:
+      type: plugin.plugin_configuration.external_entities_storage_client.[%parent.id]
+      label: 'Storage client plugin config'
+    aggr:
+      type: mapping
+      label: 'Storage client aggregation config'
+      mapping:
+        groups:
+          type: sequence
+          label: 'Group prefix(es)'
+          sequence:
+            type: string
+        group_prefix_strip:
+          type: boolean
+          label: 'Virtual group prefix'
+        id_mapper:
+          type: mapping
+          mapping:
+            id:
+              type: string
+              label: 'Property mapper plugin ID'
+            config:
+              type: plugin.plugin_configuration.external_entities_property_mapper.[%parent.id]
+              label: 'Property mapper plugin config'
+        join_mapper:
+          type: mapping
+          mapping:
+            id:
+              type: string
+              label: 'Property mapper plugin ID'
+            config:
+              type: plugin.plugin_configuration.external_entities_property_mapper.[%parent.id]
+              label: 'Property mapper plugin config'
+            merge_non_mappable_join:
+              type: boolean
+              label: 'Non-mappable join field'
+              nullable: true
+          nullable: true
+        drupal_filtering:
+          type: boolean
+          label: 'Allow Drupal-side filtering'
+          nullable: true
+        merge:
+          type: string
+          label: 'How to merge client data'
+        merge_as_member:
+          type: string
+          label: 'Field name to store sub-object(s) in an array'
+        merge_as_member_translation:
+          # Deprecated.
+          type: string
+          label: 'Deprecated translation language selection'
+          nullable: true
+        merge_join:
+          type: string
+          label: 'Previous storage ID field'
+        mode:
+          type: integer
+          label: 'Storage client access mode'
+        client_number:
+          type: integer
+          label: 'Storage client number'
+    notes:
+      type: text
+      label: 'Notes'
+      nullable: true
+
+plugin.plugin_configuration.external_entities_storage_client.*:
+  type: mapping

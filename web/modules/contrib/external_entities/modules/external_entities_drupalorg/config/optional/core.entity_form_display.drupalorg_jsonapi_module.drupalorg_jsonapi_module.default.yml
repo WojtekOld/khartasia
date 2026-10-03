@@ -1,0 +1,39 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.drupalorg_jsonapi_module.drupalorg_jsonapi_module.field_body
+  module:
+    - external_entities
+    - text
+id: drupalorg_jsonapi_module.drupalorg_jsonapi_module.default
+targetEntityType: drupalorg_jsonapi_module
+bundle: drupalorg_jsonapi_module
+mode: default
+content:
+  field_body:
+    type: text_textarea_with_summary
+    weight: 1
+    region: content
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

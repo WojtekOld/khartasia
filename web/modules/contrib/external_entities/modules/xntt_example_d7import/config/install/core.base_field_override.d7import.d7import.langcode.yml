@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - external_entities
+    - xntt_example_d7import
+  enforced:
+    module:
+      - xntt_example_d7import
+id: d7import.d7import.langcode
+field_name: langcode
+entity_type: d7import
+bundle: d7import
+label: Language
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: language

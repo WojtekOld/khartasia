@@ -12,6 +12,7 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\proc\Attribute\ProcReEncRecSet;
 use Drupal\proc\ProcKeyManagerInterface;
 use Drupal\proc\ProcReEncRecSetBase;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -48,6 +49,13 @@ class StandardProcReEncRecSet extends ProcReEncRecSetBase implements ContainerFa
   protected $logger;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * {@inheritdoc}
    *
    * @param array $configuration
@@ -64,6 +72,8 @@ class StandardProcReEncRecSet extends ProcReEncRecSetBase implements ContainerFa
    *   The ProcKeyManager service.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger.
+   * @param \Drupal\proc\Service\RecipientStorageBrokerInterface $recipient_storage
+   *   The recipient storage broker.
    */
   public function __construct(
     array $configuration,
@@ -73,12 +83,14 @@ class StandardProcReEncRecSet extends ProcReEncRecSetBase implements ContainerFa
     EntityTypeManagerInterface $entity_type_manager,
     ProcKeyManagerInterface $procKeyManager,
     LoggerInterface $logger,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     $this->setStringTranslation($translation);
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->procKeyManager = $procKeyManager;
     $this->logger = $logger;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -97,7 +109,8 @@ class StandardProcReEncRecSet extends ProcReEncRecSetBase implements ContainerFa
       $container->get('string_translation'),
       $container->get('entity_type.manager'),
       $container->get('proc.key_manager'),
-      $container->get('logger.factory')->get('proc')
+      $container->get('logger.factory')->get('proc'),
+      $container->get('proc.recipient_storage')
     );
   }
 
@@ -181,7 +194,7 @@ class StandardProcReEncRecSet extends ProcReEncRecSetBase implements ContainerFa
    */
   private function getRecipientIds(object $proc_object): array {
     $recipient_ids = [];
-    $recipients = $proc_object->get('field_recipients_set')->getValue();
+    $recipients = $this->recipientStorage->getRecipients($proc_object);
     foreach ($recipients as $recipient) {
       if (isset($recipient['target_id'])) {
         $recipient_ids[] = $recipient['target_id'];
@@ -230,7 +243,7 @@ class StandardProcReEncRecSet extends ProcReEncRecSetBase implements ContainerFa
       if (count($lost_ids) == count($recipient_ids[$proc_id])) {
         $proc_fully_lost[] = $proc_id;
         // Empty the recipients field:
-        $proc_objects[$proc_id]->set('field_recipients_set', []);
+        $this->recipientStorage->setRecipients($proc_objects[$proc_id], []);
         $proc_objects[$proc_id]->save();
       }
     }
@@ -268,10 +281,10 @@ class StandardProcReEncRecSet extends ProcReEncRecSetBase implements ContainerFa
     foreach ($proc_objects as $proc_id => $proc_object) {
       // Set the new recipients:
       if (isset($new_recipients[$proc_id])) {
-        $proc_object->set('field_recipients_set', $new_recipients[$proc_id]);
+        $this->recipientStorage->setRecipients($proc_object, $new_recipients[$proc_id]);
       }
       if (isset($new_wished_recs[$proc_id])) {
-        $proc_object->set('field_wished_recipients_set', $new_wished_recs[$proc_id]);
+        $this->recipientStorage->setWishedRecipients($proc_object, $new_wished_recs[$proc_id]);
       }
       if (!empty($new_recipients[$proc_id]) || !empty($new_wished_recs[$proc_id])) {
         // Log the update:

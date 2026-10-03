@@ -1,0 +1,15 @@
+external_entities:
+  version: 3.x
+  css:
+    theme:
+      css/external_entities.css: {}
+xntt_sortable_select:
+  version: 1.x
+  js:
+    js/xntt_sortable_select.js: {}
+  css:
+    theme:
+      css/xntt_sortable_select.css: {}
+  dependencies:
+    - core/drupal
+    - core/once

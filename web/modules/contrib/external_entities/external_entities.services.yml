@@ -1,0 +1,82 @@
+services:
+  logger.channel.external_entities:
+    class: Drupal\Core\Logger\LoggerChannel
+    arguments: ['external_entities']
+    factory: ['@logger.factory', 'get']
+  entity.query.external:
+    class: Drupal\external_entities\Entity\Query\External\QueryFactory
+    arguments: ['@entity_type.manager', '@pager.parameters', '@pager.manager']
+    tags:
+      - { name: backend_overridable }
+  external_entities.response_decoder_factory:
+    class: Drupal\external_entities\ResponseDecoder\ResponseDecoderFactory
+    tags:
+      - { name: service_collector, tag: external_entity_response_decoder, call: addDecoder }
+  external_entities.rest.debug_client:
+    class: Drupal\external_entities\GuzzleHttp\DebugClient
+    factory: 'external_entities.rest.http_client_factory:fromOptions'
+  external_entities.rest.http_client_factory:
+    class: Drupal\external_entities\GuzzleHttp\DebugClientFactory
+    arguments: ['@http_handler_stack']
+  plugin.manager.external_entities.field_mapper:
+    class: Drupal\external_entities\FieldMapper\FieldMapperManager
+    arguments:
+      - '@container.namespaces'
+      - '@cache.discovery'
+      - '@module_handler'
+      - '@messenger'
+      - '@logger.channel.external_entities'
+  plugin.manager.external_entities.property_mapper:
+    class: Drupal\external_entities\PropertyMapper\PropertyMapperManager
+    arguments:
+      - '@container.namespaces'
+      - '@cache.discovery'
+      - '@module_handler'
+      - '@messenger'
+      - '@logger.channel.external_entities'
+  plugin.manager.external_entities.data_processor:
+    class: Drupal\external_entities\DataProcessor\DataProcessorManager
+    arguments:
+      - '@container.namespaces'
+      - '@cache.discovery'
+      - '@module_handler'
+      - '@messenger'
+      - '@logger.channel.external_entities'
+  plugin.manager.external_entities.storage_client:
+    class: Drupal\external_entities\StorageClient\StorageClientManager
+    arguments:
+      - '@container.namespaces'
+      - '@cache.discovery'
+      - '@module_handler'
+      - '@messenger'
+      - '@logger.channel.external_entities'
+  plugin.manager.external_entities.data_aggregator:
+    class: Drupal\external_entities\DataAggregator\DataAggregatorManager
+    arguments:
+      - '@container.namespaces'
+      - '@cache.discovery'
+      - '@module_handler'
+      - '@messenger'
+      - '@logger.channel.external_entities'
+  route_processor_external_entity_type:
+    class: Drupal\external_entities\RouteProcessor\RouteProcessorExternalEntityType
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: route_processor_outbound }
+  external_entities.route_update_subscriber:
+    class: Drupal\external_entities\EventSubscriber\RouteUpdateSubscriber
+    arguments: ['@messenger', '@logger.channel.external_entities', '@entity_type.manager', '@router.route_provider']
+    tags:
+      - { name: event_subscriber }
+  external_entities.external_entities_subscriber:
+    class: Drupal\external_entities\EventSubscriber\ExternalEntitiesSubscriber
+    tags:
+      - { name: event_subscriber }
+  serialization.xnttjson:
+    class: \Drupal\external_entities\Serialization\JsonApi
+    tags:
+      - { name: external_entity_response_decoder }
+
+  Drupal\external_entities\Hook\ExternalEntitiesHooks:
+    class: Drupal\external_entities\Hook\ExternalEntitiesHooks
+    autowire: true

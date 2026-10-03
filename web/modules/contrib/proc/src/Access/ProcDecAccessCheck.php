@@ -14,7 +14,9 @@ use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxy;
 use Drupal\proc\Entity\Proc;
+use Drupal\proc\ProcInterface;
 use Drupal\proc\Service\AccessResultService;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Drupal\proc\Traits\ProcCsvTrait;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -70,6 +72,13 @@ class ProcDecAccessCheck implements AccessInterface {
   protected RequestStack $requestStack;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * Constructs a new ProcEncAccessCheck.
    *
    * @param \Drupal\proc\Service\AccessResultService $access_result
@@ -84,6 +93,8 @@ class ProcDecAccessCheck implements AccessInterface {
    *   The entity type manager.
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   The request stack.
+   * @param \Drupal\proc\Service\RecipientStorageBrokerInterface $recipient_storage
+   *   The recipient storage broker.
    */
   public function __construct(
     AccessResultService $access_result,
@@ -92,6 +103,7 @@ class ProcDecAccessCheck implements AccessInterface {
     LoggerInterface $logger,
     EntityTypeManagerInterface $entity_type_manager,
     RequestStack $request_stack,
+    RecipientStorageBrokerInterface $recipient_storage,
   ) {
     $this->accessResultService = $access_result;
     $this->currentUser = $current_user;
@@ -99,6 +111,7 @@ class ProcDecAccessCheck implements AccessInterface {
     $this->logger = $logger;
     $this->entityTypeManager = $entity_type_manager;
     $this->requestStack = $request_stack;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -115,6 +128,7 @@ class ProcDecAccessCheck implements AccessInterface {
       $container->get('logger.factory')->get('proc'),
       $container->get('entity_type.manager'),
       $container->get('request_stack'),
+      $container->get('proc.recipient_storage'),
     );
   }
 
@@ -274,13 +288,10 @@ class ProcDecAccessCheck implements AccessInterface {
    *   True if the user is a recipient, false otherwise.
    */
   private function isUserRecipient(object $proc, int $current_user_id): bool {
-    $recipients = $proc->get('field_recipients_set')->getValue();
-    foreach ($recipients as $recipient) {
-      if ($recipient['target_id'] == $current_user_id) {
-        return TRUE;
-      }
+    if (!$proc instanceof ProcInterface) {
+      return FALSE;
     }
-    return FALSE;
+    return $this->recipientStorage->isRecipient($proc, $current_user_id);
   }
 
 }

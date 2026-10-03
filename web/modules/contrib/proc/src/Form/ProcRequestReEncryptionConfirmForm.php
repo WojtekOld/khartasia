@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\proc\Traits\ProcCsvTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\proc\ProcKeyManager;
+use Drupal\proc\Service\RecipientStorageBrokerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
@@ -55,6 +56,13 @@ final class ProcRequestReEncryptionConfirmForm extends ConfirmFormBase {
   protected $configFactory;
 
   /**
+   * The recipient storage broker.
+   *
+   * @var \Drupal\proc\Service\RecipientStorageBrokerInterface
+   */
+  protected RecipientStorageBrokerInterface $recipientStorage;
+
+  /**
    * Constructs the form.
    *
    * @param \Drupal\Core\Path\CurrentPathStack $current_path_stack
@@ -66,11 +74,12 @@ final class ProcRequestReEncryptionConfirmForm extends ConfirmFormBase {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    */
-  public function __construct(CurrentPathStack $current_path_stack, EntityTypeManagerInterface $entity_type_manager, ProcKeyManager $key_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(CurrentPathStack $current_path_stack, EntityTypeManagerInterface $entity_type_manager, ProcKeyManager $key_manager, ConfigFactoryInterface $config_factory, RecipientStorageBrokerInterface $recipient_storage) {
     $this->currentPathStack = $current_path_stack;
     $this->entityTypeManager = $entity_type_manager;
     $this->keyManager = $key_manager;
     $this->configFactory = $config_factory;
+    $this->recipientStorage = $recipient_storage;
   }
 
   /**
@@ -82,6 +91,7 @@ final class ProcRequestReEncryptionConfirmForm extends ConfirmFormBase {
       $container->get('entity_type.manager'),
       $container->get('proc.key_manager'),
       $container->get('config.factory'),
+      $container->get('proc.recipient_storage'),
     );
   }
 
@@ -191,12 +201,12 @@ final class ProcRequestReEncryptionConfirmForm extends ConfirmFormBase {
 
       }
       if ($proc_entity) {
-        if ($proc_entity->get('field_wished_recipients_set')->isEmpty()) {
+        if (empty($this->recipientStorage->getWishedRecipients($proc_entity))) {
           continue;
         }
         $has_wished_recipients[$update_jobs_candidate] = [
           'generation_timestamp' => $proc_entity->get('meta')->getValue()[0]['generation_timestamp'],
-          'recipients' => $proc_entity->get('field_recipients_set')->getValue(),
+          'recipients' => $this->recipientStorage->getRecipients($proc_entity),
         ];
       }
     }

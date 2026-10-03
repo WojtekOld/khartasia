@@ -1,0 +1,16 @@
+entity.external_entity_type.collection:
+  title: 'External entity types'
+  parent: system.admin_structure
+  description: 'Create and manage fields, forms, and display settings for your external entity types.'
+  route_name: entity.external_entity_type.collection
+
+system.external:
+  route_name: system.external
+  parent: system.admin_config
+  title: 'External data'
+
+system.external_entities:
+  title: 'External entities'
+  parent: system.external
+  description: 'List and configure external entities.'
+  route_name: entity.external_entity_type.collection
