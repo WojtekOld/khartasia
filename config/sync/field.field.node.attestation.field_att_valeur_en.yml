@@ -1,0 +1,19 @@
+uuid: 9dbf345e-6d88-4138-8ac6-64247491ee36
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_valeur_en
+    - node.type.attestation
+id: node.attestation.field_att_valeur_en
+field_name: field_att_valeur_en
+entity_type: node
+bundle: attestation
+label: 'Énoncé (anglais)'
+description: "Traduction anglaise de l'énoncé, pour les dossiers destinés aux lecteurs anglophones. Facultative. Le champ « Valeur » (le texte français) reste la référence : en cas d'écart, c'est lui qui fait foi. Traduction de l'équipe, non de la source."
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

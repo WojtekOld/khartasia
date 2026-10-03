@@ -15,6 +15,7 @@ dependencies:
     - field.field.node.attestation.field_att_locateur
     - field.field.node.attestation.field_att_nom_vernaculaire
     - field.field.node.attestation.field_att_note_interne
+    - field.field.node.attestation.field_att_note_interne_en
     - field.field.node.attestation.field_att_papier
     - field.field.node.attestation.field_att_periode
     - field.field.node.attestation.field_att_periode_debut
@@ -29,9 +30,11 @@ dependencies:
     - field.field.node.attestation.field_att_type_ecriture
     - field.field.node.attestation.field_att_type_source
     - field.field.node.attestation.field_att_valeur
+    - field.field.node.attestation.field_att_valeur_en
     - node.type.attestation
   module:
     - path
+    - text
 id: node.attestation.default
 targetEntityType: node
 bundle: attestation
@@ -130,6 +133,14 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_att_note_interne_en:
+    type: text_textarea
+    weight: 125
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
   field_att_papier:
     type: entity_reference_autocomplete
     weight: 2
@@ -209,6 +220,14 @@ content:
   field_att_valeur:
     type: string_textarea
     weight: 4
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_valeur_en:
+    type: string_textarea
+    weight: 124
     region: content
     settings:
       rows: 5

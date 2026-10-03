@@ -15,6 +15,7 @@ dependencies:
     - field.field.node.attestation.field_att_locateur
     - field.field.node.attestation.field_att_nom_vernaculaire
     - field.field.node.attestation.field_att_note_interne
+    - field.field.node.attestation.field_att_note_interne_en
     - field.field.node.attestation.field_att_papier
     - field.field.node.attestation.field_att_periode
     - field.field.node.attestation.field_att_periode_debut
@@ -29,6 +30,7 @@ dependencies:
     - field.field.node.attestation.field_att_type_ecriture
     - field.field.node.attestation.field_att_type_source
     - field.field.node.attestation.field_att_valeur
+    - field.field.node.attestation.field_att_valeur_en
     - node.type.attestation
   module:
     - options
@@ -184,9 +186,11 @@ hidden:
   field_att_locateur: true
   field_att_nom_vernaculaire: true
   field_att_note_interne: true
+  field_att_note_interne_en: true
   field_att_periode: true
   field_att_revue_motifs: true
   field_att_statut_presence: true
   field_att_type_ecriture: true
+  field_att_valeur_en: true
   langcode: true
   search_api_excerpt: true
