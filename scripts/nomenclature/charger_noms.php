@@ -10,6 +10,9 @@
  * Variables d'environnement (facultatives) :
  *   DONNEES=<fichier>              fichier de données (défaut : donnees_noms.json, à côté du script)
  *   REFS=<clé>=<n>,<clé>=<n>       force le numéro de la notice bibliographique d'une source (si la recherche automatique échoue)
+ *   UID_AUTEUR=<uid>               compte endossé par le script et auteur des contenus créés (1 par défaut : le compte administrateur)
+ *   VOCAB_LANGUES=<vid>[,<vid>]    force le(s) vocabulaire(s) où chercher la langue (si le champ n'en déclare pas et que la recherche dans tous est ambiguë)
+ *   VOCAB_LIEUX=<vid>[,<vid>]      idem pour le lieu des attestations
  *   SEULEMENT_VALIDES=1            ne charge que les enregistrements dont la validation est « valide » ou « corrige »
  * Simulation par défaut ; touch APPLY_CONFIRME.txt pour charger ; touch RESTAURER_CONFIRME.txt pour défaire.
  *
@@ -30,6 +33,14 @@
  *   note interne de chaque attestation, pour rester attaché au contenu. « rejete » n'est jamais chargé.
  * valeurs permises : celles que la configuration du site définit (statut, concept, portée). Le script les lit sur le site ;
  *   une valeur du fichier qui n'en fait pas partie est refusée.
+ * translittération savante : romanisation conventionnelle de la forme (nom.translitteration), distincte de l'écriture locale
+ *   (nom.ecriture_locale, la graphie d'origine) et du titre (la romanisation d'usage). Exige le champ créé par modele_nomenclature_2.php.
+ * texte_en : traduction anglaise de l'énoncé d'une attestation (champ facultatif « texte_en » du fichier). Elle est enregistrée dans le champ
+ *   « Énoncé (anglais) » et ne remplace jamais le texte français, qui reste la référence. Exige le champ créé par modele_nomenclature_3.php.
+ * note_interne_en : traduction anglaise de la note de travail d'une attestation (champ facultatif du fichier). Enregistrée dans le champ « Note de
+ *   travail (anglais) », précédée de la phrase de validation en anglais. Ne remplace jamais la note française. Exige modele_nomenclature_3.php.
+ * journal de révision : message attaché à chaque version d'un contenu (onglet « Versions »). La trace du chargement (jeu, version, enregistrement) y est écrite.
+ * lieu : terme d'un des vocabulaires de zone du champ de lieu des attestations ; facultatif. Le lieu cité par la source reste dans le texte.
  * concept taxonomique : référentiel « sensu » (au sens de POWO, GRIN, Flora of China ou autre) ; exigé pour toute attestation liée à une plante.
  * validation de Drupal : contrôle des règles d'un contenu SANS l'enregistrer (entity->validate()). C'est le vrai test du modèle.
  * cas témoin : cas qui DOIT violer une règle ; s'il ne la viole pas, c'est le test qui est en défaut (faux négatif).
@@ -57,6 +68,15 @@ echo "=== Chargement initial de noms et d'attestations — mode : " . ($restore 
 $etm = \Drupal::entityTypeManager();
 $noeuds = $etm->getStorage('node');
 $termes = $etm->getStorage('taxonomy_term');
+$db = \Drupal::database();
+// Compte sous lequel le script s'exécute. Depuis la console, Drupal tourne en ANONYME : or un anonyme ne peut référencer que des contenus
+// PUBLIÉS, et ce script lie des noms non publiés entre eux (parent) et à leurs attestations ; sans changement de compte, le premier nom
+// avec un parent est rejeté. On endosse donc un compte administrateur (uid 1, ou UID_AUTEUR), qui devient aussi l'auteur des contenus créés.
+$uid_auteur = (int) (getenv('UID_AUTEUR') ?: 1);
+$compte = \Drupal\user\Entity\User::load($uid_auteur);
+if (!$compte) { echo "ERREUR : l'utilisateur $uid_auteur n'existe pas (variable UID_AUTEUR). Abandon, rien n'a été modifié.\n"; return; }
+\Drupal::service('account_switcher')->switchTo($compte);
+echo "compte du script : " . $compte->getAccountName() . " (uid $uid_auteur)\n";
 $ecrire = function ($etat) use ($fichier) { file_put_contents($fichier, json_encode($etat, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)); };
 
 // ===================== RESTAURATION =====================
@@ -163,24 +183,42 @@ foreach (array_keys($sources_utilisees) as $al) {
   $verif($ref !== NULL, "source « $al » : " . ($ref ? $ref->id() . " — " . $ref->label() : "notice introuvable ou ambiguë (la saisir dans bibcite, ou relancer avec REFS=$al=<numéro>)"));
   if ($ref) { $refs[$al] = (int) $ref->id(); }
 }
-$vocab_de = function ($bundle, $champ) { $i = FieldConfig::loadByName('node', $bundle, $champ); $t = $i ? array_keys($i->getSetting('handler_settings')['target_bundles'] ?? []) : []; return $t ? $t[0] : NULL; };
-$premier = function ($vid, $nom) use ($termes) { $r = $termes->loadByProperties(['vid' => $vid, 'name' => $nom]); return $r ? (int) key($r) : 0; };
-$vid_langue = $vocab_de('common_names', 'field_language_taxo_vern');
+// Vocabulaires cibles d'un champ de référence. Un champ qui n'en déclare AUCUN (« tous les vocabulaires ») est résolu par ce que
+// contiennent déjà les contenus existants : c'est le cas du champ de langue des noms. Un champ qui en déclare plusieurs les donne tous.
+$vocabs_de = function ($bundle, $champ, $var_env = '') use ($db) {
+  if ($var_env !== '' && ($e = getenv($var_env))) { return array_values(array_filter(array_map('trim', explode(',', $e)))); }
+  $i = FieldConfig::loadByName('node', $bundle, $champ);
+  $t = $i ? array_keys($i->getSetting('handler_settings')['target_bundles'] ?? []) : [];
+  if ($t) { return array_values($t); }
+  return array_values($db->query("SELECT DISTINCT t.vid FROM {node__$champ} f INNER JOIN {taxonomy_term_field_data} t ON t.tid = f.{$champ}_target_id WHERE f.bundle = :b", [':b' => $bundle])->fetchCol());
+};
+$premier = function ($vids, $nom) use ($termes) { $r = $termes->loadByProperties(['vid' => $vids, 'name' => $nom]); return $r ? (int) key($r) : 0; };
+$vids_langue = $vocabs_de('common_names', 'field_language_taxo_vern', 'VOCAB_LANGUES');
+$nom_vocab_langue = $vids_langue ? implode(', ', $vids_langue) : 'aucun vocabulaire déclaré ni déduit : recherche dans tous';
 $langues = []; $connues = [];
-if ($vid_langue) { foreach ($termes->loadByProperties(['vid' => $vid_langue]) as $t) { $connues[] = $t->label(); $langues[mb_strtolower($t->label())] = (int) $t->id(); } }
+if ($vids_langue) { foreach ($termes->loadByProperties(['vid' => $vids_langue]) as $t) { $connues[] = $t->label(); } }
 foreach (array_unique(array_map(function ($r) { return (string) ($r['nom']['langue'] ?? ''); }, $retenus)) as $lg) {
-  $verif(isset($langues[mb_strtolower($lg)]), "langue « $lg » dans le vocabulaire « $vid_langue » : " . (isset($langues[mb_strtolower($lg)]) ? $langues[mb_strtolower($lg)] : "absente (existantes : " . implode(', ', array_slice($connues, 0, 15)) . ")"));
+  $trouves = $termes->loadByProperties($vids_langue ? ['vid' => $vids_langue, 'name' => $lg] : ['name' => $lg]);
+  if (count($trouves) === 1) { $t = reset($trouves); $langues[mb_strtolower($lg)] = (int) $t->id(); $verif(TRUE, "langue « $lg » ($nom_vocab_langue) : terme " . $t->id() . " « " . $t->label() . " »"); }
+  elseif (count($trouves) > 1) { $verif(FALSE, "langue « $lg » : " . count($trouves) . " termes de ce nom (" . implode(' ; ', array_map(function ($t) { return $t->id() . ' dans ' . $t->bundle(); }, $trouves)) . ") ; relancer avec VOCAB_LANGUES=<vocabulaire>"); }
+  else { $verif(FALSE, "langue « $lg » : absente ($nom_vocab_langue" . ($connues ? " ; existantes : " . implode(', ', array_slice($connues, 0, 15)) : '') . ")"); }
 }
 $types = []; $types_source = [];
 foreach ($retenus as $r) { foreach ($r['attestations'] ?? [] as $a) {
   $t = $a['type'] ?? ''; $ts = $a['type_source'] ?? 'Publication scientifique';
-  if ($t !== '' && !isset($types[$t])) { $types[$t] = $premier('attestation_type', $t); $verif($types[$t] > 0, "type d'attestation « $t » : " . ($types[$t] ?: 'absent du vocabulaire')); }
-  if (!isset($types_source[$ts])) { $types_source[$ts] = $premier('attestation_type_source', $ts); $verif($types_source[$ts] > 0, "type de source « $ts » : " . ($types_source[$ts] ?: 'absent du vocabulaire')); }
+  if ($t !== '' && !isset($types[$t])) { $types[$t] = $premier('attestation_type', $t); $verif($types[$t] > 0, "type d'attestation « $t » (vocabulaire attestation_type) : " . ($types[$t] ?: 'terme absent : à créer')); }
+  if (!isset($types_source[$ts])) { $types_source[$ts] = $premier('attestation_type_source', $ts); $verif($types_source[$ts] > 0, "type de source « $ts » (vocabulaire attestation_type_source) : " . ($types_source[$ts] ?: 'terme absent : à créer')); }
 } }
-$vid_lieu = $vocab_de('attestation', 'field_att_lieu');
+$vids_lieu = $vocabs_de('attestation', 'field_att_lieu', 'VOCAB_LIEUX');
 $defs = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
 $permises = function ($champ) use ($defs) { return isset($defs[$champ]) ? array_keys((array) $defs[$champ]->getSetting('allowed_values')) : NULL; };
 $verif(isset($defs['field_att_valeur'], $defs['field_att_locateur'], $defs['field_att_statut'], $defs['field_att_concept_taxo']), "champs d'attestation présents (valeur, locateur, statut, concept)");
+$utilise_translit = FALSE; foreach ($retenus as $r) { if (!empty($r['nom']['translitteration'])) { $utilise_translit = TRUE; } }
+if ($utilise_translit) { $verif(isset($defs['field_ver_translitteration']), "champ field_ver_translitteration présent (translittération savante)" . (isset($defs['field_ver_translitteration']) ? '' : " — absent : lancer modele_nomenclature_2.php")); }
+$utilise_en = FALSE; foreach ($retenus as $r) { foreach ($r['attestations'] as $a) { if (!empty($a['texte_en'])) { $utilise_en = TRUE; } } }
+if ($utilise_en) { $verif(isset($defs['field_att_valeur_en']), "champ field_att_valeur_en présent (énoncé anglais)" . (isset($defs['field_att_valeur_en']) ? '' : " — absent : lancer modele_nomenclature_3.php")); }
+$utilise_note_en = FALSE; foreach ($retenus as $r) { foreach ($r['attestations'] as $a) { if (!empty($a['note_interne_en'])) { $utilise_note_en = TRUE; } } }
+if ($utilise_note_en) { $verif(isset($defs['field_att_note_interne_en']), "champ field_att_note_interne_en présent (note de travail anglaise)" . (isset($defs['field_att_note_interne_en']) ? '' : " — absent : lancer modele_nomenclature_3.php")); }
 $statuts_ok = $permises('field_att_statut') ?: []; $concepts_ok = $permises('field_att_concept_taxo') ?: []; $portees_ok = $permises('field_nom_portee') ?: [];
 foreach ($retenus as $cle => $r) {
   foreach ($r['attestations'] ?? [] as $k => $a) {
@@ -190,7 +228,6 @@ foreach ($retenus as $cle => $r) {
   if (!empty($r['nom']['portee']) && !in_array($r['nom']['portee'], $portees_ok, TRUE)) { $erreur("« $cle » : portée « {$r['nom']['portee']} » non permise (permise : " . implode(', ', $portees_ok) . ")"); }
 }
 $type_valeur = isset($defs['field_att_valeur']) ? $defs['field_att_valeur']->getType() : 'string_long';
-$db = \Drupal::database();
 $lc_noms = $db->query("SELECT langcode FROM {node_field_data} WHERE type = :t AND default_langcode = 1 ORDER BY nid LIMIT 1", [':t' => 'common_names'])->fetchField() ?: 'en';
 $lc_att = $db->query("SELECT langcode FROM {node_field_data} WHERE type = :t AND default_langcode = 1 ORDER BY nid LIMIT 1", [':t' => 'attestation'])->fetchField() ?: 'en';
 echo "  langue des contenus : noms « $lc_noms », attestations « $lc_att » (reprise des contenus existants)\n";
@@ -211,12 +248,25 @@ $phrase_validation = function ($v) {
   if (!empty($v['commentaire'])) { $s .= ' — ' . $v['commentaire']; }
   return $s . '.';
 };
+$phrase_validation_en = function ($v) {
+  $etat = $v['etat'] ?? 'a_valider';
+  $libelles = ['a_valider' => 'to be validated', 'valide' => 'validated', 'corrige' => 'corrected'];
+  $s = 'Validation: ' . ($libelles[$etat] ?? $etat);
+  if (!empty($v['par'])) { $s .= ' by ' . $v['par']; }
+  if (!empty($v['date'])) { $s .= ' on ' . $v['date']; }
+  if (!empty($v['commentaire'])) { $s .= ' — ' . $v['commentaire']; }
+  return $s . '.';
+};
+// Trace technique du chargement : elle va dans le JOURNAL DE RÉVISION du contenu (onglet « Versions »), jamais dans la note de travail,
+// qui ne contient que du contenu éditorial.
+$trace = function ($r) use ($periode, $jeu, $version) { return "Chargement initial $periode (jeu « $jeu », version $version, enregistrement {$r['cle']})."; };
 $plantes_de = function ($r, $a) use ($plantes) { $al = $a['plantes'] ?? ($r['nom']['plantes'] ?? []); return array_values(array_filter(array_map(function ($x) use ($plantes) { return $plantes[$x] ?? NULL; }, $al))); };
-$construire_nom = function ($r, $parent_nid = NULL) use ($langues, $plantes, $lc_noms) {
+$construire_nom = function ($r, $parent_nid = NULL) use ($langues, $plantes, $lc_noms, $trace) {
   $aliases = $r['nom']['plantes'] ?? [];
-  $v = ['type' => 'common_names', 'title' => $r['nom']['titre'], 'status' => 0, 'langcode' => $lc_noms,
+  $v = ['type' => 'common_names', 'title' => $r['nom']['titre'], 'status' => 0, 'langcode' => $lc_noms, 'revision_log' => $trace($r),
     'field_language_taxo_vern' => [['target_id' => $langues[mb_strtolower($r['nom']['langue'])] ?? 0]]];
   if (!empty($r['nom']['ecriture_locale'])) { $v['field_ver_local_scripture'] = $r['nom']['ecriture_locale']; }
+  if (!empty($r['nom']['translitteration'])) { $v['field_ver_translitteration'] = $r['nom']['translitteration']; }
   if ($aliases) {
     $v['field_genus_com_entity'] = array_map(function ($al) use ($plantes) { return ['target_id' => $plantes[$al]['nid'] ?? 0]; }, $aliases);
     $v['field_genus_taxo'] = array_map(function ($tid) { return ['target_id' => $tid]; }, array_values(array_unique(array_map(function ($al) use ($plantes) { return $plantes[$al]['tid'] ?? 0; }, $aliases))));
@@ -225,19 +275,21 @@ $construire_nom = function ($r, $parent_nid = NULL) use ($langues, $plantes, $lc
   if ($parent_nid) { $v['field_nom_parent'] = [['target_id' => $parent_nid]]; }
   return Node::create($v);
 };
-$construire_att = function ($r, $k, $nom_nid = NULL, $avec_concept = TRUE) use ($refs, $types, $types_source, $plantes_de, $valeur_champ, $lc_att, $periode, $jeu, $version, $phrase_validation, $premier, $vid_lieu) {
+$construire_att = function ($r, $k, $nom_nid = NULL, $avec_concept = TRUE) use ($refs, $types, $types_source, $plantes_de, $valeur_champ, $lc_att, $periode, $jeu, $version, $phrase_validation, $phrase_validation_en, $trace, $premier, $vids_lieu) {
   $a = $r['attestations'][$k]; $pl = $plantes_de($r, $a); $n_att = count($r['attestations']);
   $titre = $a['type'] . ' — ' . $r['nom']['titre'] . ' (' . $r['nom']['langue'] . ')' . ($n_att > 1 && $pl ? ' → ' . $pl[0]['titre'] : '');
-  $note = "Chargement initial $periode (jeu « $jeu », version $version, enregistrement {$r['cle']}). " . $phrase_validation($r['validation'] ?? []) . (empty($a['note_interne']) ? '' : ' ' . $a['note_interne']);
-  $v = ['type' => 'attestation', 'title' => $titre, 'status' => 0, 'langcode' => $lc_att,
+  $note = $phrase_validation($r['validation'] ?? []) . (empty($a['note_interne']) ? '' : ' ' . $a['note_interne']);
+  $v = ['type' => 'attestation', 'title' => $titre, 'status' => 0, 'langcode' => $lc_att, 'revision_log' => $trace($r),
     'field_att_type' => [['target_id' => $types[$a['type']] ?? 0]], 'field_att_valeur' => $valeur_champ($a['texte']), 'field_att_statut' => $a['statut'],
     'field_att_source' => [['target_id' => $refs[$a['source']] ?? 0]], 'field_att_type_source' => [['target_id' => $types_source[$a['type_source'] ?? 'Publication scientifique'] ?? 0]],
     'field_att_note_interne' => $note];
   if (!empty($a['locateur'])) { $v['field_att_locateur'] = $a['locateur']; }
+  if (!empty($a['texte_en'])) { $v['field_att_valeur_en'] = $valeur_champ($a['texte_en']); }
+  if (!empty($a['note_interne_en'])) { $v['field_att_note_interne_en'] = $phrase_validation_en($r['validation'] ?? []) . ' ' . $a['note_interne_en']; }
   if ($pl) { $v['field_att_plante'] = array_map(function ($p) { return ['target_id' => $p['nid']]; }, $pl); }
   if ($avec_concept && !empty($a['concept'])) { $v['field_att_concept_taxo'] = $a['concept']; }
   if ($nom_nid) { $v['field_att_nom_vernaculaire'] = [['target_id' => $nom_nid]]; }
-  if (!empty($a['lieu']) && $vid_lieu && ($tl = $premier($vid_lieu, $a['lieu']))) { $v['field_att_lieu'] = [['target_id' => $tl]]; }
+  if (!empty($a['lieu']) && $vids_lieu && ($tl = $premier($vids_lieu, $a['lieu']))) { $v['field_att_lieu'] = [['target_id' => $tl]]; }
   return Node::create($v);
 };
 $violations_de = function ($entite) { $m = []; foreach ($entite->validate() as $viol) { $m[] = $viol->getPropertyPath() . ' : ' . $viol->getMessage(); } return $m; };
@@ -309,12 +361,12 @@ foreach ($ordre as $cle) {
   $r = $retenus[$cle]; $n = $noeuds->load($nids_noms[$cle]);
   $att_plantes = array_map(function ($al) use ($plantes) { return $plantes[$al]['nid']; }, $r['nom']['plantes'] ?? []); sort($att_plantes);
   $parent = $r['nom']['parent'] ?? NULL;
-  $lire("$cle : nom non publié, plantes [" . implode(',', $att_plantes) . "]" . ($parent ? ", parent $parent" : '') . (!empty($r['nom']['portee']) ? ", portée {$r['nom']['portee']}" : ''),
-    $n && !$n->isPublished() && $ids($n->get('field_genus_com_entity')) === $att_plantes && (!$parent || (int) $n->get('field_nom_parent')->target_id === $nids_noms[$parent]) && (empty($r['nom']['portee']) || $n->get('field_nom_portee')->value === $r['nom']['portee']));
+  $lire("$cle : nom non publié, plantes [" . implode(',', $att_plantes) . "]" . ($parent ? ", parent $parent" : '') . (!empty($r['nom']['portee']) ? ", portée {$r['nom']['portee']}" : '') . ', journal de révision',
+    $n && !$n->isPublished() && $ids($n->get('field_genus_com_entity')) === $att_plantes && (!$parent || (int) $n->get('field_nom_parent')->target_id === $nids_noms[$parent]) && (empty($r['nom']['portee']) || $n->get('field_nom_portee')->value === $r['nom']['portee']) && (empty($r['nom']['translitteration']) || $n->get('field_ver_translitteration')->value === $r['nom']['translitteration']) && strpos((string) $n->getRevisionLogMessage(), 'Chargement initial') === 0);
   foreach ($r['attestations'] as $k => $a) {
     $at = $noeuds->load($nids_att[$cle][$k]);
-    $lire("$cle : attestation " . ($k + 1) . " non publiée, statut {$a['statut']}, locateur, lien vers le nom",
-      $at && !$at->isPublished() && $at->get('field_att_statut')->value === $a['statut'] && (empty($a['locateur']) || $at->get('field_att_locateur')->value === $a['locateur']) && (int) $at->get('field_att_nom_vernaculaire')->target_id === $nids_noms[$cle]);
+    $lire("$cle : attestation " . ($k + 1) . " non publiée, statut {$a['statut']}, locateur, lien vers le nom, journal de révision",
+      $at && !$at->isPublished() && $at->get('field_att_statut')->value === $a['statut'] && (empty($a['locateur']) || $at->get('field_att_locateur')->value === $a['locateur']) && (int) $at->get('field_att_nom_vernaculaire')->target_id === $nids_noms[$cle] && (empty($a['texte_en']) || $at->get('field_att_valeur_en')->value === $a['texte_en']) && strpos((string) $at->getRevisionLogMessage(), 'Chargement initial') === 0 && strpos((string) $at->get('field_att_note_interne')->value, 'Chargement initial') === FALSE && (empty($a['note_interne_en']) || trim((string) $at->get('field_att_note_interne_en')->value) !== ''));
   }
 }
 echo "\nrelecture : $ok/$tot conformes\n";

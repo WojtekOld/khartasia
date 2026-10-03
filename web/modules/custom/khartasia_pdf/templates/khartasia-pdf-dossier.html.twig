@@ -29,7 +29,7 @@ h1 { font-family: dejavuserif; font-style: italic; font-weight: normal; font-siz
 </style></head><body>
 <h1>{{ d.plante.titre }}</h1>
 <div class="sub">{{ L.sub }}</div>
-{% if d.plante.famille %}<div class="meta1">{{ L.fam }} : {{ d.plante.famille }}</div>{% endif %}
+{% if d.plante.famille %}<div class="meta1">{{ L.fam }}{{ L.colon }} {{ d.plante.famille }}</div>{% endif %}
 <div class="read"><b>{{ L.read_t }}.</b> {{ L.read_p|raw }}</div>
 {% if d.groupes %}
 {% for g in d.groupes %}
@@ -45,12 +45,12 @@ h1 { font-family: dejavuserif; font-style: italic; font-weight: normal; font-siz
 </table>
 {% for a in n.attestations %}
 <div class="lab">{{ L.stmt }}{% if a.type %} — {{ a.type }}{% endif %}{% if n.attestations|length > 1 %} · {{ a.statut_label }}{% endif %}{% if relecture and not a.publie %} · {{ L.unpub }}{% endif %}</div>
-<div class="stmt">{{ a.valeur }}</div>
+<div class="stmt">{{ a.valeur }}{% if a.valeur_repli and L.repli %} <span class="small">{{ L.repli }}</span>{% endif %}</div>
 <table width="100%">
 {% if a.source %}<tr><td class="k">{{ L.source }}</td><td class="v">{{ a.source }}</td></tr>{% endif %}
 {% if a.concept %}<tr><td class="k">{{ L.concept }}</td><td class="v">{{ a.concept }}</td></tr>{% endif %}
 </table>
-{% if relecture and a.note %}<div class="note"><b>{{ L.note }}</b> {{ a.note }}</div>{% endif %}
+{% if relecture and a.note %}<div class="note"><b>{{ L.note }}</b> {{ a.note }}{% if a.note_repli and L.repli %} <span class="small">{{ L.repli }}</span>{% endif %}</div>{% endif %}
 {% else %}
 <div class="stmt small">{{ L.no_att }}</div>
 {% endfor %}

@@ -1,12 +1,14 @@
 {
   "meta": {
     "jeu": "helman-wazny-2025-stellera",
-    "version": 2,
+    "version": 4,
     "description": "Six noms tibétains de Stellera chamaejasme (Helman-Ważny 2025, p. 127, d'après l'extraction de la synthèse d'octobre 2026). Données à valider par l'auteure ; rien n'est publié.",
     "conventions": [
       "Le lieu cité par la source reste dans le texte de l'affirmation ; le champ « lieu » est laissé vide (vocabulaire de lieux différé).",
       "La chaîne de provenance (qui rapporte qui) est dans la note interne, jamais dans le texte de l'affirmation.",
-      "La forme romanisée d'usage est le titre ; la translittération savante (Wylie) a son propre champ ; l'écriture tibétaine n'est pas fournie par la source extraite."
+      "La forme romanisée d'usage est le titre ; la translittération savante (Wylie) a son propre champ ; l'écriture tibétaine n'est pas fournie par la source extraite.",
+      "texte_en et note_interne_en sont des traductions faites par le projet, pas par l'auteure : les textes français (texte, note_interne) font foi, et toute correction de l'auteure porte sur eux.",
+      "La trace du chargement (jeu, version, enregistrement) est écrite dans le journal de révision de chaque contenu, pas dans la note de travail, qui ne contient que du contenu éditorial."
     ],
     "a_saisir": [
       {
@@ -66,9 +68,11 @@
           "source": "helman-wazny-2025",
           "locateur": "p. 127",
           "texte": "Nom tibétain commun de Stellera chamaejasme, employé dans les régions culturelles tibétaines (Amdo, Kham, Ü Tsang).",
+          "texte_en": "Common Tibetan name of Stellera chamaejasme, used in the Tibetan cultural regions (Amdo, Kham, Ü Tsang).",
           "concept": "powo",
           "lieu": null,
-          "note_interne": "Statut probable : identification confirmée par les materia medica d'après Boesi 2016 (p. 516), non consulté. La même phrase de la source énonce aussi l'usage papetier de la plante : attestation d'usage distincte, à saisir."
+          "note_interne": "Statut probable : identification confirmée par les materia medica d'après Boesi 2016 (p. 516), non consulté. La même phrase de la source énonce aussi l'usage papetier de la plante : attestation d'usage distincte, à saisir.",
+          "note_interne_en": "Probable status: identification confirmed by materia medica according to Boesi 2016 (p. 516), not consulted. The same sentence of the source also states the papermaking use of the plant: a separate attestation, still to be entered."
         }
       ],
       "validation": {
@@ -97,9 +101,11 @@
           "source": "helman-wazny-2025",
           "locateur": "p. 127",
           "texte": "Variante de rechakpa employée à Lithang (Kham) pour Stellera chamaejasme.",
+          "texte_en": "Variant of rechakpa used at Lithang (Kham) for Stellera chamaejasme.",
           "concept": "powo",
           "lieu": null,
-          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté.",
+          "note_interne_en": "Probable status: variant relayed from Boesi 2016 (p. 504), not consulted."
         }
       ],
       "validation": {
@@ -128,9 +134,11 @@
           "source": "helman-wazny-2025",
           "locateur": "p. 127",
           "texte": "Variante de rechakpa employée dans le Dolpo népalais pour Stellera chamaejasme.",
+          "texte_en": "Variant of rechakpa used in Nepalese Dolpo for Stellera chamaejasme.",
           "concept": "powo",
           "lieu": null,
-          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté.",
+          "note_interne_en": "Probable status: variant relayed from Boesi 2016 (p. 504), not consulted."
         }
       ],
       "validation": {
@@ -159,9 +167,11 @@
           "source": "helman-wazny-2025",
           "locateur": "p. 127",
           "texte": "Variante de rechakpa employée dans le bas Mustang (Népal) pour Stellera chamaejasme.",
+          "texte_en": "Variant of rechakpa used in lower Mustang (Nepal) for Stellera chamaejasme.",
           "concept": "powo",
           "lieu": null,
-          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté.",
+          "note_interne_en": "Probable status: variant relayed from Boesi 2016 (p. 504), not consulted."
         }
       ],
       "validation": {
@@ -190,9 +200,11 @@
           "source": "helman-wazny-2025",
           "locateur": "p. 127",
           "texte": "Variante de rechakpa employée dans la région de Xining (Qinghai, RPC) pour Stellera chamaejasme.",
+          "texte_en": "Variant of rechakpa used in the Xining area (Qinghai, PRC) for Stellera chamaejasme.",
           "concept": "powo",
           "lieu": null,
-          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté."
+          "note_interne": "Statut probable : variante relayée de Boesi 2016 (p. 504), non consulté.",
+          "note_interne_en": "Probable status: variant relayed from Boesi 2016 (p. 504), not consulted."
         }
       ],
       "validation": {
@@ -221,9 +233,11 @@
           "source": "helman-wazny-2025",
           "locateur": "p. 127",
           "texte": "Nom de Stellera chamaejasme (littéralement « fleur à l'odeur désagréable de transpiration »), relevé sur le terrain par l'auteure à Muktinath, Jharkot, Khingar et aux environs de Lo Monthang (Mustang, Népal).",
+          "texte_en": "Name of Stellera chamaejasme (literally “flower with the unpleasant smell of sweat”), recorded in the field by the author at Muktinath, Jharkot, Khingar and around Lo Monthang (Mustang, Nepal).",
           "concept": "powo",
           "lieu": null,
-          "note_interne": "Statut atteste : relevé de terrain de l'auteure, rapporté directement par la source."
+          "note_interne": "Statut atteste : relevé de terrain de l'auteure, rapporté directement par la source.",
+          "note_interne_en": "Attested status: field record by the author, reported directly by the source."
         }
       ],
       "validation": {

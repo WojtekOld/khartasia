@@ -35,8 +35,11 @@ class DossierBuilder {
     $noms = $noeuds->loadMultiple($q->execute());
 
     if ($langue !== NULL && $langue !== '') {
-      $noms = array_filter($noms, function ($n) use ($langue) {
-        return mb_strtolower($this->libelle($n, 'field_language_taxo_vern')) === mb_strtolower($langue);
+      // Le filtre accepte le nom du vocabulaire (« tibétain ») comme son équivalent affiché (« Tibetan »).
+      $noms = array_filter($noms, function ($n) use ($langue, $L) {
+        $brut = $this->libelle($n, 'field_language_taxo_vern');
+        $cible = mb_strtolower($langue);
+        return mb_strtolower($brut) === $cible || mb_strtolower($L['langues'][$brut] ?? $brut) === $cible;
       });
     }
 
@@ -58,10 +61,11 @@ class DossierBuilder {
     $groupes = [];
     $nb_att = 0;
     foreach ($noms as $nid => $nom) {
-      $langue_nom = $this->libelle($nom, 'field_language_taxo_vern');
+      $brut_langue = $this->libelle($nom, 'field_language_taxo_vern');
+      $langue_nom = $L['langues'][$brut_langue] ?? $brut_langue;
       $attestations = [];
       foreach ($par_nom[(int) $nid] ?? [] as $att) {
-        $attestations[] = $this->attestation($att, $L, $relecture, $refs);
+        $attestations[] = $this->attestation($att, $L, $relecture, $refs, $lang);
       }
       usort($attestations, function ($a, $b) {
         return [$a['type_cle'] === 'Désignation' ? 0 : 1, $a['type_cle']] <=> [$b['type_cle'] === 'Désignation' ? 0 : 1, $b['type_cle']];
@@ -125,7 +129,7 @@ class DossierBuilder {
     return array_values($badges);
   }
 
-  protected function attestation($att, array $L, bool $relecture, array &$refs): array {
+  protected function attestation($att, array $L, bool $relecture, array &$refs, string $lang): array {
     $type = $this->libelle($att, 'field_att_type');
     $statut = $this->texte($att, 'field_att_statut') ?: 'inconnu';
     $concept = $this->texte($att, 'field_att_concept_taxo');
@@ -143,17 +147,49 @@ class DossierBuilder {
       $source = $source !== '' ? $source . ', ' . $locateur : $locateur;
     }
 
+    // L'énoncé de référence est le français (« Valeur »). En anglais, on affiche la traduction de l'équipe si elle existe ;
+    // sinon le français, et on le signale pour qu'il ne passe pas pour une traduction.
+    $valeur = $this->texte($att, 'field_att_valeur');
+    $valeur_repli = FALSE;
+    if ($lang === 'en') {
+      $en = $this->texte($att, 'field_att_valeur_en');
+      if ($en !== '') {
+        $valeur = $en;
+      }
+      elseif ($valeur !== '') {
+        $valeur_repli = TRUE;
+      }
+    }
+
+    // Note de travail : réservée au mode relecture. En anglais, la note anglaise si elle existe ; sinon la française, signalée.
+    $note = '';
+    $note_repli = FALSE;
+    if ($relecture) {
+      $note = $this->texte($att, 'field_att_note_interne');
+      if ($lang === 'en') {
+        $note_en = $this->texte($att, 'field_att_note_interne_en');
+        if ($note_en !== '') {
+          $note = $note_en;
+        }
+        elseif ($note !== '') {
+          $note_repli = TRUE;
+        }
+      }
+    }
+
     return [
       'nid' => (int) $att->id(),
       'type_cle' => $type,
       'type' => $L['types'][$type] ?? $type,
-      'valeur' => $this->texte($att, 'field_att_valeur'),
+      'valeur' => $valeur,
+      'valeur_repli' => $valeur_repli,
       'statut' => $statut,
       'statut_label' => $L['st'][$statut] ?? $statut,
       'statut_classe' => $statut === 'atteste' ? 'att' : ($statut === 'probable' ? 'prob' : 'oth'),
       'source' => $source,
       'concept' => $concept !== '' ? ($L['concepts'][$concept] ?? $concept) : '',
-      'note' => $relecture ? $this->texte($att, 'field_att_note_interne') : '',
+      'note' => $note,
+      'note_repli' => $note_repli,
       'publie' => (bool) $att->isPublished(),
     ];
   }
