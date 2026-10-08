@@ -14,6 +14,7 @@ dependencies:
     - node.type.paper_mill
     - node.type.papers
   module:
+    - bibcite_entity
     - comment
     - contact
     - contextual
@@ -104,5 +105,7 @@ permissions:
   - 'use advanced search'
   - 'use text format filtered_html'
   - 'use text format full_html'
+  - 'view bibcite_contributor'
+  - 'view bibcite_reference'
   - 'view own unpublished content'
   - 'view the administration theme'

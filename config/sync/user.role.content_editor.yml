@@ -6,6 +6,7 @@ dependencies:
     - node.type.article
     - node.type.page
   module:
+    - bibcite_entity
     - comment
     - contextual
     - file
@@ -27,6 +28,8 @@ permissions:
   - 'access toolbar'
   - 'administer url aliases'
   - 'create article content'
+  - 'create bibcite_contributor'
+  - 'create bibcite_reference'
   - 'create page content'
   - 'create url aliases'
   - 'delete article revisions'
@@ -35,9 +38,12 @@ permissions:
   - 'delete own page content'
   - 'delete page revisions'
   - 'edit own article content'
+  - 'edit own bibcite_reference'
   - 'edit own comments'
   - 'edit own page content'
   - 'revert all revisions'
   - 'view all revisions'
+  - 'view bibcite_contributor'
+  - 'view bibcite_reference'
   - 'view own unpublished content'
   - 'view the administration theme'
