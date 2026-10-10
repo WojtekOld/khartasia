@@ -4,7 +4,7 @@ khartasia_guided_forms.papier_nouveau:
     _title: 'Nouveau Papier — Saisie guidée'
     _form: '\Drupal\khartasia_guided_forms\Form\PapierBaseForm'
   requirements:
-    _permission: 'access content'
+    _permission: 'create papers content'
 
 khartasia_guided_forms.papier_attestations:
   path: '/papier/{papier_nid}/attestations-guide'
@@ -12,7 +12,7 @@ khartasia_guided_forms.papier_attestations:
     _title: 'Attestations — Saisie guidée'
     _form: '\Drupal\khartasia_guided_forms\Form\PapierAttestationsForm'
   requirements:
-    _permission: 'access content'
+    _permission: 'create attestation content'
     papier_nid: \d+
 
 khartasia_guided_forms.attestation_ancrage:

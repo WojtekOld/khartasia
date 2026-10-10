@@ -28,6 +28,8 @@ function khartasia_core_theme($existing, $type, $theme, $path) {
         'title' => NULL,
         'url' => NULL,
         'summary' => NULL,
+		'details' => [],
+		'actions' => [],
       ],
       'template' => 'khartasia-dossier-card',
       'path' => $path . '/templates',

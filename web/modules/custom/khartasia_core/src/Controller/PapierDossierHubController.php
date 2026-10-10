@@ -13,11 +13,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Contrôleur du hub — /node/{node}/dossier.
  *
- * Corrigé avant premier test : la classe n'étendait pas ControllerBase et
- * utilisait t() en fonction globale, retirée depuis Drupal 10 — chaque
- * appel aurait levé une erreur fatale "Call to undefined function t()".
- * L'injection du service ParcoursPapier passe maintenant par create(),
- * plus sûre que compter sur l'auto-résolution par argument de route.
+ * Lot 6a : la carte « attestations » affiche les brouillons et les précisions
+ * suspectes (définitions : brouillon = attestation non publiée, motif « ebauche » ;
+ * précision suspecte = motif posé à la main « precision_suspecte ») et propose les
+ * actions de saisie (recette en série, attestation unitaire) aux utilisateurs autorisés.
  */
 final class PapierDossierHubController extends ControllerBase {
 
@@ -54,6 +53,32 @@ final class PapierDossierHubController extends ControllerBase {
       '@total' => $etat['attestations']['total'],
     ]);
 
+    $details = [];
+    if (($n = (int) ($etat['attestations']['brouillons'] ?? 0)) > 0) {
+      $details[] = $this->formatPlural($n, '1 brouillon à compléter', '@count brouillons à compléter');
+    }
+    if (($n = (int) ($etat['attestations']['precisions_suspectes'] ?? 0)) > 0) {
+      $details[] = $this->formatPlural($n, '1 précision suspecte', '@count précisions suspectes');
+    }
+    if ($details) {
+      $build['cards']['attestations']['#details'] = $details;
+    }
+
+    $actions = [];
+    $liens = [
+      ['khartasia_guided_forms.papier_recette', ['papier_nid' => $node->id()], [], $this->t('Saisir la recette (série)')],
+      ['khartasia_guided_forms.attestation_ancrage', [], ['query' => ['papier' => $node->id()]], $this->t('Nouvelle attestation')],
+    ];
+    foreach ($liens as [$route, $params, $options, $titre]) {
+      $url = Url::fromRoute($route, $params, $options);
+      if ($url->access()) {
+        $actions[] = ['title' => $titre, 'url' => $url->toString()];
+      }
+    }
+    if ($actions) {
+      $build['cards']['attestations']['#actions'] = $actions;
+    }
+
     $backlog_items = [];
     if ($etat['attestations']['sources_sans_type_source'] > 0) {
       $backlog_items[] = $this->t('@count attestations sourcées sans type de source', ['@count' => $etat['attestations']['sources_sans_type_source']]);
@@ -78,6 +103,8 @@ final class PapierDossierHubController extends ControllerBase {
       ];
     }
 
+    // Les boutons d'action dépendent des permissions de l'utilisateur.
+    $build['#cache']['contexts'] = ['user.permissions'];
     $build['#cache']['tags'] = Cache::mergeTags($node->getCacheTags(), ['node_list']);
 
     return $build;

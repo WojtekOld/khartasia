@@ -1,8 +1,19 @@
 {#
   khartasia-dossier-card.html.twig
   Module khartasia_core, dans modules/custom/khartasia_core/templates/.
+  Variables : title, url, summary (texte), details (liste de lignes), actions (liens d'action).
 #}
 <div class="khartasia-dossier-card">
   <h3><a href="{{ url }}">{{ title }}</a></h3>
   {% if summary %}<p class="khartasia-dossier-card__summary">{{ summary }}</p>{% endif %}
+  {% if details %}
+    <ul class="khartasia-dossier-card__details">
+      {% for ligne in details %}<li>{{ ligne }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  {% if actions %}
+    <p class="khartasia-dossier-card__actions">
+      {% for action in actions %}<a class="button button--small" href="{{ action.url }}">{{ action.title }}</a> {% endfor %}
+    </p>
+  {% endif %}
 </div>
