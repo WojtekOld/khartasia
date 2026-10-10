@@ -125,6 +125,11 @@ The default Icon selector is based on an autocomplete Drupal field.
 The submodule `UI Icons Picker` provides a more advanced selector of type
 `icon_picker`.
 
+Enabling it also makes the preview box of the default `icon_autocomplete`
+selector clickable, opening the same grid of icons. Both ways of choosing then
+work on the one element: type a name to search, or click the preview to browse.
+Set `#show_picker` to `FALSE` on the element to keep a plain autocomplete.
+
 ### Icon Library
 
 Enable the submodule `UI Icons library` to browse your icons:

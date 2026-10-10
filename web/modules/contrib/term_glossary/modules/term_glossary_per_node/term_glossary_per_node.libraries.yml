@@ -1,0 +1,6 @@
+summary:
+  js:
+    js/term-glossary-per-node-summary.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

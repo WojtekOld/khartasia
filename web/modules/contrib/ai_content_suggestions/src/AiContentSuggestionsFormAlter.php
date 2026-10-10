@@ -46,6 +46,11 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
     if ($this->currentUser->hasPermission('access ai content suggestion tools')) {
       /** @var \Drupal\Core\Entity\ContentEntityFormInterface $form_object */
       $form_object = $form_state->getFormObject();
+      // Only add the tools to an entity's add and edit forms. Core uses the
+      // "default" operation when an entity has no separate add or edit form.
+      if (!in_array($form_object->getOperation(), ['default', 'add', 'edit'], TRUE)) {
+        return;
+      }
       $entity = $form_object->getEntity();
       if (!$this->isEnabledForCurrentEntity($entity)) {
         return;

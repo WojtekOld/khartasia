@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/loader'
 import config from '../playwright.config.loader'
-import { assertSlotAddRemove, openAllDetails, pick, select } from '../objects/ComponentForm'
+import { addSlotSource, assertSlotAddRemove, openAllDetails, openSourceSelector, pick, pickSource, select, value } from '../objects/ComponentForm'
 import { resetArticleDisplay, seedArticles } from '../objects/TestContent'
 import { Audit } from '../objects/Audit'
 import { enableModules } from '../objects/Setup'
@@ -48,6 +48,7 @@ test('Field formatter: contexts and referenced entities', { tag: ['@base', '@fie
 
     // The sources offered depend on the contexts the formatter injects:
     // the field item, its entity, the referenced entity.
+    await openSourceSelector(page, `${base}[props][string][source_id]`)
     const options = await select(page, `${base}[props][string][source_id]`)
       .locator('option')
       .evaluateAll(list => list.map(o => (o as HTMLOptionElement).value))
@@ -61,13 +62,14 @@ test('Field formatter: contexts and referenced entities', { tag: ['@base', '@fie
     await pick(page, `${base}[props][string][source_id]`, referenced, `${nested}[source_id]`)
     await pick(page, `${nested}[source_id]`, 'entity_field', `${nested}[source][derivable_context]`)
     await pick(page, `${nested}[source][derivable_context]`, termName, `${nested}[source][${termName}][value][source_id]`)
-    await select(page, `${nested}[source][${termName}][value][source_id]`).selectOption('field_property:taxonomy_term:name:value')
+    await pickSource(page, `${nested}[source][${termName}][value][source_id]`, 'field_property:taxonomy_term:name:value')
 
     // Switching the term field replaces the nested form; switching back
     // gives an empty one, the old choice does not come back from the input.
     await pick(page, `${nested}[source][derivable_context]`, termColor, `${nested}[source][${termColor}][value][source_id]`)
     await expect(select(page, `${nested}[source][${termName}][value][source_id]`)).toHaveCount(0)
     await pick(page, `${nested}[source][derivable_context]`, termName, `${nested}[source][${termName}][value][source_id]`)
+    await openSourceSelector(page, `${nested}[source][${termName}][value][source_id]`)
     await expect(select(page, `${nested}[source][${termName}][value][source_id]`)).toHaveValue('')
     await select(page, `${nested}[source][${termName}][value][source_id]`).selectOption('field_property:taxonomy_term:name:value')
     await drupal.ajaxReady()
@@ -75,20 +77,20 @@ test('Field formatter: contexts and referenced entities', { tag: ['@base', '@fie
 
   await test.step('3. Slot: nested component gets the same contexts, shows the term color', async () => {
     await openAllDetails(page)
-    await select(page, `${base}[slots][slot][add_more_button]`).selectOption('component')
+    await addSlotSource(page, `${base}[slots][slot]`, 'component')
     const component = page.locator(`select[name^="${base}[slots][slot][sources]"][name$="[component_id]"]`).first()
     await component.waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
     await component.selectOption(config.testComponentId)
-    const nestedString = page.locator(`select[name^="${base}[slots][slot][sources]"][name$="[props][string][source_id]"]`).first()
+    const nestedString = page.locator(`input[name^="${base}[slots][slot][sources]"][name$="[props][string][node_id]"]`).first()
     await nestedString.waitFor({ state: 'attached', timeout: 20_000 })
-    const prefix = (await nestedString.getAttribute('name'))!.replace('[source_id]', '')
+    const prefix = (await nestedString.getAttribute('name'))!.replace('[node_id]', '')
     const nested = `${prefix}[source][${ref}][value]`
 
     await pick(page, `${prefix}[source_id]`, referenced, `${nested}[source_id]`)
     await pick(page, `${nested}[source_id]`, 'entity_field', `${nested}[source][derivable_context]`)
     await pick(page, `${nested}[source][derivable_context]`, termColor, `${nested}[source][${termColor}][value][source_id]`)
-    await select(page, `${nested}[source][${termColor}][value][source_id]`).selectOption('field_property:taxonomy_term:field_test_color:value')
+    await pickSource(page, `${nested}[source][${termColor}][value][source_id]`, 'field_property:taxonomy_term:field_test_color:value')
     await drupal.ajaxReady()
   })
 
@@ -108,17 +110,24 @@ test('Field formatter: contexts and referenced entities', { tag: ['@base', '@fie
     await drupal.expectMessage('Your settings have been saved.')
 
     await page.locator(`input[name="${field}_settings_edit"]`).click()
-    await select(page, `${base}[props][string][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][string][node_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
+    await openAllDetails(page)
+    await openSourceSelector(page, `${base}[props][string][source_id]`)
     const nested = `${base}[props][string][source][${ref}][value]`
     await expect(select(page, `${base}[props][string][source_id]`)).toHaveValue(referenced)
     await expect(page.locator(`input[name="${base}[props][string][source][derivable_context]"]`)).toHaveValue(ref)
+    await openSourceSelector(page, `${nested}[source_id]`)
     await expect(select(page, `${nested}[source_id]`)).toHaveValue('entity_field')
     await expect(select(page, `${nested}[source][derivable_context]`)).toHaveValue(termName)
+    await openSourceSelector(page, `${nested}[source][${termName}][value][source_id]`)
     await expect(select(page, `${nested}[source][${termName}][value][source_id]`)).toHaveValue('field_property:taxonomy_term:name:value')
-    const nestedString = page.locator(`select[name^="${base}[slots][slot][sources]"][name$="[props][string][source_id]"]`).first()
-    await expect(nestedString).toHaveValue(referenced)
-    const prefix = (await nestedString.getAttribute('name'))!.replace('[source_id]', '')
+    const nestedString = page.locator(`input[name^="${base}[slots][slot][sources]"][name$="[props][string][node_id]"]`).first()
+    await nestedString.waitFor({ state: 'attached', timeout: 20_000 })
+    const prefix = (await nestedString.getAttribute('name'))!.replace('[node_id]', '')
+    await openSourceSelector(page, `${prefix}[source_id]`)
+    await expect(select(page, `${prefix}[source_id]`)).toHaveValue(referenced)
     await expect(select(page, `${prefix}[source][${ref}][value][source][derivable_context]`)).toHaveValue(termColor)
+    await openSourceSelector(page, `${prefix}[source][${ref}][value][source][${termColor}][value][source_id]`)
     await expect(select(page, `${prefix}[source][${ref}][value][source][${termColor}][value][source_id]`)).toHaveValue(
       'field_property:taxonomy_term:field_test_color:value',
     )
@@ -145,7 +154,7 @@ test('Field formatter: contexts and referenced entities', { tag: ['@base', '@fie
   await test.step('7. Slot: a setting left unchecked stays unchecked', async () => {
     const openSettings = async () => {
       await page.locator(`input[name="${field}_settings_edit"]`).click()
-      await select(page, `${base}[props][string][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+      await value(page, `${base}[props][string][node_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
       await openAllDetails(page)
     }
     await page.goto('admin/structure/types/manage/test_article/display/default')
@@ -153,7 +162,7 @@ test('Field formatter: contexts and referenced entities', { tag: ['@base', '@fie
 
     // The Label formatter links to the referenced entity unless told not to,
     // which is what makes a lost value visible: it comes back checked.
-    await select(page, `${base}[slots][slot][add_more_button]`).selectOption(`field_formatter:node:test_article:${field}`)
+    await addSlotSource(page, `${base}[slots][slot]`, `field_formatter:node:test_article:${field}`)
     const type = page.locator(`select[name^="${base}[slots][slot][sources]"][name$="[source][type]"]`).first()
     await type.waitFor({ state: 'attached', timeout: 20_000 })
     const link = (await type.getAttribute('name'))!.replace(/\[type\]$/, '[settings][link]')
@@ -177,7 +186,7 @@ test('Field formatter: contexts and referenced entities', { tag: ['@base', '@fie
     await openSettings()
     await expect(page.locator(`input[name="${link}"]`)).not.toBeChecked()
     // The submit carrying that empty value kept the rest of the slot.
-    const nestedString = page.locator(`select[name^="${base}[slots][slot][sources]"][name$="[props][string][source_id]"]`).first()
+    const nestedString = page.locator(`input[name^="${base}[slots][slot][sources]"][name$="[props][string][source_id]"]`).first()
     await expect(nestedString).toHaveValue(referenced)
   })
 

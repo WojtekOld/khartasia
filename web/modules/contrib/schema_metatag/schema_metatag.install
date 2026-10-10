@@ -19,11 +19,7 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  */
 function schema_metatag_update_8101() {
 
-  /**
-   * Metatag default values.
-   *
-   * @var Drupal\metatag\Entity\MetatagDefaults
-   */
+  /** @var \Drupal\metatag\Entity\MetatagDefaults $configs */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {
@@ -59,11 +55,7 @@ function schema_metatag_update_8102() {
  */
 function schema_metatag_update_8103() {
 
-  /**
-   * Metatag default values.
-   *
-   * @var Drupal\metatag\Entity\MetatagDefaults
-   */
+  /** @var \Drupal\metatag\Entity\MetatagDefaults $configs */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {
@@ -109,11 +101,7 @@ function schema_metatag_update_8104(&$sandbox) {
  */
 function schema_metatag_update_8105() {
 
-  /**
-   * Metatag default values.
-   *
-   * @var Drupal\metatag\Entity\MetatagDefaults
-   */
+  /** @var \Drupal\metatag\Entity\MetatagDefaults $configs */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {
@@ -138,11 +126,7 @@ function schema_metatag_update_8105() {
  */
 function schema_metatag_update_8106() {
 
-  /**
-   * Metatag default values.
-   *
-   * @var Drupal\metatag\Entity\MetatagDefaults
-   */
+  /** @var \Drupal\metatag\Entity\MetatagDefaults $configs */
   $configs = MetatagDefaults::loadMultiple();
 
   $delete = [
@@ -174,11 +158,7 @@ function schema_metatag_update_8106() {
  */
 function schema_metatag_update_8107() {
 
-  /**
-   * Metatag default values.
-   *
-   * @var Drupal\metatag\Entity\MetatagDefaults
-   */
+  /** @var \Drupal\metatag\Entity\MetatagDefaults $configs */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {

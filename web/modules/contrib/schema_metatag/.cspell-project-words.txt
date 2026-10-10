@@ -1,12 +1,10 @@
 ergebnis
-Minney
 Paywalled
 votingapi
 Jsonld
 IMDB
 microdata
 gtin
-Enity
 Metafiles
 RTMP
 faxnumber
@@ -14,10 +12,8 @@ xpaths
 schemaorg
 subobject
 rdfs
-badions
 JSONLD
-keystring
-arraytrim
 База
 данни
 грешка
+lullabot

@@ -21,7 +21,7 @@ class MergeTermsTargetTest extends MergeTermsTestBase {
    * @test
    */
   public function hasTitle(): void {
-    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory);
+    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory, $this->database);
 
     $expected = new TranslatableMarkup('Please select a target term');
 
@@ -34,7 +34,7 @@ class MergeTermsTargetTest extends MergeTermsTestBase {
    * @test
    */
   public function buildsForm(): void {
-    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory);
+    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory, $this->database);
 
     $known_term_ids = array_keys($this->terms);
     $selected_term_ids = array_slice($known_term_ids, 0, 2);
@@ -96,7 +96,7 @@ class MergeTermsTargetTest extends MergeTermsTestBase {
    * @dataProvider selectedTargetsProvider
    */
   public function newOrExistingTermMustBeSelected($selected_terms): void {
-    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory);
+    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory, $this->database);
 
     $known_term_ids = array_keys($this->terms);
     $selected_term_ids = array_slice($known_term_ids, 0, 2);
@@ -122,7 +122,7 @@ class MergeTermsTargetTest extends MergeTermsTestBase {
    * @test
    */
   public function newTermFormSubmission(): void {
-    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory);
+    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory, $this->database);
 
     $known_term_ids = array_keys($this->terms);
     $selected_term_ids = array_slice($known_term_ids, 0, 2);
@@ -147,7 +147,7 @@ class MergeTermsTargetTest extends MergeTermsTestBase {
    * @test
    */
   public function existingTermSubmission() {
-    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory);
+    $sut = new MergeTermsTarget($this->entityTypeManager, $this->privateTempStoreFactory, $this->database);
 
     $known_term_ids = array_keys($this->terms);
     $selected_term_ids = array_slice($known_term_ids, 0, 2);

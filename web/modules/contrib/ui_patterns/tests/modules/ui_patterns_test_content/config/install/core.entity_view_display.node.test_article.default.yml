@@ -4,6 +4,7 @@ dependencies:
   config:
     - field.field.node.test_article.field_test_body
     - field.field.node.test_article.field_test_related
+    - field.field.node.test_article.field_test_source
     - field.field.node.test_article.field_test_summary
     - field.field.node.test_article.field_test_tags
     - node.type.test_article
@@ -45,4 +46,5 @@ content:
     weight: 3
     region: content
 hidden:
+  field_test_source: true
   links: true

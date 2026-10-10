@@ -47,13 +47,16 @@ class IconSelectFormTest extends KernelTestBase {
    *   The `dialogOptions[query]` the modal was opened with.
    * @param array $input
    *   User input, `filter` being the only key the form reads.
+   * @param array $dialog_options
+   *   Extra `dialogOptions`, siblings of `query`, `target` being the only key
+   *   the form reads.
    *
    * @return array
    *   The built form.
    */
-  private function buildPicker(array $query, array $input = []): array {
+  private function buildPicker(array $query, array $input = [], array $dialog_options = []): array {
     $request = Request::create('/ui-icons/picker/dialog', 'GET', [
-      'dialogOptions' => ['query' => $query],
+      'dialogOptions' => $dialog_options + ['query' => $query],
     ]);
     // The form builder reads the session to build the form token.
     $request->setSession(new Session(new MockArraySessionStorage()));
@@ -251,6 +254,8 @@ class IconSelectFormTest extends KernelTestBase {
     $this->assertSame('test_path:foo', $commands[0]['icon_full_id']);
     $this->assertSame(self::WRAPPER_ID, $commands[0]['wrapper_id']);
     $this->assertSame('closeDialog', $commands[1]['command']);
+    // No target was carried, so the shared modal is what gets closed.
+    $this->assertSame('#drupal-modal', $commands[1]['selector']);
   }
 
   /**
@@ -267,6 +272,67 @@ class IconSelectFormTest extends KernelTestBase {
     $response = IconSelectForm::create($this->container)->selectIconAjax($form, $form_state);
 
     $this->assertSame('', $response->getCommands()[0]['icon_full_id']);
+  }
+
+  /**
+   * Tests the dialog target falls back to the shared modal.
+   */
+  public function testBuildFormDefaultsDialogTarget(): void {
+    $form = $this->buildPicker(['wrapper_id' => self::WRAPPER_ID]);
+
+    $this->assertSame('#drupal-modal', $form['dialog_target']['#value']);
+  }
+
+  /**
+   * Tests the dialog target named by the opener is carried in the form.
+   *
+   * Core strips `target` from the options it hands to jQuery UI, so the form
+   * has to pick it up itself to know which dialog to close on selection.
+   */
+  public function testBuildFormCarriesDialogTarget(): void {
+    $form = $this->buildPicker(
+      ['wrapper_id' => self::WRAPPER_ID],
+      [],
+      ['target' => 'ui-icons-picker-dialog'],
+    );
+
+    // The id comes in bare and has to end up a selector.
+    $this->assertSame('#ui-icons-picker-dialog', $form['dialog_target']['#value']);
+  }
+
+  /**
+   * Tests a target already given as a selector is left alone.
+   */
+  public function testBuildFormKeepsDialogTargetSelector(): void {
+    $form = $this->buildPicker(
+      ['wrapper_id' => self::WRAPPER_ID],
+      [],
+      ['target' => '#ui-icons-picker-dialog'],
+    );
+
+    $this->assertSame('#ui-icons-picker-dialog', $form['dialog_target']['#value']);
+  }
+
+  /**
+   * Tests the selection closes the dialog the picker is in, not its opener.
+   *
+   * Opened from a form that is itself in the shared modal, closing
+   * `#drupal-modal` would take down the form the icon is written back to.
+   */
+  public function testSelectIconAjaxClosesOwnDialog(): void {
+    $form = [];
+    $form_state = new FormState();
+    $form_state->setValues([
+      'icon_full_id' => 'test_path:foo',
+      'wrapper_id' => self::WRAPPER_ID,
+      'dialog_target' => '#ui-icons-picker-dialog',
+    ]);
+
+    $response = IconSelectForm::create($this->container)->selectIconAjax($form, $form_state);
+
+    $commands = $response->getCommands();
+    $this->assertSame('closeDialog', $commands[1]['command']);
+    $this->assertSame('#ui-icons-picker-dialog', $commands[1]['selector']);
   }
 
 }

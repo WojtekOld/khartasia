@@ -25,6 +25,7 @@ export async function resetArticleDisplay(drupal: Drupal): Promise<void> {
     "\\$display = \\Drupal::service('entity_display.repository')->getViewDisplay('node', 'test_article');",
     '\\$display->disableLayoutBuilder()->save();',
     "\\$display->setComponent('field_test_tags', ['type' => 'entity_reference_label', 'settings' => ['link' => TRUE]])->save();",
+    "\\$display->setComponent('field_test_related', ['type' => 'entity_reference_label', 'settings' => ['link' => TRUE]])->save();",
     // Layout builder keeps unsaved changes in a shared tempstore.
     "\\Drupal::keyValueExpirable('tempstore.shared.layout_builder.section_storage.defaults')->delete('node.test_article.default');",
   ].join(' ')
@@ -49,3 +50,21 @@ export async function resetArticlesView(drupal: Drupal): Promise<void> {
   await drupal.drush(`ev "${php}"`)
 }
 
+
+/** The source field as shipped: no default value, its own widget, hidden on the page. */
+export async function resetSourceField(drupal: Drupal): Promise<void> {
+  const php = [
+    "\\Drupal\\field\\Entity\\FieldConfig::loadByName('node', 'test_article', 'field_test_source')->setDefaultValue([])->save();",
+    "\\$displays = \\Drupal::service('entity_display.repository');",
+    "\\$displays->getFormDisplay('node', 'test_article')->setComponent('field_test_source', ['type' => 'ui_patterns_source', 'settings' => []])->save();",
+    "\\$displays->getViewDisplay('node', 'test_article')->removeComponent('field_test_source')->save();",
+  ].join(' ')
+  await drupal.drush(`ev "${php}"`)
+}
+
+/** Shows the source field on the article page, with its own formatter. */
+export async function showSourceField(drupal: Drupal): Promise<void> {
+  await drupal.drush(
+    `ev "\\Drupal::service('entity_display.repository')->getViewDisplay('node', 'test_article')->setComponent('field_test_source', ['type' => 'ui_patterns_source', 'label' => 'hidden'])->save();"`,
+  )
+}

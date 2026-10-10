@@ -6,6 +6,7 @@ namespace Drupal\Tests\ui_patterns\Kernel;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_patterns\PropTypePluginManager;
 use Drupal\ui_patterns\SchemaManager\ReferencesResolver;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -56,6 +57,23 @@ final class SchemaManagerTest extends KernelTestBase {
       $this->cleanupSchema($result);
       self::assertEqualsCanonicalizing($expected, $result);
     }
+  }
+
+  /**
+   * A resolved schema is named "id", whoever resolved its "$ref".
+   */
+  public function testResolvedSchemaId(): void {
+    $resolver = \Drupal::service(ReferencesResolver::class);
+    $prop_types = \Drupal::service(PropTypePluginManager::class);
+
+    $resolved = $resolver->resolve(['$ref' => 'ui-patterns://enum_list', 'items' => ['enum' => ['a']]]);
+    self::assertSame('ui-patterns://enum-list', $resolved['id']);
+    self::assertArrayNotHasKey('$id', $resolved);
+    self::assertSame('enum_list', $prop_types->guessFromSchema($resolved)->getPluginId());
+
+    // Resolved by another module: "$id", no "$ref".
+    $inlined = ['type' => 'object', 'properties' => ['pack_id' => ['enum' => ['x']]], '$id' => 'ui-patterns://links'];
+    self::assertSame('links', $prop_types->guessFromSchema($resolver->resolve($inlined))->getPluginId());
   }
 
   /**

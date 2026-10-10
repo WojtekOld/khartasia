@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns_legacy\Drush\Commands;
 
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_legacy\ComponentConverter;
 use Drupal\ui_patterns_legacy\ComponentDiscovery;
 use Drupal\ui_patterns_legacy\ComponentWriter;
@@ -33,7 +33,6 @@ final class UiPatternsLegacyCommands extends DrushCommands {
     private readonly ComponentDiscovery $discovery,
     #[Autowire(service: 'ui_patterns_legacy.component_writer')]
     private readonly ComponentWriter $writer,
-    #[Autowire(service: 'plugin.manager.sdc')]
     private readonly ComponentPluginManager $componentsManager,
     #[Autowire(service: 'ui_patterns_legacy.story_extractor')]
     private readonly StoryExtractor $storyExtractor,

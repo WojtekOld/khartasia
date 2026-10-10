@@ -14,6 +14,6 @@ use Drupal\schema_metatag\Plugin\schema_metatag\PropertyTypeBase;
  *   sub_properties = {},
  * )
  */
-class URL extends PropertyTypeBase {
+class Url extends PropertyTypeBase {
 
 }

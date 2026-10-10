@@ -1,0 +1,6 @@
+term_glossary.glossary_config_form:
+  title: 'Term Glossary Configuration'
+  route_name: term_glossary.glossary_config_form
+  description: 'A description for the menu entry'
+  parent: system.admin_config_content
+  weight: 99

@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_test_source
+    - node.type.test_article
+  module:
+    - ui_patterns_field
+id: node.test_article.field_test_source
+field_name: field_test_source
+entity_type: node
+bundle: test_article
+label: Source
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  synchronized_translation: true
+field_type: ui_patterns_source

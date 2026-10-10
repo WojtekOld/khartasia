@@ -1,0 +1,48 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display an attribution.
+ *
+ * Available variables:
+ * - source.name: The name of the source.
+ * - source.link: The link to the source.
+ * - author.name: The name of the author.
+ * - author.link: The link to the author.
+ * - license: The associated license.
+ * - license.id: The spdx license short code.
+ * - license.name: The spdx license name.
+ * - license.osiCertified: Is the license OSI certified?
+ * - license.deprecated: Is the license deprecated?
+ * - license.link: The link to the license.
+ * - creation.type: The creation type (human_created, ai_generated, ai_modified).
+ * - creation.type_label: The translated label for creation.type.
+ * - creation.tool: The AI tool used, if any.
+ * - creation.editor.name: The prompt editor name, if creation.type is ai_generated or ai_modified.
+ * - creation.editor.link: The link to the prompt editor, if creation.type is ai_generated or ai_modified.
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes }}>
+  {% if source or author or license %}
+    {{ 'This work'|trans }}
+    {% if source.link %}
+      <a href="{{ source.link }}">{% if source.name %}{{ source.name }}{% else %}{{ source.link }}{% endif %}</a>
+    {% elseif source.name %}
+      "{{ source.name }}"
+    {% endif %}
+
+    {% if author.link %}
+      {{ 'by'|trans }} <a href="{{ author.link }}">{% if author.name %}{{ author.name }}{% else %}{{ author.link }}{% endif %}</a>
+    {% elseif author.name %}
+      {{ 'by'|trans }} {{ author.name }}
+    {% endif %}
+
+    {{ 'is licensed under'|trans }} {% if license.link %}<a href="{{ license.link }}">{{ license.name }}</a>{% else %}{{ license.name }}{% endif %}
+  {% endif %}
+  {% if creation.type == 'ai_generated' %}
+    {{ 'This work was AI-generated'|trans }}{% if creation.tool %} {{ 'using'|trans }} {{ creation.tool }}{% endif %}{% if creation.editor.link %}, {{ 'prompted by'|trans }} <a href="{{ creation.editor.link }}">{% if creation.editor.name %}{{ creation.editor.name }}{% else %}{{ creation.editor.link }}{% endif %}</a>{% elseif creation.editor.name %}, {{ 'prompted by'|trans }} {{ creation.editor.name }}{% endif %}.
+  {% elseif creation.type == 'ai_modified' %}
+    {{ 'This work was AI-modified'|trans }}{% if creation.editor.link %}, {{ 'prompted by'|trans }} <a href="{{ creation.editor.link }}">{% if creation.editor.name %}{{ creation.editor.name }}{% else %}{{ creation.editor.link }}{% endif %}</a>{% elseif creation.editor.name %}, {{ 'prompted by'|trans }} {{ creation.editor.name }}{% endif %}.
+  {% endif %}
+</div>

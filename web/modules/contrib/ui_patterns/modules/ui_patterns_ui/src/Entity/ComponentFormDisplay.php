@@ -7,8 +7,8 @@ namespace Drupal\ui_patterns_ui\Entity;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Url;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
 use Drupal\ui_patterns\PropTypePluginBase;
 use Drupal\ui_patterns\SourcePluginBase;
@@ -31,7 +31,7 @@ use Drupal\ui_patterns_ui\Form\ComponentFormDisplayForm;
     'plural' => '@count component displays',
   ],
   config_prefix: 'component_display',
-  admin_permission: 'administer component_display',
+  admin_permission: 'administer component_form_display',
   entity_keys: [
     'id' => 'id',
     'label' => 'label',
@@ -139,7 +139,6 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
    * Returns the prop definition.
    */
   public function getPropDefinition(string $prop_id): ?array {
-    // @phpstan-ignore method.notFound
     $component_definition = self::getComponentPluginManager()->negotiateDefinition($this->component_id);
     if (isset($component_definition['props']['properties'][$prop_id])) {
       return $component_definition['props']['properties'][$prop_id];
@@ -276,7 +275,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
     // Collect weights for the components in the display.
     foreach ($this->content as $options) {
       if (isset($options['weight'])) {
-        $weights[] = $options['weight'];
+        $weights[] = (int) $options['weight'];
       }
     }
     return $weights ? \max($weights) : NULL;
@@ -327,12 +326,7 @@ final class ComponentFormDisplay extends ConfigEntityBase implements ComponentFo
   /**
    * Load form display by form mode.
    */
-  public static function loadByFormMode(string $component_id, mixed $form_mode): ?ComponentFormDisplayInterface {
-    if (\is_array($form_mode)) {
-      // Strange behavior for default value form modes.
-      // @todo Debug it.
-      return NULL;
-    }
+  public static function loadByFormMode(string $component_id, string $form_mode): ?ComponentFormDisplayInterface {
     /** @var \Drupal\ui_patterns_ui\Entity\ComponentFormDisplay[] $items */
     $items = \Drupal::entityTypeManager()->getStorage('component_form_display')
       ->loadByProperties(['component_id' => $component_id, 'form_mode_name' => $form_mode]);

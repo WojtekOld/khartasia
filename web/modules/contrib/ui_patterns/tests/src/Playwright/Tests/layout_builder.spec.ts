@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/loader'
-import { assertSlotAddRemove, openAllDetails, pick, select, value } from '../objects/ComponentForm'
+import { addSlotSource, assertSlotAddRemove, openAllDetails, openSourceSelector, pick, pickSource, select, slotAddButton, value } from '../objects/ComponentForm'
 import { enableLayoutBuilder, resetArticleDisplay, seedArticles } from '../objects/TestContent'
 import { Audit } from '../objects/Audit'
 import { enableModules } from '../objects/Setup'
@@ -30,7 +30,7 @@ const tagsFormatter = 'field_formatter:node:test_article:field_test_tags'
 async function mapStringToField(page: Page, base: string, field: string, property: string, drupal: Drupal): Promise<void> {
   await pick(page, `${base}[props][string][source_id]`, 'entity_field', `${base}[props][string][source][derivable_context]`)
   await pick(page, `${base}[props][string][source][derivable_context]`, field, `${base}[props][string][source][${field}][value][source_id]`)
-  await select(page, `${base}[props][string][source][${field}][value][source_id]`).selectOption(property)
+  await pickSource(page, `${base}[props][string][source][${field}][value][source_id]`, property)
   await drupal.ajaxReady()
 }
 
@@ -63,10 +63,12 @@ test('Layout builder: entity context in a section and a block', { tag: ['@base',
     await mapStringToField(page, settings, summary, 'field_property:node:field_test_summary:value', drupal)
 
     const slot = `${settings}[slots][slot]`
-    await pick(page, `${slot}[add_more_button]`, 'entity_field', `${slot}[sources][0][source][derivable_context]`)
+    await addSlotSource(page, slot, 'entity_field', `${slot}[sources][0][source][derivable_context]`)
     const inField = `${slot}[sources][0][source][${tags}][value]`
-    await pick(page, `${slot}[sources][0][source][derivable_context]`, tags, `${inField}[add_more_button]`)
-    await pick(page, `${inField}[add_more_button]`, tagsFormatter, `${inField}[sources][0][source][type]`)
+    await openAllDetails(page)
+    await pickSource(page, `${slot}[sources][0][source][derivable_context]`, tags)
+    await slotAddButton(page, inField).waitFor({ state: 'attached', timeout: 20_000 })
+    await addSlotSource(page, inField, tagsFormatter, `${inField}[sources][0][source][type]`)
     // The formatter select rebuilds its settings over AJAX; the choice must
     // survive that rebuild before the settings are touched.
     await select(page, `${inField}[sources][0][source][type]`).selectOption('entity_reference_label')
@@ -96,7 +98,7 @@ test('Layout builder: entity context in a section and a block', { tag: ['@base',
   await test.step('5. Reopen the section and the block: everything is kept', async () => {
     await page.goto(`layout_builder/configure/section/${storage}/0`)
     await openAllDetails(page)
-    await expect(select(page, `${section}[props][string][source_id]`)).toHaveValue('entity_field')
+    await expect(value(page, `${section}[props][string][source_id]`).first()).toHaveValue('entity_field')
     await expect(select(page, `${section}[props][string][source][derivable_context]`)).toHaveValue(title)
     await expect(value(page, `${section}[props][string][source][${title}][value][source_id]`)).toHaveValue('field_property:node:title:value')
     await expect(page.locator(`input[name="${section}[props][boolean][source][value]"]`)).toBeChecked()
@@ -106,7 +108,7 @@ test('Layout builder: entity context in a section and a block', { tag: ['@base',
     const href = await page.locator(`a[href*="/layout_builder/update/block/${storage}/0/slot/"]`).first().getAttribute('href')
     await page.goto(href!.split('?')[0])
     await openAllDetails(page)
-    await expect(select(page, `${settings}[props][string][source_id]`)).toHaveValue('entity_field')
+    await expect(value(page, `${settings}[props][string][source_id]`).first()).toHaveValue('entity_field')
     await expect(select(page, `${settings}[props][string][source][derivable_context]`)).toHaveValue(summary)
     await expect(value(page, `${settings}[props][string][source][${summary}][value][source_id]`)).toHaveValue(
       'field_property:node:field_test_summary:value',

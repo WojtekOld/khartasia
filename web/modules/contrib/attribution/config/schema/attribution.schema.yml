@@ -1,0 +1,105 @@
+# Config entities.
+attribution.attribution_license.*:
+  type: config_entity
+  label: License
+  mapping:
+    id:
+      type: string
+      label: ID
+    identifier:
+      type: string
+      label: Identifier
+    name:
+      type: label
+      label: Name
+    osiCertified:
+      type: boolean
+      label: OSI certified
+    deprecated:
+      type: boolean
+      label: Deprecated
+    link:
+      type: string
+      label: Link
+# Formatter settings.
+field.formatter.settings.attribution_default:
+  type: mapping
+  label: 'Default attribution formatter settings'
+  mapping:
+    use_identifier:
+      type: boolean
+      label: 'Use license identifier instead of name'
+    cc_icon:
+      type: boolean
+      label: 'Show Creative Commons icon'
+    divider:
+      type: boolean
+      label: 'Use divider markup instead of connector words'
+    ai_icon:
+      type: boolean
+      label: 'Show AI type icon'
+    show_prompt:
+      type: boolean
+      label: 'Show AI prompt'
+    label_toggle:
+      type: boolean
+      label: 'Use field label as toggle'
+# Block instance.
+block.settings.attribution:
+  type: block_settings
+  label: 'Attribution'
+  mapping:
+    license:
+      type: string
+      label: License
+    disclaimer:
+      type: string
+      label: Disclaimer
+# Field instance.
+field.field_settings.attribution:
+  type: mapping
+  label: Attribution field settings
+  mapping:
+    default:
+      type: string
+      label: Default license
+    licenses:
+      type: sequence
+      label: Licenses
+      sequence:
+        type: string
+# Default value.
+field.value.attribution:
+  type: mapping
+  label: Default value
+  mapping:
+    source_name:
+      type: string
+      label: Source name
+    source_link:
+      type: uri
+      label: Source link
+    author_name:
+      type: string
+      label: Author name
+    author_link:
+      type: uri
+      label: Author link
+    license:
+      type: string
+      label: License
+    creation_type:
+      type: string
+      label: Creation type
+    ai_tool:
+      type: string
+      label: AI tool
+    ai_prompt:
+      type: text
+      label: AI prompt
+    prompt_editor_name:
+      type: string
+      label: Prompt editor
+    prompt_editor_link:
+      type: uri
+      label: Prompt editor link

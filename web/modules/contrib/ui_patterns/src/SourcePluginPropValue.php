@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns;
 
-use function Symfony\Component\String\u;
-
 /**
  * This class covers a specific case of Source plugins.
  *
@@ -38,14 +36,7 @@ abstract class SourcePluginPropValue extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function settingsSummary(): array {
-    $value = $this->getSetting('value') ?? NULL;
-    if (!$value || !\is_string($value)) {
-      return [];
-    }
-
-    return [
-      u(\strip_tags($value))->truncate(20, '...', FALSE),
-    ];
+    return $this->summarizeValue($this->getSetting('value'));
   }
 
   /**

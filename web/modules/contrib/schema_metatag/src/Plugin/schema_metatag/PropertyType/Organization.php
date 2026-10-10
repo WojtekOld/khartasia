@@ -31,6 +31,11 @@ use Drupal\schema_metatag\Plugin\schema_metatag\PropertyTypeBase;
  *       "label" = @Translation("name"),
  *       "description" = @Translation("Name of the person or organization, i.e. [node:author:display-name]."),
  *     },
+ *     "description" = {
+ *       "id" = "text",
+ *       "label" = @Translation("description"),
+ *       "description" = @Translation("Description of the person or organization"),
+ *     },
  *     "url" = {
  *       "id" = "url",
  *       "label" = @Translation("url"),
@@ -40,6 +45,15 @@ use Drupal\schema_metatag\Plugin\schema_metatag\PropertyTypeBase;
  *       "id" = "url",
  *       "label" = @Translation("sameAs"),
  *       "description" = @Translation("Comma separated list of URLs for the person's or organization's official social media profile page(s)."),
+ *     },
+ *     "address" = {
+ *       "id" = "postal_address",
+ *       "label" = @Translation("address"),
+ *       "description" = @Translation("The address of the organization."),
+ *       "tree_parent" = {
+ *         "PostalAddress",
+ *       },
+ *       "tree_depth" = 0,
  *     },
  *     "logo" = {
  *       "id" = "image_object",

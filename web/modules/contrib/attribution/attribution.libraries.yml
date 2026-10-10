@@ -1,0 +1,22 @@
+attribution_attribution:
+  css:
+    component:
+      css/attribution-widget.css: {}
+attribution_creative_commons_icons:
+  css:
+    component:
+      css/attribution-creative-commons-icons.css: {}
+attribution_ai_provenance:
+  css:
+    component:
+      css/attribution-ai-provenance.css: {}
+attribution_default:
+  css:
+    component:
+      css/attribution-default.css: {}
+drupal.attribution-icon:
+  css:
+    theme:
+      css/attribution.icon.theme.css: {}
+  dependencies:
+    - field_ui/drupal.field_ui.manage_fields

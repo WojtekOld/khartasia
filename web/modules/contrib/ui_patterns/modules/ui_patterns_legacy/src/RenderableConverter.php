@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns_legacy;
 
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 
 /**
  * Convert render arrays.

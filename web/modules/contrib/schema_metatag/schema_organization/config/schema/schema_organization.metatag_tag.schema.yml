@@ -7,9 +7,15 @@ metatag.metatag_tag.schema_organization_additional_type:
 metatag.metatag_tag.schema_organization_address:
   type: text
   label: 'address'
+metatag.metatag_tag.schema_organization_alternate_name:
+  type: text
+  label: 'alternateName'
 metatag.metatag_tag.schema_organization_description:
   type: text
   label: 'description'
+metatag.metatag_tag.schema_organization_founding_date:
+  type: text
+  label: 'foundingDate'
 metatag.metatag_tag.schema_organization_geo:
   type: text
   label: 'geo'
@@ -19,6 +25,9 @@ metatag.metatag_tag.schema_organization_id:
 metatag.metatag_tag.schema_organization_image:
   type: text
   label: 'image'
+metatag.metatag_tag.schema_organization_legal_name:
+  type: text
+  label: 'legalName'
 metatag.metatag_tag.schema_organization_logo:
   type: text
   label: 'logo'
@@ -70,3 +79,9 @@ metatag.metatag_tag.schema_organization_contact_point:
 metatag.metatag_tag.schema_organization_brand:
   type: text
   label: 'brand'
+metatag.metatag_tag.schema_organization_parent_organization:
+  type: string
+  label: 'parentOrganization'
+metatag.metatag_tag.schema_organization_sub_organization:
+  type: string
+  label: 'subOrganization'

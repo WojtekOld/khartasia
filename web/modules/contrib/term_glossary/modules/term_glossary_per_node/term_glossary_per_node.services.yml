@@ -1,0 +1,4 @@
+services:
+
+  Drupal\term_glossary_per_node\Hook\TermGlossaryPerNodeHooks:
+    autowire: true

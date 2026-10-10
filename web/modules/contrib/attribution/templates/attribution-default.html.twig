@@ -1,0 +1,90 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display an attribution.
+ *
+ * Available variables:
+ * - lead: A translated lead-in ("Licensed"), or NULL. Only present in word
+ *   mode (never in divider mode) and only when there is at least one of
+ *   license/author/source to show.
+ * - parts: An ordered, associative array of pre-rendered markup for
+ *   'license', 'author' and 'source'. Each value already respects the
+ *   formatter's settings (identifier vs. name, icon vs. text, divider vs.
+ *   connector words) — this template only decides the display order and
+ *   how consecutive parts are joined. Keys are only present when the
+ *   corresponding field has a value.
+ *   To change the display order, override this template and edit the
+ *   `order` list below — no other change is required.
+ * - creation: An ordered, associative array of pre-rendered markup for
+ *   'lead' ("This work is", word mode only), 'type', 'tool', 'editor', or
+ *   NULL if no creation type is set. 'prompt' (if present) is a render
+ *   array for an expandable details element.
+ * - divider: TRUE when the formatter is configured to use divider markup
+ *   instead of connector words.
+ * - attributes: The attributes for the wrapping element.
+ *
+ * The license/author/source group and the creation group are two
+ * separate statements, so the boundary between them (and the very end)
+ * always gets a literal ".attribution--stop" full stop — regardless of
+ * the divider setting. The mid-statement dividers are CSS-generated
+ * (::after) content, not markup-level punctuation, so whether and how
+ * they get announced is up to the browser/AT combination; that's fine
+ * *within* a statement, but the *end* of a statement needs a real,
+ * markup-level full stop that is announced consistently everywhere.
+ *
+ * @ingroup themeable
+ */
+#}
+{{ attach_library('attribution/attribution_default') }}
+{%- set order = ['license', 'author', 'source'] -%}
+<div{{ attributes }}>
+  {%- if lead -%}
+    {{ lead }}{{ ' ' }}
+  {%- endif -%}
+  {%- set previous = NULL -%}
+  {%- for key in order -%}
+    {%- if parts[key] is defined -%}
+      {%- if previous is not null -%}
+        {%- if divider -%}
+          <span class="attribution--divider attribution--divider-{{ previous }}-{{ key }}"></span>
+        {%- else -%}
+          {{ ' ' }}
+        {%- endif -%}
+      {%- endif -%}
+      <span class="attribution--part attribution--part-{{ key }}">{{ parts[key] }}</span>
+      {%- set previous = key -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if parts is not empty -%}
+    <span class="attribution--stop">.</span>
+  {%- endif -%}
+
+  {%- if creation -%}
+    {%- if parts is not empty -%}
+      {{ ' ' }}
+    {%- endif -%}
+    {%- if creation.lead is defined -%}
+      {{ creation.lead }}{{ ' ' }}
+    {%- endif -%}
+    <span class="attribution--creation">
+      {%- set previous = NULL -%}
+      {%- for key in ['type', 'tool', 'editor'] -%}
+        {%- if creation[key] is defined -%}
+          {%- if previous is not null -%}
+            {%- if divider -%}
+              <span class="attribution--divider attribution--divider-{{ previous }}-{{ key }}"></span>
+            {%- else -%}
+              {{ ' ' }}
+            {%- endif -%}
+          {%- endif -%}
+          <span class="attribution--part attribution--part-creation-{{ key }}">{{ creation[key] }}</span>
+          {%- set previous = key -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </span>
+    {%- if creation.prompt is defined -%}
+      {{ creation.prompt }}
+    {%- endif -%}
+    <span class="attribution--stop">.</span>
+  {%- endif -%}
+</div>

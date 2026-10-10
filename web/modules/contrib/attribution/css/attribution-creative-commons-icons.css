@@ -1,0 +1,85 @@
+/* Makeshift CC buttons via text formatting (accessible) */
+
+.attribution--license-icons {
+  /*  font-size 10px is closer to original but not accessible */
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  align-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  width: auto;
+  height: calc(1rem + 4px);
+  padding-inline-end: 0.25em;
+  border: 1px solid #000;
+  border-radius: 1px;
+  background-color: #000;
+  font-size: smaller;
+  gap: 0 1em;
+}
+
+.attribution--license-icons a {
+  white-space: nowrap;
+  color: #fff;
+}
+
+.attribution--license-icons a[rel="license"] {
+  display: inline-flex;
+  align-content: center;
+  align-items: center;
+  box-sizing: content-box;
+  height: 1rem;
+  border: 1px solid #fff;
+}
+
+.attribution--license-icons i {
+  padding: 0.125rem 0;
+  color: #fff;
+  font-weight: bold;
+  font-style: normal;
+  line-height: 1rem;
+}
+
+.attribution--license-icons i:last-child {
+  padding-right: 0.5rem;
+}
+
+.attribution--license-icons a:has(.cc-icon) {
+  text-decoration: none;
+}
+
+.attribution--license-icons .cc-icon-cc-cc {
+  position: relative;
+  /* stylelint-disable */
+  top: -0.0rem;
+  left: -0.25rem;
+  /* stylelint-enable */
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0.25rem;
+  padding: 0.25rem;
+  text-align: center;
+  color: #000;
+  border-radius: 50%;
+  background-color: #aaa;
+}
+
+.attribution--license-icons .cc-icon-cc-cc span {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.333rem;
+  padding: 0.125rem 0 0;
+  text-align: center;
+  border: 2px solid #000;
+  border-radius: 50%;
+  background-color: #fff;
+  font-weight: bold;
+}
+
+.attribution--license-icons .cc-icon-cc-version span {
+  display: none;
+}

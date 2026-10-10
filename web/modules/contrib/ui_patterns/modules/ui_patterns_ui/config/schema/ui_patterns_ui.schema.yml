@@ -90,3 +90,23 @@ ui_patterns_ui.widget_settings.*:
     required:
       type: integer
       label: 'Widget is required'
+
+field.widget.settings.ui_patterns_ui_component_form_display:
+  type: mapping
+  label: 'Component form display widget settings'
+  mapping:
+    display_id:
+      type: string
+      label: 'Default display ID'
+      nullable: true
+    additional_display_ids:
+      type: sequence
+      label: 'Additional display IDs'
+      nullable: true
+      sequence:
+        type: string
+        label: 'Display ID'
+    display_component_form:
+      type: boolean
+      label: 'Show component form'
+      nullable: true

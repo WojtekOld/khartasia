@@ -6,7 +6,7 @@ namespace Drupal\ui_patterns_field_formatters\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\Form\ComponentSettingsFormBuilderTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns\SourcePluginBase;

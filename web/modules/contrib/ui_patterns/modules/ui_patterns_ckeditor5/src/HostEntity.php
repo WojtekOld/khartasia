@@ -10,7 +10,7 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Drupal\ui_patterns\Entity\SampleEntityGenerator;
+use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 
 /**
  * The entity whose text holds the embedded components.
@@ -37,7 +37,7 @@ final class HostEntity implements TrustedCallbackInterface {
 
   public function __construct(
     private EntityTypeManagerInterface $entityTypeManager,
-    private SampleEntityGenerator $sampleEntityGenerator,
+    private SampleEntityGeneratorInterface $sampleEntityGenerator,
   ) {}
 
   /**
@@ -52,7 +52,7 @@ final class HostEntity implements TrustedCallbackInterface {
    */
   public static function preRenderPush(array $element): array {
     $entity = $element[self::ELEMENT_KEY] ?? NULL;
-    \Drupal::service('ui_patterns_ckeditor5.host_entity')->push($entity instanceof EntityInterface ? $entity : NULL);
+    \Drupal::service(HostEntity::class)->push($entity instanceof EntityInterface ? $entity : NULL);
     return $element;
   }
 
@@ -60,7 +60,7 @@ final class HostEntity implements TrustedCallbackInterface {
    * Pre-render callback: releases the host pushed by preRenderPush().
    */
   public static function preRenderPop(array $element): array {
-    \Drupal::service('ui_patterns_ckeditor5.host_entity')->pop();
+    \Drupal::service(HostEntity::class)->pop();
     return $element;
   }
 

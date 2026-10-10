@@ -7,7 +7,7 @@ namespace Drupal\ui_icons_picker\Form;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AppendCommand;
-use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\CloseDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\FormBase;
@@ -27,6 +27,11 @@ final class IconSelectForm extends FormBase {
   private const MESSAGE_WRAPPER_ID = 'icon-message-wrapper';
   private const NUM_PER_PAGE = 247;
   private const PREVIEW_ICON_SIZE = 32;
+
+  /**
+   * Dialog closed on selection when the opener did not name its own target.
+   */
+  private const DEFAULT_DIALOG_TARGET = '#drupal-modal';
 
   /**
    * The icon search service.
@@ -74,7 +79,11 @@ final class IconSelectForm extends FormBase {
     if (!$dialog_options = $this->resolveDialogOptions()) {
       return [];
     }
-    ['wrapper_id' => $wrapper_id, 'allowed_icon_pack' => $allowed_icon_pack] = $dialog_options;
+    [
+      'wrapper_id' => $wrapper_id,
+      'allowed_icon_pack' => $allowed_icon_pack,
+      'dialog_target' => $dialog_target,
+    ] = $dialog_options;
 
     if (!$modal_state = static::getModalState($form_state)) {
       $icon_list = $this->pluginManagerIconPack->getIcons($allowed_icon_pack);
@@ -108,6 +117,14 @@ final class IconSelectForm extends FormBase {
     $form['wrapper_id'] = [
       '#type' => 'hidden',
       '#value' => $wrapper_id,
+    ];
+
+    // The dialog this form lives in is not necessarily the shared #drupal-modal
+    // one, it is whatever target js/picker.js asked for. Carry it along so the
+    // selection closes this dialog and not the one that opened it.
+    $form['dialog_target'] = [
+      '#type' => 'hidden',
+      '#value' => $dialog_target,
     ];
 
     $ajax_settings = [
@@ -170,7 +187,7 @@ final class IconSelectForm extends FormBase {
   /**
    * Reads the modal dialog options the picker was opened with.
    *
-   * @return array{wrapper_id: string, allowed_icon_pack: array}|null
+   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string}|null
    *   The options, or NULL when they are missing, in which case a redirect to
    *   the front page has already been sent.
    */
@@ -190,9 +207,20 @@ final class IconSelectForm extends FormBase {
 
     $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? '';
 
+    // Core strips 'target' from the dialog options before handing them to
+    // jQuery UI, but it is still in the query the form action carries over.
+    $dialog_target = $options['target'] ?? '';
+    if (!is_string($dialog_target) || '' === $dialog_target) {
+      $dialog_target = self::DEFAULT_DIALOG_TARGET;
+    }
+    elseif (!str_starts_with($dialog_target, '#')) {
+      $dialog_target = '#' . $dialog_target;
+    }
+
     return [
       'wrapper_id' => $wrapper_id,
       'allowed_icon_pack' => empty($allowed_icon_pack) ? [] : explode('+', $allowed_icon_pack),
+      'dialog_target' => $dialog_target,
     ];
   }
 
@@ -448,8 +476,13 @@ final class IconSelectForm extends FormBase {
       $icon_full_id = '';
     }
 
+    $dialog_target = $form_state->getValue('dialog_target');
+
     $response->addCommand(new UpdateIconSelectionCommand($icon_full_id, $wrapper_id));
-    $response->addCommand(new CloseModalDialogCommand(TRUE));
+    $response->addCommand(new CloseDialogCommand(
+      is_string($dialog_target) && '' !== $dialog_target ? $dialog_target : self::DEFAULT_DIALOG_TARGET,
+      TRUE,
+    ));
 
     return $response;
   }

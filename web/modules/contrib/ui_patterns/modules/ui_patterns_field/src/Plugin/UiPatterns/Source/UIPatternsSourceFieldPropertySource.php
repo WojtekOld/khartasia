@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns_field\Plugin\UiPatterns\Source;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
@@ -97,6 +98,7 @@ class UIPatternsSourceFieldPropertySource extends FieldPropertySource {
       foreach ($sources as $source) {
         $build = $this->componentElementBuilder->buildSource($build, $propId, $propDefinition, $source, $contexts);
       }
+      $this->addCacheableDependency(CacheableMetadata::createFromRenderArray($build));
       return $build['#slots'][$propId] ?? [];
     }
     $build = [];
@@ -105,6 +107,7 @@ class UIPatternsSourceFieldPropertySource extends FieldPropertySource {
       return NULL;
     }
     $build = $this->componentElementBuilder->buildSource($build, $propId, $propDefinition, $prop_source_config, $contexts);
+    $this->addCacheableDependency(CacheableMetadata::createFromRenderArray($build));
     $property_value = $build['#props'][$propId] ?? NULL;
     if (empty($property_value)) {
       return NULL;

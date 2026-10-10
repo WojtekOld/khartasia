@@ -8,6 +8,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\ui_patterns\Kernel\SourceTree\TranslationBase;
 use Drupal\Tests\ui_patterns\Traits\TestContentCreationTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -382,6 +383,43 @@ final class SynchronousTranslationTest extends TranslationBase {
       ->get('field_source')
       ->getValue();
     self::assertCount(1, $german_values, 'German translation must expose the reduced structure after reload.');
+  }
+
+  /**
+   * A translation added without values gets the default only when asymmetric.
+   *
+   * On a synchronized field, a seeded default tree would cascade its
+   * structure onto the default language on save.
+   */
+  #[DataProvider('providerDefaultValueOnNewTranslation')]
+  public function testDefaultValueOnNewTranslation(bool $synchronized, string $expected_de_source_id): void {
+    $field = FieldConfig::loadByName('node', 'page', 'field_source');
+    self::assertInstanceOf(FieldConfig::class, $field);
+    $field->setSetting('synchronized_translation', $synchronized);
+    $field->setDefaultValue([['source_id' => 'textfield', 'source' => ['value' => 'Default']]]);
+    $field->save();
+
+    $this->node->set('field_source', [$this->testSourceTreeData[0]]);
+    $this->node->save();
+    // Migrations add translations this way.
+    $this->node->addTranslation('de')->setTitle('deutsch')->save();
+
+    $storage = \Drupal::entityTypeManager()->getStorage('node');
+    $storage->resetCache([$this->node->id()]);
+    $reloaded = $storage->load($this->node->id());
+    self::assertNotNull($reloaded);
+    self::assertSame('component', $reloaded->get('field_source')->getValue()[0]['source_id']);
+    self::assertSame($expected_de_source_id, self::sourceList($reloaded->getTranslation('de'))->getValue()[0]['source_id']);
+  }
+
+  /**
+   * Data provider for testDefaultValueOnNewTranslation().
+   */
+  public static function providerDefaultValueOnNewTranslation(): array {
+    return [
+      'synchronized: reads the default language' => [TRUE, 'component'],
+      'asymmetric: starts from the default value' => [FALSE, 'textfield'],
+    ];
   }
 
   /**

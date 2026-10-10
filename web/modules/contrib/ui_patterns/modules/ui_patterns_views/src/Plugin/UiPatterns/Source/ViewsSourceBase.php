@@ -6,13 +6,15 @@ namespace Drupal\ui_patterns_views\Plugin\UiPatterns\Source;
 
 use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Component\Render\MarkupInterface;
-use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\TempStore\SharedTempStore;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewExecutable;
+use Drupal\views\ViewExecutableFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -24,6 +26,16 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    * The views temp store.
    */
   protected ?SharedTempStore $tempStore = NULL;
+
+  /**
+   * The views executable factory.
+   */
+  protected ViewExecutableFactory $executableFactory;
+
+  /**
+   * The current user.
+   */
+  protected AccountInterface $currentUser;
 
   /**
    * The view executables resolved from the entity in context, per request.
@@ -50,6 +62,8 @@ abstract class ViewsSourceBase extends SourcePluginBase {
       $plugin_id,
       $plugin_definition
     );
+    $plugin->executableFactory = $container->get(ViewExecutableFactory::class);
+    $plugin->currentUser = $container->get(AccountInterface::class);
     if ($plugin->moduleHandler->moduleExists('views_ui')) {
       $plugin->tempStore = $container->get(SharedTempStoreFactory::class)->get('views');
     }
@@ -70,7 +84,10 @@ abstract class ViewsSourceBase extends SourcePluginBase {
         return $this->getContextValue('ui_patterns_views:view');
       }
       if (isset($this->context['ui_patterns_views:view_entity'])) {
-        return $this->getViewFromEntity($this->getContextValue('ui_patterns_views:view_entity'));
+        $view_entity = $this->getContextValue('ui_patterns_views:view_entity');
+        // Even when its display is missing.
+        $this->addCacheableDependency($view_entity);
+        return $this->getViewFromEntity($view_entity);
       }
     }
     catch (ContextException) {
@@ -86,20 +103,35 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    *
    * @return \Drupal\views\ViewExecutable|null
    *   The view on the display from context, or NULL when that display does
-   *   not exist.
+   *   not exist or the user cannot access it.
    */
   protected function getViewFromEntity(ViewEntityInterface $view_entity): ?ViewExecutable {
     $display_id = isset($this->context['ui_patterns_views:display']) ? $this->getContextValue('ui_patterns_views:display') : NULL;
     $display_id = \is_string($display_id) && $display_id !== '' ? $display_id : NULL;
+    if ($this->tempStore) {
+      // getViewExecutable() checks 'administer views'.
+      $this->addCacheContexts(['user.permissions']);
+    }
     $key = $view_entity->id() . ':' . ($display_id ?? '');
-    if (isset(self::$executables[$key])) {
-      return self::$executables[$key];
+    if (!isset(self::$executables[$key])) {
+      $view = $this->getViewExecutable($view_entity);
+      if ($view === NULL || ($display_id !== NULL && !$view->setDisplay($display_id))) {
+        return NULL;
+      }
+      self::$executables[$key] = $view;
     }
-    $view = $this->getViewExecutable($view_entity);
-    if ($view === NULL || ($display_id !== NULL && !$view->setDisplay($display_id))) {
-      return NULL;
+    return $this->accessibleView(self::$executables[$key]);
+  }
+
+  /**
+   * Returns the view when the user can access its display.
+   */
+  private function accessibleView(ViewExecutable $view): ?ViewExecutable {
+    $access = $view->getDisplay()->getPlugin('access');
+    if ($access instanceof CacheableDependencyInterface) {
+      $this->addCacheableDependency($access);
     }
-    return self::$executables[$key] = $view;
+    return $view->access($view->current_display) ? $view : NULL;
   }
 
   /**
@@ -112,10 +144,11 @@ abstract class ViewsSourceBase extends SourcePluginBase {
    *   The view executable.
    */
   protected function getViewExecutable($view): ?ViewExecutable {
-    if ($view && $this->tempStore && ($view_in_edition = $this->tempStore->get((string) $view->id()))) {
+    if ($view && $this->tempStore && $this->currentUser->hasPermission('administer views') && ($view_in_edition = $this->tempStore->get((string) $view->id()))) {
       return $view_in_edition->getExecutable();
     }
-    return ($view instanceof ViewEntityInterface) ? $view->getExecutable() : $view;
+    // Not $view->getExecutable(): the entity keeps one for all displays.
+    return ($view instanceof ViewEntityInterface) ? $this->executableFactory->get($view) : $view;
   }
 
   /**
@@ -225,15 +258,16 @@ abstract class ViewsSourceBase extends SourcePluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * The picked views field, by its label.
    */
-  public function settingsForm(array $form, FormStateInterface $form_state): array {
-    $form = parent::settingsForm($form, $form_state);
-    $propTitle = $this->propDefinition['title'] ?? '';
-    $form['label_map'] = [
-      '#type' => 'label',
-      '#title' => empty($propTitle) ? $this->label() : $propTitle . ': ' . $this->label(),
-    ];
-    return $form;
+  public function settingsSummary(): array {
+    $field_id = $this->getSetting('ui_patterns_views_field');
+    if (!$field_id) {
+      return [];
+    }
+    $options = static::getViewsFieldOptions($this->getView());
+    return [(string) ($options[$field_id] ?? $field_id)];
   }
 
   /**

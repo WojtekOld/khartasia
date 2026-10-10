@@ -4,6 +4,9 @@ picker:
     js/picker.js: {}
   dependencies:
     - core/jquery
+    # Provides the bodyScrollLock global, which drupal.dialog.ajax does not
+    # depend on itself.
+    - core/drupal.dialog
     - core/drupal.dialog.ajax
     - core/jquery.form
 
@@ -17,3 +20,15 @@ library:
   dependencies:
     - core/drupalSettings
     - ui_icons/ui_icons.preview
+
+preview_trigger:
+  version: VERSION
+  js:
+    js/preview.trigger.js: {}
+  css:
+    component:
+      css/preview.trigger.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - ui_icons_picker/picker

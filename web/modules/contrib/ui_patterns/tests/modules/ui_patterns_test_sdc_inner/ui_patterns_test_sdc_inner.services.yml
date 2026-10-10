@@ -1,0 +1,10 @@
+services:
+  # ui_patterns decorates with priority -100: 0 puts this one inner to it.
+  ui_patterns_test_sdc_inner.component_plugin_manager:
+    class: Drupal\ui_patterns_test\SynthesizingComponentPluginManager
+    decorates: plugin.manager.sdc
+    decoration_priority: 0
+    arguments:
+      $decorated: '@.inner'
+      $moduleList: '@extension.list.module'
+      $provider: 'ui_patterns_test_sdc_inner'

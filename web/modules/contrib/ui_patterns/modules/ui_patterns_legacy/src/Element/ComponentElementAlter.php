@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns_legacy\Element;
 
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Theme\ThemeManagerInterface;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_legacy\RenderableConverter;
 use Drupal\ui_patterns_library\StoriesSyntaxConverter;
 use Drupal\ui_patterns_library\StoryPluginManager;

@@ -1,0 +1,11 @@
+name: "UI Patterns Test SDC decorator (inner)"
+type: module
+description: "Decorates plugin.manager.sdc inner to ui_patterns, adding a component."
+package: "Testing"
+dependencies:
+  - ui_patterns:ui_patterns_test
+
+# Information added by Drupal.org packaging script on 2026-10-07
+version: '2.0.22'
+project: 'ui_patterns'
+datestamp: 1791358241

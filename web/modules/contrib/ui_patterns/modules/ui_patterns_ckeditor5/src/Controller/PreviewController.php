@@ -11,13 +11,12 @@ use Drupal\Core\Access\CsrfTokenGenerator;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\filter\FilterFormatInterface;
 use Drupal\filter\Plugin\FilterInterface;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_ckeditor5\HostEntity;
 use Drupal\ui_patterns_ckeditor5\Plugin\Filter\ComponentEmbed;
 use Drupal\ui_patterns_ckeditor5\RenderingFilter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -40,19 +39,6 @@ final class PreviewController extends ControllerBase {
     protected HostEntity $hostEntity,
     protected RenderingFilter $renderingFilter,
   ) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    return new self(
-      $container->get('renderer'),
-      $container->get('csrf_token'),
-      $container->get('plugin.manager.sdc'),
-      $container->get('ui_patterns_ckeditor5.host_entity'),
-      $container->get('ui_patterns_ckeditor5.rendering_filter'),
-    );
-  }
 
   /**
    * Renders the component described by the JSON request body.

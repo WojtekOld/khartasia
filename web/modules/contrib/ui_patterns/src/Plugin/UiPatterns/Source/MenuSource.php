@@ -64,6 +64,26 @@ class MenuSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
+  public function settingsSummary(): array {
+    $menu_id = $this->getSetting('menu');
+    if (!$menu_id) {
+      return [];
+    }
+    $menu = $this->entityTypeManager->getStorage('menu')->load($menu_id);
+    $summary = [$menu ? (string) $menu->label() : $menu_id];
+    $level = (int) ($this->getSetting('level') ?? 1);
+    $depth = (int) ($this->getSetting('depth') ?? 0);
+    if ($level > 1 || $depth > 0) {
+      $summary[] = ($depth > 0)
+        ? $this->t('Levels @from to @to', ['@from' => $level, '@to' => $level + $depth - 1])
+        : $this->t('From level @from', ['@from' => $level]);
+    }
+    return $summary;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPropValue(): mixed {
     $menu_id = $this->getSetting('menu');
     if (!$menu_id) {
@@ -120,21 +140,6 @@ class MenuSource extends SourcePluginBase {
       '#description' => $this->t('Set the in_active_trail property on the menu links of the current page and its ancestors. This feature has a performance impact and should only be enabled when the menu appearance should differ based on the current page. Always enabled when the menu links are not all expanded.'),
     ];
     return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function alterComponent(array $element): array {
-    $menu_id = $this->getSetting('menu');
-    if (!$menu_id) {
-      return $element;
-    }
-    $element = $this->addMenuCacheTags($element, [$menu_id]);
-    if ($this->getSetting('set_active_trail') || !$this->getSetting('expand_all_items')) {
-      $element = $this->addMenuActiveTrailCacheContexts($element, [$menu_id]);
-    }
-    return $element;
   }
 
   /**

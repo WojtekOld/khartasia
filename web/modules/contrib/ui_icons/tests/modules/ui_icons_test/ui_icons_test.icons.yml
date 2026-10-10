@@ -6,6 +6,15 @@ test_minimal:
   template: >-
     {{ icon_id }}: <img src="{{ source }}" width="32" height="32">
 
+test_library:
+  extractor: path
+  library: ui_icons_test/test_library
+  config:
+    sources:
+      - icons/flat/foo.png
+  template: >-
+    {{ icon_id }}
+
 test_preview:
   extractor: path
   config:

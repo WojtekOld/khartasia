@@ -12,7 +12,7 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Plugin\Factory\ContainerFactory;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_library\Discovery\DirectoryWithMetadataPluginDiscovery;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -78,7 +78,6 @@ final class StoryPluginManager extends DefaultPluginManager {
   public function getComponentStories(string $component_id): array {
     $stories = [];
     $definitions = $this->getDefinitions();
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->componentPluginManager;
     $negotiated_definition = $manager->negotiateDefinition($component_id);
     $replacer_component_id = $negotiated_definition['replaced_by'] ?? $component_id;

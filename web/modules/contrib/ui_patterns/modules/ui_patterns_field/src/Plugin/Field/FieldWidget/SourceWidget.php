@@ -53,7 +53,6 @@ class SourceWidget extends WidgetBase {
     $default_value = $this->getDefaultValue($items, $delta, $element, $form, $form_state);
 
     $element['#source_contexts'] = $this->getComponentSourceContexts($items);
-    $element['#tag_filter'] = $this->getSetting('tag_filter') ?? [];
     $source_form = ComponentSlotForm::buildSourceForm($element, $form_state, [], $default_value, FALSE);
     $source_form['source_id']['#empty_option'] = $this->t('- Select a source to add -');
 

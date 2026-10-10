@@ -1,0 +1,13 @@
+name: Attribution
+type: module
+description: 'Provides content attribution and license configuration.'
+package: Legal
+core_version_requirement: ^10.5 || ^11.2 || ^12
+configure: entity.attribution_license.collection
+dependencies:
+  - drupal:field
+
+# Information added by Drupal.org packaging script on 2026-10-03
+version: '1.2.1'
+project: 'attribution'
+datestamp: 1791053373

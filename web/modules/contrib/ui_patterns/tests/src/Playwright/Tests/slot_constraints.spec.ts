@@ -1,11 +1,11 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/loader'
-import { openAllDetails, pick, select } from '../objects/ComponentForm'
+import { addSlotSource, openAllDetails, pickSource, select, slotAddButton } from '../objects/ComponentForm'
 import { Audit } from '../objects/Audit'
 import { enableModules } from '../objects/Setup'
 
 // Slot restrictions read from the component definition, over AJAX: maxItems
-// disables the add select once reached and a remove enables it again;
+// disables the add button once reached and a remove enables it again;
 // expected filters the nested Component selector. The kernel tests pin the
 // form structure; this covers the rebuilt DOM and the saved block.
 
@@ -18,8 +18,16 @@ const nestedName = (id: string, delta: number): string => slot(id, `[sources][${
 test('Slot restrictions: maxItems and expected over AJAX', { tag: ['@base', '@slot_constraints'] }, async ({ page, drupal }) => {
   const audit = new Audit(page, drupal, url => url.includes('/admin/'))
   let theme = 'claro'
-  const addMax = select(page, slot('slot_max', '[add_more_button]'))
+  const addMax = slotAddButton(page, slot('slot_max'))
   const nested = (id: string, delta: number) => select(page, nestedName(id, delta))
+  // Picks the wrapper component in a row's nested selector, proven done by
+  // the wrapper slot's own add button.
+  const pickWrapper = async (id: string, delta: number) => {
+    await openAllDetails(page)
+    await pickSource(page, nestedName(id, delta), WRAPPER)
+    await slotAddButton(page, slot(id, `[sources][${delta}][source][component][slots][wrapper]`)).waitFor({ state: 'attached', timeout: 20_000 })
+    await openAllDetails(page)
+  }
   const optionValues = async (id: string, delta: number): Promise<string[]> =>
     (await nested(id, delta).locator('option').evaluateAll(els => els.map(el => (el as HTMLOptionElement).value))).filter(Boolean).sort()
 
@@ -43,14 +51,14 @@ test('Slot restrictions: maxItems and expected over AJAX', { tag: ['@base', '@sl
   await test.step('2. maxItems: disabled at two sources, enabled again after a remove', async () => {
     await openAllDetails(page)
     await expect(addMax).toBeEnabled()
-    await addMax.selectOption({ label: 'Component' })
+    await addSlotSource(page, slot('slot_max'), { label: 'Component' })
     await nested('slot_max', 0).waitFor({ state: 'attached', timeout: 20_000 })
-    await pick(page, nestedName('slot_max', 0), WRAPPER, slot('slot_max', '[sources][0][source][component][slots][wrapper][add_more_button]'))
+    await pickWrapper('slot_max', 0)
     await expect(addMax).toBeEnabled()
 
-    await addMax.selectOption({ label: 'Component' })
+    await addSlotSource(page, slot('slot_max'), { label: 'Component' })
     await nested('slot_max', 1).waitFor({ state: 'attached', timeout: 20_000 })
-    await pick(page, nestedName('slot_max', 1), WRAPPER, slot('slot_max', '[sources][1][source][component][slots][wrapper][add_more_button]'))
+    await pickWrapper('slot_max', 1)
     await expect(addMax).toBeDisabled()
 
     // Remove the second row: the slot has room again.
@@ -59,29 +67,28 @@ test('Slot restrictions: maxItems and expected over AJAX', { tag: ['@base', '@sl
     await openAllDetails(page)
     await expect(addMax).toBeEnabled()
 
-    await addMax.selectOption({ label: 'Component' })
+    await addSlotSource(page, slot('slot_max'), { label: 'Component' })
     await nested('slot_max', 1).waitFor({ state: 'attached', timeout: 20_000 })
-    await pick(page, nestedName('slot_max', 1), WRAPPER, slot('slot_max', '[sources][1][source][component][slots][wrapper][add_more_button]'))
+    await pickWrapper('slot_max', 1)
     await expect(addMax).toBeDisabled()
   })
 
   await test.step('3. expected: the nested selector offers the expected components only', async () => {
-    await openAllDetails(page)
-    await select(page, slot('slot_expected', '[add_more_button]')).selectOption({ label: 'Component' })
+    await addSlotSource(page, slot('slot_expected'), { label: 'Component' })
     await nested('slot_expected', 0).waitFor({ state: 'attached', timeout: 20_000 })
     expect(await optionValues('slot_expected', 0)).toEqual(['ui_patterns_test:test-form-component', WRAPPER])
-    await pick(page, nestedName('slot_expected', 0), WRAPPER, slot('slot_expected', '[sources][0][source][component][slots][wrapper][add_more_button]'))
+    await pickWrapper('slot_expected', 0)
 
     // A slot without expected list offers every visible component.
-    await select(page, slot('slot_free', '[add_more_button]')).selectOption({ label: 'Component' })
+    await addSlotSource(page, slot('slot_free'), { label: 'Component' })
     await nested('slot_free', 0).waitFor({ state: 'attached', timeout: 20_000 })
     const free = await optionValues('slot_free', 0)
     expect(free).toContain('ui_patterns_test:test-component')
     expect(free).not.toContain('ui_patterns_test:no-ui-component')
-    await pick(page, nestedName('slot_free', 0), WRAPPER, slot('slot_free', '[sources][0][source][component][slots][wrapper][add_more_button]'))
+    await pickWrapper('slot_free', 0)
   })
 
-  await test.step('4. Save, reopen: both rows kept, the add select still disabled', async () => {
+  await test.step('4. Save, reopen: both rows kept, the add button still disabled', async () => {
     await page.getByLabel(/Region/).selectOption({ label: 'Content' })
     await page.getByRole('button', { name: 'Save block' }).click()
     await drupal.expectMessage('The block configuration has been saved.')

@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Attribution module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\attribution\Hook\AttributionHooks;
+
+/**
+ * Implements hook_help().
+ */
+#[LegacyHook]
+function attribution_help(string $route_name): string {
+  return AttributionHooks::help($route_name);
+}
+
+/**
+ * Implements hook_theme().
+ */
+#[LegacyHook]
+function attribution_theme(): array {
+  return AttributionHooks::theme();
+}
+
+/**
+ * Implements hook_field_type_category_info_alter().
+ */
+#[LegacyHook]
+function attribution_field_type_category_info_alter(array &$definitions): void {
+  AttributionHooks::fieldTypeCategoryInfoAlter($definitions);
+}

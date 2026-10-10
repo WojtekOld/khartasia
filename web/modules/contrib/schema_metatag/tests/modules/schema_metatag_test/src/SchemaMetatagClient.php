@@ -97,6 +97,8 @@ class SchemaMetatagClient extends SchemaMetatagClientOriginal {
           ],
           'Time' => [],
         ],
+        'DefinedTerm' => [],
+        'DefinedTermSet' => [],
         'Event' => [
           'PublicationEvent' => [],
         ],

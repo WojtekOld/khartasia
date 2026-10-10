@@ -1,4 +1,4 @@
-icon.icon_pack_options.test_path:
+ui_icons.icon_pack_options.test_path:
   type: mapping
   label: 'Test path settings'
   constraints:
@@ -17,7 +17,7 @@ icon.icon_pack_options.test_path:
         Range:
           min: 0
 
-icon.icon_pack_options.test_svg:
+ui_icons.icon_pack_options.test_svg:
   type: mapping
   label: 'Test svg settings'
   constraints:
@@ -30,7 +30,7 @@ icon.icon_pack_options.test_svg:
         Range:
           min: 0
 
-icon.icon_pack_options.test_svg_sprite:
+ui_icons.icon_pack_options.test_svg_sprite:
   type: mapping
   label: 'Test sprite settings'
   constraints:
@@ -52,7 +52,7 @@ icon.icon_pack_options.test_svg_sprite:
       type: label
       label: 'Alt'
 
-icon.icon_pack_options.test_settings:
+ui_icons.icon_pack_options.test_settings:
   type: mapping
   label: 'Test settings'
   constraints:

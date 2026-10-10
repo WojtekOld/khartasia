@@ -4,38 +4,27 @@ declare(strict_types=1);
 
 namespace Drupal\ai_content_suggestions;
 
+use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ConfigurablePluginBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for ai_content_suggestions plugins.
  */
-abstract class AiContentSuggestionsPluginBase extends ConfigurablePluginBase implements AiContentSuggestionsInterface, PluginFormInterface, ContainerFactoryPluginInterface {
+abstract class AiContentSuggestionsPluginBase extends PluginBase implements AiContentSuggestionsInterface, ConfigurableInterface, PluginFormInterface, ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
   use DependencySerializationTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('ai.provider')
-    );
-  }
 
   /**
    * Constructs the instance of plugin class.
@@ -56,6 +45,33 @@ abstract class AiContentSuggestionsPluginBase extends ConfigurablePluginBase imp
     protected AiProviderPluginManager $providerPluginManager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->setConfiguration($configuration);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('ai.provider'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration(): array {
+    return $this->configuration + $this->defaultConfiguration();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setConfiguration(array $configuration): void {
+    $this->configuration = $configuration + $this->defaultConfiguration();
   }
 
   /**
@@ -230,7 +246,7 @@ abstract class AiContentSuggestionsPluginBase extends ConfigurablePluginBase imp
         '#multiple' => TRUE,
         '#weight' => 0,
         '#attributes' => ['class' => ['toggle_content_suggestion_select']],
-        '#attached'  => [
+        '#attached' => [
           'library' => ['ai_content_suggestions/ai_content_suggestions_js'],
         ],
       ],
@@ -296,7 +312,6 @@ abstract class AiContentSuggestionsPluginBase extends ConfigurablePluginBase imp
    * {@inheritdoc}
    */
   public function isAvailable(): bool {
-
     // As a base check that devs can override if needed, we will check we have
     // available models.
     return count($this->getModels(FALSE)) > 0;

@@ -1,0 +1,48 @@
+/* Default visual treatment for the "Default" attribution formatter.
+ * Override these classes in a theme to customize; nothing here is
+ * hardcoded into the PHP or Twig layer beyond the class names themselves.
+ * Positional divider classes (attribution--divider-<from>-<to>) let a
+ * theme restyle a specific connector without guessing at :nth-of-type.
+ * Divider suggestions: "|", "/", "\00b7" (center dot) or whatever you prefer.
+ */
+
+.attribution--divider::after {
+  margin: 0 0.25em;
+  content: "/";
+  opacity: 0.75;
+}
+
+.attribution--license-icon,
+.attribution--creation-icon {
+  display: inline-block;
+  inline-size: auto;
+  block-size: 1.25em;
+  vertical-align: middle;
+}
+
+.attribution summary {
+  font-size: 1rem;
+}
+
+.attribution--toggle summary {
+  cursor: pointer;
+}
+
+/* Icon hints for collapsed attribution */
+
+details.attribution .attribution--toggle-label::after {
+  display: inline-block;
+  margin-inline-start: 0.25em;
+  content: url("../assets/copyright.svg");
+  vertical-align: middle;
+  inline-size: 1.5em;
+  block-size: 1.5em;
+}
+
+details[class*="attribution--license-cc"] .attribution--toggle-label::after {
+  content: url("../assets/creative-commons/cc.svg");
+}
+
+details[class*="attribution--creation-ai"] .attribution--toggle-label::after {
+  content: url("../assets/ai/ai.svg");
+}

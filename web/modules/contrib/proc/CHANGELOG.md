@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [10.1.130] - 05 Oct 2026
+
+- Fixed proc field controls not working on AJAX-inserted forms (e.g. a dead "Decrypt" link) by wiring inline decryption links and recipient fetchers per element and per attach context instead of once per page.
+- Fixed proc text field encrypt-checkbox and submit-button wiring on AJAX-inserted forms; event bindings are now guarded with once() to avoid duplicates.
+- Incremented version number of internal js libraries.
+
+## [10.1.129] - 02 Oct 2026
+
+- Fixed form-based batch re-encryption failing with "No keys, passwords, or session key provided" by normalizing recipient IDs when matching the recipients with changed public keys.
+- Fixed "openpgp is not defined" by waiting for the OpenPGP.js global to be available instead of referencing it at module evaluation time.
+- Added proc/openpgpjs as an explicit dependency of the libraries that use the OpenPGP.js global.
+- Added a shared openpgpReady helper module and reused it in proc-api and proc-decrypt.
+- Fixed double decryption of cached-password items (duplicate stacked modals) by guarding the cached-password auto-decryption with once().
+- Fixed error when the password field is absent during cached-password decryption.
+- Normalized version number of internal js libraries.
+
+## [10.1.128] - 30 Sep 2026
+
+- Fixed the encryption-time recipients fetcher endpoint parser to accept objects keyed by "id" (in addition to "uid") and to tolerate user IDs provided as either integers or numeric strings (a mix of quoted and unquoted values).
+
+## [10.1.127] - 30 Sep 2026
+
+- Replaced status message by warning message when showing the number of available items for re-ecnryption.
+
 ## [10.1.126] - 25 Sep 2026
 
 - Added recipients storage plugin type.

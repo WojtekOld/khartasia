@@ -3,6 +3,7 @@
 namespace Drupal\ai_content_suggestions\Plugin\FieldWidgetAction;
 
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -200,7 +201,9 @@ class PromptContentSuggestion extends FieldWidgetActionBase {
    * {@inheritdoc}
    */
   public function getLibraries(): array {
-    return ['ai_content_suggestions/field_widget'];
+    // The result is always shown in a dialog, including when there are no
+    // suggestions, so the dialog AJAX command must be available on the page.
+    return ['ai_content_suggestions/field_widget', 'core/drupal.dialog.ajax'];
   }
 
   /**
@@ -223,6 +226,66 @@ class PromptContentSuggestion extends FieldWidgetActionBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function actionButton(array &$form, FormStateInterface $form_state, array $context = []) {
+    parent::actionButton($form, $form_state, $context);
+    // Mark only this action's button, so that "display on focus" does not hide
+    // the buttons of other actions on the same field.
+    if (!empty($this->getConfiguration()['settings']['display_on_focus'])) {
+      $field_name = $context['items']->getFieldDefinition()->getName();
+      $form[$this->getActionButtonWidgetId($field_name, $context)]['#attributes']['class'][] = 'ai-content-suggestions--on-focus-button';
+    }
+  }
+
+  /**
+   * Builds the user prompt sent to the LLM for an entity.
+   *
+   * Entity tokens in the prompt are replaced. If there are none, the rendered
+   * entity is appended to the prompt instead.
+   *
+   * @param string $prompt
+   *   The configured prompt.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity being edited, which may be a translation.
+   *
+   * @return string
+   *   The prompt, converted to markdown.
+   */
+  public function buildPrompt(string $prompt, ContentEntityInterface $entity): string {
+    $tokens = $this->token->scan($prompt);
+    $markdown_options = [
+      'header_style' => 'atx',
+      'strip_tags' => TRUE,
+      'strip_whitespace' => TRUE,
+      'strip_placeholder_links' => TRUE,
+    ];
+    $converter = new HtmlConverter($markdown_options);
+    // Use the language of the entity being edited, so that suggestions for a
+    // translation are generated from the translated content.
+    $langcode = $entity->language()->getId();
+    // If no tokens found attach the full entity.
+    if (empty($tokens[$entity->getEntityTypeId()])) {
+      // Replace any other token type.
+      $prompt = $this->token->replacePlain($prompt, [], ['langcode' => $langcode]);
+      // Convert entity to markdown.
+      // Create render array for the entity.
+      $render_array = $this->entityTypeManager->getViewBuilder($entity->getEntityTypeId())->view($entity, 'full', $langcode);
+      // Create HTML markup.
+      $html = $this->renderer->renderInIsolation($render_array);
+      $prompt .= $converter->convert($html);
+    }
+    else {
+      $prompt = $this->token->replace($prompt, [$entity->getEntityTypeId() => $entity], [
+        'clear' => TRUE,
+        'langcode' => $langcode,
+      ]);
+      $prompt = $converter->convert($prompt);
+    }
+    return $prompt;
+  }
+
+  /**
    * Ajax handler for AI content suggestions.
    */
   public function aiContentSuggestionsAjax(array &$form, FormStateInterface $form_state) {
@@ -239,29 +302,7 @@ class PromptContentSuggestion extends FieldWidgetActionBase {
     if ($entity->isNew()) {
       $entity->in_preview = TRUE;
     }
-    $tokens = $this->token->scan($prompt);
-    $markdown_options = [
-      'header_style' => 'atx',
-      'strip_tags' => TRUE,
-      'strip_whitespace' => TRUE,
-      'strip_placeholder_links' => TRUE,
-    ];
-    $converter = new HtmlConverter($markdown_options);
-    // If no tokens found attach the full entity.
-    if (empty($tokens[$entity->getEntityTypeId()])) {
-      // Replace any other token type.
-      $prompt = $this->token->replacePlain($prompt);
-      // Convert entity to markdown.
-      // Create render array for the entity.
-      $render_array = $this->entityTypeManager->getViewBuilder($entity->getEntityTypeId())->view($entity);
-      // Create HTML markup.
-      $html = $this->renderer->renderInIsolation($render_array);
-      $prompt .= $converter->convert($html);
-    }
-    else {
-      $prompt = $this->token->replace($prompt, [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
-      $prompt = $converter->convert($prompt);
-    }
+    $prompt = $this->buildPrompt($prompt, $entity);
     $suggestions = '';
     /** @var \Drupal\ai\AiProviderInterface $ai_provider */
     $ai_provider = $provider_config['provider_id'];

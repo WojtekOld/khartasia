@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\term_merge\Functional;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Messenger\MessengerTrait;
@@ -68,6 +69,13 @@ abstract class MergeTermsTestBase extends BrowserTestBase {
   protected VocabularyInterface $vocabulary;
 
   /**
+   * The database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected Connection $database;
+
+  /**
    * An array of taxonomy terms.
    *
    * @var \Drupal\taxonomy\TermInterface[]
@@ -100,6 +108,7 @@ abstract class MergeTermsTestBase extends BrowserTestBase {
     $this->entityTypeManager = \Drupal::entityTypeManager();
     $this->privateTempStoreFactory = \Drupal::service('tempstore.private');
     $this->vocabulary = $this->createVocabulary();
+    $this->database = \Drupal::service('database');
 
     $dispatcher = $this->prophesize(EventDispatcherInterface::class);
     $account_proxy = new AccountProxy($dispatcher->reveal());

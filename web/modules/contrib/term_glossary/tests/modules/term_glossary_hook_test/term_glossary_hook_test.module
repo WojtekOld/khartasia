@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Contains term_glossary_hook_test.module.
+ */
+
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\term_glossary_hook_test\Hook\TermGlossaryHookTestHooks;
+
+/**
+ * Implements hook_term_glossary_alter_results().
+ */
+#[LegacyHook]
+function term_glossary_hook_test_term_glossary_alter_results(&$results, $terms, $search_term) {
+  \Drupal::service(TermGlossaryHookTestHooks::class)
+    ->alterResults($results, $terms, $search_term);
+}

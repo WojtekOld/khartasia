@@ -4,7 +4,7 @@ description: "Define and expose self-contained UI Components as Drupal plugins a
 core_version_requirement: ^10.6 || ^11.3 || ^12
 package: "User interface"
 
-# Information added by Drupal.org packaging script on 2026-09-04
-version: '2.0.21'
+# Information added by Drupal.org packaging script on 2026-10-07
+version: '2.0.22'
 project: 'ui_patterns'
-datestamp: 1788535900
+datestamp: 1791358241

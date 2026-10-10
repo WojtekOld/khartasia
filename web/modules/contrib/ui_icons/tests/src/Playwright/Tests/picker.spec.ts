@@ -18,6 +18,11 @@ const FIELD_NAME = 'field_icon'
 /**
  * Create a content type with a ui_icon field edited through the picker.
  *
+ * The displays are set outside the field guard, so the beforeEach hook puts
+ * the icon_picker selector back for every test. Workers share one site and
+ * the config runs fullyParallel, so a test that switched the selector must
+ * not decide what the next one gets.
+ *
  * @param {Drupal} drupal - The Drupal object.
  * @returns {Promise<void>}
  */
@@ -29,13 +34,51 @@ async function createIconField (drupal: Drupal): Promise<void> {
     `if (!\\Drupal\\field\\Entity\\FieldConfig::loadByName('node', '${BUNDLE_ID}', '${FIELD_NAME}')) {`,
     `\\Drupal\\field\\Entity\\FieldStorageConfig::create(['field_name' => '${FIELD_NAME}', 'entity_type' => 'node', 'type' => 'ui_icon'])->save();`,
     `\\Drupal\\field\\Entity\\FieldConfig::create(['field_name' => '${FIELD_NAME}', 'entity_type' => 'node', 'bundle' => '${BUNDLE_ID}', 'label' => 'Icon', 'settings' => ['allowed_icon_pack' => ['${PACK_ID}' => '${PACK_ID}']]])->save();`,
+    `}`,
     `\\Drupal::service('entity_display.repository')->getFormDisplay('node', '${BUNDLE_ID}')`,
     `->setComponent('${FIELD_NAME}', ['type' => 'icon_widget', 'settings' => ['icon_selector' => 'icon_picker']])->save();`,
     `\\Drupal::service('entity_display.repository')->getViewDisplay('node', '${BUNDLE_ID}')`,
     `->setComponent('${FIELD_NAME}', ['label' => 'hidden', 'type' => 'icon_formatter'])->save();`,
-    `}`,
   ].join(' ')
   await drupal.drush(`php:eval "${php}"`)
+}
+
+/**
+ * Switch the field widget over to the autocomplete selector.
+ *
+ * The grid is then reached from the preview box instead of the input, which
+ * keeps typing a name available. Runs after createIconField(), which the
+ * beforeEach hook re-runs to put the icon_picker selector back.
+ *
+ * @param {Drupal} drupal - The Drupal object.
+ * @returns {Promise<void>}
+ */
+async function useAutocompleteWidget (drupal: Drupal): Promise<void> {
+  const php = [
+    `\\Drupal::service('entity_display.repository')->getFormDisplay('node', '${BUNDLE_ID}')`,
+    `->setComponent('${FIELD_NAME}', ['type' => 'icon_widget', 'settings' => ['icon_selector' => 'icon_autocomplete']])->save();`,
+  ].join(' ')
+  await drupal.drush(`php:eval "${php}"`)
+}
+
+/**
+ * The autocomplete input holding the selected value on the node form.
+ *
+ * @param {Page} page - The Playwright page.
+ * @returns {Locator} The input locator.
+ */
+function autocompleteInput (page: Page): Locator {
+  return page.locator('.ui-icons-wrapper input[name$="[icon_id]"]')
+}
+
+/**
+ * The preview box of the autocomplete, doubling as the grid trigger.
+ *
+ * @param {Page} page - The Playwright page.
+ * @returns {Locator} The preview locator.
+ */
+function previewTrigger (page: Page): Locator {
+  return page.locator('.ui-icons-preview--picker')
 }
 
 /**
@@ -190,5 +233,46 @@ test('Filter the grid and clear a selection', { tag: [ '@base' ] }, async ({ pag
     await pickIcon(page, '_none_')
 
     await expect(pickerInput(page)).toHaveValue('')
+  })
+})
+
+test('Open the grid from the autocomplete preview', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await useAutocompleteWidget(drupal)
+  await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+
+  await test.step('The empty preview offers itself as the trigger', async () => {
+    await expect(previewTrigger(page)).toBeVisible()
+    await expect(previewTrigger(page)).toHaveAttribute('role', 'button')
+    await expect(previewTrigger(page)).toHaveAttribute('tabindex', '0')
+    // Stands in for the icon that is not picked yet, an empty box reads as
+    // nothing to click.
+    await expect(previewTrigger(page).locator('.ui-icons-preview-placeholder')).toBeVisible()
+    // Triggering from the preview rather than the input is what keeps the
+    // autocomplete, the whole point over the icon_picker element.
+    await expect(autocompleteInput(page)).toHaveAttribute('data-autocomplete-path', /autocomplete/)
+  })
+
+  await test.step('Clicking the preview opens the grid', async () => {
+    await previewTrigger(page).click()
+
+    await expect(page.locator('.icon-picker-modal__content')).toBeVisible()
+    await expect(iconRadio(page, `${PACK_ID}:foo`)).toHaveCount(1)
+  })
+
+  await test.step('Picking fills the input and draws the preview', async () => {
+    await pickIcon(page, `${PACK_ID}:foo`)
+
+    await expect(autocompleteInput(page)).toHaveValue(`${PACK_ID}:foo`)
+    // Setting the value triggers `change`, which the element uses to rebuild
+    // itself through ajax and bring the preview in.
+    await expect(page.locator('.ui-icons-preview-icon img[src$="foo.png"]')).toBeVisible()
+    await expect(page.locator('.ui-icons-preview-placeholder')).toHaveCount(0)
+  })
+
+  await test.step('The keyboard reaches the grid as well', async () => {
+    await previewTrigger(page).focus()
+    await page.keyboard.press('Enter')
+
+    await expect(page.locator('.icon-picker-modal__content')).toBeVisible()
   })
 })

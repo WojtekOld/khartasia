@@ -5,7 +5,7 @@ core_version_requirement: ^10 || ^11
 dependencies:
   - proc:proc
 
-# Information added by Drupal.org packaging script on 2026-09-25
-version: '10.1.126'
+# Information added by Drupal.org packaging script on 2026-10-05
+version: '10.1.130'
 project: 'proc'
-datestamp: 1790339819
+datestamp: 1791205022

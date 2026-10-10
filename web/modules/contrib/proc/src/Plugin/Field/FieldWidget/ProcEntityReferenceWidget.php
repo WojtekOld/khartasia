@@ -363,7 +363,7 @@ class ProcEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $element['proc_field_recipients_fetcher_endpoint'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Endpoint for fetching user IDs of recipients'),
-      '#description' => $this->t('Example: https://example.com/api/get/users/param-a/param-b/param-c?param-d=1&#38;param-e=2. Accepted json formats: 1. a flat list of user IDs as in [1,2,3] 2. a list of objects with user IDs keyed by uid as in [{"uid":1},{"uid":2},{"uid":3}]'),
+      '#description' => $this->t('Example: https://example.com/api/get/users/param-a/param-b/param-c?param-d=1&#38;param-e=2. Accepted json formats: 1. a flat list of user IDs as in [1,2,3] 2. a list of objects with user IDs keyed by "id" or "uid" as in [{"id":1},{"id":2}] or [{"uid":1},{"uid":2}]. User IDs may be provided as integers or numeric strings (e.g. a mix of [{"id":"118"},{"id":12}] is accepted).'),
       '#default_value' => $this->getSetting('proc_field_recipients_fetcher_endpoint') ?? '',
       '#disabled' => FALSE,
     ];

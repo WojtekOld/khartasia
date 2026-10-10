@@ -1,0 +1,15 @@
+ui_icons.icon_pack_settings:
+  type: sequence
+  label: 'Icon settings'
+  sequence:
+    type: ui_icons.icon_pack_options.[%key]
+
+ui_icons.icon_value:
+  type: mapping
+  label: 'Icon value'
+  mapping:
+    target_id:
+      type: string
+      label: 'Icon full ID'
+    settings:
+      type: ui_icons.icon_pack_settings

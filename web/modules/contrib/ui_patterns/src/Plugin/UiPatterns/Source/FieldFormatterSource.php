@@ -6,6 +6,8 @@ namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityDisplayBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -16,9 +18,11 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\FormatterInterface;
 use Drupal\Core\Field\FormatterPluginManager;
+use Drupal\Core\Form\FormHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Logger\LoggerChannelTrait;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\Exception\MissingDataException;
@@ -88,6 +92,20 @@ class FieldFormatterSource extends FieldValueSourceBase implements TrustedCallba
     $form = parent::settingsForm($form, $form_state);
     $this->buildFieldFormatterForm($form, $form_state);
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * The picked formatter, by its label.
+   */
+  public function settingsSummary(): array {
+    $formatter_type = $this->getSetting('type');
+    if (!$formatter_type || !$this->formatterPluginManager) {
+      return [];
+    }
+    $definition = $this->formatterPluginManager->getDefinition($formatter_type, FALSE);
+    return [(string) ($definition['label'] ?? $formatter_type)];
   }
 
   /**
@@ -185,11 +203,30 @@ class FieldFormatterSource extends FieldValueSourceBase implements TrustedCallba
       $settings_subform_state = SubformState::createForSubform($form['settings'], $form, $form_state);
       $form['settings'] = $formatter->settingsForm($form, $settings_subform_state);
       $form['third_party_settings'] = $this->thirdPartySettingsForm($formatter, $field_definition, $form, $form_state);
-      // Should we use FormHelper::rewriteStatesSelector() ?
-      // like in FieldBlock::formatterSettingsProcessCallback.
+      $form['#field_name'] = $field_definition->getName();
+      $form['#process'][] = [static::class, 'processStatesSelectors'];
     }
     $form['#pre_render'][] = [static::class, 'preRenderFormatterSettingsForm'];
     return TRUE;
+  }
+
+  /**
+   * Points the formatter #states to this form, like core's FieldBlock.
+   *
+   * @param array $element
+   *   The source settings form.
+   *
+   * @return array
+   *   The element.
+   */
+  public static function processStatesSelectors(array $element): array {
+    $parents = $element['#parents'] ?? [];
+    if ($parents === []) {
+      return $element;
+    }
+    $name = \array_shift($parents) . ($parents === [] ? '' : '[' . \implode('][', $parents) . ']');
+    FormHelper::rewriteStatesSelector($element, "fields[{$element['#field_name']}][settings_edit_form]", $name);
+    return $element;
   }
 
   /**
@@ -266,6 +303,10 @@ class FieldFormatterSource extends FieldValueSourceBase implements TrustedCallba
       $settings = $this->formatterPluginManager->getDefaultSettings($formatter_type);
       $third_party_settings = [];
     }
+    // Fills the nested keys missing from the browser input.
+    if (!empty($formatter_type)) {
+      $settings = self::addMissingDefaults($settings, $this->formatterPluginManager->getDefaultSettings($formatter_type));
+    }
 
     return [
       'settings' => $settings,
@@ -274,6 +315,29 @@ class FieldFormatterSource extends FieldValueSourceBase implements TrustedCallba
       'label' => '',
       'weight' => 0,
     ];
+  }
+
+  /**
+   * Adds the missing defaults at every level, but not inside lists.
+   *
+   * @param array $settings
+   *   The settings.
+   * @param array $defaults
+   *   The default settings.
+   *
+   * @return array
+   *   The completed settings.
+   */
+  private static function addMissingDefaults(array $settings, array $defaults): array {
+    foreach ($defaults as $key => $default) {
+      if (!\array_key_exists($key, $settings)) {
+        $settings[$key] = $default;
+      }
+      elseif (\is_array($default) && \is_array($settings[$key]) && !\array_is_list($default)) {
+        $settings[$key] = self::addMissingDefaults($settings[$key], $default);
+      }
+    }
+    return $settings;
   }
 
   /**
@@ -425,24 +489,36 @@ class FieldFormatterSource extends FieldValueSourceBase implements TrustedCallba
         ],
       ]),
     ];
-    if ($field_delta === NULL) {
-      $rendered_field = $items->view($formatter_config);
-      for ($field_index = 0; $field_index < $items->count(); ++$field_index) {
-        if (!isset($rendered_field[$field_index])) {
-          continue;
-        }
-        $returned[] = $rendered_field[$field_index];
+    if ($field_delta !== NULL) {
+      try {
+        $item = $items->get($field_delta);
       }
-      return $returned;
+      catch (MissingDataException) {
+        return [];
+      }
+      if (!$item instanceof FieldItemInterface) {
+        return [];
+      }
+      // Like core's viewFieldItem(), a copy of the entity with the only item.
+      $items = (clone $items->getEntity())->get($items->getName());
+      $items->setValue([$item->getValue()]);
     }
-    try {
-      /** @var \Drupal\Core\Field\FieldItemInterface $item */
-      $item = $items->get($field_delta);
-      return ($item instanceof FieldItemInterface) ? [$item->view($formatter_config)] : [];
+    $rendered_field = $items->view($formatter_config);
+    // Keep the cache metadata set on the field.
+    $this->addCacheableDependency(CacheableMetadata::createFromRenderArray($rendered_field));
+    for ($field_index = 0; $field_index < $items->count(); ++$field_index) {
+      if (!isset($rendered_field[$field_index])) {
+        continue;
+      }
+      // Only the items are rendered: they carry the field's attachments.
+      $item_build = $rendered_field[$field_index];
+      $item_build['#attached'] = BubbleableMetadata::mergeAttachments($rendered_field['#attached'] ?? [], $item_build['#attached'] ?? []);
+      $returned[] = $item_build;
     }
-    catch (MissingDataException) {
-      return [];
+    if ($field_delta !== NULL && isset($returned[0], $rendered_field['#access'])) {
+      $returned[0]['#access'] = $rendered_field['#access'];
     }
+    return $returned;
   }
 
   /**
@@ -454,7 +530,12 @@ class FieldFormatterSource extends FieldValueSourceBase implements TrustedCallba
       return [];
     }
     $field_index = (isset($this->context['ui_patterns:field:index'])) ? $this->getContextValue('ui_patterns:field:index') : NULL;
-    return $this->viewFieldItems($items, $field_index);
+    $value = $this->viewFieldItems($items, $field_index);
+    // Do it after the render: a computed field has no cache metadata before.
+    if ($items instanceof CacheableDependencyInterface) {
+      $this->addCacheableDependency($items);
+    }
+    return $value;
   }
 
   /**

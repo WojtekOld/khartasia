@@ -2,6 +2,7 @@
 
 namespace Drupal\term_merge\Form;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -45,17 +46,27 @@ class MergeTermsTarget extends FormBase {
   protected VocabularyInterface $vocabulary;
 
   /**
+   * The database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected Connection $database;
+
+  /**
    * Constructs an OverviewTerms object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity manager service.
    * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStoreFactory
    *   The private temporary storage factory.
+   * @param \Drupal\Core\Database\Connection $database
+   *   The database connection.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, PrivateTempStoreFactory $tempStoreFactory) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, PrivateTempStoreFactory $tempStoreFactory, Connection $database) {
     $this->entityTypeManager = $entityTypeManager;
     $this->termStorage = $entityTypeManager->getStorage('taxonomy_term');
     $this->tempStoreFactory = $tempStoreFactory;
+    $this->database = $database;
   }
 
   /**
@@ -64,7 +75,8 @@ class MergeTermsTarget extends FormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('tempstore.private')
+      $container->get('tempstore.private'),
+      $container->get('database')
     );
   }
 
@@ -155,24 +167,18 @@ class MergeTermsTarget extends FormBase {
    *   Existing term labels keyed by id.
    */
   protected function buildExistingTermsOptions(): array {
-    $query = $this->termStorage->getQuery();
     $selected_term_ids = $this->getSelectedTermIds();
-    $query->condition('vid', $this->vocabulary->id());
+
+    $query = $this->database->select('taxonomy_term_field_data', 't')
+      ->fields('t', ['tid', 'name'])
+      ->condition('t.vid', $this->vocabulary->id())
+      ->condition('t.default_langcode', 1);
     if (count($selected_term_ids) > 0) {
-      $query->condition('tid', $selected_term_ids, 'NOT IN');
+      $query->condition('t.tid', $selected_term_ids, 'NOT IN');
     }
-    $tids = $query->accessCheck()->execute();
-    if (empty($tids)) {
-      return [];
-    }
-    $terms = $this->termStorage->loadMultiple($tids);
+    $options = $query->execute()->fetchAllKeyed(0, 1);
 
-    $options = [];
-    foreach ($terms as $term) {
-      $options[$term->id()] = $term->label();
-    }
-
-    asort($options);
+    asort($options, SORT_STRING | SORT_FLAG_CASE);
 
     return $options;
   }

@@ -13,8 +13,6 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
 
-use function Symfony\Component\String\u;
-
 /**
  * Plugin implementation of the source.
  *
@@ -45,14 +43,7 @@ class TokenSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function settingsSummary(): array {
-    $value = $this->getSetting('value') ?? NULL;
-    if (!$value || !\is_string($value)) {
-      return [];
-    }
-
-    return [
-      u(\strip_tags($value))->truncate(20, '...', FALSE),
-    ];
+    return $this->summarizeValue($this->getSetting('value'));
   }
 
   /**
@@ -98,6 +89,12 @@ class TokenSource extends SourcePluginBase {
       // be side effects.
       $value = NULL;
     }
+    if ($has_sample_entity) {
+      // Nothing to keep from a sample entity.
+      $bubbleable_metadata = new BubbleableMetadata();
+    }
+    // Token does not bubble a metadata object it is given.
+    $this->addCacheableDependency($bubbleable_metadata);
     if (empty($value)) {
       return $isSlot ? [] : '';
     }
@@ -108,9 +105,8 @@ class TokenSource extends SourcePluginBase {
       $build = [
         '#markup' => $value,
       ];
-      if (!$has_sample_entity) {
-        $bubbleable_metadata->applyTo($build);
-      }
+      // Attachments only travel with the render array.
+      $bubbleable_metadata->applyTo($build);
       return $build;
     }
     // A string/URL prop stays a plain untrusted string: Twig autoescapes

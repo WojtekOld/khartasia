@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns_views\Plugin\views\row;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
@@ -16,7 +19,9 @@ use Drupal\Core\Url;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns_views\ViewsPluginUiPatternsTrait;
 use Drupal\views\Attribute\ViewsRow;
+use Drupal\views\Entity\Render\EntityTranslationRenderTrait;
 use Drupal\views\Plugin\views\row\Fields;
+use Drupal\views\ViewExecutable;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,12 +39,23 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class ComponentRow extends Fields {
 
+  use EntityTranslationRenderTrait;
   use ViewsPluginUiPatternsTrait;
 
   /**
    * The sample entity generator.
    */
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
+
+  /**
+   * The entity repository.
+   */
+  protected EntityRepositoryInterface $entityRepository;
+
+  /**
+   * The language manager.
+   */
+  protected LanguageManagerInterface $languageManager;
 
   /**
    * {@inheritdoc}
@@ -52,7 +68,20 @@ class ComponentRow extends Fields {
     );
     $instance->initialize($container);
     $instance->sampleEntityGenerator = $container->get(SampleEntityGeneratorInterface::class);
+    $instance->entityRepository = $container->get(EntityRepositoryInterface::class);
+    $instance->languageManager = $container->get(LanguageManagerInterface::class);
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function query(): void {
+    parent::query();
+    // Adds the row language, read by getEntityTranslationByRelationship().
+    if ($this->view->getBaseEntityType()) {
+      $this->getEntityTranslationRenderer()->query($this->view->getQuery());
+    }
   }
 
   /**
@@ -139,7 +168,7 @@ class ComponentRow extends Fields {
     }
     else {
       $context['ui_patterns_views:row:index'] = new Context(new ContextDefinition('integer'), $row->index ?? 0);
-      $entity = $row->_entity;
+      $entity = ($row->_entity instanceof EntityInterface) ? $this->getEntityTranslationByRelationship($row->_entity, $row) : NULL;
       $bundle = ($row->_entity instanceof EntityInterface) ? $row->_entity->bundle() : '';
     }
     if ($entity instanceof EntityInterface) {
@@ -147,6 +176,42 @@ class ComponentRow extends Fields {
       $context['bundle'] = new Context(new ContextDefinition('string'), $bundle);
     }
     return $context;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEntityTypeId() {
+    $entity_type = $this->view->getBaseEntityType();
+    return $entity_type ? $entity_type->id() : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEntityTypeManager(): EntityTypeManagerInterface {
+    return $this->entityTypeManager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEntityRepository(): EntityRepositoryInterface {
+    return $this->entityRepository;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getLanguageManager(): LanguageManagerInterface {
+    return $this->languageManager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getView(): ViewExecutable {
+    return $this->view;
   }
 
   /**

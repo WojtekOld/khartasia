@@ -31,6 +31,8 @@ class PlaywrightTestSetup implements TestSetupInterface {
       'field_ui',
       'ui_patterns',
       'ui_patterns_blocks',
+      'ui_patterns_ui',
+      'ui_patterns_field',
       'ui_patterns_field_formatters',
       'layout_builder',
       'ui_patterns_layouts',

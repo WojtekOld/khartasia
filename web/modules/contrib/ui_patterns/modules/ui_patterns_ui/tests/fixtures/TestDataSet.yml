@@ -10,4 +10,4 @@ display_test_1:
   assertSession:
     elementExists:
       - [ 'css', '.ui-patterns-test-component' ]
-      - [ 'css', '.ui-patterns-test-component-variant-primary']
+      - [ 'css', '.ui-patterns-test-component-variant-other']

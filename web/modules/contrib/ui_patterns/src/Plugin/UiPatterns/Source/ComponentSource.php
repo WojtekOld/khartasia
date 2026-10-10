@@ -10,10 +10,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Utility\Token;
 use Drupal\ui_patterns\Attribute\Source;
-use Drupal\ui_patterns\ComponentPluginManager as UiPatternsComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\PropTypePluginManager;
@@ -150,9 +149,14 @@ class ComponentSource extends SourcePluginBase implements SourceWithChoicesInter
    */
   public function settingsSummary(): array {
     $component = $this->getSetting('component');
-
-    $component_id = $component['component_id'];
-    $definition = $this->componentManager->getDefinition($component_id);
+    $component_id = $component['component_id'] ?? NULL;
+    if (!$component_id) {
+      return [];
+    }
+    $definition = $this->componentManager->getDefinition($component_id, FALSE);
+    if (!$definition) {
+      return [];
+    }
 
     $label = $definition['annotated_name'] ?? $definition['label'] ?? $component_id;
     $variant_id = $component['variant_id']['source']['value'] ?? '';
@@ -166,7 +170,6 @@ class ComponentSource extends SourcePluginBase implements SourceWithChoicesInter
    * {@inheritdoc}
    */
   public function getChoices(): array {
-    \assert($this->componentManager instanceof UiPatternsComponentPluginManager);
     $definitions = $this->componentManager->getNegotiatedGroupedDefinitions();
     $choices = [];
     foreach ($definitions as $group_id => $group) {

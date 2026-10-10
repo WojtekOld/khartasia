@@ -1,0 +1,7 @@
+source_selector:
+  version: VERSION
+  js:
+    js/source-selector.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

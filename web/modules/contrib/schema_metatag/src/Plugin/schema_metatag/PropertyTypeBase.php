@@ -10,6 +10,7 @@ use Drupal\schema_metatag\SchemaMetatagClientInterface;
 use Drupal\schema_metatag\SchemaMetatagManagerInterface;
 use Drupal\schema_metatag\SchemaMetatagTestTagInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Base class for Property type plugins.
@@ -40,6 +41,13 @@ class PropertyTypeBase extends PluginBase implements PropertyTypeInterface, Sche
   protected $propertyTypeManager;
 
   /**
+   * The RequestStack service.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -51,6 +59,7 @@ class PropertyTypeBase extends PluginBase implements PropertyTypeInterface, Sche
     $instance->setSchemaMetatagManager($container->get('schema_metatag.schema_metatag_manager'));
     $instance->setSchemaMetatagClient($container->get('schema_metatag.schema_metatag_client'));
     $instance->setPropertyTypeManager($container->get('plugin.manager.schema_property_type'));
+    $instance->setRequestStack($container->get('request_stack'));
     return $instance;
   }
 
@@ -82,6 +91,16 @@ class PropertyTypeBase extends PluginBase implements PropertyTypeInterface, Sche
    */
   public function setPropertyTypeManager(PropertyTypeManager $propertyTypeManager) {
     $this->propertyTypeManager = $propertyTypeManager;
+  }
+
+  /**
+   * Sets RequestStack service.
+   *
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The RequestStack service.
+   */
+  public function setRequestStack(RequestStack $requestStack) {
+    $this->requestStack = $requestStack;
   }
 
   /**
@@ -209,6 +228,12 @@ class PropertyTypeBase extends PluginBase implements PropertyTypeInterface, Sche
         // its own tree values.
         $sub_input_values['tree_parent'] = empty($values['tree_parent']) ? $input_values['tree_parent'] : $values['tree_parent'];
         $sub_input_values['tree_depth'] = empty($values['tree_depth']) ? $input_values['tree_depth'] : $values['tree_depth'];
+
+        if (count($child_property->getSubProperties())) {
+          // If sub property has its own sub properties, pass "multiple" value.
+          // This is required for the pivot element to be added later on.
+          $sub_input_values['multiple'] = $input_values['multiple'];
+        }
 
         // Generate the sub property form element.
         $form[$sub_property_name] = $child_property->form($sub_input_values);

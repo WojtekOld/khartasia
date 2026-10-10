@@ -9,6 +9,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\ui_patterns\Element\ComponentForm;
+use Drupal\ui_patterns_ui\Entity\ComponentFormDisplay;
 
 /**
  * Provides a Component form builder element.
@@ -24,6 +25,46 @@ class UiPComponentFormDisplaysForm extends ComponentForm {
       ['#include_display_ids' => NULL, '#display_component_form' => TRUE],
       parent::getInfo()
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * The raw input keeps the shape of the form it was typed in. On a display
+   * switch the next sub-form builds from it: map it back to the canonical
+   * shape first, so no value is lost between a display and the component
+   * form.
+   */
+  public static function valueCallback(&$element, $input, FormStateInterface $form_state) {
+    $active_display_id = NULL;
+    if (\is_array($input) && \is_array($input['display'] ?? NULL)) {
+      $typed_in = (string) ($input['display']['display_id'] ?? '');
+      // The root select wins when posted: that is the switch.
+      $active_display_id = (string) ($input['display_id'] ?? $typed_in);
+      $sub_input = $input['display']['value_' . Html::getId($typed_in)] ?? NULL;
+      if (\is_array($sub_input)) {
+        if ($typed_in === '_component_form') {
+          // Already canonical.
+          $input = $sub_input;
+        }
+        elseif (ComponentFormDisplay::load($typed_in)) {
+          $sub_element = [
+            '#display_id' => $typed_in,
+            '#component_id' => $input['display']['component_id'] ?? NULL,
+          ];
+          $input = UiPComponentFormDisplayForm::valueCallback($sub_element, $sub_input, $form_state);
+        }
+      }
+    }
+    $value = parent::valueCallback($element, $input, $form_state);
+    // Mapped values are no longer empty: without the active display id the
+    // build would take them for a pre-display config and fall back to the
+    // component form. Validation shapes the stored value.
+    if ($active_display_id !== NULL && \is_array($value)) {
+      $value['display_id'] = $active_display_id;
+      $element['#default_value']['display_id'] = $active_display_id;
+    }
+    return $value;
   }
 
   /**
@@ -66,8 +107,10 @@ class UiPComponentFormDisplaysForm extends ComponentForm {
       $options['_component_form'] = \t('Component form');
     }
 
-    $element['display_id'] = [
+    $element['display_id'] = static::expandAjax([
       '#type' => 'select',
+      // A select needs a name; its options alone say nothing.
+      '#title' => \t('Form'),
       '#options' => $options,
       '#attributes' => ['class' => ['uip-display-select']],
       '#default_value' => $selected_display_id ?? \array_keys($options)[0],
@@ -77,8 +120,11 @@ class UiPComponentFormDisplaysForm extends ComponentForm {
         'effect' => 'fade',
       ],
       '#executes_submit_callback' => FALSE,
+      // Read by ComponentFormBase::resetSwitchedSiblingsInput().
+      '#ui_patterns_resets_siblings' => TRUE,
       '#access' => \count($options) > 1,
-    ];
+      '#ajax_url' => $element['#ajax_url'] ?? NULL,
+    ]);
   }
 
   /**
@@ -142,6 +188,7 @@ class UiPComponentFormDisplaysForm extends ComponentForm {
     elseif ($display_id) {
       $element['display']['value_' . Html::getId($display_id)] = [
         '#type' => 'uip_display_form',
+        '#ajax_url' => $element['#ajax_url'] ?? NULL,
         '#source_contexts' => $element['#source_contexts'] ?? [],
         '#display_id' => $display_id,
         '#component_id' => $component_id,
@@ -166,10 +213,6 @@ class UiPComponentFormDisplaysForm extends ComponentForm {
     $element['props']['#access'] = FALSE;
     $element['slots']['#access'] = FALSE;
     $element['#component_validation'] = TRUE;
-
-    $element['#after_build'] = [
-      [static::class, 'afterBuild'],
-    ];
     // Display ID.
     static::buildComponentFormDisplay($element, $form_state, $component_id, $matched_displays);
     return $element;
@@ -190,8 +233,14 @@ class UiPComponentFormDisplaysForm extends ComponentForm {
 
   /**
    * {@inheritdoc}
+   *
+   * The value bubbles at validation only: the display sub-form reads the form
+   * state values, which an early setValueForElement() would wipe.
    */
   public static function afterBuild(array $element, FormStateInterface $form_state): array {
+    if ($form_state->isProcessingInput()) {
+      static::resetSwitchedSiblingsInput($element, $form_state);
+    }
     return $element;
   }
 
@@ -202,6 +251,8 @@ class UiPComponentFormDisplaysForm extends ComponentForm {
     $display_id = $element['display']['display_id']['#value'] ?? NULL;
 
     if (empty($display_id) || !isset($element['display']['value_' . Html::getId($display_id)]['#value'])) {
+      // No display in play: the plain component form value.
+      parent::elementValidate($element, $form_state);
       return;
     }
     $value = $element['display']['value_' . Html::getId($display_id)]['#value'];

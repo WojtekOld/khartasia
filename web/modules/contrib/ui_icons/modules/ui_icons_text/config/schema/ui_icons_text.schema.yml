@@ -9,6 +9,9 @@ filter_settings.icon_embed:
       label: 'Icon pack allowed for selection'
       sequence:
         type: string
+    selector_format:
+      type: string
+      label: 'Selector format'
     result_format:
       type: string
       label: 'Autocomplete format'

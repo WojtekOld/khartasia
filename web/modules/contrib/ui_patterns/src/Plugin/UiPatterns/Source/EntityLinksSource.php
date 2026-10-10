@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
@@ -87,6 +86,8 @@ class EntityLinksSource extends SourcePluginBase {
     $entity = $this->getContextValue('entity');
     $link_templates = [];
     if (($entity instanceof EntityInterface) && $entity->id()) {
+      // The URL follows the entity (path alias).
+      $this->addCacheableDependency($entity);
       try {
         $url = $entity->toUrl($template, ['absolute' => $is_absolute]);
         // Same gate as a link element: no URL to a page the user cannot
@@ -142,9 +143,15 @@ class EntityLinksSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function settingsSummary(): array {
-    return [
-      $this->getSetting('template') ?? '',
-    ];
+    $summary = [];
+    $template = $this->getSetting('template');
+    if ($template) {
+      $summary[] = $template;
+    }
+    if ($this->isAbsoluteUrl()) {
+      $summary[] = $this->t('Absolute URL');
+    }
+    return $summary;
   }
 
   /**
@@ -160,22 +167,6 @@ class EntityLinksSource extends SourcePluginBase {
       $link_templates = $entity->getEntityType()->getLinkTemplates();
     }
     return $link_templates;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function alterComponent(array $element): array {
-    $entity = $this->getContextValue('entity');
-    if (!($entity instanceof EntityInterface)) {
-      return $element;
-    }
-
-    $entityCache = CacheableMetadata::createFromObject($entity);
-    $cache = CacheableMetadata::createFromRenderArray($element);
-    $cache->merge($entityCache);
-    $cache->applyTo($element);
-    return $element;
   }
 
 }

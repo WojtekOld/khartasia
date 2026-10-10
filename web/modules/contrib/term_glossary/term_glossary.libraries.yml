@@ -1,0 +1,32 @@
+glossary.alpha:
+  css:
+    theme:
+      assets/css/style.css: {}
+  js:
+    assets/js/block-alpha.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupalSettings
+    - core/drupal
+    - core/once
+
+glossary:
+  css:
+    theme:
+      assets/css/content-style.css: {}
+  js:
+    assets/js/glossary-content-dialog.js: {}
+  dependencies:
+    - core/jquery
+    - jquery_ui_dialog/dialog
+    - core/drupalSettings
+    - core/drupal
+    - core/once
+    - core/drupal.dialog.ajax
+
+glossary.toggle_autocomplete:
+  js:
+    assets/js/toggle-autocomplete.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

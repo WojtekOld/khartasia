@@ -10,14 +10,14 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Test components rendering as layouts.
+ * A display drives the layout builder section form and its rendering.
  *
  * @internal
  *
  * @coversNothing
  */
 #[Group('ui_patterns')]
-#[Group('ui_patterns_layouts')]
+#[Group('ui_patterns_ui')]
 #[RunTestsInSeparateProcesses]
 final class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
 
@@ -36,33 +36,6 @@ final class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
     'layout_builder',
     'block',
   ];
-
-  /**
-   * Test the form and the existence of the.
-   */
-  public function testDisplayExistsForm(): void {
-    $assert_session = $this->assertSession();
-
-    $config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/core.entity_view_display.node.page.full.yml');
-    $ui_patterns_config = &$config_import['third_party_settings']['layout_builder']['sections'][0]['layout_settings']['ui_patterns'];
-    $test_data = $this->loadTestDataFixture(__DIR__ . '/../../fixtures/TestDataSet.yml');
-    $test_set = $test_data->getTestSet('display_test_1');
-    $this->createTestContentContentType();
-    $ui_patterns_config = $this->buildUiPatternsConfig($test_set);
-    $this->importConfigFixture(
-      'core.entity_view_display.node.page.full',
-      $config_import
-    );
-    $display_config_import = $this->loadConfigFixture(__DIR__ . '/../../fixtures/config/ui_patterns_ui.component_display.ui_patterns_test.test-component.test.yml');
-    $this->importConfigFixture(
-      'ui_patterns_ui.component_display.ui_patterns_test.test-component.test',
-      $display_config_import
-    );
-    $this->drupalGet('admin/structure/types/manage/page/display/full/layout');
-    $assert_session->statusCodeEquals(200);
-    $this->click('.layout-builder__link--configure');
-    $assert_session->elementExists('css', '.uip-display-select');
-  }
 
   /**
    * Tests preview and output of props.
@@ -98,6 +71,7 @@ final class LayoutBuilderRenderTest extends UiPatternsFunctionalTestBase {
       $assert_session->statusCodeEquals(200);
       $assert_session->elementExists('css', '.ui-patterns-' . $component_id);
       $this->validateRenderedComponent($test_set);
+      $this->assertSessionObject($test_set['assertSession'] ?? []);
       $node->delete();
     }
   }

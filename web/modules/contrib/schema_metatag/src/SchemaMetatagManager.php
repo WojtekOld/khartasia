@@ -148,14 +148,23 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
     $elements = $elements['#attached']['html_head'] ?? $elements;
 
     // Parse the Schema.org metatags out of the array.
-    if ($items = self::parseJsonld($elements)) {
-      // Encode the Schema.org metatags as JSON LD.
-      if ($jsonld = self::encodeJsonld($items)) {
-        // Pass back the rendered result.
-        $jsonld_render_array = self::renderArrayJsonLd($jsonld);
-        return \Drupal::service('renderer')->render($jsonld_render_array);
-      }
+    $items = self::parseJsonld($elements);
+
+    if (empty($items)) {
+      return '';
     }
+
+    // Encode the Schema.org metatags as JSON LD.
+    $jsonld = self::encodeJsonld($items);
+
+    if ($jsonld === '') {
+      return '';
+    }
+
+    // Pass back the rendered result.
+    $jsonld_render_array = self::renderArrayJsonLd($jsonld);
+
+    return (string) \Drupal::service('renderer')->render($jsonld_render_array);
   }
 
   /**
@@ -305,14 +314,14 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
     if ('N' == $value) {
       return TRUE;
     }
-    if (!preg_match('/^([adObis]):/', $value, $badions)) {
+    if (!preg_match('/^([adObis]):/', $value, $matches)) {
       return FALSE;
     }
-    switch ($badions[1]) {
+    switch ($matches[1]) {
       case 'a':
       case 'O':
       case 's':
-        if (preg_match("/^{$badions[1]}:[0-9]+:.*[;}]\$/s", $value)) {
+        if (preg_match("/^{$matches[1]}:[0-9]+:.*[;}]\$/s", $value)) {
           return TRUE;
         }
         break;
@@ -320,7 +329,7 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
       case 'b':
       case 'i':
       case 'd':
-        if (preg_match("/^{$badions[1]}:[0-9.E-]+;\$/", $value)) {
+        if (preg_match("/^{$matches[1]}:[0-9.E-]+;\$/", $value)) {
           return TRUE;
         }
         break;
@@ -351,12 +360,17 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
       }
     }
 
+    // The pivot flag is not content, so it must not keep an otherwise empty
+    // object alive. Judge what is left without it.
+    $remainder = (array) $array;
+    unset($remainder['pivot']);
+
     // If all that's left is the pivot, return empty.
-    if ($array == ['pivot' => 1]) {
+    if (empty($remainder)) {
       return [];
     }
     // If all that's left is @type, return empty.
-    if (count($array) == 1 && key($array) == '@type') {
+    if (count($remainder) == 1 && key($remainder) == '@type') {
       return [];
     }
     // If this is an object but none of the values is @type or @id, return

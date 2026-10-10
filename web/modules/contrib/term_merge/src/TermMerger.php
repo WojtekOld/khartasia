@@ -57,7 +57,7 @@ class TermMerger implements TermMergerInterface {
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     ReferenceMigrator $migrator,
-    EventDispatcherInterface $dispatcher
+    EventDispatcherInterface $dispatcher,
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->termStorage = $this->entityTypeManager->getStorage('taxonomy_term');

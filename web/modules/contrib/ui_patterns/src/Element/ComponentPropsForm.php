@@ -76,6 +76,21 @@ class ComponentPropsForm extends ComponentFormBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public static function elementValidate(array &$element, FormStateInterface $form_state): void {
+    parent::elementValidate($element, $form_state);
+    if (isset($element['#value']) && \is_array($element['#value'])) {
+      // Each prop cleaned its own '#value': use those, not the raw submit.
+      foreach ($element['#value'] as $prop => &$prop_value) {
+        if (isset($element[$prop], $element[$prop]['#value'])) {
+          $prop_value = $element[$prop]['#value'];
+        }
+      }
+    }
+  }
+
+  /**
    * Build props forms.
    *
    * @SuppressWarnings("PHPMD.UnusedFormalParameter")
@@ -111,6 +126,7 @@ class ComponentPropsForm extends ComponentFormBase {
         '#prop_id' => $prop_id,
         '#wrap' => $element['#wrap'] ?? TRUE,
         '#render_sources' => $element['#render_sources'] ?? TRUE,
+        '#ajax_url' => $element['#ajax_url'] ?? NULL,
       ];
       if (\is_array($prop_filter) && !\in_array($prop_id, $prop_filter, TRUE)) {
         $element[$prop_id]['#access'] = FALSE;

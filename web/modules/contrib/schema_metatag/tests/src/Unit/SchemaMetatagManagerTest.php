@@ -45,7 +45,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    * @dataProvider arrayData
    */
   public function testArrayTrim($tests, $original, $original_serialized, $desired, $desired_serialized) {
-    if (!in_array('arraytrim', $tests)) {
+    if (!in_array('arrayTrim', $tests)) {
       $this->assertTrue(TRUE);
       return;
     }
@@ -116,7 +116,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    *    - original: original data.
    *    - desired: desired result.
    */
-  public function pivotData() {
+  public static function pivotData() {
     $values = [
       'Simple pivot' => [
         [
@@ -134,6 +134,59 @@ class SchemaMetatagManagerTest extends UnitTestCase {
           2 => ['@type' => 'Person', 'name' => 'George', 'Tags' => 'Third'],
         ],
       ],
+      'Nested pivot' => [
+        [
+          '@type' => 'Answer',
+          'text' => [
+            'Answer 1',
+            'Answer 2',
+            'Answer 3',
+          ],
+          'url' => [
+            'https://example.com/answer1',
+            'https://example.com/answer2',
+            'https://example.com/answer3',
+          ],
+          'author' => [
+            '@type' => 'Person',
+            'pivot' => '1',
+            'name' => [
+              'Answer Author 1',
+              'Answer Author 2',
+              'Answer Author 3',
+            ],
+          ],
+        ],
+        [
+          [
+            '@type' => 'Answer',
+            'text' => 'Answer 1',
+            'url' => 'https://example.com/answer1',
+            'author' => [
+              '@type' => 'Person',
+              'name' => 'Answer Author 1',
+            ],
+          ],
+          [
+            '@type' => 'Answer',
+            'text' => 'Answer 2',
+            'url' => 'https://example.com/answer2',
+            'author' => [
+              '@type' => 'Person',
+              'name' => 'Answer Author 2',
+            ],
+          ],
+          [
+            '@type' => 'Answer',
+            'text' => 'Answer 3',
+            'url' => 'https://example.com/answer3',
+            'author' => [
+              '@type' => 'Person',
+              'name' => 'Answer Author 3',
+            ],
+          ],
+        ],
+      ],
     ];
     return $values;
   }
@@ -149,7 +202,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    *    - desired: desired result as array.
    *    - desired_serialized: desired result, serialized.
    */
-  public function arrayData() {
+  public static function arrayData() {
     $values['Dirty input'] = [
       [
         'explode',
@@ -169,7 +222,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     ];
     $values['Nested array'] = [
       [
-        'arraytrim',
+        'arrayTrim',
         'serialize',
         'unserialize',
         'explode',
@@ -196,7 +249,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     ];
     $values['Nested array 2 levels deep'] = [
       [
-        'arraytrim',
+        'arrayTrim',
         'serialize',
         'unserialize',
         'explode',
@@ -231,7 +284,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     ];
     $values['Nested array with nested type only'] = [
       [
-        'arraytrim',
+        'arrayTrim',
         'serialize',
         'unserialize',
         'explode',
@@ -269,7 +322,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     ];
     $values['Empty nested array'] = [
       [
-        'arraytrim',
+        'arrayTrim',
         'serialize',
         'unserialize',
         'explode',
@@ -287,7 +340,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     ];
     $values['Missing type to empty array'] = [
       [
-        'arraytrim',
+        'arrayTrim',
         'serialize',
         'unserialize',
         'explode',
@@ -305,7 +358,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     ];
     $values['Type only to empty array'] = [
       [
-        'arraytrim',
+        'arrayTrim',
         'serialize',
         'unserialize',
         'explode',
@@ -320,6 +373,48 @@ class SchemaMetatagManagerTest extends UnitTestCase {
       'a:1:{s:12:"organization";a:3:{s:5:"@type";s:12:"Organization";s:4:"name";s:0:"";s:11:"description";s:0:"";}}',
       [],
       '',
+    ];
+    $values['Pivoted type only to empty array'] = [
+      [
+        'arrayTrim',
+      ],
+      [
+        'pivot' => 1,
+        '@type' => 'Question',
+        'name' => '',
+        'acceptedAnswer' => [
+          '@type' => 'Answer',
+          'text' => '',
+        ],
+      ],
+      'a:4:{s:5:"pivot";i:1;s:5:"@type";s:8:"Question";s:4:"name";s:0:"";s:14:"acceptedAnswer";a:2:{s:5:"@type";s:6:"Answer";s:4:"text";s:0:"";}}',
+      [],
+      '',
+    ];
+    $values['Pivoted array with content is kept'] = [
+      [
+        'arrayTrim',
+      ],
+      [
+        'pivot' => 1,
+        '@type' => 'Question',
+        'name' => 'How many teaspoons in a cup?',
+        'acceptedAnswer' => [
+          '@type' => 'Answer',
+          'text' => '48.',
+        ],
+      ],
+      'a:4:{s:5:"pivot";i:1;s:5:"@type";s:8:"Question";s:4:"name";s:28:"How many teaspoons in a cup?";s:14:"acceptedAnswer";a:2:{s:5:"@type";s:6:"Answer";s:4:"text";s:3:"48.";}}',
+      [
+        'pivot' => 1,
+        '@type' => 'Question',
+        'name' => 'How many teaspoons in a cup?',
+        'acceptedAnswer' => [
+          '@type' => 'Answer',
+          'text' => '48.',
+        ],
+      ],
+      'a:4:{s:5:"pivot";i:1;s:5:"@type";s:8:"Question";s:4:"name";s:28:"How many teaspoons in a cup?";s:14:"acceptedAnswer";a:2:{s:5:"@type";s:6:"Answer";s:4:"text";s:3:"48.";}}',
     ];
     $values['Array with empty parts'] = [
       ['recompute'],
@@ -352,7 +447,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    *    - original: original data.
    *    - desired: desired result.
    */
-  public function stringData() {
+  public static function stringData() {
     $values = [
       'Comma separated' => [
         'First,Second,Third',
@@ -375,7 +470,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    *    - original: original data.
    *    - desired: desired result.
    */
-  public function stringDataCustomSeparator() {
+  public static function stringDataCustomSeparator() {
     $values = [
       'Comma separated' => [
         ',',
@@ -404,7 +499,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    *    - original: original data.
    *    - desired: desired result.
    */
-  public function jsonData() {
+  public static function jsonData() {
     $values = [
       'Encode simple json' => [
         [

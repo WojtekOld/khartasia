@@ -36,6 +36,17 @@ export class Drupal {
   }
 
   /**
+   * A page in a new browser context: an anonymous visitor of the same site.
+   */
+  async anonymousPage(): Promise<Page> {
+    const context = await this.page.context().browser()!.newContext({ baseURL: `${this.drupalSite.url}/` })
+    await context.addCookies([
+      { name: 'SIMPLETEST_USER_AGENT', value: encodeURIComponent(this.drupalSite.userAgent), url: this.drupalSite.url },
+    ])
+    return context.newPage()
+  }
+
+  /**
    * Gets drupalSettings from the browser window object.
    */
   async getDrupalSettings() {

@@ -7,11 +7,12 @@ import { initPasswordCaching } from './modules/atomics/proc-init-password-cachin
 import { resetPasswordField } from './modules/atomics/proc-reset-password-field-module.js';
 import { triggerCacheDecryption } from './modules/proc-trigger-cache-decryption-module.js';
 import { decryptHandler } from './modules/proc-decrypt-handler-module.js';
+import { openpgpReady } from './modules/atomics/proc-openpgp-ready-module.js';
 
 // Keep this aligned with proc-decrypt version number in proc.libraries.yml.
-const PROC_DECRYPT_VERSION = '10.1.99';
+const PROC_DECRYPT_VERSION = '10.1.130';
 
-(function($, Drupal, drupalSettings, once, openpgp) {
+(function($, Drupal, drupalSettings, once) {
   Drupal.behaviors.ProcBehavior = {
     async attach(context, settings) {
       let contextId = context.id || '';
@@ -28,12 +29,25 @@ const PROC_DECRYPT_VERSION = '10.1.99';
           });
           return;
         }
+        // Ensure OpenPGP.js is loaded before using it.
+        const openpgp = await openpgpReady();
+        if (!openpgp) {
+          console.error(`[proc-decrypt ${PROC_DECRYPT_VERSION}] OpenPGP.js is not available; decryption cannot proceed.`);
+          messages.add(Drupal.t('The encryption library failed to load. Please reload the page and try again.'), {
+            type: 'error',
+          });
+          return;
+        }
         initPasswordCaching();
-        await triggerCacheDecryption($, openpgp, passwordSessionCachingSalt);
+        // Guard the cached-password auto-decryption with once() keyed to the
+        // password field element.
+        if (once('proc-cache-decryption', 'input[name=password]').length) {
+          await triggerCacheDecryption($, openpgp, passwordSessionCachingSalt);
+        }
         $(once('on', 'input#edit-password', context)).on('focusin', function () {
           resetPasswordField($, messages, decryptionLink);
         });
-        $('#proc-decrypt-form').submit(function (e) {
+        $('#proc-decrypt-form').off('submit').on('submit', function (e) {
           e.preventDefault();
           decryptionLink.click();
         });
@@ -44,4 +58,4 @@ const PROC_DECRYPT_VERSION = '10.1.99';
       }
     },
   };
-})(jQuery, Drupal, drupalSettings, once, openpgp);
+})(jQuery, Drupal, drupalSettings, once);

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains term_merge.module.
+ */
+
+/**
  * Implements hook_migration_plugins_alter().
  */
 function term_merge_migration_plugins_alter(array &$migrations) {

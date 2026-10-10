@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_patterns\Kernel;
 
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\ui_patterns\Traits\TestDataTrait;
+use Drupal\ui_patterns\ComponentPluginManager;
 
 /**
  * Base class to test prop type normalization.

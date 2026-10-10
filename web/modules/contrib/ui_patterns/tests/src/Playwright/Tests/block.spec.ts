@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/loader'
 import config from '../playwright.config.loader'
-import { openAllDetails, openDetails } from '../objects/ComponentForm'
+import { addSlotSource, openAllDetails, openDetails, openSourceSelector, pickSource } from '../objects/ComponentForm'
 import { Audit } from '../objects/Audit'
 import { enableModules } from '../objects/Setup'
 
@@ -37,6 +37,7 @@ test('Block: source settings forms over AJAX', { tag: ['@base', '@block'] }, asy
     await page.goto(href!.split('?')[0])
 
     await openDetails(page, 'Links')
+    await openSourceSelector(page, 'settings[ui_patterns][props][links][source_id]')
     const sourceSelect = page.locator('select[name="settings[ui_patterns][props][links][source_id]"]')
     const menuSelect = page.locator('select[name="settings[ui_patterns][props][links][source][menu]"]')
 
@@ -55,7 +56,7 @@ test('Block: source settings forms over AJAX', { tag: ['@base', '@block'] }, asy
 
     // A source whose setting is on by default: its form arrives over AJAX.
     await openAllDetails(page)
-    await page.locator('select[name="settings[ui_patterns][props][string][source_id]"]').selectOption('boolean_settings')
+    await pickSource(page, 'settings[ui_patterns][props][string][source_id]', 'boolean_settings')
     await onByDefault.waitFor({ state: 'attached', timeout: 15_000 })
     await expect(onByDefault).toBeChecked()
     await expect(page.locator('input[name="settings[ui_patterns][props][string][source][off_by_default]"]')).not.toBeChecked()
@@ -69,16 +70,17 @@ test('Block: source settings forms over AJAX', { tag: ['@base', '@block'] }, asy
 
   await test.step('2. Nesting: Component source in slot, unique wrapper ids', async () => {
     await openDetails(page, 'Slot')
-    await page
-      .locator('select[name*="[slots]"][name*="[add_more_button]"]')
-      .first()
-      .selectOption({ label: 'Component' })
+    await page.locator('[data-uip-slot-add*="[slots]"]').first().click()
+    const nestedSourceId = page.locator('select[name*="[slots]"][name$="[source_id]"]').first()
+    await nestedSourceId.waitFor({ state: 'attached', timeout: 15_000 })
+    await openAllDetails(page)
+    await nestedSourceId.selectOption({ label: 'Component' })
     const nestedComponent = page.locator('select[name*="[slots]"][name*="[component_id]"]').first()
     await nestedComponent.waitFor({ state: 'attached', timeout: 15_000 })
     await nestedComponent.selectOption(config.testComponentId)
 
-    const nestedLinksSource = page.locator('select[name*="[slots]"][name*="[props][links][source_id]"]').first()
-    await nestedLinksSource.waitFor({ state: 'attached', timeout: 15_000 })
+    const nestedLinksRow = page.locator('input[name*="[slots]"][name*="[props][links][node_id]"]').first()
+    await nestedLinksRow.waitFor({ state: 'attached', timeout: 15_000 })
 
     // The nested props arrive over AJAX: a boolean prop with a default gets it.
     await expect(nestedDefaultTrue).toBeChecked()
@@ -105,9 +107,7 @@ test('Block: source settings forms over AJAX', { tag: ['@base', '@block'] }, asy
     // nested one: pick the outer by exact name, and open its details again,
     // it closes on each AJAX replace.
     await openDetails(page, 'Slot')
-    await page
-      .locator('select[name="settings[ui_patterns][slots][slot][add_more_button]"]')
-      .selectOption({ label: 'Block' })
+    await addSlotSource(page, 'settings[ui_patterns][slots][slot]', { label: 'Block' })
     const pluginSelect = page.locator('select[name*="[slots]"][name*="[plugin_id]"]').first()
     await pluginSelect.waitFor({ state: 'attached', timeout: 15_000 })
     // BlockSource shows only the blockForm() of the plugin, so pick a block
@@ -143,6 +143,8 @@ test('Block: source settings forms over AJAX', { tag: ['@base', '@block'] }, asy
     await page.goto(editHref!.split('?')[0])
 
     // Outer links prop: Menu source with menu=main.
+    await openAllDetails(page)
+    await openSourceSelector(page, 'settings[ui_patterns][props][links][source_id]')
     const outerSource = page.locator('select[name="settings[ui_patterns][props][links][source_id]"]')
     await expect(outerSource).toHaveValue('menu')
     await expect(page.locator('select[name="settings[ui_patterns][props][links][source][menu]"]')).toHaveValue('main')

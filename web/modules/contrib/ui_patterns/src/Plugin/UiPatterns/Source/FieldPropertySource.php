@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\Plugin\Derivative\FieldPropertySourceDeriver;
@@ -40,11 +41,17 @@ class FieldPropertySource extends FieldValueSourceBase {
       // Type can be an array of types or a single type.
       $prop_typ_types = \is_array($this->propDefinition['type']) ? $this->propDefinition['type'] : [$this->propDefinition['type']];
     }
+    $property_data = $field_item_at_delta->get($property);
     // Return the raw property value: trust is carried by its type. A
     // processed property (TextProcessed) is FilteredMarkup, which the prop
     // type keeps as safe HTML; a raw string property (StringInterface) is
     // a plain string, which Twig autoescapes at render.
-    return $this->transTypeProp($field_item_at_delta->get($property)->getValue(), $prop_typ_types);
+    $value = $property_data->getValue();
+    // TextProcessed knows its cacheability once computed.
+    if ($property_data instanceof CacheableDependencyInterface) {
+      $this->addCacheableDependency($property_data);
+    }
+    return $this->transTypeProp($value, $prop_typ_types);
   }
 
   /**

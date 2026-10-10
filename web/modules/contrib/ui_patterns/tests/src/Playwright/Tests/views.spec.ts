@@ -1,7 +1,7 @@
 import { expect, Page } from '@playwright/test'
 import { test } from '../fixtures/loader'
 import config from '../playwright.config.loader'
-import { openAllDetails, select } from '../objects/ComponentForm'
+import { addSlotSource, openAllDetails, openSlotRows, openSourceSelector, pickSource, select, slotAddButton, sourceRow, value } from '../objects/ComponentForm'
 import { resetArticlesView, seedArticles } from '../objects/TestContent'
 import { Audit } from '../objects/Audit'
 import { enableModules, enableViewsDisplayExtender } from '../objects/Setup'
@@ -20,7 +20,7 @@ import type { Drupal } from '../objects/Drupal'
 // reopening, which is what a user does too. The views field does not have
 // the bug and is driven over AJAX. See the fixme at the end of this file.
 
-const dialog = '.ui-dialog'
+const dialog = '.ui-dialog.views-ui-dialog'
 const applyButton = `${dialog} .ui-dialog-buttonpane button:has-text("Apply")`
 const formatLink = 'a[href$="/page_1/style"]'
 const formatSettingsLink = 'a[href$="/page_1/style_options"]'
@@ -83,18 +83,16 @@ test('Views style: a component around the rows', { tag: ['@base', '@views'] }, a
     await pickComponentQuietly(page, `${base}[component_id]`)
     await apply(page)
     await page.locator(formatSettingsLink).click()
-    await select(page, `${base}[props][string][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][string][source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
     await expect(select(page, `${base}[component_id]`)).toHaveValue(config.testComponentId)
   })
 
   await test.step('3. Configure over AJAX: the view title, the rows in the slot', async () => {
     await openAllDetails(page)
     // Source switch over AJAX inside the dialog: the value form is replaced.
-    await select(page, `${base}[props][string][source_id]`).selectOption('view_title')
+    await pickSource(page, `${base}[props][string][source_id]`, 'view_title')
     await page.locator(`input[name="${base}[props][string][source][value]"]`).waitFor({ state: 'detached', timeout: 20_000 })
-    await openAllDetails(page)
-    await select(page, `${base}[slots][slot][add_more_button]`).selectOption('view_rows')
-    await page.locator(`[name="${base}[slots][slot][sources][0][source_id]"]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await addSlotSource(page, `${base}[slots][slot]`, 'view_rows')
     await openAllDetails(page)
     await page.locator(`input[name="${base}[props][boolean][source][value]"]`).check()
     await page.locator(`input[name="${base}[props][attributes][source][value]"]`).fill('class="from-view-style"')
@@ -104,10 +102,10 @@ test('Views style: a component around the rows', { tag: ['@base', '@views'] }, a
   await test.step('4. Save, reopen the dialog: everything is kept', async () => {
     await saveView(page, drupal)
     await page.locator(formatSettingsLink).click()
-    await select(page, `${base}[props][string][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][string][source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
     await expect(select(page, `${base}[component_id]`)).toHaveValue(config.testComponentId)
-    await expect(select(page, `${base}[props][string][source_id]`)).toHaveValue('view_title')
+    await expect(value(page, `${base}[props][string][source_id]`).first()).toHaveValue('view_title')
     await expect(page.locator(`[name="${base}[slots][slot][sources][0][source_id]"]`)).toHaveValue('view_rows')
     await expect(page.locator(`input[name="${base}[props][boolean][source][value]"]`)).toBeChecked()
     await expect(page.locator(`input[name="${base}[props][attributes][source][value]"]`)).toHaveValue('class="from-view-style"')
@@ -151,15 +149,13 @@ test('Views row: a component per row', { tag: ['@base', '@views'] }, async ({ pa
     await pickComponentQuietly(page, `${base}[component_id]`)
     await apply(page)
     await page.locator(showSettingsLink).click()
-    await select(page, `${base}[props][string][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][string][source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
     await expect(select(page, `${base}[component_id]`)).toHaveValue(config.testComponentId)
   })
 
   await test.step('3. Configure over AJAX: a row field in the slot', async () => {
-    await openAllDetails(page)
     // A row carries the views row context: its fields are offered as sources.
-    await select(page, `${base}[slots][slot][add_more_button]`).selectOption('view_field')
-    await page.locator(`[name="${base}[slots][slot][sources][0][source_id]"]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await addSlotSource(page, `${base}[slots][slot]`, 'view_field')
     await openAllDetails(page)
     const fieldSelect = select(page, `${base}[slots][slot][sources][0][source][ui_patterns_views_field]`)
     await fieldSelect.waitFor({ state: 'attached', timeout: 20_000 })
@@ -172,7 +168,7 @@ test('Views row: a component per row', { tag: ['@base', '@views'] }, async ({ pa
   await test.step('4. Save, reopen the dialog: everything is kept', async () => {
     await saveView(page, drupal)
     await page.locator(showSettingsLink).click()
-    await select(page, `${base}[props][string][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][string][source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
     await expect(select(page, `${base}[component_id]`)).toHaveValue(config.testComponentId)
     await expect(page.locator(`[name="${base}[slots][slot][sources][0][source_id]"]`)).toHaveValue('view_field')
@@ -219,27 +215,28 @@ test('Views field: the component formatter on a field', { tag: ['@base', '@views
 
   await test.step('2. Pick the component: its form arrives over AJAX', async () => {
     await select(page, `${base}[component_id]`).selectOption(config.testComponentId)
-    await select(page, `${base}[props][string][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][string][source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
   })
 
   await test.step('3. Configure the chain: tags item, referenced term, its name', async () => {
     await openAllDetails(page)
     // The formatter runs per field item, so the referenced term is a context.
+    await openSourceSelector(page, `${base}[props][string][source_id]`)
     const options = await select(page, `${base}[props][string][source_id]`)
       .locator('option')
       .evaluateAll(list => list.map(o => (o as HTMLOptionElement).value))
     expect(options).toEqual(expect.arrayContaining([referenced]))
 
     await select(page, `${base}[props][string][source_id]`).selectOption(referenced)
-    await select(page, `${nested}[source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${nested}[source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
-    await select(page, `${nested}[source_id]`).selectOption('entity_field')
+    await pickSource(page, `${nested}[source_id]`, 'entity_field')
     await select(page, `${nested}[source][derivable_context]`).waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
     await select(page, `${nested}[source][derivable_context]`).selectOption(termName)
     await page.locator(`[name="${nested}[source][${termName}][value][source_id]"]`).waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
-    await select(page, `${nested}[source][${termName}][value][source_id]`).selectOption('field_property:taxonomy_term:name:value')
+    await pickSource(page, `${nested}[source][${termName}][value][source_id]`, 'field_property:taxonomy_term:name:value')
     await drupal.ajaxReady()
     await openAllDetails(page)
     await page.locator(`input[name="${base}[props][attributes][source][value]"]`).fill('class="from-view-field"')
@@ -252,7 +249,7 @@ test('Views field: the component formatter on a field', { tag: ['@base', '@views
     await select(page, `${base}[component_id]`).waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
     await expect(select(page, `${base}[component_id]`)).toHaveValue(config.testComponentId)
-    await expect(select(page, `${base}[props][string][source_id]`)).toHaveValue(referenced)
+    await expect(value(page, `${base}[props][string][source_id]`).first()).toHaveValue(referenced)
     await expect(select(page, `${nested}[source][derivable_context]`)).toHaveValue(termName)
     await expect(page.locator(`[name="${nested}[source][${termName}][value][source_id]"]`)).toHaveValue(
       'field_property:taxonomy_term:name:value',
@@ -295,10 +292,8 @@ test('Views: an unsaved view edit reaches the sources', { tag: ['@base', '@views
     await pickComponentQuietly(page, `${base}[component_id]`)
     await apply(page)
     await page.locator(showSettingsLink).click()
-    await select(page, `${base}[slots][slot][add_more_button]`).waitFor({ state: 'attached', timeout: 20_000 })
-    await openAllDetails(page)
-    await select(page, `${base}[slots][slot][add_more_button]`).selectOption('view_field')
-    await page.locator(`[name="${base}[slots][slot][sources][0][source_id]"]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await slotAddButton(page, `${base}[slots][slot]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await addSlotSource(page, `${base}[slots][slot]`, 'view_field')
     await openAllDetails(page)
     await select(page, fieldSelectName).selectOption('title')
     await openAllDetails(page)
@@ -321,6 +316,7 @@ test('Views: an unsaved view edit reaches the sources', { tag: ['@base', '@views
     await page.locator(showSettingsLink).click()
     const fieldSelect = select(page, fieldSelectName)
     await fieldSelect.waitFor({ state: 'attached', timeout: 20_000 })
+    await openSlotRows(page, fieldSelectName)
     await openAllDetails(page)
     const options = await fieldSelect.locator('option').evaluateAll(list => list.map(o => (o as HTMLOptionElement).value))
     expect(options).toEqual(expect.arrayContaining(['nid']))
@@ -340,6 +336,56 @@ test('Views: an unsaved view edit reaches the sources', { tag: ['@base', '@views
   })
 
   await test.step('5. No PHP error in watchdog, no JS error in console', async () => {
+    await audit.expectClean()
+  })
+})
+
+// The selector inside the views modal: the row opens in place, the modal
+// lives on, and the keyboard alone drives both.
+test('Views style: the source selector inside the modal', { tag: ['@base', '@views'] }, async ({ page, drupal }) => {
+  const audit = new Audit(page, drupal, url => url.includes('/admin/'))
+  const base = 'style_options[ui_patterns][ui_patterns]'
+
+  await test.step('0. Setup: modules, content, a fresh view, admin login', async () => {
+    await setup(drupal, audit)
+  })
+
+  await test.step('1. A component style, reopened on its settings', async () => {
+    await page.goto('admin/structure/views/view/test_articles')
+    await page.locator(formatLink).click()
+    const radio = page.locator(`${dialog} input[name="style[type]"][value="ui_patterns"]`)
+    await radio.waitFor({ timeout: 20_000 })
+    await radio.click()
+    await page.locator(applyButton).click()
+    await select(page, `${base}[component_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await pickComponentQuietly(page, `${base}[component_id]`)
+    await apply(page)
+    await page.locator(formatSettingsLink).click()
+    await value(page, `${base}[props][string][node_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
+  })
+
+  await test.step('2. The row opens inside the modal, keyboard only', async () => {
+    await openAllDetails(page)
+    const row = sourceRow(page, `${base}[props][string][source_id]`)
+    await row.locator('.uip-source-selector-toggle--open').press('Enter')
+    const selector = select(page, `${base}[props][string][source_id]`)
+    await expect(selector).toBeVisible({ timeout: 20_000 })
+    await expect(selector).toBeFocused()
+    // The host modal is untouched by the row opening inside it.
+    await expect(page.locator(dialog)).toBeVisible()
+  })
+
+  await test.step('3. Cancel folds the row back, focus on its own button', async () => {
+    const row = sourceRow(page, `${base}[props][string][source_id]`)
+    await row.locator('.uip-source-selector-toggle--cancel').press('Enter')
+    const configure = row.locator('.uip-source-selector-toggle--open')
+    await expect(configure).toBeVisible({ timeout: 20_000 })
+    await expect(configure).toBeFocused()
+    await expect(page.locator(dialog)).toBeVisible()
+    await apply(page)
+  })
+
+  await test.step('4. No PHP error in watchdog, no JS error in console', async () => {
     await audit.expectClean()
   })
 })
@@ -373,26 +419,31 @@ test('Views display: a component around the whole display', { tag: ['@base', '@v
     await apply(page)
     await openAllDetails(page)
     await page.locator(componentLink).click()
-    await select(page, `${base}[props][title][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][title][source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
     await expect(select(page, `${base}[component_id]`)).toHaveValue(viewComponentId)
   })
 
   await test.step('2. The display context: its parts are offered, the style and row sources are not', async () => {
     await openAllDetails(page)
-    const options = await select(page, `${base}[slots][rows][add_more_button]`)
-      .locator('option')
-      .evaluateAll(list => list.map(o => (o as HTMLOptionElement).value))
+    await slotAddButton(page, `${base}[slots][rows]`).click()
+    const selector = select(page, `${base}[slots][rows][sources][0][source_id]`)
+    await selector.waitFor({ state: 'attached', timeout: 20_000 })
+    const options = await selector.locator('option').evaluateAll(list => list.map(o => (o as HTMLOptionElement).value))
     expect(options).toEqual(expect.arrayContaining(['view_header', 'view_rows', 'view_pager', 'view_more', 'view_feed_icons']))
     expect(options).not.toEqual(expect.arrayContaining(['view_field']))
+    await openAllDetails(page)
+    await selector.selectOption('view_rows')
   })
 
   await test.step('3. Configure over AJAX: the title, one part per slot', async () => {
-    await select(page, `${base}[props][title][source_id]`).selectOption('view_title')
+    await pickSource(page, `${base}[props][title][source_id]`, 'view_title')
     await page.locator(`input[name="${base}[props][title][source][value]"]`).waitFor({ state: 'detached', timeout: 20_000 })
     for (const [slot, sourceId] of Object.entries(parts)) {
-      await openAllDetails(page)
-      await select(page, `${base}[slots][${slot}][add_more_button]`).selectOption(sourceId)
-      await page.locator(`[name="${base}[slots][${slot}][sources][0][source_id]"]`).waitFor({ state: 'attached', timeout: 20_000 })
+      // The rows slot got its source while its offer was checked above.
+      if (slot === 'rows') {
+        continue
+      }
+      await addSlotSource(page, `${base}[slots][${slot}]`, sourceId)
     }
     await drupal.ajaxReady()
     await apply(page)
@@ -402,10 +453,10 @@ test('Views display: a component around the whole display', { tag: ['@base', '@v
     await saveView(page, drupal)
     await openAllDetails(page)
     await page.locator(componentLink).click()
-    await select(page, `${base}[props][title][source_id]`).waitFor({ state: 'attached', timeout: 20_000 })
+    await value(page, `${base}[props][title][source_id]`).first().waitFor({ state: 'attached', timeout: 20_000 })
     await openAllDetails(page)
     await expect(select(page, `${base}[component_id]`)).toHaveValue(viewComponentId)
-    await expect(select(page, `${base}[props][title][source_id]`)).toHaveValue('view_title')
+    await expect(value(page, `${base}[props][title][source_id]`).first()).toHaveValue('view_title')
     for (const [slot, sourceId] of Object.entries(parts)) {
       await expect(page.locator(`[name="${base}[slots][${slot}][sources][0][source_id]"]`)).toHaveValue(sourceId)
     }

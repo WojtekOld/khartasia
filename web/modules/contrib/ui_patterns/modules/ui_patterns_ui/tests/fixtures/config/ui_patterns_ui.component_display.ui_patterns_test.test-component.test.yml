@@ -10,7 +10,7 @@ content:
     widget_settings: { }
     source_id: select
     source:
-      value: primary
+      value: other
     parent: ''
     weight: '2'
     region: configure

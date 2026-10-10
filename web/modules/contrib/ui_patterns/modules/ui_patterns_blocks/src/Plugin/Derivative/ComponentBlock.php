@@ -35,7 +35,6 @@ class ComponentBlock extends DeriverBase implements ContainerDeriverInterface {
   public function getDerivativeDefinitions($base_plugin_definition) {
     // Block definitions are always arrays, never PluginDefinitionInterface.
     \assert(\is_array($base_plugin_definition));
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->pluginManager;
     /** @var array<string, array> $components */
     $components = $manager->getNegotiatedSortedDefinitions(NULL, 'label', TRUE);

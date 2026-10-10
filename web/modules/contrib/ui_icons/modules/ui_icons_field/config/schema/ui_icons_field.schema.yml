@@ -1,17 +1,8 @@
 field.value.ui_icon:
-  type: mapping
+  type: ui_icons.icon_value
   label: 'Default icon value'
   constraints:
     FullyValidatable: ~
-  mapping:
-    target_id:
-      type: string
-      label: 'Default icon full ID'
-    settings:
-      type: sequence
-      label: 'Default icon settings'
-      sequence:
-        type: ui_icons.icon_pack_options.[%key]
 
 field.field_settings.ui_icon:
   type: mapping
@@ -31,10 +22,8 @@ field.formatter.settings.icon_formatter:
     FullyValidatable: ~
   mapping:
     icon_settings:
-      type: sequence
+      type: ui_icons.icon_pack_settings
       label: 'Icon extractor settings'
-      sequence:
-        type: ui_icons.icon_pack_options.[%key]
 
 field.formatter.settings.icon_link_formatter:
   type: field.formatter.settings.link
@@ -43,10 +32,8 @@ field.formatter.settings.icon_link_formatter:
     FullyValidatable: ~
   mapping:
     icon_settings:
-      type: sequence
+      type: ui_icons.icon_pack_settings
       label: 'Icon extractor settings'
-      sequence:
-        type: ui_icons.icon_pack_options.[%key]
     icon_display:
       type: string
       label: 'Icon display position'

@@ -1,0 +1,13 @@
+name: 'Taxonomy Term Glossary Tippy.js Tooltips'
+type: module
+description: 'Display tooltips for the glossary terms using the Tippy.js Javascript library.'
+core_version_requirement: ^10.3 || ^11
+package: 'Fields'
+dependencies:
+  - drupal:taxonomy
+  - term_glossary:term_glossary
+
+# Information added by Drupal.org packaging script on 2026-10-10
+version: '4.7.0-beta1'
+project: 'term_glossary'
+datestamp: 1791621846

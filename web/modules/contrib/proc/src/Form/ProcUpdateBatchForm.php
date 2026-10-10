@@ -286,7 +286,7 @@ class ProcUpdateBatchForm extends ProcUpdateForm {
     $this->applyMaxFilesLimit($update_jobs);
 
     // Message the count of remaining update jobs.
-    $this->messenger()->addStatus($this->t('There are @count content items that can be re-encrypted by you.', [
+    $this->messenger()->addWarning($this->t('There are @count content items that can be re-encrypted by you.', [
       '@count' => count($update_jobs),
     ]));
 

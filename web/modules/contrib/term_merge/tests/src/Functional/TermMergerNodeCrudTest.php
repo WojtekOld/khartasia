@@ -73,8 +73,10 @@ class TermMergerNodeCrudTest extends MergeTermsTestBase {
     $first_term = reset($this->terms);
     $last_term = end($this->terms);
     $values = [
-      'field_terms' => ['target_id' => $first_term->id()],
-      ['target_id' => $last_term->id()],
+      'field_terms' => [
+        ['target_id' => $first_term->id()],
+        ['target_id' => $last_term->id()],
+      ],
     ];
     $node = $this->createNode($values);
 
@@ -100,7 +102,7 @@ class TermMergerNodeCrudTest extends MergeTermsTestBase {
       'name' => 'Basic page',
       'display_submitted' => FALSE,
     ]);
-    $this->createEntityReferenceField('node', 'page', 'field_terms', 'Terms', 'taxonomy_term');
+    $this->createEntityReferenceField('node', 'page', 'field_terms', 'Terms', 'taxonomy_term', 'default', [], -1);
   }
 
   /**

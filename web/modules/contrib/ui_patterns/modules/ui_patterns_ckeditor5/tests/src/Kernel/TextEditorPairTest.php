@@ -65,7 +65,7 @@ final class TextEditorPairTest extends CKEditor5KernelTestBase {
    * The CKEditor 5 plugin manager.
    */
   private function pluginManager(): CKEditor5PluginManagerInterface {
-    return $this->container->get('plugin.manager.ckeditor5.plugin');
+    return $this->container->get(CKEditor5PluginManagerInterface::class);
   }
 
 }

@@ -76,7 +76,7 @@ final class Readability extends AiContentSuggestionsPluginBase {
   public function updateFormWithResponse(array &$form, FormStateInterface $form_state): void {
     if ($value = $this->getTargetFieldValue($form_state)) {
       $config = $this->getConfiguration();
-      $output = $this->sendChat($config['prompt'] . $value . '"');
+      $output = (string) $this->sendChat($config['prompt'] . $value . '"');
       $cleanedResult = trim(str_replace('````', "", trim($output)));
       $cleanedResult = trim(str_replace('```', "", trim($cleanedResult)));
       $message = (!empty($cleanedResult)) ? $cleanedResult : $this->t('No result could be generated.');

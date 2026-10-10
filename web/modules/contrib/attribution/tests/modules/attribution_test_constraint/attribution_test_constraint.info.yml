@@ -1,0 +1,11 @@
+name: 'Attribution test constraint'
+type: module
+description: 'Adds property constraints to the attribution test field.'
+package: Testing
+dependencies:
+  - attribution:attribution
+
+# Information added by Drupal.org packaging script on 2026-10-03
+version: '1.2.1'
+project: 'attribution'
+datestamp: 1791053373

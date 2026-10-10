@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_patterns\Kernel;
 
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_patterns\ComponentPluginManager;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -74,7 +74,6 @@ final class ComponentPluginManagerTest extends KernelTestBase {
    * Test the method ::getCategories().
    */
   public function testGetCategories(): void {
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $categories = $manager->getCategories();
     self::assertNotEmpty($categories);
@@ -84,7 +83,6 @@ final class ComponentPluginManagerTest extends KernelTestBase {
    * Test the method ::getSortedDefinitions().
    */
   public function testGetSortedDefinitions(): void {
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $sortedDefinitions = $manager->getSortedDefinitions();
     self::assertNotEmpty($sortedDefinitions);
@@ -94,7 +92,6 @@ final class ComponentPluginManagerTest extends KernelTestBase {
    * Test the method ::getGroupedDefinitions().
    */
   public function testGetGroupedDefinitions(): void {
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $groupedDefinitions = $manager->getGroupedDefinitions();
     self::assertNotEmpty($groupedDefinitions);
@@ -104,7 +101,6 @@ final class ComponentPluginManagerTest extends KernelTestBase {
    * Test the method ::getNegotiatedGroupedDefinitions().
    */
   public function testGetNegotiatedGroupedDefinitions(): void {
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $sortedDefinitions = $manager->getSortedDefinitions();
     $groupedDefinitions = $manager->getNegotiatedGroupedDefinitions();
@@ -119,7 +115,6 @@ final class ComponentPluginManagerTest extends KernelTestBase {
    * Test the method ::getNegotiatedGroupedDefinitions().
    */
   public function testGetNegotiatedGroupedDefinitionsIncludeReplaces(): void {
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $sortedDefinitions = $manager->getSortedDefinitions();
     $groupedDefinitions = $manager->getNegotiatedGroupedDefinitions(NULL, 'label', TRUE);
@@ -134,7 +129,6 @@ final class ComponentPluginManagerTest extends KernelTestBase {
    * Test the method ::getNegotiatedSortedDefinitions().
    */
   public function testGetNegotiatedSortedDefinitions(): void {
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->manager;
     $groupedDefinitions = $manager->getNegotiatedSortedDefinitions();
     self::assertNotEmpty($groupedDefinitions);

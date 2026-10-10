@@ -1,0 +1,32 @@
+
+term_glossary.glossary_controller_apiSearch_per_letter:
+  path: '/glossary-search-letter/{letter}'
+  defaults:
+    _controller: '\Drupal\term_glossary\Controller\TermGlossaryController::apiSearchPerLetter'
+  requirements:
+    _permission: 'access content'
+
+
+term_glossary.glossary_controller_apiSearch_per_term:
+  path: '/glossary-search-term'
+  defaults:
+    _controller: '\Drupal\term_glossary\Controller\TermGlossaryController::apiSearchPerTerm'
+  requirements:
+    _permission: 'access content'
+
+term_glossary.glossary_controller_get_term_by_id:
+  path: '/glossary-get-term-by-id/{tid}'
+  defaults:
+    _controller: '\Drupal\term_glossary\Controller\TermGlossaryController::apiGetTermById'
+  requirements:
+    _permission: 'access content'
+
+term_glossary.glossary_config_form:
+  path: '/admin/config/glossary'
+  defaults:
+    _form: '\Drupal\term_glossary\Form\TermGlossaryConfigForm'
+    _title: 'Glossary Config Form'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

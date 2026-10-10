@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_patterns_ckeditor5\Kernel;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\editor\Entity\Editor;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -79,7 +80,7 @@ abstract class CKEditor5KernelTestBase extends KernelTestBase {
       'bundle' => 'page',
       'label' => 'Body',
     ])->save();
-    $this->container->get('entity_display.repository')
+    $this->container->get(EntityDisplayRepositoryInterface::class)
       ->getViewDisplay('node', 'page')
       ->setComponent('body', ['type' => 'text_default'])
       ->save();

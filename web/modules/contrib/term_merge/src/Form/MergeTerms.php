@@ -2,12 +2,9 @@
 
 namespace Drupal\term_merge\Form;
 
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element\Checkboxes;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\taxonomy\VocabularyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -18,35 +15,31 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class MergeTerms extends FormBase {
 
   /**
-   * The term storage handler.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected EntityStorageInterface $termStorage;
-
-  /**
    * The vocabulary.
    *
    * @var \Drupal\taxonomy\VocabularyInterface
    */
   protected VocabularyInterface $vocabulary;
 
+  /**
+   * Whether the Synonyms module is enabled.
+   *
+   * @var bool
+   */
   protected bool $hasSynonyms;
 
   /**
    * Constructs a MergeTerms object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity manager service.
    * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStoreFactory
    *   The private temporary storage factory service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    */
   public function __construct(
-    protected EntityTypeManagerInterface $entityTypeManager,
     protected PrivateTempStoreFactory $tempStoreFactory,
     ModuleHandlerInterface $module_handler,
   ) {
-    $this->termStorage = $entityTypeManager->getStorage('taxonomy_term');
     $this->hasSynonyms = $module_handler->moduleExists('synonyms');
   }
 
@@ -55,7 +48,6 @@ class MergeTerms extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager'),
       $container->get('tempstore.private'),
       $container->get('module_handler'),
     );
@@ -85,12 +77,17 @@ class MergeTerms extends FormBase {
       ];
     }
 
-
     $form['terms'] = [
-      '#type' => 'checkboxes',
+      '#type' => 'entity_autocomplete',
       '#title' => $this->t('Terms to merge'),
-      '#options' => $this->getTermOptions($taxonomy_vocabulary),
-      '#description' => $this->t('Select two or more terms to merge together'),
+      '#target_type' => 'taxonomy_term',
+      '#tags' => TRUE,
+      '#selection_handler' => 'default:taxonomy_term',
+      '#selection_settings' => [
+        'target_bundles' => [$taxonomy_vocabulary->id() => $taxonomy_vocabulary->id()],
+      ],
+      '#maxlength' => NULL,
+      '#description' => $this->t('Select two or more terms to merge together. Separate multiple terms with commas.'),
       '#required' => TRUE,
     ];
 
@@ -110,9 +107,7 @@ class MergeTerms extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
 
-    $selected_terms = $form_state->getValue('terms');
-
-    if (empty($selected_terms)) {
+    if (empty($this->getSelectedTermIds($form_state))) {
       $form_state->setErrorByName('terms', 'At least one term must be selected.');
     }
   }
@@ -121,7 +116,7 @@ class MergeTerms extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $selected_terms = Checkboxes::getCheckedCheckboxes($form_state->getValue('terms'));
+    $selected_terms = $this->getSelectedTermIds($form_state);
 
     $term_store = $this->tempStoreFactory->get('term_merge');
     $term_store->set('terms', $selected_terms);
@@ -149,24 +144,18 @@ class MergeTerms extends FormBase {
   }
 
   /**
-   * Builds a list of all terms in this vocabulary.
+   * Extracts the selected term IDs from the submitted form values.
    *
-   * @param \Drupal\taxonomy\VocabularyInterface $vocabulary
-   *   The vocabulary.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
    *
-   * @return string[]
-   *   An array of taxonomy term labels keyed by their id.
+   * @return int[]
+   *   The unique selected term IDs.
    */
-  protected function getTermOptions(VocabularyInterface $vocabulary) {
-    $options = [];
+  protected function getSelectedTermIds(FormStateInterface $form_state): array {
+    $term_ids = array_column((array) $form_state->getValue('terms'), 'target_id');
 
-    $terms = $this->termStorage->loadByProperties(['vid' => $vocabulary->id()]);
-    foreach ($terms as $term) {
-      $options[$term->id()] = $term->label();
-    }
-
-    asort($options);
-
-    return $options;
+    return array_values(array_unique(array_map('intval', $term_ids)));
   }
+
 }

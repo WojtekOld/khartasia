@@ -6,7 +6,9 @@ namespace Drupal\Tests\ui_patterns\Kernel\Source;
 
 use Drupal\Core\Menu\MenuActiveTrailInterface;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\node\Entity\Node;
 use Drupal\Tests\ui_patterns\Kernel\SourcePluginsTestBase;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\ui_patterns\Plugin\UiPatterns\Source\MenuSource;
 use Drupal\ui_patterns\SourcePluginBase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -22,6 +24,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 #[Group('ui_patterns')]
 #[RunTestsInSeparateProcesses]
 final class MenuSourceTest extends SourcePluginsTestBase {
+
+  use UserCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -283,25 +287,51 @@ final class MenuSourceTest extends SourcePluginsTestBase {
   }
 
   /**
-   * The active trail cache context is added only when the trail is used.
+   * The menu tag, and the active trail context when the trail is used.
+   *
+   * Read under a derived context too, where alterComponent() is not called.
    */
-  public function testAlterComponentCacheMetadata(): void {
-    $element = $this->createMenuSource(['menu' => 'main'])->alterComponent([]);
-    self::assertContains('config:system.menu.main', $element['#cache']['tags']);
-    self::assertNotContains('route.menu_active_trails:main', $element['#cache']['contexts'] ?? []);
+  public function testCacheMetadata(): void {
+    $source = $this->createMenuSource(['menu' => 'main']);
+    $source->getPropValue();
+    self::assertContains('config:system.menu.main', $source->getCacheTags());
+    self::assertNotContains('route.menu_active_trails:main', $source->getCacheContexts());
 
     $trail_settings = [
       ['menu' => 'main', 'set_active_trail' => TRUE],
       ['menu' => 'main', 'expand_all_items' => FALSE],
     ];
     foreach ($trail_settings as $settings) {
-      $element = $this->createMenuSource($settings)->alterComponent([]);
-      self::assertContains('config:system.menu.main', $element['#cache']['tags']);
-      self::assertContains('route.menu_active_trails:main', $element['#cache']['contexts']);
+      $source = $this->createMenuSource($settings);
+      $source->getPropValue();
+      self::assertContains('config:system.menu.main', $source->getCacheTags());
+      self::assertContains('route.menu_active_trails:main', $source->getCacheContexts());
     }
 
-    // Without a selected menu, the element is left untouched.
-    self::assertSame([], $this->createMenuSource([])->alterComponent([]));
+    // Without a selected menu, nothing is collected.
+    $source = $this->createMenuSource([]);
+    $source->getPropValue();
+    self::assertSame([], $source->getCacheTags());
+  }
+
+  /**
+   * A link the user cannot open is hidden, and its access cacheability is kept.
+   *
+   * Without the node tag, publishing the node does not show the link.
+   */
+  public function testDeniedLinkCacheMetadata(): void {
+    $this->setUpCurrentUser([], ['access content']);
+    $node = Node::create(['type' => 'page', 'title' => 'Unpublished', 'status' => 0]);
+    $node->save();
+    MenuLinkContent::create([
+      'menu_name' => 'main',
+      'title' => 'Secret link',
+      'link' => [['uri' => 'entity:node/' . $node->id()]],
+    ])->save();
+    $source = $this->createMenuSource(['menu' => 'main']);
+    $links = $source->getPropValue();
+    self::assertNotContains('Secret link', \array_column($links, 'title'));
+    self::assertContains('node:' . $node->id(), $source->getCacheTags());
   }
 
   /**

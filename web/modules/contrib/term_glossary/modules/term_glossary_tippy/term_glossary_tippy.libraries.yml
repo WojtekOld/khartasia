@@ -1,0 +1,24 @@
+libraries.popperjs:
+  js:
+    /libraries/popperjs/dist/umd/popper.js: { }
+
+libraries.tippyjs:
+  css:
+    component:
+      /libraries/tippyjs/dist/tippy.css: { }
+  js:
+    /libraries/tippyjs/dist/tippy.umd.js: { }
+  dependencies:
+    - term_glossary_tippy/libraries.popperjs
+
+term_glossary_tippy:
+  css:
+    theme:
+      ../../assets/css/content-style.css: { }
+  js:
+    js/term_glossary_tippy.js: { }
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - term_glossary_tippy/libraries.tippyjs

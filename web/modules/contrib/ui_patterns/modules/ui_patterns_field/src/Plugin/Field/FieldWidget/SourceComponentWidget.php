@@ -14,8 +14,7 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Render\Component\Exception\ComponentNotFoundException;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
-use Drupal\ui_patterns\ComponentPluginManager as UIPatternsComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\Form\ComponentFormBuilderTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns\SourceTags;
@@ -86,10 +85,7 @@ class SourceComponentWidget extends WidgetBase {
    *   Component options.
    */
   protected function getComponentOptions(): array {
-    $definitions = [];
-    if ($this->componentPluginManager instanceof UIPatternsComponentPluginManager) {
-      $definitions = $this->componentPluginManager->getGroupedDefinitions();
-    }
+    $definitions = $this->componentPluginManager->getGroupedDefinitions();
     $options = [];
     foreach ($definitions as $group_id => $group) {
       foreach ($group as $component_id => $definition) {
@@ -230,12 +226,11 @@ class SourceComponentWidget extends WidgetBase {
     if ($this->getSetting('component_id') !== NULL) {
       $summary[] = $this->t('Component Id: @component', ['@component' => $this->getSetting('component_id')]);
     }
-    if (!($this->getSetting('hide_slots') ?? TRUE)) {
+    if ($this->getSetting('hide_slots') ?? TRUE) {
       $summary[] = $this->t('Hide slots');
     }
-    $selection = $this->getSetting('prop_filter_enable') ?? [];
-    $props_selection = $selection['props'] ?? NULL;
-    if (\is_array($props_selection)) {
+    $props_selection = $this->getSetting('selection')['prop_filter'] ?? NULL;
+    if ($this->getSetting('prop_filter_enable') && \is_array($props_selection)) {
       $summary[] = $this->t('Only selected props: @props', ['@props' => \implode(',', $props_selection)]);
     }
 
@@ -250,7 +245,8 @@ class SourceComponentWidget extends WidgetBase {
     $parents = $form['#parents'];
     if (!self::getWidgetState($parents, $field_name, $form_state)) {
       $field_state = [
-        'items_count' => \count($items) - 1,
+        // Every item shown is saved, so no extra empty one; one when empty.
+        'items_count' => \max(\count($items) - 1, 0),
         'array_parents' => [],
       ];
       self::setWidgetState($parents, $field_name, $form_state, $field_state);
@@ -299,7 +295,7 @@ class SourceComponentWidget extends WidgetBase {
     $hide_slots = $settings['hide_slots'] ?? TRUE;
     $form_element_overrides = [
       '#allow_override' => $settings['allow_override'] ?? FALSE,
-      '#tag_filter' => ((bool) ($settings['only_widgets'] ?? TRUE)) ? [SourceTags::Widget->value => TRUE] : [],
+      '#tag_filter' => ($prop_sources === 'widgets') ? [SourceTags::Widget->value => TRUE] : [],
       '#default_value' => $component_default_value,
       '#wrap' => $wrap,
       '#render_headings' => !$hide_slots,
@@ -314,9 +310,9 @@ class SourceComponentWidget extends WidgetBase {
       '#title' => 'Node id',
       '#value' => $item_delta_value['node_id'] ?? '',
     ];
+    // Kept server side: a hidden input would render this array as a string.
     $element['third_party_settings'] = [
-      '#type' => 'hidden',
-      '#title' => 'Third party settings',
+      '#type' => 'value',
       '#value' => $item_delta_value['third_party_settings'] ?? [],
     ];
 

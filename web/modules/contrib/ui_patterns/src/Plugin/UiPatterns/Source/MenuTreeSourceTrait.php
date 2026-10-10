@@ -57,6 +57,13 @@ trait MenuTreeSourceTrait {
    */
   protected function buildMenuTree(string $menu_id, int $level = 1, int $depth = 0, bool $set_active_trail = FALSE, bool $expand_all_items = TRUE): array {
     $menu_link_tree = $this->menuLinkTree();
+    $cache = $this->addMenuCacheTags([], [$menu_id]);
+    // Collapsed items follow the active trail.
+    if ($set_active_trail || !$expand_all_items) {
+      $cache = $this->addMenuActiveTrailCacheContexts($cache, [$menu_id]);
+    }
+    // On the source: alterComponent() is not called under a derived context.
+    $this->addCacheableDependency(CacheableMetadata::createFromRenderArray($cache));
     $parameters = $this->buildMenuTreeParameters($menu_id, $level, $depth, $set_active_trail, $expand_all_items);
     if ($parameters === NULL) {
       return [];
@@ -70,6 +77,8 @@ trait MenuTreeSourceTrait {
 
     $tree = $menu_link_tree->transform($tree, $manipulators);
     $tree = $menu_link_tree->build($tree);
+    // Link access, also when no link is left.
+    $this->addCacheableDependency(CacheableMetadata::createFromRenderArray($tree));
     if (!\array_key_exists('#items', $tree)) {
       return [];
     }

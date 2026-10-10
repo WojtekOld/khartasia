@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_patterns_ckeditor5\Kernel;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\filter\FilterPluginCollection;
 use Drupal\filter\FilterProcessResult;
 use Drupal\node\Entity\Node;
+use Drupal\ui_patterns_ckeditor5\HostEntity;
 use Drupal\ui_patterns_ckeditor5\Plugin\Filter\ComponentEmbed;
 use Drupal\user\RoleInterface;
 use PHPUnit\Framework\Attributes\Group;
@@ -30,7 +33,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 final class ComponentEmbedFilterTest extends CKEditor5KernelTestBase {
 
   /**
-   * The component renders with its configuration, around the other text.
+   * The component renders unwrapped, with its configuration, in the text.
    */
   public function testRendersComponent(): void {
     $tag = $this->componentTag(self::COMPONENT, [
@@ -38,8 +41,9 @@ final class ComponentEmbedFilterTest extends CKEditor5KernelTestBase {
     ]);
     $result = $this->process('<p>before</p>' . $tag . '<p>after</p>');
     $html = $result->getProcessedText();
-    self::assertStringContainsString('<p>before</p><div class="drupal-component">', $html);
-    self::assertStringContainsString('</div><p>after</p>', $html);
+    self::assertMatchesRegularExpression('#<p>before</p><div [^>]*ui-patterns-test-component#', $html, 'The component root follows the text directly, without a wrapper.');
+    self::assertMatchesRegularExpression('#</div>\s*<p>after</p>#', $html);
+    self::assertStringNotContainsString('class="drupal-component"', $html);
     self::assertStringContainsString('ui-patterns-test-component', $html);
     self::assertMatchesRegularExpression('#ui-patterns-props-string">\s*Hello\s*<#', $html);
     self::assertStringNotContainsString('<drupal-component', $html);
@@ -91,10 +95,10 @@ final class ComponentEmbedFilterTest extends CKEditor5KernelTestBase {
       'body' => ['value' => '<p>Body</p>' . $tag, 'format' => self::FORMAT],
     ]);
     $node->save();
-    $build = $this->container->get('entity_type.manager')->getViewBuilder('node')->view($node, 'full');
-    $html = (string) $this->container->get('renderer')->renderRoot($build);
+    $build = $this->container->get(EntityTypeManagerInterface::class)->getViewBuilder('node')->view($node, 'full');
+    $html = (string) $this->container->get(RendererInterface::class)->renderRoot($build);
     self::assertMatchesRegularExpression('#ui-patterns-props-string">\s*The host title\s*<#', $html);
-    self::assertSame([], $this->container->get('ui_patterns_ckeditor5.host_entity')->getContexts(), 'The host is released after the render.');
+    self::assertSame([], $this->container->get(HostEntity::class)->getContexts(), 'The host is released after the render.');
   }
 
   /**
@@ -112,7 +116,7 @@ final class ComponentEmbedFilterTest extends CKEditor5KernelTestBase {
 
     $html = $this->process('<p>a</p>' . $this->componentTag(self::COMPONENT) . $this->componentTag('ui_patterns_test:test-form-component'))->getProcessedText();
     self::assertStringNotContainsString('ui-patterns-test-component', $html);
-    self::assertStringContainsString('<p>a</p><div class="drupal-component">', $html);
+    self::assertMatchesRegularExpression('#<p>a</p>\s*<form [^>]*ui-patterns-test-form#', $html);
 
     $this->setAllowedComponents([]);
     self::assertTrue($this->filter()->isComponentAllowed(self::COMPONENT));
@@ -149,7 +153,7 @@ final class ComponentEmbedFilterTest extends CKEditor5KernelTestBase {
    * Saves the allowed components of the test format.
    */
   private function setAllowedComponents(array $component_ids): void {
-    $format = $this->container->get('entity_type.manager')->getStorage('filter_format')->load(self::FORMAT);
+    $format = $this->container->get(EntityTypeManagerInterface::class)->getStorage('filter_format')->load(self::FORMAT);
     $format->setFilterConfig('component_embed', [
       'status' => TRUE,
       'weight' => 100,
@@ -162,7 +166,7 @@ final class ComponentEmbedFilterTest extends CKEditor5KernelTestBase {
    * The component_embed filter of the test format.
    */
   private function filter(): ComponentEmbed {
-    $filters = $this->container->get('entity_type.manager')->getStorage('filter_format')->load(self::FORMAT)->filters();
+    $filters = $this->container->get(EntityTypeManagerInterface::class)->getStorage('filter_format')->load(self::FORMAT)->filters();
     self::assertInstanceOf(FilterPluginCollection::class, $filters);
     $filter = $filters->get('component_embed');
     self::assertInstanceOf(ComponentEmbed::class, $filter);
@@ -174,7 +178,7 @@ final class ComponentEmbedFilterTest extends CKEditor5KernelTestBase {
    */
   private function process(string $text): FilterProcessResult {
     $filter = $this->filter();
-    return $this->container->get('renderer')->executeInRenderContext(new RenderContext(), static fn () => $filter->process($text, 'en'));
+    return $this->container->get(RendererInterface::class)->executeInRenderContext(new RenderContext(), static fn () => $filter->process($text, 'en'));
   }
 
 }

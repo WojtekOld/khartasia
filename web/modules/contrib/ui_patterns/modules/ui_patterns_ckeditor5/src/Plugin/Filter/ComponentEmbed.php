@@ -67,13 +67,13 @@ class ComponentEmbed extends FilterBase implements ContainerFactoryPluginInterfa
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.sdc'),
-      $container->get('renderer'),
+      $container->get(ComponentPluginManager::class),
+      $container->get(RendererInterface::class),
       $container->get('logger.channel.ui_patterns'),
-      $container->get('ui_patterns_ckeditor5.host_entity'),
-      $container->get('extension.list.module'),
-      $container->get('extension.list.theme'),
-      $container->get('ui_patterns_ckeditor5.rendering_filter'),
+      $container->get(HostEntity::class),
+      $container->get(ModuleExtensionList::class),
+      $container->get(ThemeExtensionList::class),
+      $container->get(RenderingFilter::class),
     );
   }
 
@@ -226,8 +226,6 @@ class ComponentEmbed extends FilterBase implements ContainerFactoryPluginInterfa
       '#component' => $component_id,
       '#ui_patterns' => \is_array($settings) ? $settings : [],
       '#source_contexts' => $this->hostEntity->getContexts(),
-      '#prefix' => '<div class="drupal-component">',
-      '#suffix' => '</div>',
     ];
     // Placeholders must survive until the final render and the metadata must
     // reach $result instead of bubbling to the caller, hence render() inside

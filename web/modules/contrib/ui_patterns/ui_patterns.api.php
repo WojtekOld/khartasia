@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
 use Drupal\ui_patterns\SourceInterface;
 
@@ -44,6 +45,24 @@ function hook_ui_patterns_source_value_alter(mixed &$value, SourceInterface $sou
       $value['#cache']['tags'][] = 'custom_cache_tag';
     }
   }
+}
+
+/**
+ * Alter Hook for a component form, before the Form API processes it.
+ *
+ * Fired by every host assembling a component_form element:
+ * ComponentFormBuilderTrait, the Component source, the CKEditor 5 dialog.
+ * A host sets '#allow_override' to FALSE to keep the plain form.
+ *
+ * @param array $form
+ *   The component_form element.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state of the host.
+ *
+ * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+ */
+function hook_ui_patterns_form_alter(array &$form, FormStateInterface $form_state): void {
+  $form['#component_filter'] = ['my_theme:card'];
 }
 
 /**

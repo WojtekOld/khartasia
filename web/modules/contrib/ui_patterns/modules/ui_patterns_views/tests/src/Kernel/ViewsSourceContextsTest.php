@@ -147,6 +147,7 @@ final class ViewsSourceContextsTest extends KernelTestBase {
     $display['default']['display_options']['title'] = 'unsaved view title';
     $unsaved->set('display', $display);
     \Drupal::service('tempstore.shared')->get('views')->set('test', new ViewUI($unsaved));
+    $this->setCurrentUser($this->createUser(['administer views']));
     self::assertSame('unsaved view title', $this->getViewTitle());
   }
 

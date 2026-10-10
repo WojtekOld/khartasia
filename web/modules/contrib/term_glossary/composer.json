@@ -1,0 +1,24 @@
+{
+    "name": "drupal/term_glossary",
+    "type": "drupal-module",
+    "description": "This flexible module uses a vocabulary (taxonomy) as a glossary.",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "keywords": [
+        "Drupal",
+        "term_glossary",
+        "glossary"
+    ],
+    "homepage": "https://www.drupal.org/project/term_glossary",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/term_glossary",
+        "source": "https://git.drupalcode.org/project/term_glossary"
+    },
+    "require": {
+        "drupal/jquery_ui_dialog": "^2"
+    },
+    "suggest": {
+        "npm-asset/popperjs--core": "Required by the term_glossary_tippy submodule, must be installed as web/libraries/popperjs.",
+        "npm-asset/tippy.js": "Required by the term_glossary_tippy submodule, must be installed as web/libraries/tippyjs."
+    }
+}

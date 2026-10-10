@@ -11,7 +11,7 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 
 /**
  * Provides a Component form builder element.
@@ -128,6 +128,9 @@ class ComponentForm extends ComponentFormBase {
       }
       if (isset($element['props'], $element['props']['#value'])) {
         $element['#value']['props'] = $element['props']['#value'];
+      }
+      if (isset($element['variant_id'], $element['variant_id']['#value'])) {
+        $element['#value']['variant_id'] = $element['variant_id']['#value'];
       }
       $form_state->setValueForElement($element, $element['#value']);
     }
@@ -259,7 +262,6 @@ class ComponentForm extends ComponentFormBase {
     bool $required = TRUE,
     ?array $component_filter = NULL,
   ): array {
-    // @phpstan-ignore method.notFound
     $definitions = \Drupal::service(ComponentPluginManager::class)->getNegotiatedGroupedDefinitions();
     $options = [];
     foreach ($definitions as $group_id => $group) {
@@ -397,6 +399,10 @@ class ComponentForm extends ComponentFormBase {
       }
       $parents_of_prop_or_slot = \array_slice($parents, 0, 2);
       $prop_or_slot = NestedArray::getValue($element, $parents_of_prop_or_slot);
+      if (!empty($prop_or_slot['source']['#ui_patterns_hidden'])) {
+        // The error sits in a source form hidden behind its summary: show it.
+        NestedArray::setValue($element, \array_merge($parents_of_prop_or_slot, ['source', '#ui_patterns_hidden']), FALSE);
+      }
       if (!empty($prop_or_slot) && isset($prop_or_slot['#wrap']) && $prop_or_slot['#wrap']) {
         $parents_of_prop_or_slot[] = $parents_of_prop_or_slot[1];
         $parents_of_prop_or_slot[] = '#open';

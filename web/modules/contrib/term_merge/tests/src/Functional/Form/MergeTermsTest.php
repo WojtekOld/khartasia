@@ -5,6 +5,7 @@ namespace Drupal\Tests\term_merge\Functional\Form;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\taxonomy\VocabularyInterface;
 use Drupal\term_merge\Form\MergeTerms;
 use Drupal\Tests\term_merge\Functional\MergeTermsTestBase;
 
@@ -29,35 +30,31 @@ class MergeTermsTest extends MergeTermsTestBase {
   }
 
   /**
-   * Tests a term merge form for a vocabulary without terms.
+   * Tests the term merge form structure.
    *
    * @test
    */
-  public function vocabularyWithoutTermsReturnsEmptyForm(): void {
+  public function buildsAutocompleteForm(): void {
     $vocabulary = $this->createVocabulary();
     $sut = $this->createSubjectUnderTest();
 
     $actual = $sut->buildForm([], new FormState(), $vocabulary);
-    self::assertEquals($this->getEmptyFormExpectation(), $actual);
+    self::assertEquals($this->getEmptyFormExpectation($vocabulary), $actual);
   }
 
   /**
-   * Tests a term merge form for a vocabulary with terms.
+   * Tests the autocomplete is restricted to the vocabulary.
    *
    * @test
    */
-  public function vocabularyWithTerms(): void {
+  public function restrictsAutocompleteToVocabulary(): void {
     $vocabulary = $this->createVocabulary();
-    $term1 = $this->createTerm($vocabulary);
-    $term2 = $this->createTerm($vocabulary);
     $sut = $this->createSubjectUnderTest();
 
     $actual = $sut->buildForm([], new FormState(), $vocabulary);
 
-    $expected = $this->getEmptyFormExpectation();
-    $expected['terms']['#options'][$term1->id()] = $term1->label();
-    $expected['terms']['#options'][$term2->id()] = $term2->label();
-    self::assertEquals($expected, $actual);
+    $expected = [$vocabulary->id() => $vocabulary->id()];
+    self::assertEquals($expected, $actual['terms']['#selection_settings']['target_bundles']);
   }
 
   /**
@@ -65,29 +62,33 @@ class MergeTermsTest extends MergeTermsTestBase {
    *
    * @return array
    *   An array of selections. Each selection has contains the following values:
-   *   - selectedTerms: an array of selected source taxonomy term ids.
-   *   - expectingErrors: a boolean indicating the form is expected to generate
+   *   - selected_terms: the submitted autocomplete values.
+   *   - expecting_errors: a boolean indicating the form is expected to generate
    *     an error.
    */
   public static function validatesSelectedTermsTestDataProvider(): array {
     $test_data['No terms selected'] = [
-      'selectedTerms' => [],
-      'expectingErrors' => TRUE,
+      'selected_terms' => [],
+      'expecting_errors' => TRUE,
     ];
 
     $test_data['One term selected'] = [
-      'selectedTerms' => [1],
-      'expectingErrors' => FALSE,
+      'selected_terms' => [['target_id' => 1]],
+      'expecting_errors' => FALSE,
     ];
 
     $test_data['Two terms selected'] = [
-      'selectedTerms' => [1, 2],
-      'expectingErrors' => FALSE,
+      'selected_terms' => [['target_id' => 1], ['target_id' => 2]],
+      'expecting_errors' => FALSE,
     ];
 
     $test_data['three terms selected'] = [
-      'selectedTerms' => [1, 2, 3],
-      'expectingErrors' => FALSE,
+      'selected_terms' => [
+        ['target_id' => 1],
+        ['target_id' => 2],
+        ['target_id' => 3],
+      ],
+      'expecting_errors' => FALSE,
     ];
 
     return $test_data;
@@ -97,7 +98,7 @@ class MergeTermsTest extends MergeTermsTestBase {
    * Checks the form validation for the merge terms form.
    *
    * @param array $selected_terms
-   *   The selected term ids.
+   *   The submitted autocomplete values.
    * @param bool $expecting_errors
    *   If a validation error is expected.
    *
@@ -131,7 +132,7 @@ class MergeTermsTest extends MergeTermsTestBase {
     $sut = $this->createSubjectUnderTest();
 
     $form_state = new FormState();
-    $form_state->setValue('terms', [1, 2]);
+    $form_state->setValue('terms', [['target_id' => 1], ['target_id' => 2]]);
     $form = $sut->buildForm([], $form_state, $vocabulary);
 
     $sut->submitForm($form, $form_state);
@@ -152,7 +153,11 @@ class MergeTermsTest extends MergeTermsTestBase {
     $sut = $this->createSubjectUnderTest();
     $form_state = new FormState();
     $expected_term_ids = [1, 2];
-    $form_state->setValue('terms', $expected_term_ids);
+    $form_state->setValue('terms', [
+      ['target_id' => 1],
+      ['target_id' => 2],
+      ['target_id' => 2],
+    ]);
     $form = $sut->buildForm([], $form_state, $vocabulary);
 
     self::assertEmpty($this->privateTempStoreFactory->get('term_merge')->get('terms'));
@@ -162,19 +167,27 @@ class MergeTermsTest extends MergeTermsTestBase {
   }
 
   /**
-   * Returns the expected form structure when the form is empty.
+   * Returns the expected form structure.
+   *
+   * @param \Drupal\taxonomy\VocabularyInterface $vocabulary
+   *   The vocabulary the form is built for.
    *
    * @return array
    *   A renderable array.
    */
-  private function getEmptyFormExpectation(): array {
+  private function getEmptyFormExpectation(VocabularyInterface $vocabulary): array {
     return [
       'terms' => [
-        '#type' => 'select',
-        '#title' => new TranslatableMarkup("Terms to merge"),
-        '#options' => [],
-        '#empty_option' => new TranslatableMarkup('Select two or more terms to merge together'),
-        '#multiple' => TRUE,
+        '#type' => 'entity_autocomplete',
+        '#title' => new TranslatableMarkup('Terms to merge'),
+        '#target_type' => 'taxonomy_term',
+        '#tags' => TRUE,
+        '#selection_handler' => 'default:taxonomy_term',
+        '#selection_settings' => [
+          'target_bundles' => [$vocabulary->id() => $vocabulary->id()],
+        ],
+        '#maxlength' => NULL,
+        '#description' => new TranslatableMarkup('Select two or more terms to merge together. Separate multiple terms with commas.'),
         '#required' => TRUE,
       ],
       'actions' => [
@@ -195,7 +208,7 @@ class MergeTermsTest extends MergeTermsTestBase {
    *   The form class used for rendering the merge terms form.
    */
   private function createSubjectUnderTest(): MergeTerms {
-    return new MergeTerms($this->entityTypeManager, $this->privateTempStoreFactory);
+    return new MergeTerms($this->privateTempStoreFactory, \Drupal::moduleHandler());
   }
 
   /**

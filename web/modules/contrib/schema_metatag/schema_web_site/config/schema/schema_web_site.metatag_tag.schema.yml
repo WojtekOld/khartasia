@@ -8,6 +8,9 @@ metatag.metatag_tag.schema_web_site_id:
 metatag.metatag_tag.schema_web_site_name:
   type: text
   label: 'name'
+metatag.metatag_tag.schema_web_site_alternate_name:
+  type: text
+  label: 'alternateName'
 metatag.metatag_tag.schema_web_site_publisher:
   type: text
   label: 'publisher'

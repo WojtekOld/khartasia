@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Template;
 
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
 use Drupal\ui_patterns\PropTypeAdapterPluginManager;
 use Twig\Environment;

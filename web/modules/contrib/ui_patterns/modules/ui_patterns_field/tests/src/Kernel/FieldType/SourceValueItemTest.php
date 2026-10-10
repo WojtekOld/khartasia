@@ -6,6 +6,7 @@ namespace Drupal\Tests\ui_patterns_field\Kernel\FieldType;
 
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -160,6 +161,44 @@ final class SourceValueItemTest extends KernelTestBase {
     $loaded = EntityTest::load($entity->id());
     self::assertFalse($loaded->get('field_test')->isEmpty());
     self::assertEquals('component', $loaded->get('field_test')->source_id);
+  }
+
+  /**
+   * Tests that the field settings form offers a widget for the default value.
+   */
+  public function testDefaultValuesFormHasWidget(): void {
+    $form = [];
+    $element = EntityTest::create()->get('field_test')->defaultValuesForm($form, new FormState());
+    self::assertArrayHasKey('widget', $element);
+  }
+
+  /**
+   * Tests that a default value passes the config schema and fills new entities.
+   */
+  public function testDefaultValue(): void {
+    $default_value = [
+      'node_id' => 'root',
+      'source_id' => 'component',
+      'source' => [
+        'component' => [
+          'component_id' => 'ui_patterns_test:test-component',
+          'props' => [
+            'string' => [
+              'node_id' => 'prop',
+              'source_id' => 'textfield',
+              'source' => ['value' => 'Default'],
+            ],
+          ],
+        ],
+      ],
+      'third_party_settings' => [],
+    ];
+    // Kernel tests check the config schema on save.
+    FieldConfig::loadByName('entity_test', 'entity_test', 'field_test')
+      ->set('default_value', [$default_value])
+      ->save();
+
+    self::assertEquals([$default_value], EntityTest::create()->get('field_test')->getValue());
   }
 
 }

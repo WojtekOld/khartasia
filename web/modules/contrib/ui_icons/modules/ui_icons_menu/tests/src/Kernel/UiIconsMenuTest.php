@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_menu\Kernel;
 
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\ui_icons_menu\Hook\UiIconsMenuHooks;
@@ -107,7 +109,12 @@ class UiIconsMenuTest extends KernelTestBase {
     }
     $url->setOptions($options);
 
-    $this->container->get(UiIconsMenuHooks::class)->preprocessMenu($variables);
+    // The hook is invoked directly here, so provide the render context it
+    // would get from the menu render pipeline.
+    $renderer = $this->container->get('renderer');
+    $renderer->executeInRenderContext(new RenderContext(), function () use (&$variables) {
+      $this->container->get(UiIconsMenuHooks::class)->preprocessMenu($variables);
+    });
     $actual = (string) $variables['items'][0]['title'];
 
     // Test the position of the dom element, the icon test is prefix by icon id,
@@ -131,6 +138,59 @@ class UiIconsMenuTest extends KernelTestBase {
         $this->assertStringEndsWith('foo:', $actual);
         break;
     }
+  }
+
+  /**
+   * Tests that the icon pack library bubbles out of ::preprocessMenu().
+   */
+  public function testPreprocessMenuAttachesIconLibrary(): void {
+    $menu_link = MenuLinkContent::create([
+      'title' => 'Test Item',
+      'link' => ['uri' => 'internal:/'],
+    ]);
+    $menu_link->save();
+
+    $url = $menu_link->getUrlObject();
+    $url->setOption('icon', ['target_id' => 'test_library:foo']);
+    $variables = [
+      'items' => [
+        [
+          'url' => $url,
+          'title' => $menu_link->getTitle(),
+          'below' => [],
+        ],
+      ],
+    ];
+
+    $context = new RenderContext();
+    $this->container->get('renderer')->executeInRenderContext($context, function () use (&$variables) {
+      $this->container->get(UiIconsMenuHooks::class)->preprocessMenu($variables);
+    });
+
+    $this->assertFalse($context->isEmpty(), 'The icon rendering bubbled metadata.');
+    $attachments = $context->pop()->getAttachments();
+    $this->assertContains('ui_icons_test/test_library', $attachments['library'] ?? []);
+  }
+
+  /**
+   * Tests UiIconsMenuHooks::linkAlter() outside of a render pipeline.
+   *
+   * Links are generated from places without an active render context, such as
+   * a controller or a form builder.
+   */
+  public function testLinkAlterWithoutRenderContext(): void {
+    $url = Url::fromRoute('<front>');
+    $url->setOption('icon', ['target_id' => 'test_minimal:foo']);
+    $url->setOption('icon_display', 'before');
+    $variables = [
+      'url' => $url,
+      'text' => 'Test Item',
+      'options' => [],
+    ];
+
+    $this->container->get(UiIconsMenuHooks::class)->linkAlter($variables);
+
+    $this->assertStringContainsString('foo:', (string) $variables['text']);
   }
 
 }

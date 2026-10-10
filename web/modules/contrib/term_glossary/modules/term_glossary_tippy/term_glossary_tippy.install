@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Install and requirements functions for term_glossary_tippy.
+ */
+
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
+use Drupal\term_glossary_tippy\Hook\TermGlossaryTippyRequirements;
+use Drupal\term_glossary_tippy\TippyLibraries;
+
+/**
+ * Implements hook_requirements().
+ */
+#[LegacyRequirementsHook]
+function term_glossary_tippy_requirements($phase): array {
+  $requirements = [];
+  if ($phase === 'runtime') {
+    $requirements = TermGlossaryTippyRequirements::checkRequirements();
+  }
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function term_glossary_tippy_install(): void {
+  $missing_files = TippyLibraries::getMissingFiles();
+  if ($missing_files !== []) {
+    \Drupal::messenger()->addWarning(TippyLibraries::buildWarningMessage($missing_files));
+  }
+}

@@ -193,6 +193,29 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
   }
 
   /**
+   * {@inheritdoc}
+   *
+   * The embedded source: its name, then its own summary. Recursion
+   * continues the list, one indent per level.
+   */
+  public function settingsSummary(): array {
+    $embedded = $this->getSourcePlugins()[0] ?? NULL;
+    if (!$embedded) {
+      return [];
+    }
+    $name = $embedded->label();
+    $with_choice = $embedded->label(TRUE);
+    $summary = [($with_choice !== $name) ? $name . ' ' . $with_choice : $name];
+    foreach ($embedded->settingsSummary() as $item) {
+      if (\trim((string) $item) !== '') {
+        $summary[] = $item;
+      }
+    }
+    // One more indent per level.
+    return \array_map(static fn ($item): string => "\u{00A0}\u{00A0}" . $item, $summary);
+  }
+
+  /**
    * Returns true for slots.
    */
   private function isSlot(): bool {
@@ -280,6 +303,8 @@ abstract class DerivableContextSourceBase extends SourcePluginBase implements So
       '#cardinality_multiple' => FALSE,
       '#display_remove' => FALSE,
       '#wrap' => FALSE,
+      // Already inside a source settings form: straight to the selector.
+      '#open_selector' => TRUE,
       '#' . ($is_slot ? 'slot_id' : 'prop_id') => $this->getPropId(),
       '#tree' => TRUE,
       '#default_value' => $source,

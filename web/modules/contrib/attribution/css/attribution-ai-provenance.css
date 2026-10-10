@@ -1,0 +1,8 @@
+/* Default visual treatment for AI-attribution creation types. Override these
+ * classes in a theme to customize; nothing here is hardcoded into the PHP or
+ * Twig layer beyond the class names themselves. */
+
+.attribution--divider::after {
+  content: "|";
+  opacity: 0.75;
+}

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns_field\Field;
 
 use Drupal\Core\Field\FieldItemList;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\ui_patterns\SourceTree\SourceTree;
 use Drupal\ui_patterns_field\Plugin\Field\FieldType\SourceValueItem;
@@ -30,9 +29,15 @@ class SourceValueList extends FieldItemList {
 
   /**
    * {@inheritdoc}
+   *
+   * A synchronized translation starts empty and reads the default language:
+   * a seeded default tree would cascade its structure onto it on save.
    */
-  protected function defaultValueWidget(FormStateInterface $form_state) {
-    return NULL;
+  public function applyDefaultValue($notify = TRUE) {
+    if ($this->isSynchronizedTranslation()) {
+      return $this;
+    }
+    return parent::applyDefaultValue($notify);
   }
 
   /**

@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for the Attribution test constraint module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\attribution_test_constraint\Hook\AttributionTestConstraintHooks;
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+#[LegacyHook]
+function attribution_test_constraint_entity_bundle_field_info_alter(array &$fields, EntityTypeInterface $entity_type, string $bundle): void {
+  AttributionTestConstraintHooks::entityBundleFieldInfoAlter($fields, $entity_type, $bundle);
+}

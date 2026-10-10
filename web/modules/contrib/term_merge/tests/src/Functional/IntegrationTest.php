@@ -72,7 +72,7 @@ class IntegrationTest extends TermMergeTestBase {
 
     $this->getSession()
       ->getPage()
-      ->selectFieldOption('Terms to merge', $a->id());
+      ->fillField('Terms to merge', "{$a->label()} ({$a->id()})");
     $this->getSession()->getPage()->pressButton('Merge');
     $this->assertSession()->statusCodeEquals(200);
 

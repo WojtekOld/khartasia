@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns;
 
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RenderableInterface;
 use Drupal\Core\Render\RendererInterface;
@@ -53,6 +54,12 @@ class UiPatternsNormalizer implements UiPatternsNormalizerInterface {
     }
     if (!empty(Element::properties($array))) {
       $value = (string) $this->renderer->renderInIsolation($array);
+      // Bubble what the string drops, like MetadataBubblingUrlGenerator.
+      if ($this->renderer->hasRenderContext()) {
+        $metadata = [];
+        BubbleableMetadata::createFromRenderArray($array)->applyTo($metadata);
+        $this->renderer->render($metadata);
+      }
       if ($strip_tags_from_render_arrays) {
         $value = \strip_tags($value);
       }

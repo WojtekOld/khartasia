@@ -8,8 +8,8 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\Component;
 use Drupal\Core\Routing\TrustedRedirectResponse;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Url;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_ui\Entity\ComponentFormDisplay;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -60,7 +60,6 @@ final class ComponentController extends ControllerBase {
    * Load all components, sorted by provider and label.
    */
   public function load(): array {
-    // @phpstan-ignore method.notFound
     $definitions = $this->componentPluginManager->getNegotiatedSortedDefinitions();
     $plugin_ids = \array_keys($definitions);
     // @phpstan-ignore-next-line

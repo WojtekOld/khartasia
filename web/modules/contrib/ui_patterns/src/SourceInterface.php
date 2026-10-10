@@ -27,6 +27,8 @@ interface SourceInterface extends ConfigurableInterface, PluginInspectionInterfa
 
   /**
    * Retrieve and process the prop value.
+   *
+   * Cache metadata of what is read goes to addCacheableDependency().
    */
   public function getPropValue(): mixed;
 
@@ -55,6 +57,8 @@ interface SourceInterface extends ConfigurableInterface, PluginInspectionInterfa
 
   /**
    * Allow sources to alter the component render element.
+   *
+   * Not called under a derived context: cache metadata goes in getPropValue().
    */
   public function alterComponent(array $element): array;
 

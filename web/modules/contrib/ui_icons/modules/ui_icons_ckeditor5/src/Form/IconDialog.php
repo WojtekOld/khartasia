@@ -9,14 +9,37 @@ use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\ElementInfoManagerInterface;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 use Drupal\editor\Ajax\EditorDialogSave;
 use Drupal\filter\FilterFormatInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a UI Icons Ckeditor5 form.
  */
 final class IconDialog extends FormBase {
+
+  /**
+   * Selector used when none is configured, or the configured one is gone.
+   */
+  private const DEFAULT_SELECTOR = 'icon_autocomplete';
+
+  public function __construct(
+    // Not readonly: FormBase brings DependencySerializationTrait, whose
+    // __wakeup() cannot reinitialize a readonly property of a child class
+    // before PHP 8.4.
+    protected ElementInfoManagerInterface $elementInfo,
+  ) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new static(
+      $container->get('plugin.manager.element_info'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -47,11 +70,18 @@ final class IconDialog extends FormBase {
 
     $settings = $filter_format->filters('icon_embed')->getConfiguration()['settings'] ?? [];
     $allowed_icon_pack = $settings['allowed_icon_pack'] ?? [];
+    $selector_format = $settings['selector_format'] ?? self::DEFAULT_SELECTOR;
+    // 'icon_picker' comes from the optional ui_icons_picker module. An unknown
+    // '#type' renders as nothing rather than failing, which would leave the
+    // dialog with no icon field at all, so fall back when it is gone.
+    if (!$this->elementInfo->hasDefinition($selector_format)) {
+      $selector_format = self::DEFAULT_SELECTOR;
+    }
     $result_format = $settings['result_format'] ?? 'list';
     $max_result = $settings['max_result'] ?? 24;
 
     $form['icon'] = [
-      '#type' => 'icon_autocomplete',
+      '#type' => $selector_format,
       '#title' => $this->t('Icon Name'),
       '#size' => 35,
       '#required' => TRUE,

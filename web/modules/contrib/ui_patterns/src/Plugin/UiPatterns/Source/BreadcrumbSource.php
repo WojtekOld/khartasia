@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Plugin\UiPatterns\Source;
 
 use Drupal\Core\Breadcrumb\ChainBreadcrumbBuilderInterface;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\ui_patterns\Attribute\Source;
@@ -46,6 +45,7 @@ class BreadcrumbSource extends SourcePluginBase {
    */
   public function getPropValue(): mixed {
     $breadcrumb = $this->breadcrumbManager->build($this->routeMatch);
+    $this->addCacheableDependency($breadcrumb);
     $links = [];
     foreach ($breadcrumb->getLinks() as $link) {
       $links[] = [
@@ -54,20 +54,6 @@ class BreadcrumbSource extends SourcePluginBase {
       ];
     }
     return $links;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function alterComponent(array $element): array {
-    $breadcrumb = $this->breadcrumbManager->build($this->routeMatch);
-    $renderable = $breadcrumb->toRenderable();
-
-    $breadcrumbCache = CacheableMetadata::createFromRenderArray($renderable);
-    $cache = CacheableMetadata::createFromRenderArray($element);
-    $cache->merge($breadcrumbCache);
-    $cache->applyTo($element);
-    return $element;
   }
 
 }

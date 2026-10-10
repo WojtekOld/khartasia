@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\schema_metatag\Functional;
 
+use Drupal\schema_metatag\SchemaMetatagClient;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -247,25 +248,29 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
                   foreach ($value2 as $key3 => $value3) {
                     if (is_array($value3)) {
                       foreach ($value3 as $key4 => $value4) {
-                        $keystring = implode('][', [$key, $key2, $key3, $key4]);
-                        $form_values[$tag_name . '[' . $keystring . ']'] = $value4;
+                        $key_string = implode('][', [$key, $key2, $key3, $key4]);
+                        $form_name = $tag_name . '[' . $key_string . ']';
+                        $form_values[$form_name] = $value4;
                       }
                     }
                     else {
-                      $keystring = implode('][', [$key, $key2, $key3]);
-                      $form_values[$tag_name . '[' . $keystring . ']'] = $value3;
+                      $key_string = implode('][', [$key, $key2, $key3]);
+                      $form_name = $tag_name . '[' . $key_string . ']';
+                      $form_values[$form_name] = $value3;
                     }
                   }
                 }
                 else {
-                  $keystring = implode('][', [$key, $key2]);
-                  $form_values[$tag_name . '[' . $keystring . ']'] = $value2;
+                  $key_string = implode('][', [$key, $key2]);
+                  $form_name = $tag_name . '[' . $key_string . ']';
+                  $form_values[$form_name] = $value2;
                 }
               }
             }
             else {
-              $keystring = implode('][', [$key]);
-              $form_values[$tag_name . '[' . $keystring . ']'] = $value;
+              $key_string = implode('][', [$key]);
+              $form_name = $tag_name . '[' . $key_string . ']';
+              $form_values[$form_name] = $value;
             }
           }
         }
@@ -310,6 +315,90 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
     }
 
     $this->drupalLogout();
+  }
+
+  /**
+   * Confirm that tags are valid according to Schema.org schema documentation.
+   */
+  public function testTagsAgainstSchemaOrg() {
+    if ($this->moduleName === 'schema_metatag_test') {
+      $this->markTestSkipped('The test module uses dummy tags that do not conform to Schema.org semantic validity.');
+      return;
+    }
+
+    $schema_client = new SchemaMetatagClient(
+      \Drupal::moduleHandler(),
+      \Drupal::service('schema_metatag.cache'),
+      \Drupal::logger('schema_metatag')
+    );
+    $property_info = $schema_client->propertyInfo();
+
+    $definitions = $this->metatagTagManager()->getDefinitions();
+
+    // Find the classes for this group.
+    // The classes are defined by the @type tag.
+    $classes = [];
+    foreach ($definitions as $definition) {
+      if ($definition['group'] == $this->groupName && $definition['name'] == '@type') {
+        if (!empty($definition['tree_parent'])) {
+          $classes = $definition['tree_parent'];
+        }
+        break;
+      }
+    }
+
+    if (empty($classes)) {
+      $this->markTestSkipped('Could not determine the Schema.org classes for this group.');
+      return;
+    }
+
+    $object_info = $schema_client->objectInfo();
+    $ancestors = [];
+    $queue = $classes;
+    while (!empty($queue)) {
+      $current = array_shift($queue);
+      if (!in_array($current, $ancestors)) {
+        $ancestors[] = $current;
+        if (isset($object_info[$current]['parents'])) {
+          foreach ($object_info[$current]['parents'] as $parent) {
+            $queue[] = $parent;
+          }
+        }
+      }
+    }
+
+    // Properties that are intentionally allowed despite not strictly matching
+    // the base class hierarchy, e.g. superseded properties or properties used
+    // from sub-classes.
+    $ignored_properties = [
+      'acceptsReservations',
+      'geo',
+      'interactionCount',
+      'isbn',
+      'menu',
+      'openingHoursSpecification',
+      'priceRange',
+      'starRating',
+      'webPageElement',
+    ];
+
+    foreach ($definitions as $definition) {
+      if ($definition['group'] == $this->groupName && !str_starts_with($definition['name'], '@')) {
+        $property = $definition['name'];
+        if (in_array($property, $ignored_properties)) {
+          continue;
+        }
+        $is_valid = FALSE;
+        foreach ($ancestors as $ancestor) {
+          if (isset($property_info[$ancestor][$property])) {
+            $is_valid = TRUE;
+            break;
+          }
+        }
+        $class_names = implode(', ', $classes);
+        $this->assertTrue($is_valid, "Property '{$property}' is not valid for Schema.org classes: '{$class_names}' or their parents.");
+      }
+    }
   }
 
   /**

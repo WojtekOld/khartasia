@@ -35,6 +35,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   weight: 100,
   settings: [
     'allowed_icon_pack' => [],
+    'selector_format' => 'icon_autocomplete',
     'result_format' => 'list',
     // Default autocomplete result length. Multiple of 12 to match grid format.
     'max_result' => 24,
@@ -120,11 +121,23 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       '#element_validate' => [[static::class, 'validateOptions']],
     ];
 
+    $form['selector_format'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Selector format'),
+      '#options' => $this->getSelectorFormat(),
+      '#default_value' => $this->settings['selector_format'] ?? 'icon_autocomplete',
+    ];
+
     $form['result_format'] = [
       '#type' => 'select',
       '#title' => $this->t('Result format'),
       '#options' => $this->getAutocompleteFormat(),
       '#default_value' => $this->settings['result_format'] ?? 'list',
+      '#states' => [
+        'visible' => [
+          ':input[name="filters[icon_embed][settings][selector_format]"]' => ['value' => 'icon_autocomplete'],
+        ],
+      ],
     ];
 
     $form['max_result'] = [
@@ -133,6 +146,11 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       '#max' => IconSearch::SEARCH_RESULT_MAX,
       '#title' => $this->t('Maximum results'),
       '#default_value' => $this->settings['max_result'] ?? IconSearch::SEARCH_RESULT,
+      '#states' => [
+        'visible' => [
+          ':input[name="filters[icon_embed][settings][selector_format]"]' => ['value' => 'icon_autocomplete'],
+        ],
+      ],
     ];
 
     return $form;
@@ -368,10 +386,23 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
   }
 
   /**
-   * Get the icon selector autocomplete format.
+   * Gets icon selector formats.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
-   *   An array of format for selectors options.
+   *   Icon selector format options.
+   */
+  private function getSelectorFormat(): array {
+    return [
+      'icon_autocomplete' => $this->t('Autocomplete'),
+      'icon_picker' => $this->t('Picker'),
+    ];
+  }
+
+  /**
+   * Gets icon autocomplete result formats.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
+   *   Icon result format options.
    */
   private function getAutocompleteFormat(): array {
     return [

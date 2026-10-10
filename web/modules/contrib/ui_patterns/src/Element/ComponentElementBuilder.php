@@ -13,8 +13,7 @@ use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\Core\Plugin\PreviewAwarePluginInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
-use Drupal\ui_patterns\ComponentPluginManager as UiPatternsComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
 use Drupal\ui_patterns\PropTypeInterface;
 use Drupal\ui_patterns\SourcePluginBase;
@@ -337,9 +336,7 @@ class ComponentElementBuilder implements TrustedCallbackInterface {
     $dependencies = [];
     try {
       $component = $this->componentPluginManager->find($component_id ?? $configuration['component_id']);
-      if ($this->componentPluginManager instanceof UiPatternsComponentPluginManager) {
-        SourcePluginBase::mergeConfigDependencies($dependencies, $this->componentPluginManager->calculateDependencies($component));
-      }
+      SourcePluginBase::mergeConfigDependencies($dependencies, $this->componentPluginManager->calculateDependencies($component));
       SourcePluginBase::mergeConfigDependencies($dependencies, $this->calculateComponentDependenciesProps($component, $configuration, $contexts));
       SourcePluginBase::mergeConfigDependencies($dependencies, $this->calculateComponentDependenciesSlots($component, $configuration, $contexts));
     }

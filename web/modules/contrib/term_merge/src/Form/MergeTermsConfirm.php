@@ -41,20 +41,17 @@ class MergeTermsConfirm extends FormBase {
    *   The private temporary storage factory.
    * @param \Drupal\term_merge\TermMergerInterface $termMerger
    *   The term merger service.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler service.
    * @param \Drupal\synonyms\SynonymsService\ProviderService|null $synonymProvider
    *   The synonym provider service, or NULL if Synonyms module is not present.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected PrivateTempStoreFactory $tempStoreFactory,
     protected TermMergerInterface $termMerger,
-    protected ?ProviderService  $synonymProvider,
+    protected ?ProviderService $synonymProvider,
   ) {
     $this->termStorage = $entityTypeManager->getStorage('taxonomy_term');
   }
@@ -63,7 +60,7 @@ class MergeTermsConfirm extends FormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    $synonym_provider = $container->has('synonyms.provider_service') ?  $container->get('synonyms.provider_service') : NULL;
+    $synonym_provider = $container->has('synonyms.provider_service') ? $container->get('synonyms.provider_service') : NULL;
     return new static(
       $container->get('entity_type.manager'),
       $container->get('tempstore.private'),

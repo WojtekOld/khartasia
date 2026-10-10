@@ -9,21 +9,32 @@ services:
       - 'ui_patterns'
 
   # Plugins managers.
+  # Core tags only plugin.manager.* for cache clearing. Ours are named by class.
 
+  # Priority -100 puts us outside other decorators, so what they add is
+  # annotated.
+  # @see \Drupal\ui_patterns\DependencyInjection\Compiler\ComponentPluginManagerPass
   Drupal\ui_patterns\ComponentPluginManager:
     decorates: plugin.manager.sdc
     decoration_priority: -100
     parent: plugin.manager.sdc
     arguments:
       $decorated: '@.inner'
-    calls:
-      - [ setPropTypePluginManager, [ '@plugin.manager.ui_patterns_prop_type' ] ]
-      - [ setPropTypePluginAdapter, [ '@plugin.manager.ui_patterns_prop_type_adapter' ] ]
-      - [ setReferenceSolver, [ '@ui_patterns.schema_reference_solver' ] ]
-      - [ setModuleExtensionList, [ '@extension.list.module' ] ]
+      $annotator: '@Drupal\ui_patterns\ComponentDefinitionAnnotator'
+    tags:
+      - { name: plugin_manager_cache_clear }
+
+  Drupal\ui_patterns\ComponentDefinitionAnnotator: ~
+
+  Drupal\ui_patterns\ComponentValidator:
+    decorates: Drupal\Core\Theme\Component\ComponentValidator
+    arguments:
+      $decorated: '@.inner'
 
   Drupal\ui_patterns\PropTypePluginManager:
     parent: default_plugin_manager
+    tags:
+      - { name: plugin_manager_cache_clear }
     arguments:
       - '@Drupal\ui_patterns\SchemaManager\CompatibilityChecker'
       - '@Drupal\Core\TypedData\TypedDataManagerInterface'
@@ -31,12 +42,16 @@ services:
 
   Drupal\ui_patterns\PropTypeAdapterPluginManager:
     parent: default_plugin_manager
+    tags:
+      - { name: plugin_manager_cache_clear }
     arguments:
       - '@Drupal\ui_patterns\SchemaManager\CompatibilityChecker'
   plugin.manager.ui_patterns_prop_type_adapter: '@Drupal\ui_patterns\PropTypeAdapterPluginManager'
 
   Drupal\ui_patterns\SourcePluginManager:
     parent: default_plugin_manager
+    tags:
+      - { name: plugin_manager_cache_clear }
     arguments:
       - '@Drupal\ui_patterns\PropTypePluginManager'
       - '@Drupal\Core\Plugin\Context\ContextHandlerInterface'
@@ -45,6 +60,8 @@ services:
 
   Drupal\ui_patterns\DerivableContextPluginManager:
     parent: default_plugin_manager
+    tags:
+      - { name: plugin_manager_cache_clear }
     arguments:
       - '@Drupal\Core\Entity\EntityTypeManagerInterface'
   plugin.manager.ui_patterns_derivable_context: '@Drupal\ui_patterns\DerivableContextPluginManager'

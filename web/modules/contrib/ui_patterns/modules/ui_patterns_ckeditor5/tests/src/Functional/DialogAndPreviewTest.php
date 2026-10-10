@@ -117,7 +117,7 @@ final class DialogAndPreviewTest extends BrowserTestBase {
     $assert->statusCodeEquals(200);
     $assert->titleEquals('Insert component | Drupal');
     $assert->optionExists('component[component_id]', self::COMPONENT);
-    $assert->buttonNotExists('Embed');
+    $assert->buttonExists('Embed');
 
     $this->post('editor/dialog/ui_patterns_ckeditor5/' . self::FORMAT, [
       'component_config' => Json::encode(['component_id' => self::COMPONENT]),
@@ -125,7 +125,7 @@ final class DialogAndPreviewTest extends BrowserTestBase {
     $assert->statusCodeEquals(200);
     $assert->titleEquals('Edit component: UI Patterns Test component | Drupal');
     $assert->pageTextContains('UI Patterns Test component');
-    $assert->elementExists('css', 'select[name="component[variant_id][source_id]"]');
+    $assert->elementExists('css', 'select[name="component[variant_id][source][value]"]');
     $assert->buttonExists('Embed');
   }
 

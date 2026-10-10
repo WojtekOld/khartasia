@@ -1,0 +1,16 @@
+{
+    "name": "drupal/attribution",
+    "description": "Provides content attribution and license configuration.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Stefan Auditor",
+            "email": "stefan@auditor.email"
+        }
+    ],
+    "require": {
+        "composer/spdx-licenses": "^1.5",
+        "drupal/core": "^10.5 || ^11.2 || ^12"
+    }
+}

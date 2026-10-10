@@ -7,6 +7,7 @@ export default {
   testModules: [
     'ui_patterns_test',
     'ui_patterns_blocks',
+    'ui_patterns_ui',
     'menu_link_content',
     'block',
     'dblog',
@@ -17,6 +18,7 @@ export default {
     'taxonomy',
     'field',
     'field_ui',
+    'ui_patterns_field',
     'ui_patterns_field_formatters',
     'layout_builder',
     'ui_patterns_layouts',

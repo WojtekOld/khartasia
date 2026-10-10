@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns_field\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -79,9 +80,7 @@ class SourceFormatter extends FormatterBase {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $fake_build = [];
-    $contexts = $this->getComponentSourceContexts($items);
-    $contexts['ui_patterns:lang_code'] = new Context(new ContextDefinition('any'), $langcode);
-    $contexts['ui_patterns:field:items'] = new Context(new ContextDefinition('any'), $items);
+    $contexts = $this->getFieldItemsContexts($items, $langcode);
     // Read via the list: merged view on synchronized translations. Item
     // getValue() is intentionally raw (raw = item, merged = list). Call once
     // before the loop to avoid N redundant merges.
@@ -130,6 +129,31 @@ class SourceFormatter extends FormatterBase {
         : $this->sampleEntityGenerator->get($entity_type_id, $this->findEntityBundleWithField($entity_type_id, $field_name));
     }
     $contexts['entity'] = EntityContext::fromEntity($entity);
+    return $contexts;
+  }
+
+  /**
+   * Source contexts to display the field items in a language.
+   *
+   * The items of an untranslatable field belong to the default translation,
+   * so the entity is switched to the translation being displayed.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   The field items.
+   * @param string $langcode
+   *   The display language.
+   *
+   * @return array
+   *   Source contexts.
+   */
+  protected function getFieldItemsContexts(FieldItemListInterface $items, string $langcode): array {
+    $contexts = $this->getComponentSourceContexts($items);
+    $contexts['ui_patterns:lang_code'] = new Context(new ContextDefinition('any'), $langcode);
+    $contexts['ui_patterns:field:items'] = new Context(new ContextDefinition('any'), $items);
+    $entity = isset($contexts['entity']) ? $contexts['entity']->getContextValue() : NULL;
+    if ($entity instanceof ContentEntityInterface && $entity->hasTranslation($langcode)) {
+      $contexts['entity'] = EntityContext::fromEntity($entity->getTranslation($langcode));
+    }
     return $contexts;
   }
 

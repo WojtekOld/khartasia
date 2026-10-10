@@ -8,7 +8,7 @@ field_widget_prompt: |
     {"suggestion": "Second suggested text"},
   ]
   ```
-  If you are enable to generate a response, respond with "Insufficient information provided, please add more data before generating suggestions."
+  If you are unable to generate a response, respond with "Insufficient information provided, please add more data before generating suggestions."
 plugins: {  }
 entity_types:
   node:

@@ -7,7 +7,7 @@ dependencies:
   - link_attributes:linkit_attributes
   - ui_icons:ui_icons_field_linkit
 
-# Information added by Drupal.org packaging script on 2026-08-03
-version: '2.0.0'
+# Information added by Drupal.org packaging script on 2026-09-29
+version: '2.0.1'
 project: 'ui_icons'
-datestamp: 1785781859
+datestamp: 1790680707

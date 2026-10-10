@@ -1,0 +1,4 @@
+test_library:
+  version: VERSION
+  dependencies:
+    - core/drupal

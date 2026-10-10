@@ -8,7 +8,7 @@ openpgpjs:
     js/third_party/unpkg.com/openpgp.min.js: { minified: true }
 
 proc-generate-keys:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-generate-keys.js: { }
   dependencies:
@@ -18,7 +18,7 @@ proc-generate-keys:
     - core/drupal.message
 
 proc-encrypt:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-encrypt.js: { attributes: { type: module } }
   dependencies:
@@ -29,9 +29,10 @@ proc-encrypt:
     - core/drupalSettings
     - core/drupal.dialog.ajax
     - core/jquery.form
+    - proc/openpgpjs
 
 proc-encrypt-text:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-encrypt-text.js: { attributes: { type: module } }
   dependencies:
@@ -42,9 +43,10 @@ proc-encrypt-text:
     - core/drupalSettings
     - core/drupal.dialog.ajax
     - core/jquery.form
+    - proc/openpgpjs
 
 proc-decrypt-dialog:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-decrypt-dialog.js: { }
   dependencies:
@@ -55,7 +57,7 @@ proc-decrypt-dialog:
     - core/drupalSettings
 
 proc-decrypt:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-decrypt.js: { attributes: { type: module } }
   dependencies:
@@ -66,9 +68,10 @@ proc-decrypt:
     - core/drupal.message
     - core/drupalSettings
     - core/drupal.dialog.ajax
+    - proc/openpgpjs
 
 proc-api:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-api.js: { attributes: { type: module } }
   dependencies:
@@ -79,7 +82,7 @@ proc-api:
     - proc/openpgpjs
 
 proc-field:
-  version: 10.1.102
+  version: 10.1.130
   css:
     theme:
       css/proc-field-ops.css: {}
@@ -93,9 +96,10 @@ proc-field:
     - core/drupalSettings
     - core/drupal.dialog.ajax
     - core/jquery.form
+    - proc/openpgpjs
 
 proc-decrypt-list:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-decrypt-list.js: { attributes: { type: module } }
   dependencies:
@@ -108,7 +112,7 @@ proc-decrypt-list:
     - core/jquery.form
 
 proc-update:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-update.js: { attributes: { type: module } }
   dependencies:
@@ -118,9 +122,10 @@ proc-update:
     - core/once
     - core/drupal.message
     - core/drupalSettings
+    - proc/openpgpjs
 
 proc-decrypt-handler-module:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/modules/proc-decrypt-handler-module.js: { attributes: { type: module } }
   dependencies:
@@ -133,7 +138,7 @@ proc-decrypt-handler-module:
     - core/jquery.form
 
 proc-process-decryption-module:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/modules/proc-process-decryption-module.js: { attributes: { type: module } }
   dependencies:
@@ -146,7 +151,7 @@ proc-process-decryption-module:
     - core/jquery.form
 
 proc-handle-decryption-result-module:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/modules/proc-handle-decryption-result-module.js: { attributes: { type: module } }
   dependencies:
@@ -159,7 +164,7 @@ proc-handle-decryption-result-module:
     - core/jquery.form
 
 proc-open-file-action-module:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/modules/proc-open-file-action-module.js: { attributes: { type: module } }
   dependencies:
@@ -172,7 +177,7 @@ proc-open-file-action-module:
     - core/jquery.form
 
 proc-decrypt-list-items-module:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/modules/atomics/proc-decrypt-list-items-module.js: { attributes: { type: module } }
   dependencies:
@@ -182,7 +187,7 @@ proc-decrypt-list-items-module:
     - core/drupalSettings
 
 proc-update-batch:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-update-batch.js: { attributes: { type: module } }
   dependencies:
@@ -192,22 +197,23 @@ proc-update-batch:
     - core/once
     - core/drupal.message
     - core/drupalSettings
+    - proc/openpgpjs
 
 proc-evict-expired-pass-cache-module:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/modules/proc-evict-expired-pass-cache-module.js: { attributes: { type: module } }
   dependencies:
     - core/drupalSettings
 
 proc-field-ui-icons:
-  version: 10.1.102
+  version: 10.1.130
   css:
     theme:
       css/proc-field-ui-icons.css: {}
 
 proc-sw-register:
-  version: 10.1.102
+  version: 10.1.130
   js:
     js/proc-sw-register.js: { attributes: { type: module } }
   dependencies:

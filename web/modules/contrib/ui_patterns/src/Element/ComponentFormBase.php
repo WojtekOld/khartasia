@@ -6,12 +6,17 @@ namespace Drupal\ui_patterns\Element;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AnnounceCommand;
+use Drupal\Core\Ajax\FocusFirstCommand;
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Component;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\Core\Url;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\SourceInterface;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
@@ -66,6 +71,11 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
    *   Processed element
    */
   public static function preRenderPropOrSlot(array $element): array {
+    // Set by the closed states. The hidden form still submits; it is
+    // shown back on validation errors.
+    if (isset($element['source']) && !empty($element['source']['#ui_patterns_hidden'])) {
+      static::hideSource($element['source']);
+    }
     if ($prop_or_slot_id = static::checkDetailsElement($element)) {
       $children_keys = Element::children($element);
       foreach ($children_keys as $child_key) {
@@ -80,7 +90,19 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
   }
 
   /**
+   * Wraps a source form in a hidden div; its inputs keep submitting.
+   */
+  protected static function hideSource(array &$source): void {
+    $source['#prefix'] = '<div hidden>' . ($source['#prefix'] ?? '');
+    $source['#suffix'] = ($source['#suffix'] ?? '') . '</div>';
+  }
+
+  /**
    * Customize slot or prop form elements (process).
+   *
+   * A box holding an open selector stays open, and so does the box the
+   * last action came from: its refreshed content carries the result and
+   * the control taking the focus.
    *
    * @param array $element
    *   Element to process.
@@ -91,18 +113,32 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
    *   The processed element.
    */
   public static function processPropOrSlot(array &$element, FormStateInterface $form_state) {
-    $triggering_element = $form_state->getTriggeringElement();
     if ($prop_or_slot_id = static::checkDetailsElement($element)) {
-      if (\is_array($triggering_element) && isset($triggering_element['#array_parents']) && \is_array($triggering_element['#array_parents'])) {
-        $element_array_parents = $element['#array_parents'];
-        $trigger_array_parents = $triggering_element['#array_parents'];
-        $start_of_trigger_parents = \array_slice($trigger_array_parents, 0, \count($element_array_parents));
-        if ($start_of_trigger_parents === $element_array_parents) {
-          $element[$prop_or_slot_id]['#open'] = TRUE;
-        }
+      if (static::isSelectorOpen($element) || static::isTriggeredWithin($element['#array_parents'] ?? [], $form_state)) {
+        $element[$prop_or_slot_id]['#open'] = TRUE;
       }
     }
     return $element;
+  }
+
+  /**
+   * Whether the action being processed was triggered inside these parents.
+   *
+   * @param array $array_parents
+   *   The array parents of the element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return bool
+   *   TRUE when the triggering element sits at or below them.
+   */
+  protected static function isTriggeredWithin(array $array_parents, FormStateInterface $form_state): bool {
+    $trigger = $form_state->getTriggeringElement();
+    $trigger_parents = \is_array($trigger) ? ($trigger['#array_parents'] ?? NULL) : NULL;
+    if (!\is_array($trigger_parents) || \count($array_parents) === 0) {
+      return FALSE;
+    }
+    return \array_slice($trigger_parents, 0, \count($array_parents)) === $array_parents;
   }
 
   /**
@@ -129,6 +165,10 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
     $url = $element['#ajax_url'] ?? NULL;
     if (isset($element['#ajax']) && $url) {
       $element['#ajax']['url'] = $url;
+      // Core replaces the options of the URL with these: keep the host's.
+      if ($url instanceof Url) {
+        $element['#ajax']['options'] = $url->getOptions();
+      }
     }
     return $element;
   }
@@ -176,8 +216,7 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
     $source_plugin_manager = \Drupal::service(SourcePluginManager::class);
     /** @var \Drupal\ui_patterns\PropTypeInterface $prop_type */
     $prop_type = empty($definition) ? $source_plugin_manager->getSlotPropType() : $definition['ui_patterns']['type_definition'];
-    $prop_plugin_definition = $prop_type->getPluginDefinition();
-    $default_source_id = (\is_array($prop_plugin_definition) && isset($prop_plugin_definition['default_source'])) ? $prop_plugin_definition['default_source'] : NULL;
+    $default_source_id = static::getDefaultSourceId($definition);
     $sources = $source_plugin_manager->getDefinitionsForPropType($prop_type->getPluginId(), $source_contexts, $tag_filter);
     $source_ids = \array_keys($sources);
     $source_ids = \array_combine($source_ids, $source_ids);
@@ -213,6 +252,564 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
   }
 
   /**
+   * Get the default source id declared by the prop type.
+   *
+   * @param array $definition
+   *   The prop definition, empty for a slot.
+   *
+   * @return string|null
+   *   The default source id, or NULL when the prop type declares none.
+   */
+  protected static function getDefaultSourceId(array $definition): ?string {
+    $source_plugin_manager = \Drupal::service(SourcePluginManager::class);
+    /** @var \Drupal\ui_patterns\PropTypeInterface $prop_type */
+    $prop_type = empty($definition) ? $source_plugin_manager->getSlotPropType() : $definition['ui_patterns']['type_definition'];
+    $prop_plugin_definition = $prop_type->getPluginDefinition();
+    return (\is_array($prop_plugin_definition) && isset($prop_plugin_definition['default_source'])) ? $prop_plugin_definition['default_source'] : NULL;
+  }
+
+  /**
+   * Get source definitions for a prop or slot, ordered, without instances.
+   *
+   * Same candidates and order as getSources(), but nothing is instantiated.
+   *
+   * @param string $prop_or_slot_id
+   *   The prop or slot ID.
+   * @param array $definition
+   *   The prop or slot definition.
+   * @param array $element
+   *   The form element.
+   *
+   * @return array<string, array>
+   *   The source definitions, ordered.
+   *
+   * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+   */
+  protected static function getSourceDefinitions(string $prop_or_slot_id, array $definition, array $element): array {
+    $source_contexts = $element['#source_contexts'] ?? [];
+    $tag_filter = $element['#tag_filter'] ?? [];
+    $source_plugin_manager = \Drupal::service(SourcePluginManager::class);
+    /** @var \Drupal\ui_patterns\PropTypeInterface $prop_type */
+    $prop_type = empty($definition) ? $source_plugin_manager->getSlotPropType() : $definition['ui_patterns']['type_definition'];
+    $definitions = $source_plugin_manager->getDefinitionsForPropType($prop_type->getPluginId(), $source_contexts, $tag_filter);
+    return static::orderSourceDefinitions($definitions, static::getDefaultSourceId($definition));
+  }
+
+  /**
+   * Order source definitions: default first, then native, then converted.
+   *
+   * Definition-level twin of orderSources().
+   *
+   * @param array<string, array> $definitions
+   *   The source definitions.
+   * @param string|null $default_source_id
+   *   The default source id.
+   *
+   * @return array<string, array>
+   *   The ordered source definitions.
+   */
+  protected static function orderSourceDefinitions(array $definitions, ?string $default_source_id): array {
+    $returned = [];
+    if ($default_source_id && isset($definitions[$default_source_id])) {
+      $returned[$default_source_id] = $definitions[$default_source_id];
+    }
+    $native = [];
+    $converted = [];
+    foreach ($definitions as $source_id => $source_definition) {
+      if ($source_id === $default_source_id) {
+        continue;
+      }
+      if (\in_array(SourceTags::PropTypeNative->value, $source_definition['tags'] ?? [], TRUE)) {
+        $native[$source_id] = $source_definition;
+      }
+      else {
+        $converted[$source_id] = $source_definition;
+      }
+    }
+    $by_label = static function (array $a, array $b): int {
+      return \strcasecmp((string) ($a['label'] ?? ''), (string) ($b['label'] ?? ''));
+    };
+    \uasort($native, $by_label);
+    \uasort($converted, $by_label);
+    return $returned + $native + $converted;
+  }
+
+  /**
+   * Resolve the source id shown while the source selector is closed.
+   *
+   * @param array $configuration
+   *   The prop configuration.
+   * @param array<string, array> $definitions
+   *   The ordered source definitions.
+   *
+   * @return string|null
+   *   The configured source id when still available, else the first widget
+   *   source, else NULL.
+   */
+  protected static function resolveClosedSourceId(array $configuration, array $definitions): ?string {
+    $source_id = $configuration['source_id'] ?? NULL;
+    if ($source_id && isset($definitions[$source_id])) {
+      return $source_id;
+    }
+    foreach ($definitions as $candidate_id => $source_definition) {
+      if (\in_array(SourceTags::Widget->value, $source_definition['tags'] ?? [], TRUE)) {
+        return $candidate_id;
+      }
+    }
+    return NULL;
+  }
+
+  /**
+   * Create a single configured source instance.
+   *
+   * Instance-level twin of the tail of getSources(), for one source id.
+   *
+   * @param string $source_id
+   *   The source id, present in $source_definition.
+   * @param array $source_definition
+   *   The source definition.
+   * @param string $prop_or_slot_id
+   *   The prop or slot ID.
+   * @param array $definition
+   *   The prop or slot definition.
+   * @param array $element
+   *   The form element.
+   *
+   * @return \Drupal\ui_patterns\SourceInterface
+   *   The source instance.
+   */
+  protected static function createSourceInstance(string $source_id, array $source_definition, string $prop_or_slot_id, array $definition, array $element): SourceInterface {
+    $configuration = $element['#default_value'] ?? [];
+    $source_contexts = $element['#source_contexts'] ?? [];
+    $form_array_parents = $element['#array_parents'] ?? [];
+    $source_plugin_manager = \Drupal::service(SourcePluginManager::class);
+    /** @var \Drupal\ui_patterns\SourcePluginBase $source */
+    $source = $source_plugin_manager->createInstance($source_id, SourcePluginBase::buildConfiguration($prop_or_slot_id, $definition, $configuration, $source_contexts, $form_array_parents));
+    $source->setConfiguration(\array_merge($source->getConfiguration(), [
+      'selection' => [
+        'default' => ($source_id === static::getDefaultSourceId($definition)),
+        'tags' => $source_definition['tags'] ?? [],
+      ],
+    ]));
+    return $source;
+  }
+
+  /**
+   * Whether a source selector is open in this prop or slot.
+   *
+   * The state rides the _open input, written by toggleSelectorSubmit(): the
+   * form builds from the raw input, and hosts which rebuild their form state
+   * on every request — Views, the CKEditor 5 dialog — keep the input only.
+   *
+   * @param array $element
+   *   The form element.
+   *
+   * @return bool
+   *   TRUE when open.
+   */
+  protected static function isSelectorOpen(array $element): bool {
+    return !empty($element['#default_value']['_open']);
+  }
+
+  /**
+   * Build the submit button which opens or closes the source selector.
+   *
+   * A real submit button: without JavaScript it triggers a full POST rebuild
+   * and the selector renders inline.
+   *
+   * @param array $element
+   *   The prop form element.
+   * @param string $prop_id
+   *   The prop ID.
+   * @param string $row_wrapper_id
+   *   The id of the wrapper div around the whole prop form.
+   * @param string $operation
+   *   Either 'open', 'close' or 'cancel'.
+   * @param string|\Stringable|null $label
+   *   The visible label, NULL for the operation default.
+   *
+   * @return array
+   *   The button render array.
+   */
+  protected static function buildSelectorToggleButton(array $element, string $prop_id, string $row_wrapper_id, string $operation, string|\Stringable|null $label = NULL): array {
+    $title = (string) ($element['#title'] ?? $prop_id);
+    $values = [
+      // The prop goes in the name: a screen reader lists buttons out of
+      // context. The visible word comes first: voice control says it.
+      'open' => \t('Edit'),
+      // Save keeps the typed values in the form; the host form persists
+      // them on its own submit.
+      'close' => \t('Save'),
+      // Cancel restores the values the row opened with.
+      'cancel' => \t('Cancel'),
+    ];
+    $label ??= $values[$operation];
+    $button = [
+      '#type' => 'submit',
+      '#value' => $label,
+      '#name' => \strtr($prop_id . '_' . \implode('-', $element['#array_parents']) . '_' . $operation, '-', '_'),
+      '#submit' => [
+        static::class . '::toggleSelectorSubmit',
+      ],
+      // Read by ComponentForm::validateFormElement() to skip the component
+      // render validation.
+      '#ui_patterns' => TRUE,
+      '#ui_patterns_prop_parents' => $element['#parents'],
+      '#ui_patterns_selector_operation' => $operation,
+      // Validate nothing: the toggle rides the raw input only. Partial
+      // values mislead hosts which rebuild their structure from them —
+      // core's FieldBlock falls back to the default formatter, losing
+      // this very form.
+      '#limit_validation_errors' => [],
+      '#button_type' => ($operation === 'close') ? 'primary' : NULL,
+      '#attributes' => [
+        'formnovalidate' => 'formnovalidate',
+        'aria-label' => \t('@label: @prop', ['@label' => $label, '@prop' => $title]),
+        'class' => [
+          'uip-source-selector-toggle',
+          'uip-source-selector-toggle--' . $operation,
+        ],
+      ],
+      '#ajax' => [
+        'callback' => [static::class, 'refreshSelectorForm'],
+        'wrapper' => $row_wrapper_id,
+        'effect' => 'fade',
+        'progress' => ['type' => 'fullscreen'],
+        // Click, not the mousedown core binds on buttons: the browser
+        // fires the field's blur and change first, so the edit reaches a
+        // host watching the form before this request replaces the row.
+        'event' => 'click',
+      ],
+    ];
+    $button['#id'] = static::getElementId($element, $button['#name']);
+    return $button;
+  }
+
+  /**
+   * The close and cancel controls of an open row.
+   *
+   * The snapshot hidden holds the row input at open time, written by
+   * toggleSelectorSubmit(); cancel restores it. A row added open has none:
+   * its cancel drops the row.
+   *
+   * @param array $element
+   *   The element the buttons act on; carries the parents and title.
+   * @param string $prop_id
+   *   The prop or slot ID.
+   * @param string $row_wrapper_id
+   *   The id of the wrapper div around the row.
+   *
+   * @return array
+   *   The controls, keyed by element name.
+   */
+  protected static function buildOpenRowControls(array $element, string $prop_id, string $row_wrapper_id): array {
+    return [
+      '_close' => static::buildSelectorToggleButton($element, $prop_id, $row_wrapper_id, 'close'),
+      '_cancel' => static::buildSelectorToggleButton($element, $prop_id, $row_wrapper_id, 'cancel'),
+      '_snapshot' => ['#type' => 'hidden'],
+    ];
+  }
+
+  /**
+   * Submit handler: open, close or cancel a source selector, then rebuild.
+   *
+   * Raw input only: a form-state value written here would hand hosts
+   * rebuilding their structure from values a partial tree.
+   *
+   * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+   */
+  public static function toggleSelectorSubmit(array $form, FormStateInterface $form_state): void {
+    $trigger = $form_state->getTriggeringElement();
+    $base = $trigger['#ui_patterns_prop_parents'];
+    $operation = $trigger['#ui_patterns_selector_operation'];
+    $input = $form_state->getUserInput();
+    if ($operation === 'cancel') {
+      $snapshot = NestedArray::getValue($input, \array_merge($base, ['_snapshot']));
+      $typed = NestedArray::getValue($input, $base);
+      NestedArray::unsetValue($input, $base);
+      $row = \is_string($snapshot) && $snapshot !== '' ? \json_decode($snapshot, TRUE) : NULL;
+      if (\is_array($row)) {
+        unset($row['_open'], $row['_snapshot']);
+        NestedArray::setValue($input, $base, $row);
+      }
+      // Read by announceValues().
+      $form_state->setTemporaryValue(static::restoredKey($base), static::rowValues($typed) !== static::rowValues($row));
+    }
+    else {
+      if ($operation === 'open') {
+        $row = NestedArray::getValue($input, $base);
+        if (\is_array($row)) {
+          unset($row['_open'], $row['_snapshot']);
+          NestedArray::setValue($input, \array_merge($base, ['_snapshot']), \json_encode($row));
+        }
+      }
+      else {
+        NestedArray::unsetValue($input, \array_merge($base, ['_snapshot']));
+      }
+      NestedArray::setValue($input, \array_merge($base, ['_open']), ($operation === 'open') ? '1' : '');
+    }
+    $form_state->setUserInput($input);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Ajax handler: refresh a whole prop form.
+   */
+  public static function refreshSelectorForm(array $form, FormStateInterface $form_state): mixed {
+    $triggering_element = $form_state->getTriggeringElement();
+    $wrapper_id = $triggering_element['#ajax']['wrapper'];
+    // One step up from the button: recorded paths go stale in nested
+    // forms.
+    $parents = \array_slice($triggering_element['#array_parents'], 0, -1);
+    $form_state->setRebuild(TRUE);
+    $returned = NestedArray::getValue($form, $parents);
+    $returned = static::announceValues($returned, $triggering_element, $form_state);
+    $response = new AjaxResponse();
+    // The wrapper div is the element's own #prefix: replace only its content.
+    $returned['#prefix'] = '';
+    $returned['#suffix'] = '';
+    $response->addCommand(new HtmlCommand('#' . $wrapper_id, $returned));
+    // The button which triggered the refresh went away with the old row.
+    $response->addCommand(new FocusFirstCommand(static::getRowFocusSelector($returned, $wrapper_id)));
+    if ($message = static::foldMessage($returned, $triggering_element)) {
+      $response->addCommand(new AnnounceCommand($message));
+    }
+    return $response;
+  }
+
+  /**
+   * What a screen reader hears once a row folds; sighted users see the box.
+   *
+   * @param array $row
+   *   The refreshed prop or slot row.
+   * @param array $trigger
+   *   The triggering element.
+   *
+   * @return string|null
+   *   The message, or NULL when the row only opened.
+   */
+  protected static function foldMessage(array $row, array $trigger): ?string {
+    $title = ($row['#title'] ?? '') ?: ($row['_box']['#title'] ?? $row['#prop_id'] ?? '');
+    return match ($trigger['#ui_patterns_selector_operation'] ?? '') {
+      'close' => (string) \t('@prop: values kept.', ['@prop' => $title]),
+      'cancel' => (string) \t('@prop: values put back.', ['@prop' => $title]),
+      default => NULL,
+    };
+  }
+
+  /**
+   * Marks a cancelled row whose values changed, for the page to hear.
+   *
+   * Saving keeps what the browser already reported; opening changes nothing.
+   *
+   * @param array $row
+   *   The refreshed prop or slot row.
+   * @param array $trigger
+   *   The triggering element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The row, marked when a cancel changed its values.
+   */
+  protected static function announceValues(array $row, array $trigger, FormStateInterface $form_state): array {
+    if (!isset($row['source_id']) || ($trigger['#ui_patterns_selector_operation'] ?? '') !== 'cancel') {
+      return $row;
+    }
+    if (!$form_state->getTemporaryValue(static::restoredKey($trigger['#ui_patterns_prop_parents']))) {
+      return $row;
+    }
+    // Read by js/source-selector.js.
+    $row['source_id']['#attributes']['data-uip-announce'] = 'true';
+    return $row;
+  }
+
+  /**
+   * The form state key telling whether a cancel changed the row's values.
+   *
+   * @param array $base
+   *   The row's parents.
+   *
+   * @return array
+   *   The temporary value key.
+   */
+  protected static function restoredKey(array $base): array {
+    return ['ui_patterns', 'restored', \implode('.', $base)];
+  }
+
+  /**
+   * The posted values of a row, without the controls carrying its state.
+   *
+   * @param mixed $row
+   *   The row's user input, or NULL when the row posted nothing.
+   *
+   * @return array
+   *   The values.
+   */
+  protected static function rowValues(mixed $row): array {
+    if (!\is_array($row)) {
+      return [];
+    }
+    return \array_filter($row, static fn ($key): bool => !\str_starts_with((string) $key, '_'), \ARRAY_FILTER_USE_KEY);
+  }
+
+  /**
+   * The control taking the focus once an action refreshed a row.
+   *
+   * Open: the source select, or Save when there is nothing to pick.
+   * Closed: the button opening the selector again, else the row itself,
+   * whose box summary takes the focus.
+   *
+   * @param array $row
+   *   The refreshed prop or slot row.
+   * @param string $fallback_id
+   *   The id to focus into when the row carries neither control.
+   *
+   * @return string
+   *   A selector for FocusFirstCommand.
+   */
+  protected static function getRowFocusSelector(array $row, string $fallback_id): string {
+    if (isset($row['_close']['#id'])) {
+      $target = (($row['source_id']['#type'] ?? '') === 'select') ? $row['source_id'] : $row['_close'];
+      return '#' . $target['#id'];
+    }
+    return '#' . ($row['_configure']['#id'] ?? $fallback_id);
+  }
+
+  /**
+   * Add the summary standing in for a non-widget source, and the open button.
+   *
+   * Shared by prop and slot rows.
+   *
+   * @param array $form
+   *   The closed row.
+   * @param array $element
+   *   The element the button acts on; carries the parents and title.
+   * @param string $prop_or_slot_id
+   *   The prop or slot ID.
+   * @param string $row_wrapper_id
+   *   The id of the wrapper div around the row.
+   * @param \Drupal\ui_patterns\SourceInterface|null $selected_source
+   *   The source shown while closed, NULL when the row has none.
+   *
+   * @return array
+   *   The closed row.
+   */
+  protected static function addClosedSummaryAndButton(array $form, array $element, string $prop_or_slot_id, string $row_wrapper_id, ?SourceInterface $selected_source): array {
+    $is_widget = $selected_source && static::isWidget($selected_source);
+    if ($selected_source && !$is_widget) {
+      // Read by preRenderPropOrSlot() and preRenderSourceRow().
+      $form['source']['#ui_patterns_hidden'] = TRUE;
+      $form['summary'] = static::buildSourceSummary($selected_source);
+    }
+    elseif (!$selected_source) {
+      $form['summary'] = static::buildSourceSummary(NULL);
+    }
+    // A widget is edited in place: its button only switches the source.
+    $label = match (TRUE) {
+      !$selected_source => \t('Choose source'),
+      $is_widget => \t('Change source'),
+      default => NULL,
+    };
+    $form['_configure'] = static::buildSelectorToggleButton($element, $prop_or_slot_id, $row_wrapper_id, 'open', $label);
+    return $form;
+  }
+
+  /**
+   * Whether a source is a widget, edited in place.
+   */
+  protected static function isWidget(SourceInterface $source): bool {
+    return \in_array(SourceTags::Widget->value, $source->getConfiguration()['selection']['tags'] ?? [], TRUE);
+  }
+
+  /**
+   * Build the summary standing in for a closed source form.
+   *
+   * @param \Drupal\ui_patterns\SourceInterface|null $source
+   *   The source instance, NULL when the prop has no source yet.
+   *
+   * @return array
+   *   The summary render array.
+   */
+  protected static function buildSourceSummary(?SourceInterface $source): array {
+    if (!$source) {
+      return [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['uip-source-summary', 'uip-source-summary--empty']],
+        'empty' => [
+          '#markup' => '<em>' . \t('Not set') . '</em>',
+        ],
+      ];
+    }
+    // Source name and choice label first, then the settings summary.
+    $summary = \array_filter($source->settingsSummary(), static fn ($item): bool => \trim((string) $item) !== '');
+    $name = $source->label();
+    $with_choice = $source->label(TRUE);
+    \array_unshift($summary, ($with_choice !== $name) ? $name . ' ' . $with_choice : $name);
+    $summary = static::nestSummaryLines(\array_values($summary));
+    return [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['uip-source-summary']],
+      'items' => [
+        '#theme' => 'item_list',
+        '#items' => $summary,
+      ],
+    ];
+  }
+
+  /**
+   * Turns indent-prefixed summary lines into nested list items.
+   *
+   * @param array<string|\Stringable> $lines
+   *   The lines, two NBSP per level.
+   *
+   * @return array
+   *   Nested item_list items.
+   */
+  protected static function nestSummaryLines(array $lines): array {
+    $indent = "\u{00A0}\u{00A0}";
+    $rows = [];
+    foreach ($lines as $line) {
+      $line = (string) $line;
+      $depth = 0;
+      while (\str_starts_with($line, $indent)) {
+        ++$depth;
+        $line = \substr($line, \strlen($indent));
+      }
+      $rows[] = [$depth, $line];
+    }
+    $i = 0;
+    return static::buildSummaryLevel($rows, $i, 0);
+  }
+
+  /**
+   * Builds one nesting level; deeper rows become a sub-list of their line.
+   */
+  protected static function buildSummaryLevel(array $rows, int &$i, int $depth): array {
+    $items = [];
+    while ($i < \count($rows)) {
+      [$row_depth, $text] = $rows[$i];
+      if ($row_depth < $depth) {
+        break;
+      }
+      if ($row_depth > $depth) {
+        $sub = static::buildSummaryLevel($rows, $i, $row_depth);
+        $last = \array_key_last($items);
+        if ($last === NULL) {
+          $items[] = ['list' => ['#theme' => 'item_list', '#items' => $sub]];
+        }
+        else {
+          $items[$last]['list'] = ['#theme' => 'item_list', '#items' => $sub];
+        }
+        continue;
+      }
+      $items[] = ['#markup' => Html::escape($text)];
+      ++$i;
+    }
+    return $items;
+  }
+
+  /**
    * Get source plugin form.
    */
   protected static function getSourcePluginForm(FormStateInterface $form_state, ?SourceInterface $source, string $wrapper_id): array {
@@ -226,7 +823,7 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
     }
     $form = $source->settingsForm([], $form_state);
     // @phpstan-ignore-next-line
-    $form['#prefix'] = "<div id='" . $wrapper_id . "'>" . ($form['#prefix'] ?? '');
+    $form['#prefix'] = static::sourceWrapper($wrapper_id) . ($form['#prefix'] ?? '');
     $form['#suffix'] = ($form['#suffix'] ?? '') . '</div>';
     // Weird, but :switchSourceForm() AJAX handler doesn't work without that.
     foreach (Element::children($form) as $child) {
@@ -241,9 +838,33 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
    * Ajax handler: Switch source plugin form.
    */
   public static function switchSourceForm(array $form, FormStateInterface $form_state): array {
-    $parents = $form_state->getTriggeringElement()['#array_parents'];
-    $subform = NestedArray::getValue($form, \array_slice($parents, 0, -1));
-    return $subform['source'];
+    $trigger = $form_state->getTriggeringElement();
+    $subform = NestedArray::getValue($form, \array_slice($trigger['#array_parents'], 0, -1));
+    $source = $subform['source'];
+    // The form landing here holds values the browser never reported.
+    $wrapper_id = $trigger['#ajax']['wrapper'];
+    if (isset($source['#prefix'])) {
+      $source['#prefix'] = \str_replace(static::sourceWrapper($wrapper_id), static::sourceWrapper($wrapper_id, TRUE), (string) $source['#prefix']);
+    }
+    else {
+      $source['#attributes']['data-uip-announce'] = 'true';
+    }
+    return $source;
+  }
+
+  /**
+   * The opening tag of the div a source form is replaced within.
+   *
+   * @param string $wrapper_id
+   *   The AJAX wrapper id.
+   * @param bool $announce
+   *   TRUE to carry the marker read by js/source-selector.js.
+   *
+   * @return string
+   *   The tag.
+   */
+  protected static function sourceWrapper(string $wrapper_id, bool $announce = FALSE): string {
+    return "<div id='" . $wrapper_id . "'" . ($announce ? ' data-uip-announce="true"' : '') . '>';
   }
 
   /**
@@ -339,6 +960,12 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
       static::elementValidate($element, $form_state);
       static::resetSwitchedSiblingsInput($element, $form_state);
     }
+    // Again once built: a remove with an error elsewhere skips the rebuild,
+    // and the first pass processed the box before knowing its own button.
+    $box = $element['#prop_id'] ?? self::getSlotId($element);
+    if (($element[$box]['#type'] ?? '') === 'details' && static::isTriggeredWithin($element['#array_parents'] ?? [], $form_state)) {
+      $element[$box]['#open'] = TRUE;
+    }
     return $element;
   }
 
@@ -411,12 +1038,18 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
     foreach (Element::children($element) as $key) {
       self::dropEmptyInput($element[$key], $input, $changed);
     }
-    if (empty($element['#input']) || !isset($element['#parents'])) {
+    if (!isset($element['#parents'])) {
       return;
     }
     $exists = FALSE;
     $value = NestedArray::getValue($input, $element['#parents'], $exists);
-    if ($exists && ($value === NULL || $value === [])) {
+    if (!$exists) {
+      return;
+    }
+    // Inputs drop their NULL and empty entries; any element drops the
+    // array skeleton its children left, or an input-reading value
+    // callback would trust it over the defaults.
+    if ((!empty($element['#input']) && $value === NULL) || $value === []) {
       NestedArray::unsetValue($input, $element['#parents']);
       $changed = TRUE;
     }
@@ -456,12 +1089,21 @@ abstract class ComponentFormBase extends FormElementBase implements TrustedCallb
 
   /**
    * Build sources selector widget.
+   *
+   * @param array $sources
+   *   The candidate sources.
+   * @param \Drupal\ui_patterns\SourceInterface|null $selected_source
+   *   The selected source, if any.
+   * @param string $wrapper_id
+   *   The AJAX wrapper id.
+   * @param bool $always_visible
+   *   TRUE to show the selector even with one selected candidate.
    */
-  protected static function buildSourceSelector(array $sources, ?SourceInterface $selected_source, string $wrapper_id): array {
+  protected static function buildSourceSelector(array $sources, ?SourceInterface $selected_source, string $wrapper_id, bool $always_visible = FALSE): array {
     if (empty($sources)) {
       return [];
     }
-    if ($selected_source && (\count($sources) === 1)) {
+    if (!$always_visible && $selected_source && (\count($sources) === 1)) {
       return [
         '#type' => 'hidden',
         '#value' => \array_keys($sources)[0],

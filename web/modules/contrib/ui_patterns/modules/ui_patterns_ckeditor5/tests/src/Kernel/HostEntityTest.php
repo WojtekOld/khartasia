@@ -121,7 +121,7 @@ final class HostEntityTest extends CKEditor5KernelTestBase {
    * The service.
    */
   private function hostEntity(): HostEntity {
-    return $this->container->get('ui_patterns_ckeditor5.host_entity');
+    return $this->container->get(HostEntity::class);
   }
 
 }

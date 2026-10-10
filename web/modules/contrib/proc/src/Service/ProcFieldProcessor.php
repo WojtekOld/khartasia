@@ -535,12 +535,20 @@ let endpoint_recipients_csv = endpoint_response.then(async function(result) {
     if (item !== null && typeof item !== 'object') {
       return item;
     }
-    // Format 2: a list of objects keyed by 'uid', e.g. [{"uid": 1}].
+    // Format 2: a list of objects keyed by 'id' or 'uid', e.g.
+    // [{"id": 1}] or [{"uid": 1}].
     if (item !== null && typeof item === 'object') {
-      return item['uid'];
+      return item['id'] ?? item['uid'];
     }
     return undefined;
-  }).filter(value => value !== undefined && value !== null).join();
+  })
+  .filter(value => value !== undefined && value !== null && value !== '')
+  // Accept both integers and numeric strings, i.e. tolerate a mix of user
+  // IDs provided with and without quotes.
+  .map(value => Number(value))
+  // Keep only positive integers, discarding the anonymous user (ID 0).
+  .filter(value => Number.isInteger(value) && value > 0)
+  .join();
 });
 
 endpoint_recipients_csv.then(async function(result) {

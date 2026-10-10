@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/loader'
 import config from '../playwright.config.loader'
-import { assertSlotAddRemove, openAllDetails, pick, select } from '../objects/ComponentForm'
+import { assertSlotAddRemove, openAllDetails, openSourceSelector, pick, pickSource, select, value } from '../objects/ComponentForm'
 import { seedArticles } from '../objects/TestContent'
 import { Audit } from '../objects/Audit'
 import { enableModules } from '../objects/Setup'
@@ -14,7 +14,7 @@ import { enableModules } from '../objects/Setup'
 // Content: ui_patterns_test_content (test_article with a text body and the
 // "Test components" format, whose editor has the component toolbar item).
 
-const dialog = '.ui-dialog'
+const dialog = '.ui-dialog.ui-patterns-ckeditor5-dialog'
 const embed = '.ui-dialog-buttonset button:has-text("Embed")'
 const widget = '.ck-editor__editable .ck-widget.drupal-component'
 const rendered = '.ui-patterns-test-component.from-ckeditor .ui-patterns-props-string'
@@ -63,7 +63,11 @@ test('CKEditor 5: insert, edit, render and delete a component', { tag: ['@base',
     await openDialogFromToolbar()
     await expect(page.locator(`${dialog} .ui-dialog-title`)).toHaveText('Insert component')
     const scope = page.locator(dialog)
-    await pick(scope, 'component[component_id]', config.testComponentId, 'component[props][string][source_id]')
+    await select(scope, 'component[component_id]').selectOption(config.testComponentId)
+    await value(scope, 'component[props][string][node_id]').first().waitFor({ state: 'attached', timeout: 20_000 })
+    // The row opens inside the editor dialog, which stays as it is.
+    await openSourceSelector(scope, 'component[props][string][source_id]')
+    await expect(page.locator(dialog)).toBeVisible()
     // The unsaved node gives the sources a sample entity of its bundle.
     const options = await select(scope, 'component[props][string][source_id]')
       .locator('option')
@@ -112,7 +116,7 @@ test('CKEditor 5: insert, edit, render and delete a component', { tag: ['@base',
     const scope = page.locator(dialog)
     // Both sources have a [source][value] input: wait on the rebuild itself.
     await openAllDetails(scope)
-    await select(scope, 'component[props][string][source_id]').selectOption('token')
+    await pickSource(scope, 'component[props][string][source_id]', 'token')
     await drupal.ajaxReady()
     await openAllDetails(scope)
     await expect(select(scope, 'component[props][string][source_id]')).toHaveValue('token')

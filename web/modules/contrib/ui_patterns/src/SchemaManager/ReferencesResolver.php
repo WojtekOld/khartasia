@@ -36,7 +36,7 @@ class ReferencesResolver {
 
     ++$depth;
 
-    // The resolver converts arrays to objects and adds an "id" property.
+    // The resolver converts arrays to objects.
     if (isset($schema['$ref'])) {
       $storage = new SchemaStorage();
 
@@ -49,14 +49,6 @@ class ReferencesResolver {
 
         // Merge referenced schema into the current schema.
         $schema += $refSchema;
-
-        // The "id" added by the resolver is a string. A schema declaring a
-        // property named "id" holds a schema definition instead.
-        if (isset($schema['id']) && \is_string($schema['id'])) {
-          // Prop types like enum_list has an underscore.
-          // This leads to an "Invalid URL format" exception.
-          $schema['id'] = \str_replace('_', '-', $schema['id']);
-        }
       }
       catch (RuntimeException $e) {
         // $schema is untouched: only resolveRefSchema() throws.
@@ -66,6 +58,9 @@ class ReferencesResolver {
         ]);
       }
     }
+
+    // Another module may have resolved the "$ref" before us.
+    $schema = $this->normalizeId($schema);
 
     // Recursively resolve nested schemas.
     foreach ($schema as $key => $value) {
@@ -77,6 +72,23 @@ class ReferencesResolver {
       }
     }
 
+    return $schema;
+  }
+
+  /**
+   * Renames "$id" to "id", the key PropTypePluginManager reads.
+   *
+   * Only a string: a prop named "id" holds a schema.
+   */
+  private function normalizeId(array $schema): array {
+    if (isset($schema['$id']) && \is_string($schema['$id'])) {
+      $schema['id'] = $schema['$id'];
+      unset($schema['$id']);
+    }
+    if (isset($schema['id']) && \is_string($schema['id'])) {
+      // An underscore, as in enum_list, is an "Invalid URL format".
+      $schema['id'] = \str_replace('_', '-', $schema['id']);
+    }
     return $schema;
   }
 

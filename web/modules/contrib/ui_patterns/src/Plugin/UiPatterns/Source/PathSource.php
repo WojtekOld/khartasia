@@ -54,6 +54,14 @@ class PathSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
+  public function settingsSummary(): array {
+    $path = $this->getUrlFromRoute($this->getSetting('value'));
+    return $path ? [$path] : [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
     $value = $this->getSetting('value');

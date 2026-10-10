@@ -17,7 +17,7 @@
 import { getPassSessionCachingSalt } from './modules/atomics/proc-caching-salt-module.js';
 import { getCsrfToken } from './modules/atomics/proc-csrf-token-module.js';
 
-(function (Drupal, drupalSettings, openpgp) {
+(function (Drupal, drupalSettings) {
   'use strict';
 
   const COOLDOWN_STORAGE_KEY = 'proc.sw_reencrypt.last_run';
@@ -162,8 +162,8 @@ import { getCsrfToken } from './modules/atomics/proc-csrf-token-module.js';
 
     try {
       const salt = getPassSessionCachingSalt();
-      const messageSource = await openpgp.readMessage({ armoredMessage: cachedPassword });
-      const { data: secretPassString } = await openpgp.decrypt({
+      const messageSource = await window.openpgp.readMessage({ armoredMessage: cachedPassword });
+      const { data: secretPassString } = await window.openpgp.decrypt({
         message: messageSource,
         passwords: [salt],
       });
@@ -255,4 +255,4 @@ import { getCsrfToken } from './modules/atomics/proc-csrf-token-module.js';
       bursting = false;
     }
   }
-})(Drupal, drupalSettings, openpgp);
+})(Drupal, drupalSettings);

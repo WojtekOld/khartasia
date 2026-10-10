@@ -143,7 +143,7 @@ abstract class DerivableContextPluginBase extends PluginBase implements Derivabl
           $available_runtime_contexts,
           $plugin_context_definition
         );
-      $matching_context = \reset($matches);
+      $matching_context = $matches[$name] ?? \reset($matches);
       if ($matching_context) {
         $this->setContextValue($name, $matching_context->getContextValue());
       }

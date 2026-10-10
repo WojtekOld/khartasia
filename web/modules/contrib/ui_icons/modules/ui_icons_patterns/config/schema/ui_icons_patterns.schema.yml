@@ -1,0 +1,12 @@
+ui_patterns_source.icon:
+  type: mapping
+  label: 'Source: Icon'
+  mapping:
+    value:
+      type: ui_icons.icon_value
+      nullable: true
+      label: 'Default icon value'
+
+ui_patterns_source.icon_renderable:
+  type: ui_patterns_source.icon
+  label: 'Source: Icon renderable'

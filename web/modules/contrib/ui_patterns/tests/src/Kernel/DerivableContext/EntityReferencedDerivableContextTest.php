@@ -77,6 +77,29 @@ final class EntityReferencedDerivableContextTest extends SourcePluginsTestBase {
   }
 
   /**
+   * A reference field the user cannot view exposes nothing.
+   *
+   * Core checks the field access before a formatter runs.
+   */
+  public function testHiddenReferenceFieldExposesNothing(): void {
+    // Denies view access to fields named field_no_view_access.
+    $this->enableModules(['field_test']);
+    $this->createNodeReferenceField('field_no_view_access', translatable: FALSE);
+    $this->container->get(DerivableContextPluginManager::class)->clearCachedDefinitions();
+    $referenced = $this->createPage('Referenced', TRUE);
+    $host = Node::create([
+      'type' => 'page',
+      'title' => 'Host',
+      'field_no_view_access' => [['target_id' => $referenced->id()]],
+    ]);
+    $host->save();
+    $this->setUpCurrentUser([], ['access content']);
+
+    $derived = $this->derivableContext($host, [], 'entity_reference:node:page:field_no_view_access:node:page')->getDerivedContexts();
+    self::assertSame([], \array_map(static fn (array $contexts) => $contexts['entity']->getContextValue()->id(), $derived));
+  }
+
+  /**
    * The field index context is a field delta: a denied delta exposes nothing.
    */
   public function testFieldIndexIsTheFieldDelta(): void {
@@ -114,6 +137,24 @@ final class EntityReferencedDerivableContextTest extends SourcePluginsTestBase {
   }
 
   /**
+   * The next step reads the referenced entity, not another node in context.
+   *
+   * Pages pass every global context along, the route's node included.
+   */
+  public function testNextStepReadsTheReferencedEntity(): void {
+    $referenced = $this->createPage('Referenced', TRUE);
+    $host = $this->createPage('Host', TRUE, [$referenced]);
+    $this->setUpCurrentUser([], ['access content']);
+
+    $derived = $this->derivableContext($host, ['@node.node_route_context:node' => EntityContext::fromEntity($host)])->getDerivedContexts();
+    self::assertSame($referenced->id(), $derived[0]['entity']->getContextValue()->id());
+
+    $field_context = $this->container->get(DerivableContextPluginManager::class)->createInstance('field:node:page:title', DerivableContextPluginBase::buildConfiguration($derived[0]));
+    self::assertInstanceOf(DerivableContextPluginBase::class, $field_context);
+    self::assertSame($referenced->id(), $field_context->getDerivedContexts()[0]['entity']->getContextValue()->id());
+  }
+
+  /**
    * Creates a page, optionally referencing nodes.
    *
    * @param string $title
@@ -144,9 +185,9 @@ final class EntityReferencedDerivableContextTest extends SourcePluginsTestBase {
   /**
    * The referenced entities derivable context for a host entity.
    */
-  private function derivableContext(EntityInterface $host, array $extra_contexts = []): DerivableContextPluginBase {
+  private function derivableContext(EntityInterface $host, array $extra_contexts = [], string $plugin_id = self::DERIVABLE_CONTEXT_ID): DerivableContextPluginBase {
     $contexts = ['entity' => EntityContext::fromEntity($host)] + $extra_contexts;
-    $plugin = $this->container->get(DerivableContextPluginManager::class)->createInstance(self::DERIVABLE_CONTEXT_ID, DerivableContextPluginBase::buildConfiguration($contexts));
+    $plugin = $this->container->get(DerivableContextPluginManager::class)->createInstance($plugin_id, DerivableContextPluginBase::buildConfiguration($contexts));
     self::assertInstanceOf(DerivableContextPluginBase::class, $plugin);
     return $plugin;
   }

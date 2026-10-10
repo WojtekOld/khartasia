@@ -12,7 +12,7 @@ use Drupal\Core\Plugin\Component;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 use Symfony\Component\Filesystem\Path;
@@ -47,7 +47,6 @@ class ComponentLayout extends DeriverBase implements ContainerDeriverInterface {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    /** @var \Drupal\ui_patterns\ComponentPluginManager $manager */
     $manager = $this->pluginManager;
     $sorted_definitions = $manager->getNegotiatedSortedDefinitions(NULL, 'label', TRUE);
 

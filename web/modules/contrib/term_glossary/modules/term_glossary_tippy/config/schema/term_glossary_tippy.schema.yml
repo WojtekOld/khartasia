@@ -1,0 +1,10 @@
+term_glossary.glossaryconfig.tippyjs:
+  type: config_object
+  label: 'TermGlossary Tippy.js settings'
+  mapping:
+    desc_attr:
+      type: string
+    html_tag:
+      type: string
+    a11y_features:
+      type: boolean

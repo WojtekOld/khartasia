@@ -8,8 +8,6 @@ use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
@@ -36,9 +34,7 @@ class ComponentFormatter extends ComponentFormatterBase {
     if (\count($items) === 0) {
       return [];
     }
-    $context = $this->getComponentSourceContexts($items);
-    $context['ui_patterns:lang_code'] = new Context(new ContextDefinition('any'), $langcode);
-    $context['ui_patterns:field:items'] = new Context(new ContextDefinition('any'), $items);
+    $context = $this->getFieldItemsContexts($items, $langcode);
     // If context 'ui_patterns:field:index' exists
     // it will be kept.
     if (isset($context['ui_patterns:field:index'])) {

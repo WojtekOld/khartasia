@@ -9,4 +9,4 @@ metatag.metatag_tag.schema_qa_page_type:
   label: '@type'
 metatag.metatag_tag.schema_qa_page_main_entity:
   type: text
-  label: 'mainEnity'
+  label: 'mainEntity'

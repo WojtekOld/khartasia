@@ -18,18 +18,18 @@ class TermMergerTermCrudTest extends MergeTermsTestBase {
    *
    * @return array
    *   An array of options. Each option has contains the following values:
-   *   - methodName: the selected method for merging to the target term.
+   *   - method_name: the selected method for merging to the target term.
    *   - target: a string representing the target taxonomy term.
    */
   public static function mergeTermFunctionsProvider(): array {
 
     $functions['::mergeIntoNewTerm'] = [
-      'methodName' => 'mergeIntoNewTerm',
+      'method_name' => 'mergeIntoNewTerm',
       'target' => 'new term',
     ];
 
     $functions['::mergeIntoTerm'] = [
-      'methodName' => 'mergeIntoTerm',
+      'method_name' => 'mergeIntoTerm',
       'target' => '',
     ];
 
@@ -48,7 +48,8 @@ class TermMergerTermCrudTest extends MergeTermsTestBase {
    * @dataProvider mergeTermFunctionsProvider
    */
   public function canOnlyMergeTermsInTheSameVocabulary(string $method_name, string $target): void {
-    $this->expectException('\RuntimeException', 'Only merges within the same vocabulary are supported');
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('Only merges within the same vocabulary are supported');
     $vocab2 = $this->createVocabulary();
     $term3 = $this->createTerm($vocab2);
 
@@ -71,7 +72,8 @@ class TermMergerTermCrudTest extends MergeTermsTestBase {
    * @dataProvider mergeTermFunctionsProvider
    */
   public function minimumTermsValidation(string $method_name, string $target) {
-    $this->expectException('\RuntimeException', 'You must provide at least 1 term');
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('You must provide at least 1 term');
     $sut = $this->createSubjectUnderTest();
 
     $sut->{$method_name}([], $this->prepareTarget($target));
@@ -96,9 +98,12 @@ class TermMergerTermCrudTest extends MergeTermsTestBase {
 
   /**
    * Tests the validation for the target term being in the same vocabulary.
+   *
+   * @test
    */
   public function existingTermMustBeInSameVocabularyAsMergedTerms(): void {
-    $this->expectException('\RuntimeException', 'The target term must be in the same vocabulary as the terms being merged');
+    $this->expectException(\RuntimeException::class);
+    $this->expectExceptionMessage('The target term must be in the same vocabulary as the terms being merged');
     $sut = $this->createSubjectUnderTest();
 
     $term = $this->createTerm($this->createVocabulary());

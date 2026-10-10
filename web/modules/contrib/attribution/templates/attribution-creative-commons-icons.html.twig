@@ -1,0 +1,60 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display an attribution.
+ *
+ * Available variables:
+ * - source.name: The name of the source.
+ * - source.link: The link to the source.
+ * - author.name: The name of the author.
+ * - author.link: The link to the author.
+ * - license: The associated license.
+ * - license.id: The spdx license short code.
+ * - license.name: The spdx license name.
+ * - license.osiCertified: Is the license OSI certified?
+ * - license.deprecated: Is the license deprecated?
+ * - license.link: The link to the license.
+ * - creation.type: The creation type (human_created, ai_generated, ai_modified).
+ * - creation.type_label: The translated label for creation.type.
+ *
+ * @ingroup themeable
+ */
+#}
+{{ attach_library('attribution/attribution_creative_commons_icons') }}
+{{ attach_library('attribution/attribution_ai_provenance') }}
+{%- set version = '' -%}
+<div{{ attributes }}>
+  {%- if license.link ~%}
+  <a rel="license" href="{{ license.link }}" title="{{ license.name }}">
+    {%~ else ~%}
+  <span title="{{ license.name }}">
+  {%~ endif ~%}
+  {% set features = license.identifier|split('-') %}
+  {% for feature in features %}
+    {%- if feature matches '/^[-+]?[0-9]*\\.?[0-9]+$/' -%}
+      {%- set version = feature -%}
+    <i class="cc-icon-cc-version">&nbsp;<span>{{ feature|upper }}</span></i>
+    {%- else -%}
+      {%- if version == '' -%}
+    {%- if features[loop.index] matches '/^[-+]?[0-9]*\\.?[0-9]+$/' %}{%- set last = true %}{%- endif -%}
+    <i class="cc-icon cc-icon-cc-{{ feature|lower }}"><span>{{ feature|upper }}</span></i>
+    <b>{%- if last != true and loop.first != 1 and loop.last != 1 -%}-{%- else -%}&nbsp;{%- endif -%}</b>
+      {%- elseif version != '' -%}
+    <i class="cc-icon cc-icon-cc-{{ feature|lower }}"><span>{{ feature|upper }}</span></i>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {% if license.link %}
+
+  </a>
+  {%~ else %}
+
+  </span>
+{%~ endif %}
+  {%~ if author.link %}
+    <a href="{{ author.link }}">{{ author.name }}</a>
+  {%~ endif %}
+  {% if creation and creation.type != 'human_created' %}
+    <i class="attribution-creation-badge attribution-creation-badge--{{ creation.type }}" title="{{ creation.type_label }}"><span>{{ creation.type_label }}</span></i>
+  {% endif %}
+</div>

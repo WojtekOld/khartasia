@@ -18,39 +18,13 @@
 import { getPassSessionCachingSalt } from './modules/atomics/proc-caching-salt-module.js';
 import { decryptPrivateKey } from './modules/atomics/proc-decrypt-privkey-module.js';
 import { openPasswordDialog } from './modules/proc-open-password-dialog-module.js';
+import { openpgpReady } from './modules/atomics/proc-openpgp-ready-module.js';
 
 (function (Drupal, drupalSettings) {
   'use strict';
 
   Drupal.proc = Drupal.proc || {};
   Drupal.proc.api = Drupal.proc.api || {};
-
-  /**
-   * Waits until the global OpenPGP.js instance is available.
-   *
-   * @return {Promise<Object|null>}
-   */
-  function openpgpReady(timeoutMs) {
-    timeoutMs = timeoutMs || 5000;
-    if (window.openpgp) {
-      return Promise.resolve(window.openpgp);
-    }
-    const start = Date.now();
-    return new Promise((resolve) => {
-      const tick = () => {
-        if (window.openpgp) {
-          resolve(window.openpgp);
-        }
-        else if (Date.now() - start >= timeoutMs) {
-          resolve(null);
-        }
-        else {
-          setTimeout(tick, 50);
-        }
-      };
-      tick();
-    });
-  }
 
   /**
    * Builds the decrypt-text endpoint URL for a cipher ID.

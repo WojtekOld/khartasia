@@ -16,7 +16,7 @@ class PermissionsTest extends TermMergeTestBase {
    *   The test data sets containing:
    *   permissions:        string[]
    *      Contains the permissions the user should have.
-   *   expectedStatusCode: int
+   *   expected_status_code: int
    *      The status code that should be returned.
    */
   public static function permissionsProvider(): array {
@@ -24,12 +24,12 @@ class PermissionsTest extends TermMergeTestBase {
 
     $test_data['no permissions'] = [
       'permissions' => [],
-      'expectedStatusCode' => 403,
+      'expected_status_code' => 403,
     ];
 
     $test_data['no edit permission'] = [
       'permissions' => ['merge taxonomy terms'],
-      'expectedStatusCode' => 403,
+      'expected_status_code' => 403,
     ];
 
     $test_data['edit permission'] = [
@@ -37,7 +37,7 @@ class PermissionsTest extends TermMergeTestBase {
         'merge taxonomy terms',
         'edit terms in %vocabulary_id',
       ],
-      'expectedStatusCode' => 200,
+      'expected_status_code' => 200,
     ];
 
     return $test_data;

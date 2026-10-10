@@ -208,7 +208,12 @@ class UiIconsMenuHooks {
    */
   protected function generateMarkup(mixed &$text, string $icon_full_id, array $icon_settings, string $icon_display = 'before'): void {
     $icon_renderable = IconDefinition::getRenderable($icon_full_id, $icon_settings);
-    $icon = $this->renderer->renderInIsolation($icon_renderable);
+    // Render in the active context so the icon pack library bubbles up to the
+    // page. ::linkAlter() runs on every generated link, including outside a
+    // render pipeline, where ::render() would throw, so isolate there.
+    $icon = $this->renderer->hasRenderContext()
+      ? $this->renderer->render($icon_renderable)
+      : $this->renderer->renderInIsolation($icon_renderable);
 
     switch ($icon_display) {
       case 'before':

@@ -63,7 +63,8 @@ class UiPComponentFormDisplayForm extends FormElementBase {
           $variant_id = $source;
           continue;
         }
-        if (\in_array($key, ['props', 'slots', 'component_id', 'display_id', 'variant_id'], TRUE)) {
+        $skipped = ['props', 'slots', 'component_id', 'display_id', 'variant_id', 'node_id', 'third_party_settings'];
+        if (\in_array($key, $skipped, TRUE)) {
           continue;
         }
         if ($display->isSlot($key)) {
@@ -86,7 +87,6 @@ class UiPComponentFormDisplayForm extends FormElementBase {
         'variant_id' => $variant_id,
         'props' => $props,
         'slots' => $slots,
-        'node_id' => $input['node_id'] ?? '',
       ];
       $element['#default_value'] = $output;
       return $output;
@@ -109,7 +109,16 @@ class UiPComponentFormDisplayForm extends FormElementBase {
    *   The form state.
    */
   public static function elementValidate(array &$element, FormStateInterface $form_state): void {
-    $element['#value'] = self::valueCallback($element, $form_state->getValue($element['#parents']), $form_state);
+    $input = $form_state->getValue($element['#parents']);
+    if (\is_array($input)) {
+      foreach (\array_keys($input) as $key) {
+        // A selector row cleans its own '#value': use it, not the raw submit.
+        if (isset($element[$key]['#value'])) {
+          $input[$key] = $element[$key]['#value'];
+        }
+      }
+    }
+    $element['#value'] = self::valueCallback($element, $input, $form_state);
     if (isset($element['#value'])) {
       $form_state->setValueForElement($element, $element['#value']);
     }
@@ -170,7 +179,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
     else {
       $configuration = $element['#default_value']['props'][$prop_slot_id] ?? $element['#default_value']['slots'][$prop_slot_id]['sources'][0] ?? [];
     }
-    $source_contexts = [];
+    $source_contexts = $element['#source_contexts'] ?? [];
     $form_array_parents = $element['#array_parents'];
     $configuration['widget_settings'] = $slot_prop_option['widget_settings'] ?? [];
     if (!isset($configuration['widget_settings']['title_display'])) {
@@ -184,10 +193,12 @@ class UiPComponentFormDisplayForm extends FormElementBase {
     $element[$prop_slot_id]['source'] = $form;
     $element[$prop_slot_id]['source_id'] = ['#type' => 'hidden', '#default_value' => $source_id];
     $element[$prop_slot_id]['node_id'] = ['#type' => 'hidden', '#default_value' => $configuration['node_id'] ?? ''];
-    $element[$prop_slot_id]['third_party_settings'] = [
-      '#type' => 'hidden',
-      '#default_value' => $configuration['third_party_settings'] ?? '',
-    ];
+    if ($element['#display']->isSlot($prop_slot_id)) {
+      $element[$prop_slot_id]['third_party_settings'] = [
+        '#type' => 'value',
+        '#value' => $configuration['third_party_settings'] ?? [],
+      ];
+    }
   }
 
   /**
@@ -195,6 +206,7 @@ class UiPComponentFormDisplayForm extends FormElementBase {
    */
   protected static function buildSourceSelectorForm(ComponentFormDisplay $display, string $prop_slot_id, array &$element): void {
     $prop_definition = $display->getPropDefinition($prop_slot_id);
+    $element[$prop_slot_id]['#ajax_url'] = $element['#ajax_url'] ?? NULL;
     if ($display->isSlot($prop_slot_id)) {
       $configuration = $element['#default_value']['slots'][$prop_slot_id]['sources'] ?? [];
       $element[$prop_slot_id]['#type'] = 'component_slot_form';

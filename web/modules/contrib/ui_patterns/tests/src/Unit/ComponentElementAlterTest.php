@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_patterns\Unit;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Render\Markup;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_patterns\Element\ComponentElementAlter;
@@ -91,6 +92,43 @@ final class ComponentElementAlterTest extends UnitTestCase {
         ['#theme' => 'my_theme', '#access' => FALSE], TRUE,
       ],
     ];
+  }
+
+  /**
+   * A removed empty slot leaves its cache tags on the component.
+   *
+   * Without them, the component is not refreshed when the slot gets content.
+   */
+  #[DataProvider('provideEmptySlotsWithMetadata')]
+  public function testEmptySlotMetadataKept(array $slot): void {
+    $alter = new ComponentElementAlter();
+    $element = $alter->normalizeSlots(['#slots' => ['slot' => $slot]]);
+    self::assertArrayNotHasKey('slot', $element['#slots']);
+    self::assertSame(['empty_slot'], $element['#cache']['tags'] ?? []);
+  }
+
+  /**
+   * Empty slots carrying a cache tag at different places.
+   */
+  public static function provideEmptySlotsWithMetadata(): array {
+    return [
+      'on the slot' => [['#cache' => ['tags' => ['empty_slot']]]],
+      'on a nested child' => [[['child' => ['#cache' => ['tags' => ['empty_slot']]]]]],
+      'on the access of a hidden child' => [
+        [['#markup' => 'Hidden', '#access' => AccessResult::forbidden()->addCacheTags(['empty_slot'])]],
+      ],
+    ];
+  }
+
+  /**
+   * A child hidden by a boolean leaks no settings to the page.
+   */
+  public function testHiddenChildMetadataDropped(): void {
+    $alter = new ComponentElementAlter();
+    $hidden = ['#markup' => 'Hidden', '#access' => FALSE, '#attached' => ['drupalSettings' => ['hidden' => TRUE]]];
+    $element = $alter->normalizeSlots(['#slots' => ['slot' => [$hidden]]]);
+    self::assertArrayNotHasKey('slot', $element['#slots']);
+    self::assertEmpty($element['#attached'] ?? []);
   }
 
 }

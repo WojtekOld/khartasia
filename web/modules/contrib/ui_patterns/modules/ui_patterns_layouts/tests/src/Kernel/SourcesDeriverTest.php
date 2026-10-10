@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_patterns_layouts\Kernel;
 
 use Drupal\Core\Layout\LayoutPluginManagerInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Tests\ui_patterns\Kernel\SourcePluginsTestBase;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_layouts\Plugin\Layout\ComponentLayout;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -56,7 +56,6 @@ final class SourcesDeriverTest extends SourcePluginsTestBase {
    * Tests creating fields of all types on a content type.
    */
   public function testDerivedPluginPerComponent() {
-    // @phpstan-ignore method.notFound
     $components = $this->componentManager->getNegotiatedSortedDefinitions();
 
     foreach ($components as $component) {

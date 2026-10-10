@@ -6,6 +6,7 @@ use Drupal\Core\Entity\Plugin\DataType\EntityAdapter;
 use Drupal\Core\Url;
 use Drupal\schema_metatag\Plugin\schema_metatag\PropertyTypeBase;
 use Drupal\views\Views;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a plugin for the 'ItemListElement' Schema.org property type.
@@ -22,6 +23,30 @@ use Drupal\views\Views;
  * )
  */
 class ItemListElement extends PropertyTypeBase {
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->moduleHandler = $container->get('module_handler');
+    $instance->requestStack = $container->get('request_stack');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -120,11 +145,11 @@ class ItemListElement extends PropertyTypeBase {
         $view->setDisplay($display_id);
       }
       else {
-        $request = \Drupal::request();
+        $request = $this->requestStack->getCurrentRequest();
         $view_id = $request->attributes->get('view_id');
         if ($view_id) {
-         $view = Views::getView($view_id);
-       }
+          $view = Views::getView($view_id);
+        }
         $view->initDisplay();
       }
 
@@ -146,8 +171,7 @@ class ItemListElement extends PropertyTypeBase {
       }
 
       // Allow modules to alter the arguments passed to the view.
-      // @phpstan-ignore-next-line as its used on purpose.
-      \Drupal::moduleHandler()->alter('schema_item_list_views_args', $args);
+      $this->moduleHandler->alter('schema_item_list_views_args', $args);
 
       if (!empty($args)) {
         $view->setArguments($args);

@@ -140,6 +140,7 @@ final class ViewsDisplayPartsRenderTest extends KernelTestBase {
     $display['default']['display_options']['title'] = 'Unsaved view title';
     $unsaved->set('display', $display);
     $this->container->get('tempstore.shared')->get('views')->set('test', new ViewUI($unsaved));
+    $this->setCurrentUser($this->createUser(['administer views']));
 
     $this->renderBuild($this->componentBuild([
       'ui_patterns_views:view_entity' => EntityContext::fromEntity(View::load('test')),
@@ -224,6 +225,54 @@ final class ViewsDisplayPartsRenderTest extends KernelTestBase {
   }
 
   /**
+   * A missing display still depends on the view config.
+   */
+  public function testMissingDisplayKeepsTheViewCacheTag(): void {
+    $source = $this->source('view_header', [
+      'ui_patterns_views:view_entity' => EntityContext::fromEntity(View::load('test')),
+      'ui_patterns_views:display' => new Context(new ContextDefinition('string'), 'missing'),
+    ]);
+    $source->getPropValue();
+    self::assertContains('config:views.view.test', $source->getCacheTags());
+  }
+
+  /**
+   * A view the user cannot access gives nothing.
+   */
+  public function testViewAccessIsChecked(): void {
+    $view = View::load('test');
+    $display = $view->get('display');
+    $display['default']['display_options']['access'] = ['type' => 'perm', 'options' => ['perm' => 'access content']];
+    $view->set('display', $display);
+    $view->save();
+    $this->setCurrentUser($this->createUser());
+    $source = $this->source('view_title', [
+      'ui_patterns_views:view_entity' => EntityContext::fromEntity(View::load('test')),
+      'ui_patterns_views:display' => new Context(new ContextDefinition('string'), 'page_1'),
+    ]);
+    self::assertSame('', $source->getPropValue());
+    self::assertContains('user.permissions', $source->getCacheContexts());
+  }
+
+  /**
+   * Only users who can edit views get the unsaved copy of the Views UI.
+   */
+  public function testUnsavedViewNeedsAdministerViews(): void {
+    $unsaved = clone View::load('test');
+    $display = $unsaved->get('display');
+    $display['default']['display_options']['title'] = 'Unsaved view title';
+    $unsaved->set('display', $display);
+    $this->container->get('tempstore.shared')->get('views')->set('test', new ViewUI($unsaved));
+    $this->setCurrentUser($this->createUser());
+    $source = $this->source('view_title', [
+      'ui_patterns_views:view_entity' => EntityContext::fromEntity(View::load('test')),
+      'ui_patterns_views:display' => new Context(new ContextDefinition('string'), 'page_1'),
+    ]);
+    self::assertSame('Test view title', $source->getPropValue());
+    self::assertContains('user.permissions', $source->getCacheContexts());
+  }
+
+  /**
    * The display ID selects the display, and a running view wins over both.
    */
   public function testViewContextsPrecedence(): void {
@@ -234,6 +283,16 @@ final class ViewsDisplayPartsRenderTest extends KernelTestBase {
     self::assertSame('Attachment after title', $this->source('view_title', $entity_contexts)->getPropValue());
     self::assertSame('Test view title', $this->source('view_title', $entity_contexts + $this->executableContexts())->getPropValue());
     self::assertSame('', $this->source('view_title', [])->getPropValue());
+  }
+
+  /**
+   * Two displays of one view entity each give their own rows.
+   */
+  public function testTwoDisplaysOfOneViewEntity(): void {
+    $this->createNodes(['Node A', 'Node B', 'Node C']);
+    $entity = View::load('test');
+    self::assertCount(2, $this->renderedRows($entity, 'page_1'));
+    self::assertCount(1, $this->renderedRows($entity, 'attachment_2'));
   }
 
   /**
@@ -308,6 +367,22 @@ final class ViewsDisplayPartsRenderTest extends KernelTestBase {
     $source = $this->container->get(SourcePluginManager::class)->createInstance($source_id, $configuration);
     self::assertInstanceOf(SourcePluginBase::class, $source);
     return $source;
+  }
+
+  /**
+   * The rows a view_rows source renders for a display of a view entity.
+   *
+   * @return \SimpleXMLElement[]
+   *   The rendered rows.
+   */
+  private function renderedRows(View $entity, string $display_id): array {
+    $rows = $this->source('view_rows', [
+      'ui_patterns_views:view_entity' => EntityContext::fromEntity($entity),
+      'ui_patterns_views:display' => new Context(new ContextDefinition('string'), $display_id),
+    ])->getPropValue();
+    self::assertIsArray($rows);
+    $this->setRawContent((string) $this->container->get(RendererInterface::class)->renderInIsolation($rows));
+    return $this->cssSelect('.views-row');
   }
 
   /**

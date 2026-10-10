@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_patterns_field\Kernel\Source;
 
+use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\Core\Render\RenderContext;
+use Drupal\node\Entity\Node;
 use Drupal\Tests\ui_patterns\Kernel\SourcePluginsTestBase;
 use Drupal\ui_patterns_field\Plugin\UiPatterns\Source\UIPatternsSourceFieldPropertySource;
+use Drupal\ui_patterns_test\Plugin\UiPatterns\Source\Cacheable;
 
 use function PHPUnit\Framework\assertIsArray;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -44,6 +49,56 @@ final class UIPatternsSourceFieldPropertySourceTest extends SourcePluginsTestBas
       }
       $this->runSourcePluginTest($test_set);
     }
+  }
+
+  /**
+   * The cache metadata of the stored component's sources reaches the page.
+   */
+  #[DataProvider('provideStoredConfigurations')]
+  public function testStoredSourceCacheMetadata(array $stored, array $configuration): void {
+    $node = Node::create([
+      'type' => 'page',
+      'title' => 'Host',
+      'field_ui_patterns_source_1' => [
+        'source_id' => 'component',
+        'source' => ['component' => ['component_id' => 'ui_patterns_test:test-component'] + $stored],
+      ],
+    ]);
+    $node->save();
+    $element = [
+      '#type' => 'component',
+      '#component' => 'ui_patterns_test:test-component',
+      '#source_contexts' => ['entity' => EntityContext::fromEntity($node)],
+      '#ui_patterns' => $configuration,
+    ];
+    $renderer = $this->container->get('renderer');
+    $context = new RenderContext();
+    $output = (string) $renderer->executeInRenderContext($context, static fn () => $renderer->render($element));
+    self::assertStringContainsString(Cacheable::OUTPUT, $output);
+    self::assertContains(Cacheable::TAG, $context->pop()->getCacheTags());
+  }
+
+  /**
+   * A stored prop and a stored slot, each read through the field.
+   */
+  public static function provideStoredConfigurations(): array {
+    $cacheable = ['source_id' => 'cacheable', 'source' => []];
+    $field_source = ['source_id' => 'ui_patterns_source:node:field_ui_patterns_source_1'];
+    $field_context = 'field:node:page:field_ui_patterns_source_1';
+    $read = static fn (array $value): array => [
+      'source_id' => 'entity_field',
+      'source' => ['derivable_context' => $field_context, $field_context => ['value' => $value]],
+    ];
+    return [
+      'prop' => [
+        ['props' => ['string' => $cacheable]],
+        ['props' => ['string' => $read($field_source)]],
+      ],
+      'slot' => [
+        ['slots' => ['slot' => ['sources' => [$cacheable]]]],
+        ['slots' => ['slot' => ['sources' => [$read(['sources' => [$field_source]])]]]],
+      ],
+    ];
   }
 
   /**

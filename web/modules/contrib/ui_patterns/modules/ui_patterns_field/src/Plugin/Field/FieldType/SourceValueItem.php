@@ -170,11 +170,4 @@ class SourceValueItem extends FieldItemBase {
     return $values;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function defaultValueWidget(FormStateInterface $form_state): mixed {
-    return NULL;
-  }
-
 }

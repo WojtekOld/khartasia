@@ -1,0 +1,82 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display an attribution.
+ *
+ * Available variables:
+ * - source.name: The name of the source.
+ * - source.link: The link to the source.
+ * - author.name: The name of the author.
+ * - author.link: The link to the author.
+ * - license: The associated license.
+ * - license.id: The spdx license short code.
+ * - license.name: The spdx license name.
+ * - license.osiCertified: Is the license OSI certified?
+ * - license.deprecated: Is the license deprecated?
+ * - license.link: The link to the license.
+ * - creation.type: The creation type (human_created, ai_generated, ai_modified).
+ * - creation.type_label: The translated label for creation.type.
+ * - creation.tool: The AI tool used, if any.
+ * - creation.prompt: The AI prompt used, if any.
+ * - creation.editor.name: The prompt editor name, if creation.type is ai_generated or ai_modified.
+ * - creation.editor.link: The link to the prompt editor, if creation.type is ai_generated or ai_modified.
+ *
+ * @ingroup themeable
+ */
+#}
+{% if source or author or license or creation %}
+  <div{{ attributes }}>
+    <dl class="attribution attribution--license-{{ license.id }}">
+      {% if source %}
+      <dt class="attribution--source-title">
+        {{ 'Source'|trans }}
+      </dt>
+      <dd class="attribution--source-name">
+        {% if source.link %}
+          <a href="{{ source.link }}">{{ source.name ? source.name : source.link }}</a>
+        {% else %}
+          {{ source.name }}
+        {% endif %}
+      </dd>
+      {% endif %}
+      {% if source %}
+        <dt class="attribution--author-title">
+          {{ 'Author'|trans }}
+        </dt>
+        <dd class="attribution--author-name">
+          {% if author.link %}
+            <a href="{{ author.link }}">{{ author.name ? author.name : author.link }}</a>
+          {% else %}
+            {{ author.name }}
+          {% endif %}
+        </dd>
+      {% endif %}
+      {% if license %}
+      <dt class="attribution--license-title">
+        {{ 'License'|trans }}
+      </dt>
+      <dd class="attribution--license-definition">
+        <ul>
+          {% if license.link -%}
+          <li class="attribution--license-link"><a href="{{ license.link }}">{{ license.name|trans }}</a></li>
+          {%~ else -%}
+          <li class="attribution--license-name">{{ license.name|trans }}</li>
+          {%~ endif %}
+          <li class="attribution--license-osi-approved">{{ 'OSI approved:'|trans }} {{ license.osiCertified ? 'Yes' : 'No'|trans }}</li>
+          <li class="attribution--license-deprecated">{{ 'Deprecated:'|trans }} {{ license.deprecated ? 'Yes' : 'No'|trans }}</li>
+        </ul>
+      </dd>
+      {% endif %}
+      {% if creation %}
+      <dt class="attribution--creation-title">
+        {{ 'Creation'|trans }}
+      </dt>
+      <dd class="attribution--creation-type attribution--creation-{{ creation.type }}">
+        {{ creation.type_label }}
+        {%- if creation.tool %} ({{ creation.tool }}){% endif -%}
+        {%- if creation.editor %}, {{ 'prompted by'|trans }} {% if creation.editor.link %}<a href="{{ creation.editor.link }}">{{ creation.editor.name ? creation.editor.name : creation.editor.link }}</a>{% else %}{{ creation.editor.name }}{% endif %}{% endif -%}
+      </dd>
+      {% endif %}
+    </dl>
+  </div>
+{% endif %}

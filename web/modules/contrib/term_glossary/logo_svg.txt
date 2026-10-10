@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Base of the book with rounded corners -->
+  <path d="M15 20 
+           Q15 17, 18 17
+           L82 17
+           Q85 17, 85 20
+           L85 80
+           Q85 83, 82 83
+           L18 83
+           Q15 83, 15 80
+           Z" 
+        fill="#0678BE"/>
+  
+  <!-- Pages overlay with rounded corners -->
+  <path d="M18 22
+           Q18 20, 20 20
+           L80 20
+           Q82 20, 82 22
+           L82 78
+           Q82 80, 80 80
+           L20 80
+           Q18 80, 18 78
+           Z" 
+        fill="white"/>
+        
+  <!-- Signets/Bookmarks on the right with space from border -->
+  <path d="M77 20 L77 32 L72 27 L67 32 L67 20 Z" fill="#FF6B6B"/>
+  <path d="M65 20 L65 32 L60 27 L55 32 L55 20 Z" fill="#4ECDC4"/>
+  <path d="M53 20 L53 32 L48 27 L43 32 L43 20 Z" fill="#45B7D1"/>
+  
+  <!-- Definition lines with rounded ends -->
+  <path d="M42 42 L75 42" stroke="#0678BE" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M42 55 L75 55" stroke="#0678BE" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M42 68 L75 68" stroke="#0678BE" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Alphabet indicators with increased weight -->
+  <text x="28" y="45" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="10" fill="#0678BE" style="font-weight: 900;">A</text>
+  <text x="28" y="58" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="10" fill="#0678BE" style="font-weight: 900;">B</text>
+  <text x="28" y="71" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="10" fill="#0678BE" style="font-weight: 900;">C</text>
+</svg>

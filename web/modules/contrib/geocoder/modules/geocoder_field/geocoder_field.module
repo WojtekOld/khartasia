@@ -94,7 +94,7 @@ function geocoder_field_form_field_config_edit_form_alter(array &$form, FormStat
       '#type' => 'value',
       '#value' => $field_plugin,
     ];
-    $form['actions']['submit']['#validate'][] = 'geocoder_field_field_config_edit_form_validate';
+    $form['#validate'][] = 'geocoder_field_field_config_edit_form_validate';
   }
 }
 
@@ -235,7 +235,7 @@ function _geocoder_field_process(EntityInterface $entity, array $fields): bool {
       continue;
     }
 
-    $remote_field = isset($geocoder['field']) ?
+    $remote_field = !empty($geocoder['field']) ?
       $entity->get($geocoder['field']) :
       NULL;
 

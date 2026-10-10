@@ -104,7 +104,7 @@ Using this module, the code in the head might end up looking like this:
             "headline": "Curabitur arcu erat]",
             "author": {
                 "@type": "Person",
-                "name": "Minney Mouse",
+                "name": "Jane Doe",
                 "sameAs": "https://example.com/user/2"
             },
             "publisher": {
@@ -137,12 +137,6 @@ ergebnis/composer-normalize:
 * composer normalize modules/contrib/schema_metatag/composer.json
 
 
-Credits
---------------------------------------------------------------------------------
-The initial development was by Karen Stevenson [2].
-
-
 References
 --------------------------------------------------------------------------------
 1: https://schema.org/
-2: https://www.drupal.org/u/karens

@@ -13,7 +13,6 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\ui_patterns\Form\ComponentFormBuilderTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns_ui\Entity\ComponentFormDisplay;
@@ -38,16 +37,10 @@ class ComponentFormDisplayWidget extends WidgetBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
-   * The component plugin manager.
-   */
-  protected ComponentPluginManager $componentPluginManager;
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->componentPluginManager = $container->get(ComponentPluginManager::class);
     $instance->entityTypeManager = $container->get(EntityTypeManagerInterface::class);
     return $instance;
   }
@@ -124,7 +117,7 @@ class ComponentFormDisplayWidget extends WidgetBase {
     $element['additional_display_ids'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Additional display ID'),
-      '#default_value' => $this->getSetting('additional_display_ids'),
+      '#default_value' => $this->getSetting('additional_display_ids') ?? [],
       '#options' => $options,
     ];
 
@@ -157,7 +150,8 @@ class ComponentFormDisplayWidget extends WidgetBase {
     $parents = $form['#parents'];
     if (!static::getWidgetState($parents, $field_name, $form_state)) {
       $field_state = [
-        'items_count' => \count($items) - 1,
+        // Every item shown is saved, so no extra empty one; one when empty.
+        'items_count' => \max(\count($items) - 1, 0),
         'array_parents' => [],
       ];
       static::setWidgetState($parents, $field_name, $form_state, $field_state);
@@ -213,8 +207,8 @@ class ComponentFormDisplayWidget extends WidgetBase {
     $source_data = $item_delta_value['source'] ?? [];
     $component_default_value = $source_data['component']
       ?? [
-        '#component_id' => $component_id,
-        '#display_id' => $display_id,
+        'component_id' => $component_id,
+        'display_id' => $display_id,
       ];
 
     $element['source'] = [
@@ -222,6 +216,9 @@ class ComponentFormDisplayWidget extends WidgetBase {
       '#tree' => TRUE,
     ];
     $element['source_id'] = ['#type' => 'hidden', '#value' => $source_id];
+    // Kept as stored: translations are matched on the node id.
+    $element['node_id'] = ['#type' => 'hidden', '#value' => $item_delta_value['node_id'] ?? ''];
+    $element['third_party_settings'] = ['#type' => 'value', '#value' => $item_delta_value['third_party_settings'] ?? []];
 
     $contexts = $this->getComponentSourceContexts($items);
     $component_element = $this->buildComponentsForm($form_state, $contexts, $component_id, TRUE, TRUE, 'ui_patterns');

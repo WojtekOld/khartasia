@@ -1,21 +1,58 @@
 {
     "name": "drupal/term_merge",
-    "type": "drupal-module",
     "description": "Allows users to merge taxonomy terms in the same vocabulary together.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "keywords": ["Drupal"],
     "homepage": "https://www.drupal.org/project/term_merge",
     "authors": [
         {
-            "name": "legolasbo",
-            "homepage": "https://www.drupal.org/u/legolasbo"
+            "name": "Chris Jansen (legolasbo)",
+            "homepage": "https://www.drupal.org/u/legolasbo",
+            "role": "Maintainer"
         },
         {
-            "name": "daniel_j",
-            "homepage":"https://www.drupal.org/u/daniel_j"
+            "name": "Daniel Johnson (daniel_j)",
+            "homepage": "https://www.drupal.org/u/daniel_j",
+            "role": "Maintainer"
+        },
+        {
+            "name": "bucefal91",
+            "homepage": "https://www.drupal.org/u/bucefal91",
+            "role": "Maintainer"
+        },
+        {
+            "name": "eli",
+            "homepage": "https://www.drupal.org/u/eli",
+            "role": "Maintainer"
+        },
+        {
+            "name": "g.i.joe",
+            "homepage": "https://www.drupal.org/u/gijoe",
+            "role": "Maintainer"
+        },
+        {
+            "name": "nylin",
+            "homepage": "https://www.drupal.org/user/816040",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Alexander Ross (bleen)",
+            "homepage": "https://www.drupal.org/user/bleen",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Viktor Holovachek (AstonVictor)",
+            "homepage": "https://www.drupal.org/u/astonvictor",
+            "role": "Maintainer"
         }
     ],
+    "minimum-stability": "dev",
     "support": {
         "issues": "https://www.drupal.org/project/issues/term_merge",
-        "source": "https://git.drupal.org/project/term_merge.git"
+        "source": "https://git.drupalcode.org/project/term_merge"
     },
-    "license": "GPL-2.0-or-later"
+    "require": {
+        "drupal/term_reference_change": "^2.0@beta"
+    }
 }

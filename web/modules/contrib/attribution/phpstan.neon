@@ -1,0 +1,16 @@
+includes:
+  - phpstan-baseline.neon
+parameters:
+  level: 8
+  ignoreErrors:
+    # Drupal's Field API / TypedData magic __get() property access
+    # (e.g. $item->source_name) cannot be statically verified without the
+    # mglaman/phpstan-drupal extension.
+    - identifier: property.notFound
+    # Drupal core's own widget/formatter interfaces leave many array
+    # parameters and return types untyped; matching them exactly is
+    # required for LSP compatibility with the parent signatures.
+    - identifier: missingType.iterableValue
+    - identifier: missingType.generics
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"

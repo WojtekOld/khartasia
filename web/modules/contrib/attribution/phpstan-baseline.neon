@@ -1,0 +1,12 @@
+parameters:
+	ignoreErrors:
+		-
+			# viewElements() intentionally sets a top-level '#label_display'
+			# string key as a sibling of the numeric delta keys, so that
+			# FormatterBase::view()'s array_merge($info, $elements) overrides
+			# the field's own label display. This is a deliberate, documented
+			# technique, not a type error.
+			message: '#^Method Drupal\\attribution\\Plugin\\Field\\FieldFormatter\\AttributionDefaultFormatter\:\:viewElements\(\) should return array\<int, array\<int\|string, mixed\>\> but returns array\<int\|string, array\|string\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Plugin/Field/FieldFormatter/AttributionDefaultFormatter.php

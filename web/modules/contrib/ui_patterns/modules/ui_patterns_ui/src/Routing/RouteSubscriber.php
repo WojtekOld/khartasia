@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -39,7 +39,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           'component_id' => $component->getPluginId(),
         ] + $defaults,
         [
-          '_permission' => 'administer component form display',
+          '_permission' => 'administer component_form_display',
         ]
       );
       $collection->add("entity.component_form_display.{$component->getPluginId()}", $route);
@@ -52,7 +52,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           'component_id' => $component->getPluginId(),
         ] + $defaults,
         [
-          '_permission' => 'administer component form display',
+          '_permission' => 'administer component_form_display',
         ]
       );
       $collection->add("entity.component_form_display.{$component->getPluginId()}.edit_form", $route);
@@ -65,7 +65,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           'component_id' => $component->getPluginId(),
         ] + $defaults,
         [
-          '_permission' => 'administer component',
+          '_permission' => 'administer component_form_display',
         ]
       );
       $collection->add("entity.component_form_display.{$component->getPluginId()}.add_form", $route);

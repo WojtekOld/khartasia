@@ -125,10 +125,7 @@ class WysiwygWidget extends SourcePluginBase implements TrustedCallbackInterface
    * {@inheritdoc}
    */
   public function settingsSummary(): array {
-    $value = $this->getSetting('value')['value'] ?? '';
-    return [
-      \substr(\strip_tags($value), 0, 20),
-    ];
+    return $this->summarizeValue($this->getSetting('value')['value'] ?? '');
   }
 
   /**

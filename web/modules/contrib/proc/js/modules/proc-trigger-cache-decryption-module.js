@@ -39,7 +39,15 @@ export async function triggerCacheDecryption($, openpgp, passwordSessionCachingS
           message: messageSource,
           passwords: [passwordSessionCachingSalt],
         });
-        $('input[name=password]')[0].value = decrypted;
+        const passwordField = $('input[name=password]');
+        // The password field may be absent (e.g. the decryption form is not
+        // present on this page); skip injection and auto-decryption in that
+        // case to avoid dereferencing an undefined element.
+        if (passwordField.length === 0) {
+          console.info('Proc: password field not found; skipping cached passphrase injection.');
+          return;
+        }
+        passwordField.val(decrypted);
         // Do not decrypt automatically in standalone mode.
         if (drupalSettings.proc.proc_decryption_mode !== '0') {
           await decryptHandler($);

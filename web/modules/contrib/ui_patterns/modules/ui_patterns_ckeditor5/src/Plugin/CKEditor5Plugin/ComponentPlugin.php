@@ -37,7 +37,7 @@ class ComponentPlugin extends CKEditor5PluginDefault implements ContainerFactory
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('csrf_token'),
+      $container->get(CsrfTokenGenerator::class),
     );
   }
 

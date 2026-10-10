@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\ui_patterns_legacy\Service;
 
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\layout_builder\Section;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\PropTypeInterface;
 
 /**

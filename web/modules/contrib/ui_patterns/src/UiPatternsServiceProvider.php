@@ -6,10 +6,11 @@ namespace Drupal\ui_patterns;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
+use Drupal\ui_patterns\DependencyInjection\Compiler\ComponentPluginManagerPass;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * Registers layout builder and field layout resolver.
+ * Registers the context entity resolvers and the SDC plugin manager pass.
  */
 class UiPatternsServiceProvider extends ServiceProviderBase {
 
@@ -17,6 +18,7 @@ class UiPatternsServiceProvider extends ServiceProviderBase {
    * {@inheritdoc}
    */
   public function register(ContainerBuilder $container): void {
+    $container->addCompilerPass(new ComponentPluginManagerPass());
     $modules = $container->getParameterBag()->get('container.modules');
     if (\is_array($modules) === FALSE) {
       return;

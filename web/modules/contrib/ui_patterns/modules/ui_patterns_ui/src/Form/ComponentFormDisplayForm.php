@@ -14,7 +14,7 @@ use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns\PluginWidgetSettingsInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns_ui\Entity\ComponentFormDisplay;
@@ -55,6 +55,14 @@ final class ComponentFormDisplayForm extends EntityForm {
     }
 
     return $this->entityTypeManager->getStorage($entity_type_id)->create(['component_id' => $component_id]);
+  }
+
+  /**
+   * Whether the component already has a display with this form mode.
+   */
+  public function formModeExists(string $form_mode_name): bool {
+    \assert($this->entity instanceof ComponentFormDisplay);
+    return ComponentFormDisplay::loadByFormMode($this->entity->getComponentId(), $form_mode_name) !== NULL;
   }
 
   /**
@@ -141,7 +149,7 @@ final class ComponentFormDisplayForm extends EntityForm {
       '#type' => 'machine_name',
       '#default_value' => $entity->isNew() === FALSE ? $entity->getFormModeName() : NULL,
       '#machine_name' => [
-        'exists' => [ComponentFormDisplay::class, 'loadByFormMode'],
+        'exists' => [$this, 'formModeExists'],
       ],
       '#disabled' => !$entity->isNew(),
     ];
@@ -151,7 +159,6 @@ final class ComponentFormDisplayForm extends EntityForm {
       '#title' => $this->t('Enabled'),
       '#default_value' => $entity->status(),
     ];
-    // @phpstan-ignore method.notFound
     $components = $this->componentPluginManager->getNegotiatedSortedDefinitions();
     $component_id = $entity->getComponentId();
     $component = $components[$component_id];
@@ -303,7 +310,9 @@ final class ComponentFormDisplayForm extends EntityForm {
     ];
 
     $plugin_options = [];
-    if (isset($display_options['region']) && $display_options['region'] === 'content') {
+    // On an AJAX rebuild only the input carries the region just picked.
+    $region = $form_state->getUserInput()['fields'][$prop_slot_id]['region'] ?? $display_options['region'] ?? NULL;
+    if ($region === 'content') {
       $plugin_options[''] = $this->t('Source selector');
     }
     $source_plugins = $entity->getSourcePlugins($prop_slot_id);
@@ -507,15 +516,7 @@ final class ComponentFormDisplayForm extends EntityForm {
       }
       else {
         $options = $entity->getPropSlotOption($prop_id);
-
-        // Update field settings only if the submit handler told us to.
-        if ($form_state->get('plugin_settings_update') === $prop_id) {
-          // Only store settings actually used by the selected plugin.
-          $default_settings = [];
-          $options['settings'] = isset($values['settings_edit_form']['settings']) ? \array_intersect_key($values['settings_edit_form']['settings'], $default_settings) : [];
-          $form_state->set('plugin_settings_update', NULL);
-        }
-
+        $form_state->set('plugin_settings_update', NULL);
         $options['source_id'] = $values['source_id'];
         $options['weight'] = $values['weight'];
         $options['region'] = $values['region'];

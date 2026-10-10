@@ -1,0 +1,4 @@
+services:
+
+  Drupal\term_glossary_hook_test\Hook\TermGlossaryHookTestHooks:
+    autowire: true

@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * Hooks implementations for term_glossary_per_node module.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\term_glossary_per_node\Hook\TermGlossaryPerNodeHooks;
+
+/**
+ * Implements hook_help().
+ */
+#[LegacyHook]
+function term_glossary_per_node_help($route_name, RouteMatchInterface $route_match) {
+  return \Drupal::service(TermGlossaryPerNodeHooks::class)->help($route_name, $route_match);
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+#[LegacyHook]
+function term_glossary_per_node_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  return \Drupal::service(TermGlossaryPerNodeHooks::class)->entityBundleFieldInfo($entity_type, $bundle, $base_field_definitions);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+#[LegacyHook]
+function term_glossary_per_node_form_node_type_form_alter(&$form, FormStateInterface $form_state): void {
+  \Drupal::service(TermGlossaryPerNodeHooks::class)->formNodeTypeFormAlter($form, $form_state);
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+#[LegacyHook]
+function term_glossary_per_node_entity_base_field_info(EntityTypeInterface $entity_type): array {
+  return \Drupal::service(TermGlossaryPerNodeHooks::class)->entityBaseFieldInfo($entity_type);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+#[LegacyHook]
+function term_glossary_per_node_form_node_form_alter(&$form, FormStateInterface &$form_state): void {
+  \Drupal::service(TermGlossaryPerNodeHooks::class)->formNodeFormAlter($form, $form_state);
+}

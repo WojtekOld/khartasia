@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Update hooks for the Attribution module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\attribution\Entity\AttributionLicense;
+use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
+
+/**
+ * Adds the AI-attribution columns and the 'unknown_unasserted' license.
+ */
+function attribution_update_10001(): void {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $database_schema = \Drupal::database()->schema();
+
+  $field_storage_configs = $entity_type_manager
+    ->getStorage('field_storage_config')
+    ->loadByProperties(['type' => 'attribution']);
+
+  foreach ($field_storage_configs as $field_storage_config) {
+    // The columns are widened with a manual ALTER rather than relying solely
+    // on updateFieldStorageDefinition(), because that method only recreates
+    // the table outright for fields with no data; for fields that already
+    // have data it skips adding new columns entirely (it only touches
+    // indexes), so the columns would otherwise silently never appear.
+    $schema = $field_storage_config->getSchema();
+    $entity_type_id = $field_storage_config->getTargetEntityTypeId();
+    $entity_storage = $entity_type_manager->getStorage($entity_type_id);
+    if (!$entity_storage instanceof SqlEntityStorageInterface) {
+      continue;
+    }
+    /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
+    $table_mapping = $entity_storage->getTableMapping();
+
+    $tables = [$table_mapping->getDedicatedDataTableName($field_storage_config)];
+    if ($field_storage_config->isRevisionable()) {
+      $tables[] = $table_mapping->getDedicatedRevisionTableName($field_storage_config);
+    }
+
+    foreach (['creation_type', 'ai_tool', 'ai_prompt', 'prompt_editor_name', 'prompt_editor_link'] as $property) {
+      $column = $table_mapping->getFieldColumnName($field_storage_config, $property);
+      $field_spec = $schema['columns'][$property];
+      foreach ($tables as $table) {
+        if ($database_schema->tableExists($table) && !$database_schema->fieldExists($table, $column)) {
+          $database_schema->addField($table, $column, $field_spec);
+        }
+      }
+    }
+
+    // Bring Drupal's own bookkeeping of the installed field schema back in
+    // sync with what is now physically in the database, so the update
+    // system stops reporting a pending schema change for this field.
+    $field_storage_config_for_sync = clone $field_storage_config;
+    $field_storage_config_for_sync->setSetting('column_changes_handled', TRUE);
+    $entity_definition_update_manager->updateFieldStorageDefinition($field_storage_config_for_sync);
+  }
+
+  if (!AttributionLicense::load('unknown_unasserted')) {
+    $config_file = \Drupal::service('extension.list.module')->getPath('attribution') . '/config/install/attribution.attribution_license.unknown_unasserted.yml';
+    $contents = file_get_contents($config_file);
+    if ($contents !== FALSE) {
+      AttributionLicense::create(Yaml::decode($contents))->save();
+    }
+  }
+}

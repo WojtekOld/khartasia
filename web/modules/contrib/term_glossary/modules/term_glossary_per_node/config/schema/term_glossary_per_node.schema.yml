@@ -1,0 +1,19 @@
+node.type.*.third_party.term_glossary_per_node:
+  type: mapping
+  label: 'Per node Term Glossary settings'
+  mapping:
+    active:
+      type: integer
+      label: 'Enable Term Glossary for content type'
+    override:
+      type: integer
+      label: 'Enable Term Glossary override per node'
+    override_default:
+      type: integer
+      label: 'Enable / disable the glossary display default value'
+    override_vocabulary:
+      type: integer
+      label: 'Enable / disable overriding of the glossary vocabulary'
+    default_vocabulary:
+      type: string
+      label: 'Default vocabulary for glossary per node'

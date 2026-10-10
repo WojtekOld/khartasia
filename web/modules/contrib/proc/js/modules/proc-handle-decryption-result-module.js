@@ -62,9 +62,12 @@ function closeOpenDecryptionDialog($, opLink) {
  * @returns {Promise<void>}
  */
 export async function handleDecryptionResult($, decrypted, cipherId, temporaryDownloadLink, cipherIndex, opLink) {
-  if (opLink === undefined) {
+  if (opLink === undefined || opLink.length === 0) {
     opLink = $('#decryption-link');
   }
+  // Resolve the trigger link id safely; it may be absent if no element
+  // matched (e.g. the decryption dialog markup changed or was removed).
+  const opLinkId = opLink?.[0]?.id;
   if (decrypted === undefined) {
     const msg = Drupal.t(
       'Unable to decrypt the content. Make sure you have entered the right passphrase.',
@@ -77,7 +80,7 @@ export async function handleDecryptionResult($, decrypted, cipherId, temporaryDo
   if (decrypted) {
     // If this is not any kind of re-encryption, it is simple decryption that
     // opens the file:
-    if (opLink[0].id !== 'update-link' && opLink[0].id !== 'update-batch-link') {
+    if (opLinkId !== 'update-link' && opLinkId !== 'update-batch-link') {
       if (
         $('textarea').length !== 0 &&
         (typeof decrypted.data === 'string' ||
@@ -114,10 +117,14 @@ export async function handleDecryptionResult($, decrypted, cipherId, temporaryDo
           try {
             let array = new Uint8Array(evt.target.result);
             const startSeconds = new Date().getTime() / 1000;
+            // Normalise strings before intersecting.
+            const selectedRecipientsForCipher = (
+              JSON.parse(drupalSettings.proc.proc_selected_update_procs_recipients)[cipherId] || []
+            ).map(String);
             let filteredData = Object.fromEntries(
               Object.entries(
                 JSON.parse(drupalSettings.proc.proc_recipients_pubkeys_changed))
-                  .filter(([key]) => JSON.parse(drupalSettings.proc.proc_selected_update_procs_recipients)[cipherId].includes(key)
+                  .filter(([key]) => selectedRecipientsForCipher.includes(String(key))
               )
             );
             drupalSettings.proc.proc_recipients_pubkeys_changed_host = JSON.stringify(filteredData);
@@ -129,7 +136,7 @@ export async function handleDecryptionResult($, decrypted, cipherId, temporaryDo
               let browser_fingerprint = `${navigator.userAgent}, (${screen.width} x ${screen.height})`;
               let generation_timespan = endSeconds - startSeconds;
 
-              if (opLink[0].id === 'update-batch-link') {
+              if (opLinkId === 'update-batch-link') {
                 console.info('Initiating webservice upload of re-encrypted cipher text');
                 const url = new URL(window.location.origin + drupalSettings.path.baseUrl + 'api/proc/edit-cipher');
                 url.searchParams.set('cache_bust', `${Date.now()}_${Math.floor(Math.random() * 1000000)}`);

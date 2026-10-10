@@ -1,0 +1,5 @@
+entity.attribution_license.overview:
+  title: Attribution Licenses
+  parent: system.admin_structure
+  description: 'List of licenses for attributions.'
+  route_name: entity.attribution_license.collection

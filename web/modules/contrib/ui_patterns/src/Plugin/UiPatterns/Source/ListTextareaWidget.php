@@ -104,6 +104,17 @@ class ListTextareaWidget extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
+  public function settingsSummary(): array {
+    $value = $this->getSetting('value');
+    if (\is_string($value) && $value !== '') {
+      $value = \array_map('\trim', \preg_split("/\r\n|\n|\r/", $value) ?: []);
+    }
+    return \is_array($value) ? $this->summarizeValue($value) : [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
     $items = $this->getSetting('value');

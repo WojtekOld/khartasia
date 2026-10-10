@@ -31,6 +31,19 @@ class CheckboxWidget extends SourcePluginPropValueWidget {
 
   /**
    * {@inheritdoc}
+   *
+   * Only the checked state is worth a line.
+   */
+  public function settingsSummary(): array {
+    if (!$this->getSetting('value')) {
+      return [];
+    }
+    $title = (string) ($this->getConfiguration()['widget_settings']['title'] ?? '');
+    return [$title !== '' ? $title : (string) $this->t('Yes')];
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);

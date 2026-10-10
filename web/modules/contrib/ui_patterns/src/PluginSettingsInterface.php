@@ -58,7 +58,8 @@ interface PluginSettingsInterface {
    * Returns a short summary for the current settings.
    *
    * @return array<string|\Stringable>
-   *   A short summary of the settings.
+   *   Short plain lines: first what is selected, then how it is set up.
+   *   Never the choice label — the caller shows it.
    */
   public function settingsSummary(): array;
 

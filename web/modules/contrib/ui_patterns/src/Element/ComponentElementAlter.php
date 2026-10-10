@@ -5,20 +5,17 @@ declare(strict_types=1);
 namespace Drupal\ui_patterns\Element;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\ui_patterns\Plugin\UiPatterns\PropType\SlotPropType;
 
 /**
  * Our additions to the SDC render element.
  */
 class ComponentElementAlter implements TrustedCallbackInterface {
-
-  public function __construct(
-    protected ComponentPluginManager $componentPluginManager,
-  ) {}
 
   /**
    * {@inheritdoc}
@@ -53,7 +50,7 @@ class ComponentElementAlter implements TrustedCallbackInterface {
       // Because SDC validator is sometimes confused by an empty slot.
       // We check the current slot render element.
       if (\is_array($slot) && self::isSlotEmpty($slot)) {
-        self::mergeSlotBubbleableMetadata($element, $slot, 1);
+        self::mergeSlotBubbleableMetadata($element, $slot);
         unset($element['#slots'][$slot_id]);
         continue;
       }
@@ -93,15 +90,24 @@ class ComponentElementAlter implements TrustedCallbackInterface {
 
   /**
    * Merge slots metadata to the component recursive.
+   *
+   * Keeps what the renderer would bubble, as deep as isSlotEmpty().
    */
-  protected static function mergeSlotBubbleableMetadata(array &$element, array $slot, int $max_level = 1, int $level = 0): void {
+  protected static function mergeSlotBubbleableMetadata(array &$element, array $slot, int $max_level = 5, int $level = 0): void {
+    $access = $slot['#access'] ?? TRUE;
+    if (!($access instanceof AccessResultInterface) && !$access) {
+      return;
+    }
     if ($level < $max_level) {
-      foreach (Element::getVisibleChildren($slot) as $child) {
+      foreach (Element::children($slot) as $child) {
         self::mergeSlotBubbleableMetadata($element, $slot[$child], $max_level, $level + 1);
       }
     }
-    $elementMetadata = BubbleableMetadata::createFromRenderArray($element);
-    $elementMetadata->merge(BubbleableMetadata::createFromRenderArray($slot));
+    $elementMetadata = BubbleableMetadata::createFromRenderArray($element)
+      ->merge(BubbleableMetadata::createFromRenderArray($slot));
+    if (($slot['#access'] ?? NULL) instanceof AccessResultInterface) {
+      $elementMetadata = $elementMetadata->merge(CacheableMetadata::createFromObject($slot['#access']));
+    }
     $elementMetadata->applyTo($element);
   }
 

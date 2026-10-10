@@ -78,19 +78,23 @@ class GetPluginResponseTest extends KernelTestBase {
   }
 
   /**
-   * Builds and returns the node add form for the 'page' content type.
+   * Builds and returns a node form for the 'page' content type.
    *
    * Passes a minimal form through the form alter service, which mirrors what
    * hook_form_alter does on a real content entity form.
    *
+   * @param string $operation
+   *   The entity form operation. The node add form uses "default".
+   *
    * @return array
    *   The altered form array.
    */
-  private function buildPageNodeAddForm(): array {
+  private function buildPageNodeAddForm(string $operation = 'default'): array {
     $node = Node::create(['type' => 'page', 'uid' => 0]);
 
     $form_object = $this->createMock(ContentEntityFormInterface::class);
     $form_object->method('getEntity')->willReturn($node);
+    $form_object->method('getOperation')->willReturn($operation);
 
     $form_state = $this->createMock(FormStateInterface::class);
     $form_state->method('getFormObject')->willReturn($form_object);
@@ -115,6 +119,16 @@ class GetPluginResponseTest extends KernelTestBase {
 
     $this->assertArrayHasKey('summarise', $form,
       'The Summarise plugin alterForm method was called and added its element to the node form.');
+  }
+
+  /**
+   * Tests that forms other than add and edit forms are not altered.
+   */
+  public function testAlterFormSkipsOtherOperations(): void {
+    $form = $this->buildPageNodeAddForm('delete');
+
+    $this->assertArrayNotHasKey('summarise', $form,
+      'The Summarise plugin did not add its element to the delete form.');
   }
 
   /**

@@ -1,0 +1,15 @@
+name: 'Taxonomy Term Glossary'
+type: module
+description: 'Add automatic highlight of terms with description in content.'
+core_version_requirement: ^10.3 || ^11
+package: 'Fields'
+configure: 'term_glossary.glossary_config_form'
+dependencies:
+  - drupal:taxonomy
+  - drupal:text
+  - jquery_ui_dialog:jquery_ui_dialog
+
+# Information added by Drupal.org packaging script on 2026-10-10
+version: '4.7.0-beta1'
+project: 'term_glossary'
+datestamp: 1791621846

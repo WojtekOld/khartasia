@@ -26,6 +26,8 @@ use Drupal\Core\Utility\Token;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+use function Symfony\Component\String\u;
+
 /**
  * Base class for source plugins.
  */
@@ -46,14 +48,14 @@ abstract class SourcePluginBase extends PluginBase implements SourceInterface, C
   use PluginDependencyTrait;
 
   /**
-   * Definition of the targeted prop.
+   * Definition of the targeted prop, empty unless buildConfiguration() set it.
    */
-  protected array $propDefinition;
+  protected array $propDefinition = [];
 
   /**
-   * ID of the targeted prop.
+   * ID of the targeted prop, empty unless buildConfiguration() set it.
    */
-  protected string $propId;
+  protected string $propId = '';
 
   /**
    * The provided plugin contexts.
@@ -174,6 +176,29 @@ abstract class SourcePluginBase extends PluginBase implements SourceInterface, C
   }
 
   /**
+   * Turns a saved value into a single truncated summary line.
+   *
+   * @param mixed $value
+   *   The saved value: a scalar, or an array of scalars.
+   *
+   * @return array<string|\Stringable>
+   *   One line, or nothing when the value is empty.
+   */
+  protected function summarizeValue(mixed $value): array {
+    if (\is_int($value) || \is_float($value)) {
+      $value = (string) $value;
+    }
+    elseif (\is_array($value)) {
+      // Checkboxes store unchecked entries as 0: the filter drops them.
+      $value = \implode(', ', \array_filter($value, static fn ($item): bool => \is_scalar($item) && !empty($item)));
+    }
+    if (!$value || !\is_string($value)) {
+      return [];
+    }
+    return [u(\strip_tags($value))->truncate(20, '...', FALSE)];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function label(bool $with_context = FALSE): string {
@@ -218,8 +243,6 @@ abstract class SourcePluginBase extends PluginBase implements SourceInterface, C
       if (!\array_key_exists($convertible_prop_type, $convertible_props)) {
         continue;
       }
-      // We start a conversion.
-      $data = $this->getPropValue();
       // A path exists, we follow the conversion path.
       $conversion_path = $convertible_props[$convertible_prop_type];
       $conversion_path = \array_reverse($conversion_path);

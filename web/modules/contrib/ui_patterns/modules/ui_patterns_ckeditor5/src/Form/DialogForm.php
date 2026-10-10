@@ -7,12 +7,15 @@ namespace Drupal\ui_patterns_ckeditor5\Form;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\Core\Url;
 use Drupal\editor\Ajax\EditorDialogSave;
 use Drupal\filter\FilterFormatInterface;
+use Drupal\ui_patterns\ComponentPluginManager;
 use Drupal\ui_patterns_ckeditor5\HostEntity;
 use Drupal\ui_patterns_ckeditor5\Plugin\Filter\ComponentEmbed;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -36,6 +39,7 @@ final class DialogForm extends FormBase {
   public function __construct(
     protected ComponentPluginManager $componentPluginManager,
     protected HostEntity $hostEntity,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {}
 
   /**
@@ -43,8 +47,9 @@ final class DialogForm extends FormBase {
    */
   public static function create(ContainerInterface $container): static {
     return new self(
-      $container->get('plugin.manager.sdc'),
-      $container->get('ui_patterns_ckeditor5.host_entity'),
+      $container->get(ComponentPluginManager::class),
+      $container->get(HostEntity::class),
+      $container->get(ModuleHandlerInterface::class),
     );
   }
 
@@ -75,13 +80,7 @@ final class DialogForm extends FormBase {
     // the form values only, so the form carries them as hidden values.
     $input = $form_state->getUserInput();
     $request_values = \is_array($input['host'] ?? NULL) ? $input['host'] : $request->getPayload()->all();
-    $form['host'] = ['#tree' => TRUE];
-    foreach (['entity_type', 'entity_id', 'entity_bundle', 'component_config'] as $key) {
-      $form['host'][$key] = [
-        '#type' => 'hidden',
-        '#value' => \is_scalar($request_values[$key] ?? NULL) ? (string) $request_values[$key] : '',
-      ];
-    }
+    $form['host'] = $this->buildHostValues($request_values);
     $component_config = $this->getComponentConfig($request_values, $form_state);
 
     $form['#tree'] = TRUE;
@@ -107,27 +106,46 @@ final class DialogForm extends FormBase {
     }
     $form['component'] = [
       '#type' => 'component_form',
-      '#component_id' => $component_id,
+      // Pinned when editing; when inserting, the selector stays, so its AJAX
+      // finds it again on the rebuilds.
+      '#component_id' => $definition ? $component_id : NULL,
       '#component_filter' => $filter->getAllowedComponentIds() ?: NULL,
       '#source_contexts' => $this->hostEntity->getContextsFromValues($request_values),
-      // AJAX rebuilds of the sources must post to the dialog route.
-      '#ajax_url' => $request->getRequestUri(),
+      // AJAX rebuilds of the sources must post to the dialog route, as
+      // AJAX form submissions.
+      '#ajax_url' => Url::fromRoute('ui_patterns_ckeditor5.dialog', ['filter_format' => $filter_format->id()], ['query' => [FormBuilderInterface::AJAX_FORM_REQUEST => TRUE]]),
       '#default_value' => $component_config,
     ];
+    // The alter the other hosts get from ComponentFormBuilderTrait.
+    $this->moduleHandler->alter('ui_patterns_form', $form['component'], $form_state);
+    // Present from the start: the AJAX rebuilds replace the component element
+    // only. Without a component, the submission renders the errors.
     $form['actions'] = ['#type' => 'actions'];
-    if (isset($component_config['component_id'])) {
-      $form['actions']['submit'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Embed'),
-        '#button_type' => 'primary',
-        '#ajax' => [
-          'callback' => [$this, 'ajaxSubmitForm'],
-          'wrapper' => self::AJAX_WRAPPER,
-          'disable-refocus' => TRUE,
-        ],
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Embed'),
+      '#button_type' => 'primary',
+      '#ajax' => [
+        'callback' => [$this, 'ajaxSubmitForm'],
+        'wrapper' => self::AJAX_WRAPPER,
+        'disable-refocus' => TRUE,
+      ],
+    ];
+    return $form;
+  }
+
+  /**
+   * The host entity and the edited component, kept as hidden values.
+   */
+  protected function buildHostValues(array $request_values): array {
+    $host = ['#tree' => TRUE];
+    foreach (['entity_type', 'entity_id', 'entity_bundle', 'component_config'] as $key) {
+      $host[$key] = [
+        '#type' => 'hidden',
+        '#value' => \is_scalar($request_values[$key] ?? NULL) ? (string) $request_values[$key] : '',
       ];
     }
-    return $form;
+    return $host;
   }
 
   /**

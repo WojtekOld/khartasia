@@ -1,0 +1,13 @@
+name: 'Taxonomy Term Glossary Abbreviation'
+type: module
+description: 'Generate ABBR HTML elements for glossary terms.'
+core_version_requirement: ^10.3 || ^11
+package: 'Fields'
+dependencies:
+  - drupal:taxonomy
+  - term_glossary:term_glossary
+
+# Information added by Drupal.org packaging script on 2026-10-10
+version: '4.7.0-beta1'
+project: 'term_glossary'
+datestamp: 1791621846

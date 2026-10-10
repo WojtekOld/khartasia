@@ -3,3 +3,6 @@ Flesch
 flesch
 Summarise
 summarise
+abeilles
+Texte
+ville

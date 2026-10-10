@@ -1,13 +1,13 @@
-name: Term Merge
-description: Allows users to merge taxonomy terms in the same vocabulary together.
-core_version_requirement: ^9 || ^10 || ^11
+name: 'Term Merge'
 type: module
-
+description: 'Allows users to merge taxonomy terms in the same vocabulary together.'
+core_version_requirement: ^9 || ^10 || ^11
+package: Taxonomy
 dependencies:
- - drupal:taxonomy
- - term_reference_change:term_reference_change
+  - drupal:taxonomy
+  - term_reference_change:term_reference_change
 
-# Information added by Drupal.org packaging script on 2025-07-09
-version: '2.0.0'
+# Information added by Drupal.org packaging script on 2026-10-05
+version: '2.0.1'
 project: 'term_merge'
-datestamp: 1752105251
+datestamp: 1791188399

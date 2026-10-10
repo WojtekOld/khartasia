@@ -3,6 +3,7 @@
 namespace Drupal\Tests\term_merge\Functional\Form;
 
 use Drupal\Core\Form\FormState;
+use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\term_merge\Form\MergeTermsConfirm;
 use Drupal\Tests\term_merge\Functional\MergeTermsTestBase;
@@ -30,58 +31,58 @@ class MergeTermsConfirmTest extends MergeTermsTestBase {
    *
    * @return array
    *   An array of options. Each option has contains the following values:
-   *   - terms: an array of source taxonomy term ids.
+   *   - selected_terms: an array of source taxonomy term ids.
    *   - target: a string representing the target taxonomy term.
    */
   public static function selectedTermsProvider(): array {
 
     $test_data['no terms new target'] = [
-      'terms' => [],
+      'selected_terms' => [],
       'target' => 'New term',
     ];
 
     $test_data['no terms existing target'] = [
-      'terms' => [],
+      'selected_terms' => [],
       'target' => '',
     ];
 
     $test_data['one term new target'] = [
-      'terms' => [1],
+      'selected_terms' => [1],
       'target' => 'New term',
     ];
 
     $test_data['one term existing target'] = [
-      'terms' => [1],
+      'selected_terms' => [1],
       'target' => '',
     ];
 
     $test_data['two terms new target'] = [
-      'terms' => [1, 2],
+      'selected_terms' => [1, 2],
       'target' => 'New term',
     ];
 
     $test_data['two terms existing target'] = [
-      'terms' => [1, 2],
+      'selected_terms' => [1, 2],
       'target' => '',
     ];
 
     $test_data['three terms new target'] = [
-      'terms' => [1, 2, 3],
+      'selected_terms' => [1, 2, 3],
       'target' => 'New term',
     ];
 
     $test_data['three terms existing target'] = [
-      'terms' => [1, 2, 3],
+      'selected_terms' => [1, 2, 3],
       'target' => '',
     ];
 
     $test_data['four terms new target'] = [
-      'terms' => [1, 2, 3, 4],
+      'selected_terms' => [1, 2, 3, 4],
       'target' => 'New term',
     ];
 
     $test_data['four terms existing target'] = [
-      'terms' => [1, 2, 3, 4],
+      'selected_terms' => [1, 2, 3, 4],
       'target' => '',
     ];
 
@@ -94,11 +95,11 @@ class MergeTermsConfirmTest extends MergeTermsTestBase {
    * @test
    * @dataProvider selectedTermsProvider
    */
-  public function titleCallback(array $selected_terms): void {
+  public function titleCallback(array $selected_terms, string $target): void {
     $sut = $this->createSubjectUnderTest();
     $this->privateTempStoreFactory->get('term_merge')->set('terms', $selected_terms);
 
-    $expected = new TranslatableMarkup('Are you sure you wish to merge %termCount terms?', ['%termCount' => count($selected_terms)]);
+    $expected = new PluralTranslatableMarkup(count($selected_terms), 'Are you sure you wish to merge one term?', 'Are you sure you wish to merge @count terms?');
     self::assertEquals($expected, $sut->titleCallback());
   }
 
@@ -157,7 +158,7 @@ class MergeTermsConfirmTest extends MergeTermsTestBase {
       'message' => [
         '#markup' => $message,
       ],
-      'terms' => [
+      'selected_terms' => [
         '#title' => new TranslatableMarkup("Terms to be merged"),
         '#theme' => 'item_list',
         '#items' => $items,
@@ -191,9 +192,12 @@ class MergeTermsConfirmTest extends MergeTermsTestBase {
 
   /**
    * Tests an exception is thrown for invalid target types.
+   *
+   * @test
    */
   public function incorrectTargetThrowsException(): void {
-    $this->expectException('\LogicException', 'Invalid target type. Should be string or implement TermInterface');
+    $this->expectException(\LogicException::class);
+    $this->expectExceptionMessage('Invalid target type. Should be string or implement TermInterface');
     $sut = $this->createSubjectUnderTest();
 
     $this->privateTempStoreFactory->get('term_merge')->set('terms', [1, 2]);
@@ -209,17 +213,17 @@ class MergeTermsConfirmTest extends MergeTermsTestBase {
    *
    * @return array
    *   An array of options. Each option has contains the following values:
-   *   - methodName: the method name associated with the selected merge option.
+   *   - method_name: the method name associated with the selected merge option.
    *   - target: a string representing the target taxonomy term.
    */
   public static function termMergerMethodProvider(): array {
     $methods['new term'] = [
-      'methodName' => 'mergeIntoNewTerm',
+      'method_name' => 'mergeIntoNewTerm',
       'target' => 'New term',
     ];
 
     $methods['existing term'] = [
-      'methodName' => 'mergeIntoTerm',
+      'method_name' => 'mergeIntoTerm',
       'target' => '',
     ];
 
@@ -303,7 +307,7 @@ class MergeTermsConfirmTest extends MergeTermsTestBase {
    *   The form class used for rendering the confirm form.
    */
   protected function createSubjectUnderTest(): MergeTermsConfirm {
-    return new MergeTermsConfirm($this->entityTypeManager, $this->privateTempStoreFactory, \Drupal::service('term_merge.term_merger'));
+    return new MergeTermsConfirm($this->entityTypeManager, $this->privateTempStoreFactory, \Drupal::service('term_merge.term_merger'), NULL);
   }
 
   /**

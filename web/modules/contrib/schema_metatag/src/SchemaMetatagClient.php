@@ -120,7 +120,7 @@ class SchemaMetatagClient implements SchemaMetatagClientInterface {
           $object = is_array($item['rdfs:label'])
             ? $item['rdfs:label']['@value']
             : $item['rdfs:label'];
-          $description = $item['rdfs:comment'];
+          $description = is_array($item['rdfs:comment']) ? $item['rdfs:comment']['@value'] : $item['rdfs:comment'];
           if (array_key_exists('rdfs:subClassOf', $item)) {
             foreach ($item['rdfs:subClassOf'] as $value) {
               if (!is_array($value)) {
@@ -161,8 +161,12 @@ class SchemaMetatagClient implements SchemaMetatagClientInterface {
       foreach ($data as $item) {
         if ($this->isIncludedProperty($item)) {
           $expected_types = $belongs_to = [];
-          $property = $item['rdfs:label'];
-          $description = $item['rdfs:comment'];
+          $property = is_array($item['rdfs:label'])
+            ? $item['rdfs:label']['@value']
+            : $item['rdfs:label'];
+          $description = is_array($item['rdfs:comment'])
+            ? $item['rdfs:comment']['@value']
+            : $item['rdfs:comment'];
           foreach ($item[static::$prefix . 'rangeIncludes'] as $value) {
             foreach ((array) $value as $value_item) {
               $expected_types[] = str_replace(static::$prefix, '', $value_item);
@@ -353,6 +357,7 @@ class SchemaMetatagClient implements SchemaMetatagClientInterface {
       $prev_key = $key;
     }
 
+    return [];
   }
 
   /**
@@ -392,7 +397,7 @@ class SchemaMetatagClient implements SchemaMetatagClientInterface {
    * {@inheritdoc}
    */
   public function clearData() {
-    $this->cacheBackend->invalidateAll();
+    $this->cacheBackend->deleteAll();
   }
 
   /**

@@ -28,6 +28,18 @@ include:
 #   OPT_IN_TEST_NEXT_MAJOR: '1'
 #   _CURL_TEMPLATES_REF: 'main'
 
+# drupal/ai 1.5 requires drupal/ai_content_suggestions ^1.5. Composer derives
+# this project's own version from the git ref, which is not the branch name in
+# merge request pipelines, so they fell back to drupal/ai 1.4. Set the version
+# explicitly so all pipelines test against the same drupal/ai release. Update
+# this when creating a new branch.
+variables:
+  COMPOSER_ROOT_VERSION: 1.5.x-dev
+  # The module supports Drupal 10, so also test against the previous major
+  # version on merge requests and pushes.
+  OPT_IN_TEST_PREVIOUS_MAJOR: '1'
+  _AUTORUN_PREVIOUS_MAJOR: 'push-and-mr'
+
 # drupal/ai ships its own ai_content_suggestions submodule with the same
 # machine name and namespace as this standalone module. When both are
 # present, Drupal's extension discovery may load the bundled (older) copy,

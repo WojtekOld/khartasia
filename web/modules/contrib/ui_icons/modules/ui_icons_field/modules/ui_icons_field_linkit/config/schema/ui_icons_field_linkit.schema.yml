@@ -5,10 +5,8 @@ field.formatter.settings.icon_linkit_formatter:
     FullyValidatable: ~
   mapping:
     icon_settings:
-      type: sequence
+      type: ui_icons.icon_pack_settings
       label: 'Icon extractor settings'
-      sequence:
-        type: ui_icons.icon_pack_options.[%key]
     icon_display:
       type: string
       label: 'Icon display position'

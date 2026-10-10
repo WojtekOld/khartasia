@@ -4,4 +4,6 @@ ui_icons_picker.ui:
     _form: 'Drupal\ui_icons_picker\Form\IconSelectForm'
   requirements:
     _permission: 'access content'
-    _method: 'POST'
+  # GET opens the dialog, js/picker.js asks for it that way, and the form it
+  # holds then posts back to this same route to search, page and select.
+  methods: [GET, POST]

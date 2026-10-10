@@ -11,33 +11,47 @@ import { handlePasswordDecryption } from './modules/proc-handle-password-decrypt
 import { renderMedia } from './modules/atomics/proc-media-viewer-module.js';
 
 // Keep this aligned with proc-field version number in proc.libraries.yml.
-const PROC_FIELD_VERSION = '10.1.99';
+const PROC_FIELD_VERSION = '10.1.130';
 
 (function($, Drupal, drupalSettings, once, openpgp) {
   const ProcBehavior = {
     attach(context, settings) {
-      once('proc-decrypt', 'html', context).forEach(initProcBehavior);
+      initProcBehavior(context);
+      handleProcFetchers(
+        once('proc-fetcher', '[proc="true"][data-proc-fetcher]', context)
+      );
+      setForInlineDecryption(
+        once('proc-inline-decryption', '[data-drupal-proc-inline-decryption]', context)
+      );
     }
   };
   /**
-   * Bootstraps Proc field behavior for the current page context.
+   * Bootstraps Proc field behavior for the given context.
    *
-   * It discovers relevant field elements, applies initial UI wiring for
-   * encryption/decryption toggles, and starts recipient-fetcher synchronization.
+   * It discovers relevant field elements and applies initial UI wiring for
+   * encryption toggles and submit-button state. The work is gated on the
+   * presence of proc text fields in the context (so it runs for both the
+   * initial page load and AJAX-delivered forms), while the sibling metadata is
+   * recomputed document-wide so newly added fields are accounted for.
+   *
+   * @param {Document|Element} context
+   *   The behavior attach context.
    *
    * @returns {void}
    */
-  function initProcBehavior() {
-    const { procFieldElements, encryptCheckboxes, procFields, procInlineDecryptionLinks } = selectProcElements();
-    const procFetchers = document.querySelectorAll('[proc="true"][data-proc-fetcher]');
+  function initProcBehavior(context) {
+    // Only (re)initialize when proc text fields are present in this context.
+    if (once('proc-text-field', '[proc="true"]:not(.form-autocomplete)', context).length === 0) {
+      return;
+    }
+    const { procFieldElements, encryptCheckboxes, procFields } = selectProcElements();
 
-    setupProcElements(procFieldElements, encryptCheckboxes, procFields, procInlineDecryptionLinks);
-    handleProcFetchers(procFetchers);
+    setupProcElements(procFieldElements, encryptCheckboxes, procFields);
   }
   /**
    * Selects Proc-enabled form controls.
    *
-   * @returns {{procFieldElements: NodeListOf<Element>, encryptCheckboxes: NodeListOf<Element>, procFields: string[], procInlineDecryptionLinks: NodeListOf<Element>}}
+   * @returns {{procFieldElements: NodeListOf<Element>, encryptCheckboxes: NodeListOf<Element>, procFields: string[]}}
    *   Grouped DOM collections and normalized field names.
    */
   function selectProcElements() {
@@ -46,11 +60,8 @@ const PROC_FIELD_VERSION = '10.1.99';
     );
     const procFields = Array.from(procFieldElements, extractFieldName);
     const encryptCheckboxes = document.querySelectorAll('[id^="encrypt-checkbox-"]');
-    const procInlineDecryptionLinks = document.querySelectorAll(
-      '[data-drupal-proc-inline-decryption]'
-    );
 
-    return { procFieldElements, encryptCheckboxes, procFields, procInlineDecryptionLinks };
+    return { procFieldElements, encryptCheckboxes, procFields };
   }
   /**
    * Applies initial UI bindings for Proc field controls.
@@ -61,18 +72,15 @@ const PROC_FIELD_VERSION = '10.1.99';
    *   Encryption toggles aligned with Proc field elements.
    * @param {string[]} procFields
    *   Canonical field names extracted from inputs.
-   * @param {NodeListOf<Element>} procInlineDecryptionLinks
-   *   Links that trigger inline decryption viewers.
    *
    * @returns {void}
    */
-  function setupProcElements(procFieldElements, encryptCheckboxes, procFields, procInlineDecryptionLinks) {
+  function setupProcElements(procFieldElements, encryptCheckboxes, procFields) {
     setTextSiblingsAttribute(procFields, procFieldElements, encryptCheckboxes);
     setInitialStateCheckboxes(procFieldElements, encryptCheckboxes);
     disableEncryptCheckboxIfEmpty(procFieldElements);
     switchSubmitOnInput(procFields, procFieldElements);
     switchSubmitOnCheckbox(encryptCheckboxes);
-    setForInlineDecryption(procInlineDecryptionLinks);
   }
   /**
    * Processes dynamic recipient fetcher widgets on the page.
@@ -267,7 +275,7 @@ const PROC_FIELD_VERSION = '10.1.99';
    * @returns {void}
    */
   function disableEncryptCheckboxIfEmpty(procFieldElements) {
-    procFieldElements.forEach((fieldElement, index) => {
+    once('proc-encrypt-checkbox-toggle', procFieldElements).forEach((fieldElement) => {
       fieldElement.addEventListener('input', inputChangeCheckbox);
     });
   }
@@ -300,7 +308,9 @@ const PROC_FIELD_VERSION = '10.1.99';
           'data-proc-text-siblings',
           procFields.join(),
         );
-        procFieldElements[index].addEventListener('input', inputChangeSubmit);
+      });
+      once('proc-submit-on-input', procFieldElements).forEach((fieldElement) => {
+        fieldElement.addEventListener('input', inputChangeSubmit);
       });
     }
   }
@@ -380,7 +390,7 @@ const PROC_FIELD_VERSION = '10.1.99';
   function switchSubmitOnCheckbox(encryptCheckboxes) {
     // Process when there is a submit element specified in drupalSettings.
     if (drupalSettings.proc && drupalSettings.proc.submit_element_id) {
-      encryptCheckboxes.forEach((encryptCheckbox) => {
+      once('proc-submit-on-checkbox', encryptCheckboxes).forEach((encryptCheckbox) => {
         encryptCheckbox.addEventListener('input', checkboxChangeSubmit);
       });
     }

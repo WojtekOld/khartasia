@@ -5,3 +5,43 @@ field.field_settings.ui_patterns_source:
     synchronized_translation:
       label: 'Synchronized Translation'
       type: boolean
+
+field.value.ui_patterns_source:
+  type: ui_patterns_slot_source
+  label: 'Default value'
+  mapping:
+    node_id:
+      type: string
+      label: 'Node ID'
+
+field.widget.settings.ui_patterns_source_component:
+  type: mapping
+  label: 'Components only widget settings'
+  mapping:
+    component_id:
+      type: string
+      label: 'Component ID'
+      nullable: true
+    allow_override:
+      type: boolean
+      label: 'Allow override of component form'
+    hide_slots:
+      type: boolean
+      label: 'Hide slots'
+    prop_sources:
+      type: string
+      label: 'Prop sources'
+      nullable: true
+    prop_filter_enable:
+      type: boolean
+      label: 'Show only selected props'
+    selection:
+      type: mapping
+      label: 'Selection'
+      mapping:
+        prop_filter:
+          type: sequence
+          label: 'Selected props'
+          sequence:
+            type: string
+            label: 'Prop ID'

@@ -66,9 +66,13 @@ class IconSource extends SourcePluginBase {
    */
   public function settingsSummary(): array {
     $value = $this->getSetting('value');
-    if (empty($value)) {
+    if (!$value || empty($value)) {
       return [];
     }
+    if (!isset($value['target_id']) || !is_string($value['target_id'])) {
+      return [];
+    }
+
     [$pack, $icon] = explode(':', $value['target_id']);
     return [
       $icon . ' (' . $pack . ')',

@@ -32,9 +32,7 @@ class ComponentPerItemFormatter extends ComponentFormatterBase {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $build = [];
-    $context = $this->getComponentSourceContexts($items);
-    $context['ui_patterns:lang_code'] = new Context(new ContextDefinition('any'), $langcode);
-    $context['ui_patterns:field:items'] = new Context(new ContextDefinition('any'), $items);
+    $context = $this->getFieldItemsContexts($items, $langcode);
     for ($field_item_index = 0; $field_item_index < $items->count(); ++$field_item_index) {
       $build[] = $this->buildComponentRenderable(
         $this->getComponentConfiguration()['component_id'],

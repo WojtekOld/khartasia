@@ -1,0 +1,74 @@
+term_glossary.glossaryconfig:
+  type: config_object
+  label: 'TermGlossary settings'
+  mapping:
+    vocab:
+      type: string
+    integration_type:
+      type: string
+    single_match:
+      type: boolean
+    single_match_per_content:
+      type: boolean
+    full_word:
+      type: boolean
+    boundary_exceptions:
+      type: string
+    case_sensitive:
+      type: boolean
+    per_term_options:
+      type: boolean
+    term_synonyms:
+      type: boolean
+    synonyms_field:
+      type: string
+    match_all_synonyms:
+      type: boolean
+    exclude_self_reference:
+      type: boolean
+    view_mode:
+      type: string
+    json_term_cache:
+      type: integer
+    ignore_tags:
+      type: string
+      label: 'HTML tags to ignore'
+
+term_glossary.glossaryconfig.jqueryui:
+  type: config_object
+  label: 'TermGlossary jQueryUI dialog settings'
+  mapping:
+    dialog_width:
+      type: string
+    dialog_height:
+      type: string
+    dialog_min_height:
+      type: string
+    dialog_title:
+      type: label
+    dialog_close_button:
+      type: boolean
+
+block.settings.glossary_alphabetical_bock:
+  type: block_settings
+  label: 'Glossary alphabetical block'
+  mapping:
+    search_type:
+      type: string
+      label: 'Search type'
+
+field.formatter.third_party.term_glossary:
+  type: mapping
+  label: 'Term Glossary field formatter third party settings'
+  mapping:
+    glossary:
+      type: boolean
+    glossary_vocabulary:
+      type: sequence
+      sequence:
+        type: mapping
+        label: 'Vocabulary reference'
+        mapping:
+          target_id:
+            type: string
+            label: 'Vocabulary machine name'

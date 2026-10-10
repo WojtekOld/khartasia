@@ -1,0 +1,27 @@
+services:
+
+  plugin.manager.term_glossary.term_glossary_handler:
+    class: Drupal\term_glossary\TermGlossaryHandlerPluginManager
+    parent: default_plugin_manager
+
+  logger.channel.term_glossary:
+    parent: logger.channel_base
+    arguments: [ 'term_glossary' ]
+
+  term_glossary.manager:
+    class: Drupal\term_glossary\Service\TermGlossaryManager
+    arguments:
+      - '@config.manager'
+      - '@entity_type.manager'
+      - '@cache.default'
+      - '@language_manager'
+      - '@renderer'
+      - '@module_handler'
+      - '@logger.channel.term_glossary'
+      - '@plugin.manager.term_glossary.term_glossary_handler'
+      - '@entity.repository'
+      - '@cache_contexts_manager'
+  Drupal\term_glossary\Service\TermGlossaryManagerInterface: '@term_glossary.manager'
+
+  Drupal\term_glossary\Hook\TermGlossaryHooks:
+    autowire: true

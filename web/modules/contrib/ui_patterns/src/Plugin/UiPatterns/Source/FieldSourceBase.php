@@ -8,7 +8,6 @@ use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\ui_patterns\SourceInterface;
 use Drupal\ui_patterns\SourcePluginBase;
@@ -44,18 +43,6 @@ abstract class FieldSourceBase extends SourcePluginBase implements SourceInterfa
     );
     $instance->entityFieldManager = $container->get(EntityFieldManagerInterface::class);
     return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function settingsForm(array $form, FormStateInterface $form_state): array {
-    $form = parent::settingsForm($form, $form_state);
-    $form['label_map'] = [
-      '#type' => 'label',
-      '#title' => $this->propDefinition['title'] ?? ': ' . $this->label(),
-    ];
-    return $form;
   }
 
   /**

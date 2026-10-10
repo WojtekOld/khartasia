@@ -32,10 +32,9 @@ class ComponentPreBuildAlter {
       ->load($display_id);
     if ($display !== NULL) {
       \assert($display instanceof ComponentFormDisplay);
-      $elementMetadata = BubbleableMetadata::createFromRenderArray($element);
-      $elementMetadata->merge(BubbleableMetadata::createFromObject($display));
-      $elementMetadata->addCacheTags(['config:' . $display->getConfigDependencyName()]);
-      $elementMetadata->applyTo($element);
+      BubbleableMetadata::createFromRenderArray($element)
+        ->merge(BubbleableMetadata::createFromObject($display))
+        ->applyTo($element);
       $options = $display->getPropSlotOptions();
       foreach ($options as $prop_slot_id => $option) {
         if (isset($option['source_id'])) {

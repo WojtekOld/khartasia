@@ -6,7 +6,7 @@ package: User interface
 dependencies:
   - ui_patterns:ui_patterns
 
-# Information added by Drupal.org packaging script on 2026-09-04
-version: '2.0.21'
+# Information added by Drupal.org packaging script on 2026-10-07
+version: '2.0.22'
 project: 'ui_patterns'
-datestamp: 1788535900
+datestamp: 1791358241

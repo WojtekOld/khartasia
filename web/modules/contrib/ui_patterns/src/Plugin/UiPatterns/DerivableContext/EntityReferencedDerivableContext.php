@@ -209,11 +209,12 @@ class EntityReferencedDerivableContext extends DerivableContextPluginBase {
   /**
    * Get the referenced entities the current user can view.
    *
-   * Same rules as core entity reference formatters: the entity is translated
-   * for the display language first, so access is checked on the translation
-   * that will be shown. The access cacheability is collected for every
-   * referenced entity, denied ones included, so the render cache varies and
-   * gets invalidated the same way core does.
+   * Same rules as core entity reference formatters: the user must be able to
+   * view the field, then the entity is translated for the display language,
+   * so access is checked on the translation that will be shown. The access
+   * cacheability is collected for the field and every referenced entity,
+   * denied ones included, so the render cache varies and gets invalidated the
+   * same way core does.
    *
    * @param \Drupal\Core\Entity\EntityInterface|null $entity
    *   The entity.
@@ -229,9 +230,14 @@ class EntityReferencedDerivableContext extends DerivableContextPluginBase {
     if (!($entity instanceof ContentEntityInterface) || !$entity->hasField($ref_field_name)) {
       return [];
     }
+    $field_reference = $entity->get($ref_field_name);
+    $field_access = $field_reference->access('view', NULL, TRUE);
+    $this->addCacheableDependency($field_access);
+    if (!$field_access->isAllowed()) {
+      return [];
+    }
     $langcode = $this->getDisplayLangcode($entity);
     $referenced_entities = [];
-    $field_reference = $entity->get($ref_field_name);
     for ($delta = 0; $delta < $field_reference->count(); ++$delta) {
       $referenced_entity = $this->getReferencedEntityAtDelta($field_reference, $delta, $bundle);
       if (!$referenced_entity) {
