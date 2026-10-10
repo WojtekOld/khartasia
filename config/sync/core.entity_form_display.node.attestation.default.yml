@@ -107,6 +107,7 @@ third_party_settings:
         - field_att_commentaire_ecart
         - field_att_comparaison_ref
         - field_att_comparaison_note
+        - precision_suspecte
       label: '4. Qualification'
       region: content
       parent_name: group_att_onglets
@@ -509,6 +510,11 @@ content:
   path:
     type: path
     weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  precision_suspecte:
+    weight: 1
     region: content
     settings: {  }
     third_party_settings: {  }

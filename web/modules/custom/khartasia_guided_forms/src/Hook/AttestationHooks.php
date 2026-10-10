@@ -4,6 +4,7 @@ namespace Drupal\khartasia_guided_forms\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\khartasia_guided_forms\Policy\AttestationPolicy as P;
 
@@ -67,6 +68,19 @@ class AttestationHooks {
       return;
     }
     $node = $form_state->getFormObject()->getEntity();
+
+    // Case « Précision suspecte » (pas un champ : elle pose ou retire un motif de revue).
+    $motifs = array_column($node->get('field_att_revue_motifs')->getValue(), 'value');
+    $form['precision_suspecte'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Précision suspecte'),
+      '#description' => t("Cochez si l'énoncé paraît plus précis que ce que la source permet (valeur chiffrée, date exacte, proportion sans méthode). L'attestation est alors signalée à la revue."),
+      '#default_value' => in_array('precision_suspecte', $motifs, TRUE),
+      '#parents' => ['precision_suspecte'],
+      '#weight' => 6,
+    ];
+    $form['#entity_builders'][] = [static::class, 'poserMotifPrecision'];
+
     if ($node->isPublished() || !isset($form['actions']['submit'])) {
       return;
     }
@@ -99,6 +113,71 @@ class AttestationHooks {
     $declencheur = $form_state->getTriggeringElement();
     if (($declencheur['#name'] ?? '') === 'khartasia_publier') {
       $form_state->setValue(['status', 'value'], 1);
+    }
+  }
+
+
+  /**
+   * Déclare la case « Précision suspecte » comme champ supplémentaire du formulaire,
+   * pour qu'elle puisse être rangée dans un onglet (field_group).
+   */
+  #[Hook('entity_extra_field_info')]
+  public function extraFields(): array {
+    return ['node' => ['attestation' => ['form' => ['precision_suspecte' => [
+      'label' => t('Précision suspecte'),
+      'description' => t('Case qui pose ou retire le motif de revue « précision suspecte ».'),
+      'weight' => 6,
+      'visible' => TRUE,
+    ]]]]];
+  }
+
+  /**
+   * Avant l'enregistrement : pose ou retire le motif selon la case.
+   */
+  public static function poserMotifPrecision(string $entity_type, EntityInterface $entity, array &$form, FormStateInterface $form_state): void {
+    if ($entity->bundle() !== 'attestation' || !$entity->hasField('field_att_revue_motifs')) {
+      return;
+    }
+    $motifs = array_column($entity->get('field_att_revue_motifs')->getValue(), 'value');
+    $motifs = array_values(array_diff($motifs, ['precision_suspecte']));
+    if ($form_state->getValue('precision_suspecte')) {
+      $motifs[] = 'precision_suspecte';
+    }
+    $entity->set('field_att_revue_motifs', array_map(fn($m) => ['value' => $m], $motifs));
+  }
+
+  /**
+   * Pré-remplissage simple d'un nouveau contenu depuis l'adresse (lot 4).
+   *
+   *  - nom commun : ?plante=NID (article) → plante liée ; ?materiau=TID → matériau désigné ;
+   *  - nom de papier : ?papier=NID (papers) → papier concerné.
+   * Les identifiants invalides sont ignorés sans erreur. Le paramètre ?edit[...] de Drupal 8+
+   * n'existe plus : ce hook en tient lieu.
+   */
+  #[Hook('entity_prepare_form')]
+  public function preRemplir(EntityInterface $entity, string $operation, FormStateInterface $form_state): void {
+    if (!$entity instanceof NodeInterface || !$entity->isNew()) {
+      return;
+    }
+    $q = \Drupal::request()->query;
+    $noeud = fn($id, $type) => ($id && ctype_digit((string) $id) && ($n = \Drupal::entityTypeManager()->getStorage('node')->load((int) $id)) && $n->bundle() === $type) ? (int) $n->id() : NULL;
+
+    if ($entity->bundle() === 'common_names') {
+      if ($entity->get('field_genus_com_entity')->isEmpty() && ($nid = $noeud($q->get('plante'), 'article'))) {
+        $entity->set('field_genus_com_entity', [['target_id' => $nid]]);
+      }
+      $tid = $q->get('materiau');
+      if ($entity->hasField('field_materiau_ref') && $entity->get('field_materiau_ref')->isEmpty() && $tid && ctype_digit((string) $tid)) {
+        $t = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load((int) $tid);
+        if ($t && $t->bundle() === 'materiau') {
+          $entity->set('field_materiau_ref', [['target_id' => (int) $t->id()]]);
+        }
+      }
+    }
+    elseif ($entity->bundle() === 'nom_papier' && $entity->hasField('field_np_papier')) {
+      if ($entity->get('field_np_papier')->isEmpty() && ($nid = $noeud($q->get('papier'), 'papers'))) {
+        $entity->set('field_np_papier', [['target_id' => $nid]]);
+      }
     }
   }
 
