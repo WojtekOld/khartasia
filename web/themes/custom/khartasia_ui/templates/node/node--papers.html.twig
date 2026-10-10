@@ -115,6 +115,7 @@
 
       {# Attestations — datation, géographie, composition, agent de traitement... #}
       {% if attestations_par_type %}
+        {% set kh_statuts = {'probable': 'probable', 'hypothetique': 'hypothétique', 'refute': 'réfuté', 'inconnu': 'à vérifier'} %}
         <section class="kh-plante__section">
           <h2 class="kh-plante__section-title">Attestations</h2>
           {% for type_label, liste in attestations_par_type %}
@@ -127,10 +128,12 @@
                     {{ att.valeur }}
                     {% if att.periodes %}<span class="kh-nom-scripture">({{ att.periodes|join(', ') }})</span>{% endif %}
                     {% if att.lieu %}<span class="kh-nom-scripture">— {{ att.lieu }}</span>{% endif %}
-                    {% if att.source %}<span class="kh-fibre__notes">[source : {{ att.source }}]</span>{% endif %}
-                      {% if att.a_revoir %}<span class="kh-dispute-badge" title="En attente de revue">⚠ signalée</span>{% endif %}
-                      {% if att.url_dispute %}<a href="{{ att.url_dispute }}" class="kh-dispute-lien">Signaler une discussion</a>{% endif %}
-                    {% if att.statut and att.statut != 'attesté' %}<em class="kh-fibre__notes">[{{ att.statut }}]</em>{% endif %}
+                    {% for s in att.sources %}
+                      {% if s.label %}<span class="kh-fibre__notes">[source : {{ s.label }}]</span>{% endif %}
+                      {% if s.dispute %}<span class="kh-dispute-badge" title="Une discussion est en cours">⚠ signalée</span>{% endif %}
+                      {% if s.url_dispute %}<a href="{{ s.url_dispute }}" class="kh-dispute-lien">Signaler une discussion</a>{% endif %}
+                      {% if s.statut and s.statut != 'atteste' %}<em class="kh-fibre__notes">[{{ kh_statuts[s.statut]|default(s.statut) }}]</em>{% endif %}
+                    {% endfor %}
                   </li>
                 {% endfor %}
               </ul>
