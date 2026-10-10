@@ -37,8 +37,18 @@ function k_terme(string $vid, string $nom, ?int $parent_tid, string $desc, strin
   $ids = $stockage->getQuery()->accessCheck(FALSE)
     ->condition('vid', $vid)->condition('name', $nom)->execute();
   if ($ids) {
-    echo "  = existe  [$vid] $nom\n";
-    return (int) reset($ids);
+    $tid = (int) reset($ids);
+    // Mise à jour de la description si elle a changé dans le JSON (nom et parent inchangés).
+    $t = $stockage->load($tid);
+    $actuelle = (string) ($t->get('description')->value ?? '');
+    if ($desc !== '' && $actuelle !== $desc) {
+      echo "  ~ décrire [$vid] $nom (description mise à jour)\n";
+      if ($appliquer) { $t->set('description', ['value' => $desc, 'format' => $format])->save(); }
+    }
+    else {
+      echo "  = existe  [$vid] $nom\n";
+    }
+    return $tid;
   }
   echo "  + créer   [$vid] $nom" . ($parent_tid ? " (parent tid $parent_tid)" : '') . "\n";
   if (!$appliquer) { return NULL; }

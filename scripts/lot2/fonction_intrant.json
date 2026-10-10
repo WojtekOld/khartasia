@@ -1,160 +1,163 @@
 {
- "vocabulaire": {
-  "vid": "fonction_intrant",
-  "nom": "Fonction de l'intrant",
-  "description": "Rôle d'un intrant (plante ou matériau) dans la recette d'un papier. La fonction n'est pas une propriété du matériau : un même matériau peut être charge ici et adhésif là. Elle se saisit sur l'attestation, d'après ce que dit la source, jamais d'après ce que l'on suppose."
- },
- "termes": [
-  {
-   "nom": "Fibre principale",
-   "court": "La matière dont les fibres forment l'essentiel de la feuille.",
-   "definition": "La ou les plantes dont les fibres constituent le corps du papier. Un papier a le plus souvent une ou deux fibres principales ; l'identification repose idéalement sur l'analyse microscopique des fibres.",
-   "exemples": [
-    "Daphne ou Stellera pour des papiers tibétains de type shog (identification à confirmer par analyse).",
-    "Bambou pour le papier liansi de Yanshan.",
-    "Mûrier à papier (Broussonetia, kozo) pour des papiers japonais."
-   ],
-   "distinguer": [
-    "Fibre adjuvante : ajoutée en plus petite part, elle ne définit pas le papier.",
-    "Additif : une plante présente pour le parfum, le décor ou l'imprégnation n'est pas une fibre."
-   ],
-   "precautions": [
-    "Une plante simplement mentionnée dans un texte n'est pas démontrée fibre principale : le statut maximal reste « probable » tant qu'une analyse des fibres ou une source primaire précise ne le confirme.",
-    "Une formule répétée de copie en copie sans source primaire (vulgate) ne vaut pas attestation.",
-    "Si deux sources divergent (texte et analyse), saisissez deux attestations et reliez-les comme concurrentes."
-   ]
+  "vocabulaire": {
+    "vid": "fonction_intrant",
+    "nom": "Fonction de l'intrant",
+    "description": "Rôle d'un intrant (plante ou matériau) dans la recette d'un papier. La fonction n'est pas une propriété du matériau : un même matériau peut être charge ici et adhésif là. Elle se saisit sur l'attestation, d'après ce que dit la source, jamais d'après ce que l'on suppose."
   },
-  {
-   "nom": "Fibre adjuvante",
-   "court": "Une fibre ajoutée en complément, en moindre part.",
-   "definition": "Fibre qui entre dans la pâte aux côtés de la fibre principale (pour la solidité, la texture ou le coût) sans définir le papier.",
-   "exemples": [
-    "Exemple de principe : une seconde écorce mêlée à la pâte principale, signalée par la source comme un complément."
-   ],
-   "distinguer": [
-    "Fibre principale : c'est elle qui donne son identité au papier.",
-    "Impureté ou trace : un fragment fibreux accidentel n'est pas un intrant."
-   ],
-   "precautions": [
-    "Ne donnez aucune proportion chiffrée si la source n'en donne pas la méthode (règle 13) : « 70 % / 30 % » sans méthode est une précision fabriquée.",
-    "La mention d'une plante dans une identification de fibres peut être de l'imprégnation, du décor, du parfum ou une impureté du tamis : relisez la source avant de la classer ici."
-   ]
-  },
-  {
-   "nom": "Dispersant (mucilage)",
-   "court": "Une substance visqueuse ajoutée à la cuve pour répartir les fibres.",
-   "definition": "Substance, souvent un mucilage végétal, ajoutée à l'eau de la cuve pour disperser régulièrement les fibres et ralentir leur dépôt pendant la formation de la feuille. Elle ne reste pas dans la feuille finie. Le terme chinois 纸药 (zhǐyào, « médicament du papier ») désigne cette fonction.",
-   "exemples": [
-    "Mucilage de racine ou d'écorce de plantes, notamment Actinidia sp.",
-    "Le 纸药 du Lianshi, objet de recherches sur le 水卵虫树 et d'autres plantes à mucilage.",
-    "刨花楠, cité comme dispersant dans plusieurs bassins de production."
-   ],
-   "distinguer": [
-    "Adhésif / encollage : agit sur la feuille formée (liaison ou fermeture de surface), alors que le dispersant agit dans la cuve.",
-    "纸药, shogdum, shogshing : noms de fonction (appellatifs génériques), non d'espèces. Saisissez-les comme noms communs, jamais comme une plante."
-   ],
-   "precautions": [
-    "Une même plante peut servir de dispersant dans un bassin et d'autre chose ailleurs : la fonction se saisit d'après la source, pas d'après la plante.",
-    "Sans analyse, l'identification botanique d'un 纸药 reste hypothétique."
-   ]
-  },
-  {
-   "nom": "Colorant",
-   "court": "Une substance qui colore la pâte ou la feuille.",
-   "definition": "Matière ajoutée pour donner sa couleur au papier, dans la masse ou en surface : pigment, teinture végétale, suie.",
-   "exemples": [
-    "Indigo (Strobilanthes cusia).",
-    "Phellodendron, pour le jaune dit « de sutra ».",
-    "Suie (sre nag), matériau minéral, pour les papiers noirs de type thing shog."
-   ],
-   "distinguer": [
-    "Mordant : fixe le colorant mais ne colore pas lui-même.",
-    "Charge : modifie l'opacité ou la blancheur, pas la teinte."
-   ],
-   "precautions": [
-    "Une plante peut être à la fois colorant et protection contre les insectes (phellodendron, selon la source) : une affirmation par attestation, donc deux attestations si la source dit les deux.",
-    "Un colorant végétal brut reste une plante ; la suie, une préparation, est un matériau (règle 10)."
-   ]
-  },
-  {
-   "nom": "Adhésif / encollage",
-   "court": "Ce qui colle, lie ou ferme la surface de la feuille.",
-   "definition": "Substance qui lie les éléments entre eux (adhésif) ou qui ferme la surface de la feuille pour la rendre moins absorbante (encollage).",
-   "exemples": [
-    "Colle de peau de yak (phing).",
-    "Cervelles (glad pa) dans la recette du thing shog.",
-    "Gélatine, amidon."
-   ],
-   "distinguer": [
-    "Dispersant : agit dans la cuve, avant la formation de la feuille.",
-    "Charge : l'amidon peut être un encollage dans un papier et une charge dans un autre. Choisissez la fonction que la SOURCE donne (règle 9)."
-   ],
-   "precautions": [
-    "La fonction n'est pas une propriété du matériau : ne la déduisez pas de ce que vous savez de l'amidon ou de la colle.",
-    "Matériau animal ou préparé : ne créez un nœud matériau que si la source le nomme distinctement (règle 12)."
-   ]
-  },
-  {
-   "nom": "Charge",
-   "court": "Une matière ajoutée à la pâte pour changer opacité, blancheur ou poids.",
-   "definition": "Matière finement divisée, le plus souvent minérale, incorporée à la pâte pour modifier l'opacité, la blancheur, le poids ou le toucher de la feuille.",
-   "exemples": [
-    "Kaolin (高岭土).",
-    "Craie, talc.",
-    "Amidon, lorsque la source lui donne ce rôle."
-   ],
-   "distinguer": [
-    "Colorant : change la teinte.",
-    "Adhésif / encollage : lie ou ferme la surface."
-   ],
-   "precautions": [
-    "Même précaution que pour l'encollage : l'amidon change de fonction selon la recette.",
-    "Une trace minérale trouvée à l'analyse (sable, impureté de l'eau) n'est pas une charge ajoutée."
-   ]
-  },
-  {
-   "nom": "Agent de cuisson",
-   "court": "Un agent alcalin qui ramollit les fibres lors de la cuisson.",
-   "definition": "Substance, le plus souvent alcaline, utilisée pour cuire ou macérer la matière fibreuse brute afin d'en séparer les fibres.",
-   "exemples": [
-    "Chaux.",
-    "Cendres végétales."
-   ],
-   "distinguer": [
-    "Méthode de fabrication : décrit un procédé ; l'agent de cuisson est la substance employée."
-   ],
-   "precautions": [
-    "Une préparation (lessive de cendres) est un matériau ; la plante brute dont provient la cendre se note comme origine végétale du matériau (règle 11), pas comme intrant du papier."
-   ]
-  },
-  {
-   "nom": "Mordant",
-   "court": "Une substance qui fixe un colorant sur la fibre.",
-   "definition": "Substance qui permet au colorant de se fixer durablement sur la fibre ; elle n'a de sens que lorsqu'un colorant est employé.",
-   "exemples": [
-    "Alun (exemple de principe, à renseigner d'après la source)."
-   ],
-   "distinguer": [
-    "Colorant : il donne la couleur ; le mordant ne fait que la fixer."
-   ],
-   "precautions": [
-    "Ne saisissez un mordant que si la source le mentionne : on ne le déduit pas de la présence d'un colorant."
-   ]
-  },
-  {
-   "nom": "Additif (olfactif, décoratif, insecticide)",
-   "court": "Ce qui est ajouté sans former, lier ni colorer la feuille : parfum, décor, protection.",
-   "definition": "Substance ajoutée pour une qualité particulière du papier : parfum, éléments décoratifs (paillettes, fibres colorées), protection contre les insectes.",
-   "exemples": [
-    "Phellodendron, pour sa protection contre les insectes, selon la source.",
-    "Matière parfumante ou éléments de décor signalés par la source."
-   ],
-   "distinguer": [
-    "Fibre adjuvante : contribue à la structure de la feuille ; un additif, non."
-   ],
-   "precautions": [
-    "Vigilance « composant principal ou trace » : une plante repérée à l'analyse peut venir d'une imprégnation, d'un décor, d'un parfum ou d'une impureté du tamis ; ce n'est pas forcément une fibre."
-   ]
-  }
- ]
+  "termes": [
+    {
+      "nom": "Fibre principale",
+      "court": "La matière dont les fibres forment l'essentiel de la feuille.",
+      "definition": "La ou les plantes dont les fibres constituent le corps du papier. Un papier a le plus souvent une ou deux fibres principales ; l'identification repose idéalement sur l'analyse microscopique des fibres.",
+      "exemples": [
+        "Daphne ou Stellera pour des papiers tibétains de type shog (identification à confirmer par analyse).",
+        "Bambou pour le papier liansi de Yanshan.",
+        "Mûrier à papier (Broussonetia, kozo) pour des papiers japonais."
+      ],
+      "distinguer": [
+        "Fibre adjuvante : ajoutée en plus petite part, elle ne définit pas le papier.",
+        "Additif : une plante présente pour le parfum, le décor ou l'imprégnation n'est pas une fibre."
+      ],
+      "precautions": [
+        "Une plante simplement mentionnée dans un texte n'est pas démontrée fibre principale : le statut maximal reste « probable » tant qu'une analyse des fibres ou une source primaire précise ne le confirme.",
+        "Une formule répétée de copie en copie sans source primaire (vulgate) ne vaut pas attestation.",
+        "Si deux sources divergent (texte et analyse), saisissez deux attestations et reliez-les comme concurrentes."
+      ]
+    },
+    {
+      "nom": "Fibre adjuvante",
+      "court": "Une fibre ajoutée en complément, en moindre part.",
+      "definition": "Fibre qui entre dans la pâte aux côtés de la fibre principale (pour la solidité, la texture ou le coût) sans définir le papier.",
+      "exemples": [
+        "Exemple de principe : une seconde écorce mêlée à la pâte principale, signalée par la source comme un complément."
+      ],
+      "distinguer": [
+        "Fibre principale : c'est elle qui donne son identité au papier.",
+        "Impureté ou trace : un fragment fibreux accidentel n'est pas un intrant."
+      ],
+      "precautions": [
+        "Ne donnez aucune proportion chiffrée si la source n'en donne pas la méthode (règle 13) : « 70 % / 30 % » sans méthode est une précision fabriquée.",
+        "La mention d'une plante dans une identification de fibres peut être de l'imprégnation, du décor, du parfum ou une impureté du tamis : relisez la source avant de la classer ici."
+      ]
+    },
+    {
+      "nom": "Dispersant (mucilage)",
+      "court": "Une substance visqueuse ajoutée à la cuve pour répartir les fibres.",
+      "definition": "Substance, souvent un mucilage végétal, ajoutée à l'eau de la cuve pour disperser régulièrement les fibres et ralentir leur dépôt pendant la formation de la feuille. Elle ne reste pas dans la feuille finie. Le terme chinois 纸药 (zhǐyào, « médicament du papier ») désigne cette fonction.",
+      "exemples": [
+        "Mucilage de racine ou d'écorce de plantes, notamment Actinidia sp.",
+        "Le 纸药 du Lianshi, objet de recherches sur le 水卵虫树 et d'autres plantes à mucilage.",
+        "刨花楠, cité comme dispersant dans plusieurs bassins de production."
+      ],
+      "distinguer": [
+        "Adhésif / encollage : agit sur la feuille formée (liaison ou fermeture de surface), alors que le dispersant agit dans la cuve.",
+        "纸药, shogdum, shogshing : noms de fonction (appellatifs génériques), non d'espèces. Saisissez-les comme noms communs, jamais comme une plante."
+      ],
+      "precautions": [
+        "Une même plante peut servir de dispersant dans un bassin et d'autre chose ailleurs : la fonction se saisit d'après la source, pas d'après la plante.",
+        "Sans analyse, l'identification botanique d'un 纸药 reste hypothétique."
+      ]
+    },
+    {
+      "nom": "Colorant",
+      "court": "Une substance qui colore la pâte ou la feuille.",
+      "definition": "Matière ajoutée pour donner sa couleur au papier, dans la masse ou en surface : pigment, teinture végétale, suie.",
+      "exemples": [
+        "Indigo (Strobilanthes cusia).",
+        "Phellodendron, pour le jaune dit « de sutra ».",
+        "Suie (sre nag), matériau minéral, pour les papiers noirs de type thing shog."
+      ],
+      "distinguer": [
+        "Mordant : fixe le colorant mais ne colore pas lui-même.",
+        "Charge : modifie l'opacité ou la blancheur, pas la teinte."
+      ],
+      "precautions": [
+        "Une plante peut être à la fois colorant et protection contre les insectes (phellodendron, selon la source) : une affirmation par attestation, donc deux attestations si la source dit les deux.",
+        "Un colorant végétal brut reste une plante ; la suie, une préparation, est un matériau (règle 10)."
+      ]
+    },
+    {
+      "nom": "Adhésif / encollage",
+      "court": "Ce qui colle, lie ou ferme la surface de la feuille.",
+      "definition": "Substance qui lie les éléments entre eux (adhésif) ou qui ferme la surface de la feuille pour la rendre moins absorbante (encollage).",
+      "exemples": [
+        "Colle de peau de yak (phing).",
+        "Cervelles (glad pa) dans la recette du thing shog.",
+        "Gélatine, amidon."
+      ],
+      "distinguer": [
+        "Dispersant : agit dans la cuve, avant la formation de la feuille.",
+        "Charge : l'amidon peut être un encollage dans un papier et une charge dans un autre. Choisissez la fonction que la SOURCE donne (règle 9)."
+      ],
+      "precautions": [
+        "La fonction n'est pas une propriété du matériau : ne la déduisez pas de ce que vous savez de l'amidon ou de la colle.",
+        "Matériau animal ou préparé : ne créez un nœud matériau que si la source le nomme distinctement (règle 12)."
+      ]
+    },
+    {
+      "nom": "Charge",
+      "court": "Une matière ajoutée à la pâte pour changer opacité, blancheur ou poids.",
+      "definition": "Matière finement divisée, le plus souvent minérale, incorporée à la pâte pour modifier l'opacité, la blancheur, le poids ou le toucher de la feuille.",
+      "exemples": [
+        "Kaolin (高岭土).",
+        "Craie, talc.",
+        "Amidon, lorsque la source lui donne ce rôle."
+      ],
+      "distinguer": [
+        "Colorant : change la teinte.",
+        "Adhésif / encollage : lie ou ferme la surface."
+      ],
+      "precautions": [
+        "Même précaution que pour l'encollage : l'amidon change de fonction selon la recette.",
+        "Une trace minérale trouvée à l'analyse (sable, impureté de l'eau) n'est pas une charge ajoutée."
+      ]
+    },
+    {
+      "nom": "Agent de cuisson",
+      "court": "Un agent alcalin qui ramollit les fibres lors de la cuisson.",
+      "definition": "Substance, le plus souvent alcaline, utilisée pour cuire ou macérer la matière fibreuse brute afin d'en séparer les fibres.",
+      "exemples": [
+        "Chaux.",
+        "Cendres végétales."
+      ],
+      "distinguer": [
+        "Méthode de fabrication : décrit un procédé ; l'agent de cuisson est la substance employée."
+      ],
+      "precautions": [
+        "Une préparation (lessive de cendres) est un matériau ; la plante brute dont provient la cendre se note comme origine végétale du matériau (règle 11), pas comme intrant du papier."
+      ]
+    },
+    {
+      "nom": "Mordant",
+      "court": "Une substance qui fixe un colorant sur la fibre.",
+      "definition": "Substance qui permet au colorant de se fixer durablement sur la fibre ; elle n'a de sens que lorsqu'un colorant est employé.",
+      "exemples": [
+        "Alun (exemple de principe, à renseigner d'après la source)."
+      ],
+      "distinguer": [
+        "Colorant : il donne la couleur ; le mordant ne fait que la fixer."
+      ],
+      "precautions": [
+        "Ne saisissez un mordant que si la source le mentionne : on ne le déduit pas de la présence d'un colorant."
+      ]
+    },
+    {
+      "nom": "Additif (olfactif, décoratif, insecticide)",
+      "court": "Ce qui est ajouté ou appliqué sans former, lier ni colorer la feuille : parfum, décor, protection, traitement.",
+      "definition": "Substance ajoutée à la pâte, ou appliquée à la feuille, pour une qualité particulière du papier : parfum, éléments décoratifs (paillettes, fibres colorées), protection contre les insectes, ainsi que les traitements de finition : blanchiment, surfaçage (polissage, enduit de surface), imprégnation.",
+      "exemples": [
+        "Phellodendron, pour sa protection contre les insectes, selon la source.",
+        "Matière parfumante ou éléments de décor signalés par la source.",
+        "Agent de blanchiment appliqué à la pâte ou à la feuille, selon la source.",
+        "Surfaçage ou imprégnation de la feuille finie ; préciser dans la note le procédé et la substance."
+      ],
+      "distinguer": [
+        "Fibre adjuvante : contribue à la structure de la feuille ; un additif, non.",
+        "Adhésif / encollage : l'encollage lie ou ferme la feuille ; un surfaçage ou une imprégnation modifie seulement sa surface ou son aspect (en cas de doute, suivre le terme employé par la source et le dire dans la note)."
+      ],
+      "precautions": [
+        "Vigilance « composant principal ou trace » : une plante repérée à l'analyse peut venir d'une imprégnation, d'un décor, d'un parfum ou d'une impureté du tamis ; ce n'est pas forcément une fibre."
+      ]
+    }
+  ]
 }
