@@ -17,6 +17,7 @@ module:
   breakpoint: 0
   ckeditor5: 0
   comment: 0
+  conditional_fields: 0
   config: 0
   config_split: 0
   config_translation: 0
@@ -37,6 +38,7 @@ module:
   facets_rest: 0
   facets_searchbox_widget: 0
   field: 0
+  field_group: 0
   field_ui: 0
   file: 0
   file_mdm: 0
