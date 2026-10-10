@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - node.type.article
+    - node.type.attestation
     - node.type.page
   module:
     - bibcite_entity
@@ -28,6 +29,7 @@ permissions:
   - 'access toolbar'
   - 'administer url aliases'
   - 'create article content'
+  - 'create attestation content'
   - 'create bibcite_contributor'
   - 'create bibcite_reference'
   - 'create page content'
@@ -37,7 +39,9 @@ permissions:
   - 'delete own files'
   - 'delete own page content'
   - 'delete page revisions'
+  - 'edit any attestation content'
   - 'edit own article content'
+  - 'edit own attestation content'
   - 'edit own bibcite_reference'
   - 'edit own comments'
   - 'edit own page content'

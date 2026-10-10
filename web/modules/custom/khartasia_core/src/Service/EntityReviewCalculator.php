@@ -3,12 +3,22 @@
 namespace Drupal\khartasia_core\Service;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * Calcule les motifs de revue et le booléen dérivé sur `attestation`.
  * Rembourse la dette F13. Point G tranché : source_sans_type est
  * désormais persisté (pas seulement scanné en direct par le hub) —
  * ParcoursPapier::etat() interroge ce champ directement.
+ *
+ * LOT 1 (ancrage d'une attestation) — deux familles de motifs :
+ * - motifs CALCULÉS (source_sans_type, source_absente) : recalculés à chaque
+ *   sauvegarde depuis l'état de l'entité ;
+ * - motifs DÉCLARÉS, posés par un formulaire et jamais calculés :
+ *   `ebauche` (brouillon de saisie) et `source_a_creer` (un contributeur
+ *   signale une source absente). Ils sont CONSERVÉS tant que leur condition
+ *   vaut (voir plus bas), au lieu d'être écrasés par le recalcul.
+ *   `dispute_signalee` suit sa propre règle, inchangée.
  */
 class EntityReviewCalculator {
 
@@ -56,11 +66,28 @@ class EntityReviewCalculator {
       $motifs[] = 'dispute_signalee';
     }
 
+    // --- ebauche : brouillon de saisie, conservé tant que le nœud n'est pas
+    // publié. La publication met fin à l'état de brouillon (le motif tombe).
+    if (in_array('ebauche', $motifs_precedents, TRUE)
+      && $entity instanceof NodeInterface && !$entity->isPublished()) {
+      $motifs[] = 'ebauche';
+    }
+
+    // --- source_a_creer : signalé par un contributeur, conservé tant qu'aucune
+    // source n'est renseignée. Dès qu'une source est choisie, il tombe.
+    if (in_array('source_a_creer', $motifs_precedents, TRUE)
+      && $entity->hasField('field_att_source') && $entity->get('field_att_source')->isEmpty()) {
+      $motifs[] = 'source_a_creer';
+    }
+
     if ($entity->hasField('field_att_revue_motifs')) {
       $entity->set('field_att_revue_motifs', array_values(array_unique($motifs)));
     }
+    // Booléen dérivé : « à revoir » dès qu'un motif appelle une revue. Un
+    // simple brouillon en cours de rédaction n'en est pas un : `ebauche` seul
+    // ne le déclenche pas.
     if ($entity->hasField('field_att_a_revoir')) {
-      $entity->set('field_att_a_revoir', !empty($motifs));
+      $entity->set('field_att_a_revoir', !empty(array_diff($motifs, ['ebauche'])));
     }
   }
 

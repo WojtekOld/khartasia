@@ -7,3 +7,4 @@ dependencies:
   - drupal:node
   - drupal:taxonomy
   - drupal:field
+  - khartasia_guided_forms:khartasia_guided_forms

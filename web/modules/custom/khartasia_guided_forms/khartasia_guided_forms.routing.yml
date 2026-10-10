@@ -14,3 +14,11 @@ khartasia_guided_forms.papier_attestations:
   requirements:
     _permission: 'access content'
     papier_nid: \d+
+
+khartasia_guided_forms.attestation_ancrage:
+  path: '/khartasia/attestation/nouvelle'
+  defaults:
+    _title: 'Nouvelle attestation — Ancrage'
+    _form: '\Drupal\khartasia_guided_forms\Form\AttestationAncrageForm'
+  requirements:
+    _permission: 'create attestation content'

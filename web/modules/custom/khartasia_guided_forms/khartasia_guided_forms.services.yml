@@ -1,0 +1,5 @@
+# À FUSIONNER si le module possède déjà un fichier services.yml.
+services:
+  khartasia_guided_forms.attestation_factory:
+    class: Drupal\khartasia_guided_forms\Service\AttestationFactory
+    arguments: ['@entity_type.manager', '@current_user']

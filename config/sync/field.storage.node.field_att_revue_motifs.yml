@@ -19,7 +19,13 @@ settings:
       label: 'Source renseignée sans type de source'
     -
       value: source_absente
-      label: 'Attestation d''un papier sans source'
+      label: "Attestation d'un papier sans source"
+    -
+      value: ebauche
+      label: 'Brouillon de saisie (ébauche)'
+    -
+      value: source_a_creer
+      label: 'Source à créer (signalée par un contributeur)'
   allowed_values_function: ''
 module: options
 locked: false

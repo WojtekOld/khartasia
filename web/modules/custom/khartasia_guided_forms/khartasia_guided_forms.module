@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * Hooks du module Khartasia Guided Forms.
+ *
+ * À FUSIONNER si le module possède déjà un fichier .module.
+ */
+
+use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Quand un éditeur crée une source depuis l'étape d'ancrage (adresse avec
+ * ?retour=ancrage), on le ramène à l'ancrage avec la source nouvellement
+ * créée sélectionnée (?source=ID), en conservant sujet et objet.
+ */
+function khartasia_guided_forms_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  $form_object = $form_state->getFormObject();
+  if (!$form_object instanceof ContentEntityForm) {
+    return;
+  }
+  $entite = $form_object->getEntity();
+  if ($entite->getEntityTypeId() !== 'bibcite_reference' || !$entite->isNew()) {
+    return;
+  }
+  if (\Drupal::request()->query->get('retour') !== 'ancrage') {
+    return;
+  }
+  if (isset($form['actions']['submit'])) {
+    $form['actions']['submit']['#submit'][] = 'khartasia_guided_forms_source_creee_retour';
+  }
+}
+
+/**
+ * Redirige vers l'ancrage après création d'une source.
+ */
+function khartasia_guided_forms_source_creee_retour(array &$form, FormStateInterface $form_state) {
+  $entite = $form_state->getFormObject()->getEntity();
+  $requete = \Drupal::request()->query;
+  $query = ['source' => $entite->id()];
+  foreach (['papier', 'plante', 'nom', 'objet'] as $cle) {
+    if ($requete->get($cle)) {
+      $query[$cle] = $requete->get($cle);
+    }
+  }
+  $form_state->setRedirect('khartasia_guided_forms.attestation_ancrage', [], ['query' => $query]);
+}

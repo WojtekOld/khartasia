@@ -6,6 +6,7 @@ dependencies:
     - filter.format.filtered_html
     - filter.format.full_html
     - node.type.article
+    - node.type.attestation
     - node.type.book
     - node.type.common_names
     - node.type.nouvelles
@@ -55,6 +56,7 @@ permissions:
   - 'administer taxonomy'
   - 'change own username'
   - 'create article content'
+  - 'create attestation content'
   - 'create book content'
   - 'create common_names content'
   - 'create nouvelles content'
@@ -88,6 +90,7 @@ permissions:
   - 'edit any paper_mill content'
   - 'edit any papers content'
   - 'edit own article content'
+  - 'edit own attestation content'
   - 'edit own book content'
   - 'edit own comments'
   - 'edit own common_names content'
