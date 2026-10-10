@@ -19,6 +19,12 @@ use Drupal\node\NodeInterface;
  *   signale une source absente). Ils sont CONSERVÉS tant que leur condition
  *   vaut (voir plus bas), au lieu d'être écrasés par le recalcul.
  *   `dispute_signalee` suit sa propre règle, inchangée.
+ *
+ * LOT 4 : `precision_suspecte` est un motif DÉCLARÉ par l'éditeur (case du
+ *   formulaire) : l'énoncé paraît plus précis que ce que la source permet
+ *   (valeur chiffrée, date exacte, proportion sans méthode). Il est conservé
+ *   tant que l'éditeur ne l'a pas retiré ; le formulaire le retire en
+ *   décochant la case, un script ne le retire jamais.
  */
 class EntityReviewCalculator {
 
@@ -78,6 +84,11 @@ class EntityReviewCalculator {
     if (in_array('source_a_creer', $motifs_precedents, TRUE)
       && $entity->hasField('field_att_source') && $entity->get('field_att_source')->isEmpty()) {
       $motifs[] = 'source_a_creer';
+    }
+
+    // --- precision_suspecte : déclaré par l'éditeur, conservé jusqu'à retrait explicite.
+    if (in_array('precision_suspecte', $motifs_precedents, TRUE)) {
+      $motifs[] = 'precision_suspecte';
     }
 
     if ($entity->hasField('field_att_revue_motifs')) {

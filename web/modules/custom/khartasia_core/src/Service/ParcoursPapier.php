@@ -50,6 +50,14 @@ final class ParcoursPapier {
     $etat['attestations']['contradictions_non_resolues'] = (clone $attQueryBase)
       ->condition('field_att_revue_motifs', 'dispute_signalee')
       ->count()->execute();
+    // Lot 4 : brouillons de saisie (non publiés, motif « ebauche ») et précisions suspectes.
+    $etat['attestations']['brouillons'] = (clone $attQueryBase)
+      ->condition('status', 0)
+      ->condition('field_att_revue_motifs', 'ebauche')
+      ->count()->execute();
+    $etat['attestations']['precisions_suspectes'] = (clone $attQueryBase)
+      ->condition('field_att_revue_motifs', 'precision_suspecte')
+      ->count()->execute();
 
     return $etat;
   }
