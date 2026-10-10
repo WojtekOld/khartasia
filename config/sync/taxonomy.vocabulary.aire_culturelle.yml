@@ -1,0 +1,9 @@
+uuid: cbbe9f82-a279-48da-a01b-1fd5b2685a77
+langcode: en
+status: true
+dependencies: {  }
+name: 'Aire culturelle'
+vid: aire_culturelle
+description: "Zone définie par la culture papetière (et non par les frontières d'État actuelles). Deux niveaux : aire large, puis sous-aire."
+weight: 0
+new_revision: false

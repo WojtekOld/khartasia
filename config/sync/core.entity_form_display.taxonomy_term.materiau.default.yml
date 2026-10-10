@@ -5,6 +5,8 @@ dependencies:
   config:
     - field.field.taxonomy_term.materiau.field_mat_etat
     - field.field.taxonomy_term.materiau.field_mat_nature
+    - field.field.taxonomy_term.materiau.field_mat_source
+    - field.field.taxonomy_term.materiau.field_origine_vegetale
     - taxonomy.vocabulary.materiau
   module:
     - path
@@ -33,6 +35,26 @@ content:
     weight: 11
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_mat_source:
+    type: entity_reference_autocomplete
+    weight: 50
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_origine_vegetale:
+    type: entity_reference_autocomplete
+    weight: 50
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   langcode:
     type: language_select

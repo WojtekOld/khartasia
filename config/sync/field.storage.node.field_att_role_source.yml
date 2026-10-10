@@ -1,0 +1,33 @@
+uuid: 834875d4-7fc2-4f05-a25e-774bf2acb358
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_att_role_source
+field_name: field_att_role_source
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: atteste_directement
+      label: 'Atteste directement'
+    -
+      value: reference_generique
+      label: 'Référence générique'
+    -
+      value: contexte_historique
+      label: 'Contexte historique'
+    -
+      value: contredit
+      label: Contredit
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,45 @@
+uuid: ee925666-30e2-4095-9a6d-2073d1d3c511
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.materiau.field_mat_etat
+    - field.field.taxonomy_term.materiau.field_mat_nature
+    - field.field.taxonomy_term.materiau.field_mat_source
+    - field.field.taxonomy_term.materiau.field_origine_vegetale
+    - taxonomy.vocabulary.materiau
+  module:
+    - text
+id: taxonomy_term.materiau.default
+targetEntityType: taxonomy_term
+bundle: materiau
+mode: default
+content:
+  description:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_mat_source:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
+    region: content
+  field_origine_vegetale:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
+    region: content
+hidden:
+  field_mat_etat: true
+  field_mat_nature: true
+  langcode: true
+  search_api_excerpt: true

@@ -1,0 +1,9 @@
+uuid: 1fbb7840-fdc5-43c1-9d4b-3668992a0973
+langcode: en
+status: true
+dependencies: {  }
+name: "Fonction de l'intrant"
+vid: fonction_intrant
+description: "Rôle d'un intrant (plante ou matériau) dans la recette d'un papier. La fonction n'est pas une propriété du matériau : un même matériau peut être charge ici et adhésif là. Elle se saisit sur l'attestation, d'après ce que dit la source, jamais d'après ce que l'on suppose."
+weight: 0
+new_revision: false

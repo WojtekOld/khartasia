@@ -26,6 +26,9 @@ settings:
     -
       value: source_a_creer
       label: 'Source à créer (signalée par un contributeur)'
+    -
+      value: precision_suspecte
+      label: 'Précision suspecte'
   allowed_values_function: ''
 module: options
 locked: false

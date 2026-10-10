@@ -1,0 +1,28 @@
+uuid: 8b62cc79-05af-4687-bcfc-422f96bf5ae7
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_materiau
+    - node.type.attestation
+    - taxonomy.vocabulary.materiau
+id: node.attestation.field_att_materiau
+field_name: field_att_materiau
+entity_type: node
+bundle: attestation
+label: 'Matériau (intrant non végétal ou préparé)'
+description: "Si l'intrant est un matériau (ex. cendre, colle animale, pigment minéral), le choisir ici plutôt qu'une plante."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      materiau: materiau
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+field_type: entity_reference

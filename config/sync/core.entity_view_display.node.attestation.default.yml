@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.attestation.field_aire_culturelle
     - field.field.node.attestation.field_att_a_revoir
     - field.field.node.attestation.field_att_approx
     - field.field.node.attestation.field_att_axe
@@ -11,8 +12,10 @@ dependencies:
     - field.field.node.attestation.field_att_comparaison_ref
     - field.field.node.attestation.field_att_concept_taxo
     - field.field.node.attestation.field_att_concurrente
+    - field.field.node.attestation.field_att_fonction
     - field.field.node.attestation.field_att_lieu
     - field.field.node.attestation.field_att_locateur
+    - field.field.node.attestation.field_att_materiau
     - field.field.node.attestation.field_att_nom_vernaculaire
     - field.field.node.attestation.field_att_note_interne
     - field.field.node.attestation.field_att_note_interne_en
@@ -23,6 +26,7 @@ dependencies:
     - field.field.node.attestation.field_att_plante
     - field.field.node.attestation.field_att_relation_ecart
     - field.field.node.attestation.field_att_revue_motifs
+    - field.field.node.attestation.field_att_role_source
     - field.field.node.attestation.field_att_source
     - field.field.node.attestation.field_att_statut
     - field.field.node.attestation.field_att_statut_presence
@@ -40,6 +44,14 @@ targetEntityType: node
 bundle: attestation
 mode: default
 content:
+  field_aire_culturelle:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
+    region: content
   field_att_approx:
     type: boolean
     label: above
@@ -88,6 +100,14 @@ content:
     third_party_settings: {  }
     weight: 12
     region: content
+  field_att_fonction:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
+    region: content
   field_att_lieu:
     type: entity_reference_label
     label: above
@@ -95,6 +115,14 @@ content:
       link: true
     third_party_settings: {  }
     weight: 11
+    region: content
+  field_att_materiau:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 50
     region: content
   field_att_papier:
     type: entity_reference_label
@@ -136,6 +164,13 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 13
+    region: content
+  field_att_role_source:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 50
     region: content
   field_att_source:
     type: entity_reference_label

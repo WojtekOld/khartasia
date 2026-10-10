@@ -1,0 +1,28 @@
+uuid: bf9ee5d0-9868-4f1e-b876-52e986cb48c3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_aire_culturelle
+    - node.type.common_names
+    - taxonomy.vocabulary.aire_culturelle
+id: node.common_names.field_aire_culturelle
+field_name: field_aire_culturelle
+entity_type: node
+bundle: common_names
+label: 'Aire culturelle'
+description: "Aire où le nom (ou l'énoncé) est en usage. Plusieurs valeurs possibles ; choisir le niveau le plus précis que la source permet."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      aire_culturelle: aire_culturelle
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+field_type: entity_reference

@@ -1,0 +1,28 @@
+uuid: 910a5a20-2eb8-41d3-b768-3b2cf7e2eb75
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_ver_ecriture
+    - node.type.common_names
+    - taxonomy.vocabulary.type_ecriture
+id: node.common_names.field_ver_ecriture
+field_name: field_ver_ecriture
+entity_type: node
+bundle: common_names
+label: 'Écriture du nom'
+description: "Système d'écriture dans lequel ce nom est donné (ex. translittération, écriture originale). Valeurs du vocabulaire « type_ecriture »."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      type_ecriture: type_ecriture
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+field_type: entity_reference

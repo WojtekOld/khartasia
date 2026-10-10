@@ -1,0 +1,28 @@
+uuid: b970f029-36f5-4ea6-b711-c9460f81cbba
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_origine_vegetale
+    - node.type.article
+    - taxonomy.vocabulary.materiau
+id: taxonomy_term.materiau.field_origine_vegetale
+field_name: field_origine_vegetale
+entity_type: taxonomy_term
+bundle: materiau
+label: "Plantes d'origine"
+description: 'Plante(s) dont provient ce matériau (laisser vide si non végétal).'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      article: article
+    sort:
+      field: title
+      direction: asc
+    auto_create: false
+field_type: entity_reference

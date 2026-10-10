@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.attestation.field_aire_culturelle
     - field.field.node.attestation.field_att_a_revoir
     - field.field.node.attestation.field_att_approx
     - field.field.node.attestation.field_att_axe
@@ -11,8 +12,10 @@ dependencies:
     - field.field.node.attestation.field_att_comparaison_ref
     - field.field.node.attestation.field_att_concept_taxo
     - field.field.node.attestation.field_att_concurrente
+    - field.field.node.attestation.field_att_fonction
     - field.field.node.attestation.field_att_lieu
     - field.field.node.attestation.field_att_locateur
+    - field.field.node.attestation.field_att_materiau
     - field.field.node.attestation.field_att_nom_vernaculaire
     - field.field.node.attestation.field_att_note_interne
     - field.field.node.attestation.field_att_note_interne_en
@@ -23,6 +26,7 @@ dependencies:
     - field.field.node.attestation.field_att_plante
     - field.field.node.attestation.field_att_relation_ecart
     - field.field.node.attestation.field_att_revue_motifs
+    - field.field.node.attestation.field_att_role_source
     - field.field.node.attestation.field_att_source
     - field.field.node.attestation.field_att_statut
     - field.field.node.attestation.field_att_statut_presence
@@ -45,6 +49,16 @@ content:
     weight: 10
     region: content
     settings: {  }
+    third_party_settings: {  }
+  field_aire_culturelle:
+    type: entity_reference_autocomplete
+    weight: 50
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   field_att_approx:
     type: boolean_checkbox
@@ -105,6 +119,12 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_att_fonction:
+    type: options_select
+    weight: 50
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_att_lieu:
     type: entity_reference_autocomplete
     weight: 11
@@ -120,6 +140,16 @@ content:
     weight: 123
     region: content
     settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_att_materiau:
+    type: entity_reference_autocomplete
+    weight: 50
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -178,6 +208,12 @@ content:
   field_att_relation_ecart:
     type: options_select
     weight: 13
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_att_role_source:
+    type: options_select
+    weight: 50
     region: content
     settings: {  }
     third_party_settings: {  }

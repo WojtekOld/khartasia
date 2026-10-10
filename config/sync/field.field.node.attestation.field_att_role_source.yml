@@ -1,0 +1,21 @@
+uuid: fa3f6ea4-323e-4620-bb62-9a241df33a16
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_att_role_source
+    - node.type.attestation
+  module:
+    - options
+id: node.attestation.field_att_role_source
+field_name: field_att_role_source
+entity_type: node
+bundle: attestation
+label: 'Rôle de la source'
+description: "Comment la source soutient l'énoncé : elle l'atteste directement, ne donne qu'une référence générique, fournit un contexte historique, ou le contredit."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

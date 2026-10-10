@@ -1,0 +1,21 @@
+uuid: 9aec1122-cab7-458f-bb39-3402ccf70149
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_mat_source
+    - taxonomy.vocabulary.materiau
+id: taxonomy_term.materiau.field_mat_source
+field_name: field_mat_source
+entity_type: taxonomy_term
+bundle: materiau
+label: Sources
+description: 'Références bibliographiques qui décrivent ce matériau.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:khartasia_source'
+  handler_settings: {  }
+field_type: entity_reference

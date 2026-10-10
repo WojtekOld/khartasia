@@ -1,0 +1,28 @@
+uuid: 43e666bd-6549-43af-9573-86689034a366
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_materiau_ref
+    - node.type.common_names
+    - taxonomy.vocabulary.materiau
+id: node.common_names.field_materiau_ref
+field_name: field_materiau_ref
+entity_type: node
+bundle: common_names
+label: 'Matériau désigné'
+description: "À remplir quand le nom désigne un matériau (matière brute ou préparée) plutôt qu'une plante. Plantes et matériau s'excluent (contrôle au lot 2b)."
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:filter_existing_terms'
+  handler_settings:
+    target_bundles:
+      materiau: materiau
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+field_type: entity_reference
