@@ -1,0 +1,6 @@
+# À AJOUTER à khartasia_guided_forms.permissions.yml (le créer s'il n'existe pas).
+# Si le fichier existe déjà : ne copier que le bloc ci-dessous, à la suite du contenu existant.
+administer attestation disputes:
+  title: 'Gérer les disputes entre attestations'
+  description: "Choisir l'attestation concurrente, qualifier l'écart (convergence, divergence, contradiction) et passer une attestation au statut « réfuté »."
+  restrict access: true
