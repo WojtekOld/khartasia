@@ -247,12 +247,12 @@ class NomPapierWizardForm extends FormBase {
     ]);
     if ($relation_tid && in_array($relation_tid, $relations_disputees, TRUE)) {
       $papers_nid = $form_state->get('papers_nid');
-      $url = Url::fromRoute('node.add', ['node_type' => 'attestation'], [
-        'query' => ['edit[field_att_papier][0][target_id]' => $papers_nid],
+      $url = Url::fromRoute('khartasia_guided_forms.attestation_ancrage', [], [
+        'query' => ['papier' => $papers_nid],
       ])->toString();
       $form['escalade_attestation'] = [
         '#markup' => '<div class="khartasia-escalade"><p>' . $this->t(
-          'Cette relation implique souvent plusieurs sources concurrentes. Le champ ci-dessus n\'en porte qu\'une. <a href=":url" target="_blank">Créer une Attestation liée (axe Nomenclature)</a> pour documenter la dispute avec toutes ses sources et son statut propre.',
+          'Cette relation implique souvent plusieurs sources concurrentes. Le champ ci-dessus n\'en porte qu\'une. <a href=":url" target="_blank">Créer une attestation liée',
           [':url' => $url]
         ) . '</p></div>',
       ];
@@ -403,6 +403,7 @@ class NomPapierWizardForm extends FormBase {
     ];
     if ($relation_tid) {
       $values['field_np_relation'] = $relation_tid;
+
     }
     if ($form_state->getValue('source')) {
       $values['field_np_source'] = $form_state->getValue('source');
@@ -430,7 +431,6 @@ class NomPapierWizardForm extends FormBase {
     }
 
     $node->save();
-
     // L3 : journalisation de la fiabilité de l'heuristique (patron Wallpaper Canton).
     if ($suggeree) {
       \Drupal::logger('khartasia_noms')->info('couche suggérée=@s retenue=@r valeur=@v', [
