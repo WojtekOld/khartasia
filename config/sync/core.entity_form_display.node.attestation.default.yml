@@ -37,8 +37,119 @@ dependencies:
     - field.field.node.attestation.field_att_valeur_en
     - node.type.attestation
   module:
+    - field_group
     - path
     - text
+third_party_settings:
+  field_group:
+    group_att_affirmation:
+      children:
+        - field_att_type
+        - field_att_papier
+        - field_att_nom_vernaculaire
+        - field_att_plante
+        - field_att_concept_taxo
+        - field_att_fonction
+        - field_att_materiau
+        - field_att_axe
+        - field_att_valeur
+      label: '1. Affirmation'
+      region: content
+      parent_name: group_att_onglets
+      weight: 1
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: open
+        description: "De quoi parle-t-on, et qu'affirme-t-on ? Un seul sujet : un papier ou un nom (la plante peut être l'objet)."
+        required_fields: true
+    group_att_contexte:
+      children:
+        - field_aire_culturelle
+        - field_att_lieu
+        - field_att_periode_debut
+        - field_att_periode_fin
+        - field_att_approx
+      label: '2. Contexte'
+      region: content
+      parent_name: group_att_onglets
+      weight: 2
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: closed
+        description: 'Où, quand, dans quelle aire culturelle.'
+        required_fields: true
+    group_att_source:
+      children:
+        - field_att_source
+        - field_att_role_source
+        - field_att_type_source
+        - field_att_locateur
+      label: '3. Source'
+      region: content
+      parent_name: group_att_onglets
+      weight: 3
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: closed
+        description: "D'où vient l'affirmation, et comment la source la soutient."
+        required_fields: true
+    group_att_qualification:
+      children:
+        - field_att_statut
+        - field_att_concurrente
+        - field_att_relation_ecart
+        - field_att_commentaire_ecart
+        - field_att_comparaison_ref
+        - field_att_comparaison_note
+      label: '4. Qualification'
+      region: content
+      parent_name: group_att_onglets
+      weight: 4
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: closed
+        description: "Degré de certitude, désaccords avec d'autres attestations, comparaisons."
+        required_fields: true
+    group_att_revue:
+      children:
+        - field_att_valeur_en
+        - field_att_note_interne_en
+      label: '5. Revue et traduction'
+      region: content
+      parent_name: group_att_onglets
+      weight: 5
+      format_type: tab
+      format_settings:
+        classes: ''
+        id: ''
+        formatter: closed
+        description: 'Textes en anglais pour les dossiers destinés aux lecteurs anglophones.'
+        required_fields: true
+    group_att_onglets:
+      children:
+        - group_att_affirmation
+        - group_att_contexte
+        - group_att_source
+        - group_att_qualification
+        - group_att_revue
+      label: 'Étapes de la saisie'
+      region: content
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      format_settings:
+        classes: ''
+        id: ''
+        direction: horizontal
+        width_breakpoint: 640
 id: node.attestation.default
 targetEntityType: node
 bundle: attestation
@@ -52,7 +163,7 @@ content:
     third_party_settings: {  }
   field_aire_culturelle:
     type: entity_reference_autocomplete
-    weight: 50
+    weight: 0
     region: content
     settings:
       match_operator: CONTAINS
@@ -62,14 +173,14 @@ content:
     third_party_settings: {  }
   field_att_approx:
     type: boolean_checkbox
-    weight: 10
+    weight: 4
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
   field_att_axe:
     type: entity_reference_autocomplete
-    weight: 1
+    weight: 7
     region: content
     settings:
       match_operator: CONTAINS
@@ -79,23 +190,63 @@ content:
     third_party_settings: {  }
   field_att_commentaire_ecart:
     type: string_textarea
-    weight: 14
+    weight: 3
     region: content
     settings:
       rows: 5
       placeholder: ''
-    third_party_settings: {  }
+    third_party_settings:
+      conditional_fields:
+        effdc90f-07c3-4f96-9827-e34417516781:
+          entity_type: node
+          bundle: attestation
+          dependee: field_att_concurrente
+          settings:
+            state: visible
+            reset: false
+            condition: '!empty'
+            grouping: AND
+            values_set: 1
+            value: ''
+            values: {  }
+            value_form:
+              -
+                target_id: null
+                _weight: '0'
+            effect: show
+            effect_options: {  }
+            selector: ''
   field_att_comparaison_note:
     type: string_textarea
-    weight: 16
+    weight: 5
     region: content
     settings:
       rows: 5
       placeholder: ''
-    third_party_settings: {  }
+    third_party_settings:
+      conditional_fields:
+        f416af64-1316-4b44-b4e7-489617a1edfa:
+          entity_type: node
+          bundle: attestation
+          dependee: field_att_comparaison_ref
+          settings:
+            state: visible
+            reset: false
+            condition: '!empty'
+            grouping: AND
+            values_set: 1
+            value: ''
+            values: {  }
+            value_form:
+              -
+                target_id: null
+                _weight: '0'
+            effect: show
+            effect_options: {  }
+            selector: ''
   field_att_comparaison_ref:
     type: entity_reference_autocomplete
-    weight: 15
+    weight: 4
     region: content
     settings:
       match_operator: CONTAINS
@@ -105,13 +256,33 @@ content:
     third_party_settings: {  }
   field_att_concept_taxo:
     type: options_select
-    weight: 121
+    weight: 4
     region: content
     settings: {  }
-    third_party_settings: {  }
+    third_party_settings:
+      conditional_fields:
+        919687cb-ec63-4c5e-afe4-1d9238244ebe:
+          entity_type: node
+          bundle: attestation
+          dependee: field_att_plante
+          settings:
+            state: visible
+            reset: false
+            condition: '!empty'
+            grouping: AND
+            values_set: 1
+            value: ''
+            values: {  }
+            value_form:
+              -
+                target_id: null
+                _weight: '0'
+            effect: show
+            effect_options: {  }
+            selector: ''
   field_att_concurrente:
     type: entity_reference_autocomplete
-    weight: 12
+    weight: 1
     region: content
     settings:
       match_operator: CONTAINS
@@ -121,13 +292,32 @@ content:
     third_party_settings: {  }
   field_att_fonction:
     type: options_select
-    weight: 50
+    weight: 5
     region: content
     settings: {  }
-    third_party_settings: {  }
+    third_party_settings:
+      conditional_fields:
+        922213a9-cc99-4acb-9012-cc4507b27974:
+          entity_type: node
+          bundle: attestation
+          dependee: field_att_type
+          settings:
+            state: visible
+            reset: false
+            condition: value
+            grouping: AND
+            values_set: 1
+            value: ''
+            values: {  }
+            value_form:
+              -
+                target_id: '2316'
+            effect: show
+            effect_options: {  }
+            selector: ''
   field_att_lieu:
     type: entity_reference_autocomplete
-    weight: 11
+    weight: 1
     region: content
     settings:
       match_operator: CONTAINS
@@ -137,7 +327,7 @@ content:
     third_party_settings: {  }
   field_att_locateur:
     type: string_textfield
-    weight: 123
+    weight: 3
     region: content
     settings:
       size: 60
@@ -145,7 +335,7 @@ content:
     third_party_settings: {  }
   field_att_materiau:
     type: entity_reference_autocomplete
-    weight: 50
+    weight: 6
     region: content
     settings:
       match_operator: CONTAINS
@@ -155,7 +345,7 @@ content:
     third_party_settings: {  }
   field_att_nom_vernaculaire:
     type: entity_reference_autocomplete
-    weight: 122
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -165,7 +355,7 @@ content:
     third_party_settings: {  }
   field_att_note_interne_en:
     type: text_textarea
-    weight: 125
+    weight: 1
     region: content
     settings:
       rows: 5
@@ -173,7 +363,7 @@ content:
     third_party_settings: {  }
   field_att_papier:
     type: entity_reference_autocomplete
-    weight: 2
+    weight: 1
     region: content
     settings:
       match_operator: CONTAINS
@@ -183,14 +373,14 @@ content:
     third_party_settings: {  }
   field_att_periode_debut:
     type: number
-    weight: 8
+    weight: 2
     region: content
     settings:
       placeholder: ''
     third_party_settings: {  }
   field_att_periode_fin:
     type: number
-    weight: 9
+    weight: 3
     region: content
     settings:
       placeholder: ''
@@ -207,19 +397,59 @@ content:
     third_party_settings: {  }
   field_att_relation_ecart:
     type: options_select
-    weight: 13
+    weight: 2
     region: content
     settings: {  }
-    third_party_settings: {  }
+    third_party_settings:
+      conditional_fields:
+        88c0fef9-4597-46a9-a430-e43f11203ecf:
+          entity_type: node
+          bundle: attestation
+          dependee: field_att_concurrente
+          settings:
+            state: visible
+            reset: false
+            condition: '!empty'
+            grouping: AND
+            values_set: 1
+            value: ''
+            values: {  }
+            value_form:
+              -
+                target_id: null
+                _weight: '0'
+            effect: show
+            effect_options: {  }
+            selector: ''
   field_att_role_source:
     type: options_select
-    weight: 50
+    weight: 1
     region: content
     settings: {  }
-    third_party_settings: {  }
+    third_party_settings:
+      conditional_fields:
+        86e51f6b-823a-4a9a-98d2-3f293ad25c30:
+          entity_type: node
+          bundle: attestation
+          dependee: field_att_source
+          settings:
+            state: visible
+            reset: false
+            condition: '!empty'
+            grouping: AND
+            values_set: 1
+            value: ''
+            values: {  }
+            value_form:
+              -
+                target_id: null
+                _weight: '0'
+            effect: show
+            effect_options: {  }
+            selector: ''
   field_att_source:
     type: entity_reference_autocomplete
-    weight: 5
+    weight: 0
     region: content
     settings:
       match_operator: CONTAINS
@@ -229,7 +459,7 @@ content:
     third_party_settings: {  }
   field_att_statut:
     type: options_select
-    weight: 7
+    weight: 0
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -245,7 +475,7 @@ content:
     third_party_settings: {  }
   field_att_type_source:
     type: entity_reference_autocomplete
-    weight: 1
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -255,7 +485,7 @@ content:
     third_party_settings: {  }
   field_att_valeur:
     type: string_textarea
-    weight: 4
+    weight: 8
     region: content
     settings:
       rows: 5
@@ -263,7 +493,7 @@ content:
     third_party_settings: {  }
   field_att_valeur_en:
     type: string_textarea
-    weight: 124
+    weight: 0
     region: content
     settings:
       rows: 5
