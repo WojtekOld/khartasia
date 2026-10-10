@@ -22,3 +22,12 @@ khartasia_guided_forms.attestation_ancrage:
     _form: '\Drupal\khartasia_guided_forms\Form\AttestationAncrageForm'
   requirements:
     _permission: 'create attestation content'
+    
+khartasia_guided_forms.papier_recette:
+  path: '/papier/{papier_nid}/recette'
+  defaults:
+    _title: 'Recette du papier — Saisie en série'
+    _form: '\Drupal\khartasia_guided_forms\Form\PapierRecetteForm'
+  requirements:
+    _permission: 'create attestation content'
+    papier_nid: \d+

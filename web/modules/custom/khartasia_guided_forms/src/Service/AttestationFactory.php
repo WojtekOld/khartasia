@@ -174,4 +174,88 @@ class AttestationFactory {
     return $node;
   }
 
+
+  /**
+   * Crée en série les brouillons d'une recette : un papier, une source, N intrants.
+   *
+   * Chaque ligne est VALIDÉE (validate()) avant l'enregistrement : une ligne qui viole une
+   * règle d'intégrité n'est pas créée et son message est renvoyé ; les autres sont créées.
+   * Aucun champ de proportion (règle 13 de la gouvernance).
+   *
+   * DÉFINITIONS
+   * - Recette : l'ensemble des intrants d'un papier selon UNE source (cas du thing shog :
+   *   1 papier, 1 source, 4 attestations).
+   * - Ligne : ['plante' => ?int, 'materiau' => ?int, 'fonction' => int, 'statut' => string,
+   *   'locateur' => string, 'valeur' => string]. Plante OU matériau, jamais les deux.
+   *
+   * @return array{crees: int[], erreurs: string[]}
+   *   Identifiants des brouillons créés ; messages d'erreur par ligne (numérotées depuis 1).
+   */
+  public function creerEnSerie(int $papier_nid, ?int $source_id, string $concept, array $lignes): array {
+    $nodes = $this->entityTypeManager->getStorage('node');
+    $termes = $this->entityTypeManager->getStorage('taxonomy_term');
+    $papier = $nodes->load($papier_nid);
+    $res = ['crees' => [], 'erreurs' => []];
+    $type = $termes->loadByProperties(['vid' => 'attestation_type', 'name' => 'Composition']);
+    if (!$papier || !$type) {
+      $res['erreurs'][] = $papier ? 'Le type d\'attestation « Composition » est introuvable.' : 'Papier introuvable.';
+      return $res;
+    }
+    $type = reset($type);
+    $motifs = [self::MOTIF_EBAUCHE];
+    if (!$source_id) {
+      $motifs[] = self::MOTIF_SOURCE_ABSENTE;
+    }
+    foreach (array_values($lignes) as $i => $l) {
+      $n = $i + 1;
+      $plante = !empty($l['plante']) ? $nodes->load($l['plante']) : NULL;
+      $materiau = !empty($l['materiau']) ? $termes->load($l['materiau']) : NULL;
+      $fonction = !empty($l['fonction']) ? $termes->load($l['fonction']) : NULL;
+      $intrant = $plante ? $plante->label() : ($materiau ? $materiau->label() : '');
+      $titre = 'Composition (' . ($fonction ? $fonction->label() : '?') . ', ' . $intrant . ') — ' . $papier->label();
+      $valeurs = [
+        'type' => 'attestation',
+        'title' => mb_substr($titre, 0, 255),
+        'status' => 0,
+        'uid' => $this->currentUser->id(),
+        'field_att_type' => ['target_id' => $type->id()],
+        'field_att_papier' => ['target_id' => $papier_nid],
+        'field_att_fonction' => ['target_id' => $l['fonction'] ?? NULL],
+        'field_att_statut' => $l['statut'] ?: 'inconnu',
+        'field_att_revue_motifs' => array_map(fn($m) => ['value' => $m], $motifs),
+      ];
+      if ($plante) {
+        $valeurs['field_att_plante'] = ['target_id' => $plante->id()];
+        if ($concept !== '') {
+          $valeurs['field_att_concept_taxo'] = $concept;
+        }
+      }
+      if ($materiau) {
+        $valeurs['field_att_materiau'] = ['target_id' => $materiau->id()];
+      }
+      if ($source_id) {
+        $valeurs['field_att_source'] = ['target_id' => $source_id];
+      }
+      if (!empty($l['locateur'])) {
+        $valeurs['field_att_locateur'] = $l['locateur'];
+      }
+      $valeurs['field_att_valeur'] = !empty($l['valeur']) ? $l['valeur']
+        : (($fonction ? $fonction->label() : '') . ' : ' . $intrant);
+
+      $node = $nodes->create($valeurs);
+      $violations = $node->validate();
+      if (count($violations)) {
+        $msgs = [];
+        foreach ($violations as $v) {
+          $msgs[] = strip_tags((string) $v->getMessage());
+        }
+        $res['erreurs'][] = "Ligne $n (" . $intrant . ') : ' . implode(' ', array_unique($msgs));
+        continue;
+      }
+      $node->save();
+      $res['crees'][] = (int) $node->id();
+    }
+    return $res;
+  }
+
 }
