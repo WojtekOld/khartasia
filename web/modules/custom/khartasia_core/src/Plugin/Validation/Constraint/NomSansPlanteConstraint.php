@@ -15,6 +15,9 @@ use Symfony\Component\Validator\Constraint as SymfonyConstraint;
  * portée : à quoi se rapporte un nom qui n'a pas de plante liée (champ field_nom_portee) : taxon supérieur,
  *   appellatif générique (une fonction), ou « sans référent papetier » (faux nom). « Espèce » ne suffit pas :
  *   il signifie qu'une fiche Plante existe.
+ * matériau (field_materiau_ref) : terme du vocabulaire « materiau » (matière brute ou préparée, pas
+ *   forcément une plante). Un nom qui désigne un matériau a un référent valide, sans plante liée.
+ *   Plantes et matériau s'excluent : un nom vise des plantes OU un matériau.
  * clause de maintien : la règle ne s'applique qu'à un nom nouveau, ou dont le lien vers la plante ou la portée
  *   a changé ; un nom existant sans plante peut donc être retouché sans qu'on lui réclame ce qu'il n'a jamais eu.
  */
@@ -28,6 +31,11 @@ class NomSansPlanteConstraint extends SymfonyConstraint {
   /**
    * Message affiché sur le champ « Portée du nom ».
    */
-  public string $message = 'Un nom vernaculaire sans plante liée doit préciser sa portée : taxon supérieur, appellatif générique ou sans référent papetier.';
+  public string $message = 'Un nom vernaculaire sans plante liée doit préciser sa portée : taxon supérieur, appellatif générique ou sans référent papetier, ou désigner un matériau.';
+
+  /**
+   * Message affiché sur le champ « Matériau désigné » quand plantes et matériau sont tous deux renseignés.
+   */
+  public string $messageExclusif = 'Un nom désigne soit une ou plusieurs plantes, soit un matériau, pas les deux.';
 
 }

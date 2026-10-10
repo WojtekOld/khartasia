@@ -25,6 +25,16 @@ class AttestationConceptConstraintValidator extends ConstraintValidator {
     }
 
     $plantes = $this->cibles($entity, 'field_att_plante');
+
+    // Exclusion plante / matériau (intrant). Aucune clause de maintien : le champ matériau est nouveau.
+    if ($plantes && $entity->hasField('field_att_materiau') && $this->cibles($entity, 'field_att_materiau')) {
+      $this->context->buildViolation($constraint->messageExclusif)
+        ->atPath('field_att_materiau')
+        ->addViolation();
+      return;
+    }
+
+    // Sans plante (matériau seul ou aucun intrant), le concept taxonomique n'a pas lieu d'être exigé.
     if (!$plantes) {
       return;
     }

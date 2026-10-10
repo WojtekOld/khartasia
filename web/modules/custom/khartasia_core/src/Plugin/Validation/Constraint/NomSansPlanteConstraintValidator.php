@@ -31,9 +31,19 @@ class NomSansPlanteConstraintValidator extends ConstraintValidator {
 
     $plantes = $this->cibles($entity, 'field_genus_com_entity');
     $portee = $this->valeur($entity, 'field_nom_portee');
+    $materiaux = $entity->hasField('field_materiau_ref') ? $this->cibles($entity, 'field_materiau_ref') : [];
 
-    // Règle satisfaite : une plante est liée, ou la portée explique son absence.
-    if ($plantes || in_array($portee, self::PORTEES_VALIDES, TRUE)) {
+    // Exclusion : plantes et matériau ne se cumulent pas (aucune clause de maintien : champ nouveau, donc
+    // aucune fiche existante n'est concernée).
+    if ($plantes && $materiaux) {
+      $this->context->buildViolation($constraint->messageExclusif)
+        ->atPath('field_materiau_ref')
+        ->addViolation();
+      return;
+    }
+
+    // Règle satisfaite : une plante est liée, un matériau est désigné, ou la portée explique l'absence de plante.
+    if ($plantes || $materiaux || in_array($portee, self::PORTEES_VALIDES, TRUE)) {
       return;
     }
 
@@ -41,7 +51,8 @@ class NomSansPlanteConstraintValidator extends ConstraintValidator {
     $original = $this->original($entity);
     if ($original
       && $this->cibles($original, 'field_genus_com_entity') === $plantes
-      && $this->valeur($original, 'field_nom_portee') === $portee) {
+      && $this->valeur($original, 'field_nom_portee') === $portee
+      && (!$original->hasField('field_materiau_ref') || $this->cibles($original, 'field_materiau_ref') === $materiaux)) {
       return;
     }
 
