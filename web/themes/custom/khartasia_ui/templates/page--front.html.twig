@@ -26,14 +26,12 @@
     Khartasia
   </a>
   <div class="kh-nav__links">
-    <a href="/catalogue" class="kh-nav__link">{{ 'Catalogue'|t }}</a>
-    <a href="/plantes"   class="kh-nav__link">{{ 'Plantes'|t }}</a>
-    <a href="/papers"    class="kh-nav__link">{{ 'Papers'|t }}</a>
-    <a href="/methode"   class="kh-nav__link">{{ 'Methode'|t }}</a>
-    <a href="/bibliographie" class="kh-nav__link">{{ 'Bibliographie'|t }}</a>
-	       {% if saisie_guidee_url %}
-         <a href="{{ saisie_guidee_url }}" class="kh-nav__link">{{ 'Saisie guidée'|t }}</a>
-			{% endif %}
+    <a href="/glossaire/plantes"       class="kh-nav__link">{{ 'Plantes'|t }}</a>
+    <a href="/glossaire/papiers"       class="kh-nav__link">{{ 'Papiers'|t }}</a>
+    <a href="/glossaire/noms-communs"  class="kh-nav__link">{{ 'Noms communs'|t }}</a>
+    {% if saisie_guidee_url %}
+      <a href="{{ saisie_guidee_url }}" class="kh-nav__link">{{ 'Saisie guidée'|t }}</a>
+    {% endif %}
   </div>
   <div class="kh-nav__lang">
     {% for langue in kh_langues %}
@@ -51,7 +49,7 @@
     <p class="kh-hero__sub">
       {{ 'Ce repertoire des papiers asiatiques de fabrication artisanale destines a la restauration et conservation : Plantes, fibres, techniques de fabrication est en cours de remaniement'|t }}
     </p>
-    <a href="/catalogue" class="kh-hero__cta">{{ 'Explorer le catalogue'|t }} →</a>
+    <a href="/glossaire/papiers" class="kh-hero__cta">{{ 'Explorer le catalogue'|t }} →</a>
   </div>
 
   <div class="kh-banner" style="background-image:url('/sites/default/files/banner/fab-pap-en-tamis.jpg');">
