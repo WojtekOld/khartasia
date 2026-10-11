@@ -1,0 +1,56 @@
+/* Page « Saisie guidée » — diagramme cliquable + liste. Palette reprise des schémas d'architecture. */
+.sg { --sg-papier: #1a4f8b; --sg-papier-f: #e8f0fa; --sg-charn: #c8661a; --sg-charn-f: #fcf0e2;
+      --sg-plante: #2a7a45; --sg-plante-f: #e8f3ea; --sg-mat: #8b5a1f; --sg-mat-f: #f7efe3;
+      --sg-ref: #555; --sg-ref-f: #f2f2f2; --sg-texte: #2b2b2b; max-width: 1040px; margin: 0 auto; }
+.sg-intro { max-width: 70ch; }
+.sg-bascule { display: flex; gap: .5rem; margin: 1rem 0; }
+.sg-bascule a { padding: .3rem .9rem; border: 1px solid #888; border-radius: 999px; text-decoration: none; color: inherit; }
+.sg-bascule a.is-actif { background: #333; color: #fff; border-color: #333; }
+
+.sg svg { width: 100%; height: auto; display: block; font-family: inherit; }
+.sg-zone rect { stroke-width: 2; }
+.sg-zone--papier > rect { fill: var(--sg-papier-f); stroke: var(--sg-papier); }
+.sg-zone--charniere > rect { fill: var(--sg-charn-f); stroke: var(--sg-charn); }
+.sg-zone--plante > rect { fill: var(--sg-plante-f); stroke: var(--sg-plante); }
+.sg-zone--materiau > rect { fill: var(--sg-mat-f); stroke: var(--sg-mat); }
+.sg-zone--ref > rect { fill: var(--sg-ref-f); stroke: var(--sg-ref); }
+.sg-t { font-size: 17px; font-weight: 700; fill: var(--sg-texte); }
+.sg-zone--papier .sg-t { fill: var(--sg-papier); } .sg-zone--charniere .sg-t { fill: var(--sg-charn); }
+.sg-zone--plante .sg-t { fill: var(--sg-plante); } .sg-zone--materiau .sg-t { fill: var(--sg-mat); }
+.sg-s { font-size: 12.5px; font-style: italic; fill: #555; }
+.sg-accent { fill: #b32a2a; } .sg-gras { font-weight: 700; font-style: normal; }
+.sg-trait { stroke: var(--sg-charn); stroke-width: 2.5; } .sg-fleche { fill: var(--sg-charn); }
+
+.sg-boite rect { fill: #fff; stroke-width: 1.5; transition: fill .15s, stroke-width .15s; }
+.sg-boite text { fill: var(--sg-texte); pointer-events: none; }
+.sg-b1 { font-size: 14.5px; font-weight: 600; } .sg-b2 { font-size: 12.5px; fill: #555; }
+.sg-papier rect { stroke: var(--sg-papier); } .sg-charniere rect { stroke: var(--sg-charn); }
+.sg-plante rect { stroke: var(--sg-plante); } .sg-materiau rect { stroke: var(--sg-mat); } .sg-ref rect { stroke: var(--sg-ref); }
+.sg-boite[href] { cursor: pointer; }
+.sg-boite[href]:hover rect, .sg-boite[href]:focus rect { stroke-width: 3.5; fill: #fffbe6; }
+.sg-boite:focus { outline: none; } .sg-boite[href]:focus-visible rect { stroke-width: 4; stroke: #000; }
+.sg-boite.is-disabled { cursor: not-allowed; opacity: .45; }
+.sg-note rect { fill: transparent; stroke: var(--sg-charn); stroke-dasharray: 5 4; }
+.sg-note text { font-size: 12.5px; font-style: italic; fill: #8a4a12; }
+
+/* Vue liste */
+.sg-liste { display: none; }
+.sg[data-vue="liste"] .sg-diagramme { display: none; }
+.sg[data-vue="liste"] .sg-liste { display: block; }
+.sg-groupe { margin: 1.2rem 0; padding-left: .9rem; border-left: 4px solid #999; }
+.sg-groupe:nth-child(1) { border-color: var(--sg-papier); } .sg-groupe:nth-child(2) { border-color: var(--sg-charn); }
+.sg-groupe:nth-child(3) { border-color: var(--sg-plante); } .sg-groupe:nth-child(4) { border-color: var(--sg-mat); }
+.sg-groupe h2 { margin: 0 0 .2rem; font-size: 1.15rem; } .sg-groupe__intro { margin: 0 0 .5rem; color: #555; font-style: italic; }
+.sg-liste li { margin: .35rem 0; } .sg-liste li.is-disabled { opacity: .5; } .sg-aide { color: #555; }
+
+.sg-selecteur { margin: 2rem 0 1rem; padding: 1rem 1.2rem; background: var(--sg-ref-f); border-radius: 8px; }
+.sg-selecteur h2 { margin-top: 0; font-size: 1.15rem; }
+.sg-regles { margin: 1.5rem 0; } .sg-regles summary { cursor: pointer; font-weight: 600; }
+.sg-regles li { margin: .4rem 0; max-width: 80ch; }
+
+/* Écran étroit : la liste remplace le diagramme (texte du schéma illisible). */
+@media (max-width: 720px) {
+  .sg .sg-diagramme { display: none !important; }
+  .sg .sg-liste { display: block !important; }
+  .sg-bascule { display: none; }
+}

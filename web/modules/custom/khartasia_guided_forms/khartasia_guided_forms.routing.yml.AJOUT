@@ -1,0 +1,8 @@
+# À AJOUTER à la fin de khartasia_guided_forms.routing.yml (une ligne vide avant ce bloc).
+khartasia_guided_forms.saisie_guidee:
+  path: '/khartasia/saisie-guidee'
+  defaults:
+    _title: 'Saisie guidée'
+    _controller: '\Drupal\khartasia_guided_forms\Controller\SaisieGuideeController::page'
+  requirements:
+    _custom_access: '\Drupal\khartasia_guided_forms\Controller\SaisieGuideeController::access'

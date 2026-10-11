@@ -31,6 +31,9 @@
     <a href="/papers"    class="kh-nav__link">{{ 'Papers'|t }}</a>
     <a href="/methode"   class="kh-nav__link">{{ 'Methode'|t }}</a>
     <a href="/bibliographie" class="kh-nav__link">{{ 'Bibliographie'|t }}</a>
+	       {% if saisie_guidee_url %}
+         <a href="{{ saisie_guidee_url }}" class="kh-nav__link">{{ 'Saisie guidée'|t }}</a>
+			{% endif %}
   </div>
   <div class="kh-nav__lang">
     {% for langue in kh_langues %}
