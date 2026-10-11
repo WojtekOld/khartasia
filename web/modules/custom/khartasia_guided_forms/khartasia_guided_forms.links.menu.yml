@@ -1,6 +1,0 @@
-khartasia_guided_forms.saisie_guidee:
-  title: 'Saisie guidée'
-  description: 'Raccourcis vers les formulaires de saisie'
-  route_name: khartasia_guided_forms.saisie_guidee
-  menu_name: main
-  weight: 50
