@@ -1,0 +1,7 @@
+uuid: df224ca9-0755-422f-b329-789469b742bc
+langcode: en
+status: false
+dependencies: {  }
+formId: node_panel_form
+captchaType: default
+label: node_panel_form

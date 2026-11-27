@@ -15,6 +15,7 @@ module:
   block: 0
   block_content: 0
   breakpoint: 0
+  captcha: 0
   ckeditor5: 0
   comment: 0
   conditional_fields: 0
@@ -54,6 +55,7 @@ module:
   jquery_ui: 0
   jquery_ui_slider: 0
   jquery_ui_touch_punch: 0
+  key: 0
   khartasia_core: 0
   khartasia_guided_forms: 0
   khartasia_migrate: 0
@@ -113,6 +115,7 @@ module:
   text: 0
   token: 0
   toolbar: 0
+  turnstile: 0
   twig_tweak: 0
   ui_icons: 0
   ui_icons_field: 0

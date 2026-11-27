@@ -1,0 +1,7 @@
+uuid: f7bcda5d-19b0-48f9-b73b-5c4237ec83fa
+langcode: en
+status: false
+dependencies: {  }
+formId: node_materiau_papetier_form
+captchaType: default
+label: node_materiau_papetier_form

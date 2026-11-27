@@ -1,0 +1,7 @@
+uuid: fae4fc5c-19d0-44fc-8e95-715f0fe947e9
+langcode: en
+status: false
+dependencies: {  }
+formId: node_nom_papier_form
+captchaType: default
+label: node_nom_papier_form

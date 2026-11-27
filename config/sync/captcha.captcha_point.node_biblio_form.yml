@@ -1,0 +1,7 @@
+uuid: 03fb05b2-b1f3-4363-ba79-1d88188383eb
+langcode: en
+status: false
+dependencies: {  }
+formId: node_biblio_form
+captchaType: default
+label: node_biblio_form

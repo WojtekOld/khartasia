@@ -1,0 +1,7 @@
+uuid: 78870ef1-9eab-4a72-acfc-355055af9087
+langcode: en
+status: false
+dependencies: {  }
+formId: node_plante_texte_form
+captchaType: default
+label: node_plante_texte_form

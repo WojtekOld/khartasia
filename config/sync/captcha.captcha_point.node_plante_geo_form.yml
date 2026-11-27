@@ -1,0 +1,7 @@
+uuid: 0dd5e9b8-a980-43b6-98a5-43318fe2ceb5
+langcode: en
+status: false
+dependencies: {  }
+formId: node_plante_geo_form
+captchaType: default
+label: node_plante_geo_form

@@ -1,0 +1,7 @@
+uuid: 4305cc64-4644-468c-817d-ddfcf8a3444a
+langcode: en
+status: false
+dependencies: {  }
+formId: node_nouvelles_form
+captchaType: default
+label: node_nouvelles_form
