@@ -12,3 +12,5 @@
 /web/build-stamp.json
 __pycache__/
 *.bak
+
+/private/
